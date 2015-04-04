@@ -3,10 +3,21 @@ User
     password Text Maybe
     UniqueUser ident
     deriving Typeable
-Email
-    email Text
-    user UserId Maybe
-    verkey Text Maybe
-    UniqueEmail email
+
+--Email
+--    email Text
+--    user UserId Maybe
+--    verkey Text Maybe
+--    UniqueEmail email
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
+
+Category
+    name Text
+    deriving Show
+
+Photo
+    category CategoryId sqltype=int -- sqltype is workaround due to bug in persistent (uses bigint instead)
+    name Text
+    src Text
+    deriving Show

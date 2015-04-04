@@ -12,9 +12,11 @@ module Application
     , db
     ) where
 
-import Control.Monad.Logger                 (liftLoc, runLoggingT)
-import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
-                                             myPoolSize, runSqlPool)
+import Control.Monad.Logger                 (liftLoc, runNoLoggingT)
+--import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
+--                                             myPoolSize, runSqlPool)
+--import Database.Persist.Sql                 (runSqlPool)
+import Database.Persist.ODBC
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.Wai.Handler.Warp             (Settings, defaultSettings,
@@ -32,6 +34,7 @@ import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
 -- Don't forget to add new modules to your cabal file!
 import Handler.Common
 import Handler.Home
+import Handler.Photo
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -58,16 +61,36 @@ makeFoundation appSettings = do
     -- temporary foundation without a real connection pool, get a log function
     -- from there, and then create the real foundation.
     let mkFoundation appConnPool = App {..}
-        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
-        logFunc = messageLoggerSource tempFoundation appLogger
+--        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
+--        logFunc = messageLoggerSource tempFoundation appLogger
 
-    -- Create the database connection pool
-    pool <- flip runLoggingT logFunc $ createMySQLPool
-        (myConnInfo $ appDatabaseConf appSettings)
-        (myPoolSize $ appDatabaseConf appSettings)
+    pool <- createPoolConfig $ appDatabaseConf appSettings
 
+--    pool <- createODBCPool
+--        (read $ odbcDbtype  $ appDatabaseConf appSettings)
+--        (odbcConnStr        $ appDatabaseConf appSettings)
+--        (odbcPoolSize       $ appDatabaseConf appSettings)
+
+--    -- Create the database connection pool
+--    pool <- flip runLoggingT logFunc $ createODBCPool
+--        (read $ odbcDbtype  $ appDatabaseConf appSettings)
+--        (odbcConnStr        $ appDatabaseConf appSettings)
+--        (odbcPoolSize       $ appDatabaseConf appSettings)
+
+    -- ReaderT SqlBackend m ()
+--     SqlPersistT m a -> Pool SqlBackend -> m a
     -- Perform database migration using our application's logging settings.
-    runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+--    runResourceT $ runNoLoggingT $ runSqlPool (runMigration migrateAll) pool -- logFunc
+
+    runResourceT $ runNoLoggingT $ withODBCConn (Just MySQL) (odbcConnStr $ appDatabaseConf appSettings) $ runSqlConn (runMigration migrateAll)
+
+--    runResourceT $ runNoLoggingT $ withODBCConn Nothing dsn $ runSqlConn $ do
+--        conn <- ask
+--        let dbtype=read $ T.unpack $ connRDBMS conn
+--        liftIO $ putStrLn $ "original:" ++ show dbtype' ++ " calculated:" ++ show dbtype
+--        liftIO $ putStrLn "\nbefore migration\n"
+--        runMigration migrateAll
+--        liftIO $ putStrLn "after migration"
 
     -- Return the foundation
     return $ mkFoundation pool
