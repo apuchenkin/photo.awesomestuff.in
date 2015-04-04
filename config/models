@@ -16,7 +16,7 @@ Category
     name Text
     deriving Show
 
-Photo
+Photo json
     category CategoryId sqltype=int -- sqltype is workaround due to bug in persistent (uses bigint instead)
     name Text
     src Text

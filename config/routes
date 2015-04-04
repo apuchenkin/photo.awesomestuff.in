@@ -5,4 +5,4 @@
 /robots.txt RobotsR GET
 
 / HomeR GET POST
-photo PhotoR GET
+photo PhotosR GET

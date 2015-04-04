@@ -12,7 +12,7 @@ module Application
     , db
     ) where
 
-import Control.Monad.Logger                 (liftLoc, runNoLoggingT)
+import Control.Monad.Logger                 (liftLoc, runLoggingT, runNoLoggingT)
 --import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
 --                                             myPoolSize, runSqlPool)
 --import Database.Persist.Sql                 (runSqlPool)
@@ -61,36 +61,17 @@ makeFoundation appSettings = do
     -- temporary foundation without a real connection pool, get a log function
     -- from there, and then create the real foundation.
     let mkFoundation appConnPool = App {..}
---        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
---        logFunc = messageLoggerSource tempFoundation appLogger
+        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
+        logFunc = messageLoggerSource tempFoundation appLogger
 
-    pool <- createPoolConfig $ appDatabaseConf appSettings
+    pool <- flip runLoggingT logFunc $ createODBCPool
+        (Just MySQL)
+        (odbcConnStr        $ appDatabaseConf appSettings)
+        (odbcPoolSize       $ appDatabaseConf appSettings)
 
---    pool <- createODBCPool
---        (read $ odbcDbtype  $ appDatabaseConf appSettings)
---        (odbcConnStr        $ appDatabaseConf appSettings)
---        (odbcPoolSize       $ appDatabaseConf appSettings)
+--    pool <- createPoolConfig $ appDatabaseConf appSettings
 
---    -- Create the database connection pool
---    pool <- flip runLoggingT logFunc $ createODBCPool
---        (read $ odbcDbtype  $ appDatabaseConf appSettings)
---        (odbcConnStr        $ appDatabaseConf appSettings)
---        (odbcPoolSize       $ appDatabaseConf appSettings)
-
-    -- ReaderT SqlBackend m ()
---     SqlPersistT m a -> Pool SqlBackend -> m a
-    -- Perform database migration using our application's logging settings.
---    runResourceT $ runNoLoggingT $ runSqlPool (runMigration migrateAll) pool -- logFunc
-
-    runResourceT $ runNoLoggingT $ withODBCConn (Just MySQL) (odbcConnStr $ appDatabaseConf appSettings) $ runSqlConn (runMigration migrateAll)
-
---    runResourceT $ runNoLoggingT $ withODBCConn Nothing dsn $ runSqlConn $ do
---        conn <- ask
---        let dbtype=read $ T.unpack $ connRDBMS conn
---        liftIO $ putStrLn $ "original:" ++ show dbtype' ++ " calculated:" ++ show dbtype
---        liftIO $ putStrLn "\nbefore migration\n"
---        runMigration migrateAll
---        liftIO $ putStrLn "after migration"
+    runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
     -- Return the foundation
     return $ mkFoundation pool
