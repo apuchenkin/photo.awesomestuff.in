@@ -82,6 +82,8 @@ library
                  , containers
                  , vector
                  , time
+                 , friday
+                 , friday-devil
 
 executable         aws-photo-service
     if flag(library-only)

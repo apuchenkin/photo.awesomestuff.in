@@ -6,6 +6,7 @@ config/client_session_key.aes
 *.o
 *.sqlite3
 .hsenv*
+.idea
 cabal-dev/
 yesod-devel/
 .cabal-sandbox
