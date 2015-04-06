@@ -4,6 +4,9 @@ module Handler.Home where
 
 import Import
 import System.Directory (getDirectoryContents)
+import Codec.Picture (readImage, Image (..))
+import Codec.Picture.Types (dynamicMap)
+
 --import qualified GHC.IO  as IO (FilePath)
 
 -- This is a handler function for the GET request method on the HomeR
@@ -24,10 +27,17 @@ getInstallR = do
      ids <- sequence $ map (createPhoto path) srcs
      returnJson ids
      where
-     createPhoto :: String -> String -> Handler (Key Photo)
-     createPhoto srcPath = (\ src -> do
-        let thumbPath = "static/gallery/thumb/"
-        let thumb = Just $ thumbPath ++ src
-        let photo = Photo src (srcPath ++ src) thumb 0 Nothing
-        photoId <- runDB $ insert photo
-        return photoId)
+     createPhoto :: String -> String -> Handler (Maybe (Key Photo))
+     createPhoto srcPath = \ name -> do
+        let src = srcPath ++ name
+        mImage <- liftIO $ readImage src
+        case mImage of
+            Left _  -> return Nothing
+            Right image -> do
+                let thumbPath = "static/gallery/thumb/"
+                let thumb = Just $ thumbPath ++ name
+                let width  = dynamicMap imageWidth  image
+                let height = dynamicMap imageHeight image
+                let photo = Photo name src thumb width height 0 Nothing
+                photoId <- runDB $ insert photo
+                return $ Just photoId

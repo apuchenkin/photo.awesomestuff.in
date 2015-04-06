@@ -83,6 +83,7 @@ library
                  , vector
                  , time
                  , wai-cors
+                 , JuicyPixels
 
 executable         aws-photo-service
     if flag(library-only)

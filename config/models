@@ -20,6 +20,8 @@ Photo json
     name String
     src String
     thumb String Maybe
+    width Int
+    height Int
     views Int
     category CategoryId Maybe sqltype=int -- sqltype is workaround due to bug in persistent (uses bigint instead)
     deriving Show
