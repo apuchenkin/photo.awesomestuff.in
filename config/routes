@@ -5,5 +5,8 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
-/photo PhotosR GET
 /install InstallR GET
+
+/photo              PhotosR GET
+/photo/#PhotoId     PhotoR  GET
+
