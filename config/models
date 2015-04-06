@@ -17,7 +17,9 @@ Category
     deriving Show
 
 Photo json
-    category CategoryId sqltype=int -- sqltype is workaround due to bug in persistent (uses bigint instead)
-    name Text
-    src Text
+    name String
+    src String
+    thumb String Maybe
+    views Int
+    category CategoryId Maybe sqltype=int -- sqltype is workaround due to bug in persistent (uses bigint instead)
     deriving Show

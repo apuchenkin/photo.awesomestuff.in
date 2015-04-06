@@ -12,10 +12,9 @@ module Application
     , db
     ) where
 
-import Control.Monad.Logger                 (liftLoc, runLoggingT, runNoLoggingT)
+import Control.Monad.Logger                 (liftLoc, runLoggingT)
 --import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
 --                                             myPoolSize, runSqlPool)
---import Database.Persist.Sql                 (runSqlPool)
 import Database.Persist.ODBC
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
@@ -29,6 +28,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
+import Network.Wai.Middleware.Cors          (simpleCors)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -117,7 +117,7 @@ getApplicationDev = do
     foundation <- makeFoundation settings
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
-    return (wsettings, app)
+    return (wsettings, simpleCors app)
 
 getAppSettings :: IO AppSettings
 getAppSettings = loadAppSettings [configSettingsYml] [] useEnv
@@ -144,7 +144,7 @@ appMain = do
     app <- makeApplication foundation
 
     -- Run the application with Warp
-    runSettings (warpSettings foundation) app
+    runSettings (warpSettings foundation) (simpleCors app)
 
 
 --------------------------------------------------------------

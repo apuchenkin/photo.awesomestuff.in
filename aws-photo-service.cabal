@@ -82,8 +82,7 @@ library
                  , containers
                  , vector
                  , time
-                 , friday
-                 , friday-devil
+                 , wai-cors
 
 executable         aws-photo-service
     if flag(library-only)
