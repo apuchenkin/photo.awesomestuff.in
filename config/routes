@@ -10,3 +10,4 @@
 /photo              PhotosR GET
 /photo/#PhotoId     PhotoR  GET
 
+/category           CategoryR GET
