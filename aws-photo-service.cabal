@@ -82,6 +82,7 @@ library
                  , containers
                  , vector
                  , time
+                 , esqueleto
                  , wai-cors
                  , JuicyPixels
 

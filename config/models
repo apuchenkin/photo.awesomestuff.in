@@ -12,9 +12,16 @@ User
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
 
-Category
+Category json
     name Text
+    parent CategoryId Maybe sqltype=int
+    UniqueName name
     deriving Show
+
+PhotoCategory
+    category CategoryId sqltype=int
+    photo PhotoId sqltype=int
+    UniquePhotoCategory category photo
 
 Photo json
     name String
@@ -23,5 +30,4 @@ Photo json
     width Int
     height Int
     views Int
-    category CategoryId Maybe sqltype=int -- sqltype is workaround due to bug in persistent (uses bigint instead)
     deriving Show

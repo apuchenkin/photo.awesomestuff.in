@@ -38,6 +38,6 @@ getInstallR = do
                 let thumb = Just $ thumbPath ++ name
                 let width  = dynamicMap imageWidth  image
                 let height = dynamicMap imageHeight image
-                let photo = Photo name src thumb width height 0 Nothing
+                let photo = Photo name src thumb width height 0
                 photoId <- runDB $ insert photo
                 return $ Just photoId
