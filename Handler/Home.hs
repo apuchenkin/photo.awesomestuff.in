@@ -6,8 +6,8 @@ import Import
 import System.Directory (getDirectoryContents)
 import Codec.Picture (readImage, Image (..))
 import Codec.Picture.Types (dynamicMap)
-
---import qualified GHC.IO  as IO (FilePath)
+import Data.Aeson (decode, encode, Object)
+import Data.Aeson.Types (parseMaybe)
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -38,6 +38,32 @@ getInstallR = do
                 let thumb = Just $ thumbPath ++ name
                 let width  = dynamicMap imageWidth  image
                 let height = dynamicMap imageHeight image
-                let photo = Photo name src thumb width height 0
+                let photo = Photo name src thumb width height "" 0
                 photoId <- runDB $ insert photo
                 return $ Just photoId
+
+getInstallExifR :: Handler Value
+getInstallExifR = do
+    exifFile <- liftIO $ readFile "exif.json"
+    let maybeExif = decode exifFile :: Maybe [Object]
+    case maybeExif of
+        Nothing -> invalidArgs ["category"]
+        Just exif -> do
+            ids <- sequence $ map createPhoto exif
+            returnJson ids
+            where
+                createPhoto :: Object -> Handler (Key Photo)
+                createPhoto obj = do
+                    let maybePhoto = flip parseMaybe obj $ \o -> do
+                         name   <- o  .: "File:FileName"
+                         src    <- o  .: "SourceFile"
+                         width  <- o  .: "File:ImageWidth"
+                         height <- o  .: "File:ImageHeight"
+                         let thumb  = Just ("static/gallery/thumb/" ++ name)
+                         let exifData = toStrict $ decodeUtf8 $ encode obj
+                         return $ Photo name src thumb width height exifData 0
+                    case maybePhoto of
+                        Nothing -> invalidArgs ["parse error"]
+                        Just photo -> do
+                            photoId <- runDB $ insert photo
+                            return photoId

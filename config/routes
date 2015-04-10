@@ -5,9 +5,12 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
-/install InstallR GET
 
 /photo              PhotosR GET
 /photo/#PhotoId     PhotoR  GET
 
 /category           CategoryR GET
+
+-- admin routes
+/install InstallR GET
+/install-exif InstallExifR GET
