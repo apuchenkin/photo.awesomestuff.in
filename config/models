@@ -29,5 +29,6 @@ Photo json
     thumb String Maybe
     width Int
     height Int
+    exif Text
     views Int
     deriving Show
