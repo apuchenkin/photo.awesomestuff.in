@@ -7,7 +7,8 @@ import System.Directory (getDirectoryContents)
 import Codec.Picture (readImage, Image (..))
 import Codec.Picture.Types (dynamicMap)
 import Data.Aeson (decode, encode, Object)
-import Data.Aeson.Types (parseMaybe)
+import Data.Aeson.Types (parseMaybe, Parser)
+import qualified Data.Text as T (replace)
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -52,8 +53,12 @@ getInstallExifR = do
             ids <- sequence $ map createPhoto exif
             returnJson ids
             where
-                createPhoto :: Object -> Handler (Key Photo)
+                createPhoto :: Object -> Handler (Maybe (Key Photo))
                 createPhoto obj = do
+                    let maybeCategories = flip parseMaybe obj $ \o -> do
+                         categories <- o  .: "IPTC:Keywords"  :: Parser [Text]
+                         return $ flip map categories (\c -> Category (unpack $ T.replace " " "-" (toLower c)) Nothing)
+
                     let maybePhoto = flip parseMaybe obj $ \o -> do
                          name   <- o  .: "File:FileName"
                          src    <- o  .: "SourceFile"
@@ -62,8 +67,25 @@ getInstallExifR = do
                          let thumb  = Just ("static/gallery/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
                          return $ Photo name src thumb width height exifData 0
+
                     case maybePhoto of
-                        Nothing -> invalidArgs ["parse error"]
                         Just photo -> do
                             photoId <- runDB $ insert photo
-                            return photoId
+
+                            case maybeCategories of
+                                Just categories -> do
+                                    sequence $ flip map categories $ \c -> do
+                                        mcid <- runDB $ insertUnique c
+                                        case mcid of
+                                            Nothing -> do
+                                                mcid <- runDB $ getBy $ UniqueName (categoryName c)
+                                                case mcid of {Just (Entity cid _) -> runDB $ insertUnique $ PhotoCategory cid photoId}
+                                            Just cid -> runDB $ insertUnique $ PhotoCategory cid photoId
+                                Nothing -> return $ sequence Nothing
+
+                            return $ Just photoId
+                        Nothing ->
+                            return Nothing
+
+
+

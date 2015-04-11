@@ -26,7 +26,7 @@ getPhotosR = do
                $ E.from $ \(photo `E.InnerJoin` pc `E.InnerJoin` category) -> do
                     E.on $ category ^. CategoryId   E.==. pc ^. PhotoCategoryCategory
                     E.on $ photo    ^. PhotoId      E.==. pc ^. PhotoCategoryPhoto
-                    E.where_ (category ^. CategoryName E.==. E.val categoryName)
+                    E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
                     return photo
             returnJson $ map toCollectionPhoto photos
     where

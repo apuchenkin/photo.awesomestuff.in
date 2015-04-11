@@ -13,7 +13,7 @@ User
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
 
 Category json
-    name Text
+    name String
     parent CategoryId Maybe sqltype=int
     UniqueName name
     deriving Show
