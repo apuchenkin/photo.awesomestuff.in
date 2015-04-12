@@ -60,11 +60,12 @@ getInstallExifR = do
                          return $ flip map categories (\c -> Category (unpack $ T.replace " " "-" (toLower c)) Nothing)
 
                     let maybePhoto = flip parseMaybe obj $ \o -> do
-                         name   <- o  .: "File:FileName"
-                         src    <- o  .: "SourceFile"
-                         width  <- o  .: "File:ImageWidth"
-                         height <- o  .: "File:ImageHeight"
-                         let thumb  = Just ("static/gallery/thumb/" ++ name)
+                         name       <- o  .: "File:FileName"
+                         src        <- o  .: "SourceFile"
+                         width      <- o  .: "File:ImageWidth"
+                         height     <- o  .: "File:ImageHeight"
+                         directory  <- o  .: "File:Directory"
+                         let thumb  = Just (directory ++ "/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
                          return $ Photo name src thumb width height exifData 0
 
