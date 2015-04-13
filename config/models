@@ -23,6 +23,11 @@ PhotoCategory
     photo PhotoId sqltype=int
     UniquePhotoCategory category photo
 
+Author json
+    name String
+    UniqueAuthor name
+    deriving Show
+
 Photo json
     name String
     src String
@@ -31,11 +36,12 @@ Photo json
     height Int
     exif Text
     views Int
+    author AuthorId Maybe sqltype=int
     deriving Show
 
 Translation json
-    language Language sqltype=ENUM('En','Ru')
-    type TranslationType sqltype=ENUM('CategoryType','PhotoType')
+    language Language
+    type TranslationType
     refId Int64
     field String
     value String
