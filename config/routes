@@ -6,11 +6,16 @@
 
 / HomeR GET
 
+-- public exposed API
 /photo              PhotosR GET
 /photo/#PhotoId     PhotoR  GET
 
 /category           CategoryR GET
 
+/translation        TranslationR GET
+
 -- admin routes
+
 /install InstallR GET
 /install-exif InstallExifR GET
+

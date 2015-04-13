@@ -17,6 +17,7 @@ library
                      Foundation
                      Import
                      Import.NoFoundation
+                     Types
                      Model
                      Settings
                      Settings.StaticFiles
@@ -24,6 +25,7 @@ library
                      Handler.Home
                      Handler.Photo
                      Handler.Category
+                     Handler.Translation
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

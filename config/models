@@ -32,3 +32,12 @@ Photo json
     exif Text
     views Int
     deriving Show
+
+Translation json
+    language Language sqltype=ENUM('En','Ru')
+    type TranslationType sqltype=ENUM('CategoryType','PhotoType')
+    refId Int64
+    field String
+    value String
+    UniqueTranslation language type refId field
+    deriving Show

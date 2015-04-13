@@ -8,6 +8,7 @@ import Codec.Picture (readImage, Image (..))
 import Codec.Picture.Types (dynamicMap)
 import Data.Aeson (decode, encode, Object)
 import Data.Aeson.Types (parseMaybe, Parser)
+import Database.Persist.Sql (fromSqlKey)
 import qualified Data.Text as T (replace)
 
 -- This is a handler function for the GET request method on the HomeR
@@ -55,36 +56,46 @@ getInstallExifR = do
             where
                 createPhoto :: Object -> Handler (Maybe (Key Photo))
                 createPhoto obj = do
-                    let maybeCategories = flip parseMaybe obj $ \o -> do
+                    maybeCategories <- fromMaybe (return []) $ flip parseMaybe obj $ \o -> do
                          categories <- o  .: "IPTC:Keywords"  :: Parser [Text]
-                         return $ flip map categories (\c -> Category (unpack $ T.replace " " "-" (toLower c)) Nothing)
+                         return $ sequence $ flip map categories $ \title -> do
+                            let normalizedTitle = unpack $ T.replace " " "-" (toLower title)
+                            mcid <- runDB $ insertUnique $ Category normalizedTitle Nothing
+                            mcid <- case mcid of
+                                Nothing -> do
+                                   mc <- runDB $ getBy $ UniqueName normalizedTitle
+                                   case mc of
+                                        Nothing -> return Nothing
+                                        Just c  -> return $ Just $ entityKey c
+                                Just cid -> return $ Just cid
+                            case mcid of
+                                Nothing     -> return Nothing
+                                Just cid    -> do
+                                    _ <- runDB $ insertUnique $ Translation En CategoryType (fromSqlKey cid) "title" (unpack $ title)
+                                    return $ Just cid
 
-                    let maybePhoto = flip parseMaybe obj $ \o -> do
-                         name       <- o  .: "File:FileName"
+                    maybePhoto <- fromMaybe (return Nothing) $ flip parseMaybe obj $ \o -> do
+                         name       <- o  .: "File:FileName" :: Parser String
                          src        <- o  .: "SourceFile"
                          width      <- o  .: "File:ImageWidth"
                          height     <- o  .: "File:ImageHeight"
-                         directory  <- o  .: "File:Directory"
-                         let thumb  = Just (directory ++ "/thumb/" ++ name)
+                         dir        <- o  .: "File:Directory"
+                         author     <- o  .: "EXIF:Artist"
+                         caption    <- o  .: "EXIF:Software"
+                         let thumb  = Just (dir ++ "/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
-                         return $ Photo name src thumb width height exifData 0
+                         let photo = Photo name src thumb width height exifData 0
+                         let insertPhoto = do
+                              pid <- runDB $ insert photo
+                              _ <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "author" author
+                              _ <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" caption
+                              return $ Just pid
+                         return insertPhoto
 
                     case maybePhoto of
-                        Just photo -> do
-                            photoId <- runDB $ insert photo
-
-                            case maybeCategories of
-                                Just categories -> do
-                                    sequence $ flip map categories $ \c -> do
-                                        mcid <- runDB $ insertUnique c
-                                        case mcid of
-                                            Nothing -> do
-                                                mcid <- runDB $ getBy $ UniqueName (categoryName c)
-                                                case mcid of {Just (Entity cid _) -> runDB $ insertUnique $ PhotoCategory cid photoId}
-                                            Just cid -> runDB $ insertUnique $ PhotoCategory cid photoId
-                                Nothing -> return $ sequence Nothing
-
-                            return $ Just photoId
+                        Just pid -> do
+                            _ <- sequence $ flip map (catMaybes maybeCategories) $ \cid -> runDB $ insertUnique $ PhotoCategory cid pid
+                            return $ Just pid
                         Nothing ->
                             return Nothing
 
