@@ -13,8 +13,8 @@ module Application
     ) where
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
---import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
---                                             myPoolSize, runSqlPool)
+import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
+                                             myPoolSize, runSqlPool)
 import Database.Persist.ODBC
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
@@ -66,13 +66,12 @@ makeFoundation appSettings = do
         tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
         logFunc = messageLoggerSource tempFoundation appLogger
 
-    pool <- flip runLoggingT logFunc $ createODBCPool
-        (Just MySQL)
-        (odbcConnStr        $ appDatabaseConf appSettings)
-        (odbcPoolSize       $ appDatabaseConf appSettings)
+    -- Create the database connection pool
+    pool <- flip runLoggingT logFunc $ createMySQLPool
+        (myConnInfo $ appDatabaseConf appSettings)
+        (myPoolSize $ appDatabaseConf appSettings)
 
---    pool <- createPoolConfig $ appDatabaseConf appSettings
-
+    -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
     -- Return the foundation
