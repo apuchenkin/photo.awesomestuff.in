@@ -40,7 +40,7 @@ getInstallR = do
                 let thumb = Just $ thumbPath ++ name
                 let width  = dynamicMap imageWidth  image
                 let height = dynamicMap imageHeight image
-                let photo = Photo name src thumb width height "" 0
+                let photo = Photo name src thumb width height "" 0 Nothing
                 photoId <- runDB $ insert photo
                 return $ Just photoId
 
@@ -84,11 +84,11 @@ getInstallExifR = do
                          caption    <- o  .: "EXIF:Software"
                          let thumb  = Just (dir ++ "/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
-                         let photo = Photo name src thumb width height exifData 0
                          let insertPhoto = do
+                              aid <- runDB $ insertUnique $ Author author
+                              let photo = Photo name src thumb width height exifData 0 aid
                               pid <- runDB $ insert photo
-                              _ <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "author" author
-                              _ <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" caption
+                              _   <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" caption
                               return $ Just pid
                          return insertPhoto
 

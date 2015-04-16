@@ -14,13 +14,13 @@ User
 
 Category json
     name String
-    parent CategoryId Maybe sqltype=int
+    parent CategoryId Maybe
     UniqueName name
     deriving Show
 
 PhotoCategory
-    category CategoryId sqltype=int
-    photo PhotoId sqltype=int
+    category CategoryId
+    photo PhotoId
     UniquePhotoCategory category photo
 
 Author json
@@ -36,12 +36,12 @@ Photo json
     height Int
     exif Text
     views Int
-    author AuthorId Maybe sqltype=int
+    author AuthorId Maybe
     deriving Show
 
 Translation json
-    language Language
-    type TranslationType
+    language Language sqltype=enum('Ru','En')
+    type TranslationType sqltype=enum('CategoryType','PhotoType')
     refId Int64
     field String
     value String
