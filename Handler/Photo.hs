@@ -3,8 +3,6 @@ module Handler.Photo where
 import Import
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
-import Data.Data (Data)
-import Data.Aeson (encode, withObject)
 
 getPhotoR :: PhotoId -> Handler Value
 getPhotoR photoId = do
@@ -18,24 +16,27 @@ getPhotosR = do
     maybeCategoryName <- lookupGetParam "category"
     case maybeCategoryName of
         Nothing -> do
-            photos <- runDB $ selectList [] [] :: Handler [Entity Photo]
-            returnJson $ map toCollectionPhoto photos
+            returnJson ()
         Just categoryName -> do
             photos <- runDB
                $ E.select
-               $ E.from $ \(photo `E.InnerJoin` pc `E.InnerJoin` category) -> do
-                    E.on $ category ^. CategoryId   E.==. pc ^. PhotoCategoryCategory
-                    E.on $ photo    ^. PhotoId      E.==. pc ^. PhotoCategoryPhoto
+               $ E.from $ \(author `E.InnerJoin` photo `E.InnerJoin` pc `E.InnerJoin` category ) -> do
+                    E.on $ category ^. CategoryId              E.==. pc     ^. PhotoCategoryCategory
+                    E.on $ photo    ^. PhotoId                 E.==. pc     ^. PhotoCategoryPhoto
+                    E.on $ E.just (author   ^. AuthorId)       E.==. photo  ^. PhotoAuthor
+
                     E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
-                    return photo
+                    return (photo, author)
+
             returnJson $ map toCollectionPhoto photos
     where
-        toCollectionPhoto :: (Entity Photo) -> Value
-        toCollectionPhoto (Entity id Photo {..}) = object[
-                "id"        .= id,
+        toCollectionPhoto :: (Entity Photo, Entity Author) -> Value
+        toCollectionPhoto (Entity pid Photo {..}, Entity _ author) = object [
+                "id"        .= pid,
                 "src"       .= photoSrc,
                 "thumb"     .= photoThumb,
                 "width"     .= photoWidth,
                 "height"    .= photoHeight,
-                "views"     .= photoViews
+                "views"     .= photoViews,
+                "author"    .= authorName author
             ]

@@ -56,23 +56,14 @@ getInstallExifR = do
             where
                 createPhoto :: Object -> Handler (Maybe (Key Photo))
                 createPhoto obj = do
-                    maybeCategories <- fromMaybe (return []) $ flip parseMaybe obj $ \o -> do
+                    categories <- fromMaybe (return []) $ flip parseMaybe obj $ \o -> do
                          categories <- o  .: "IPTC:Keywords"  :: Parser [Text]
                          return $ sequence $ flip map categories $ \title -> do
                             let normalizedTitle = unpack $ T.replace " " "-" (toLower title)
-                            mcid <- runDB $ insertUnique $ Category normalizedTitle Nothing
-                            mcid <- case mcid of
-                                Nothing -> do
-                                   mc <- runDB $ getBy $ UniqueName normalizedTitle
-                                   case mc of
-                                        Nothing -> return Nothing
-                                        Just c  -> return $ Just $ entityKey c
-                                Just cid -> return $ Just cid
-                            case mcid of
-                                Nothing     -> return Nothing
-                                Just cid    -> do
-                                    _ <- runDB $ insertUnique $ Translation En CategoryType (fromSqlKey cid) "title" (unpack $ title)
-                                    return $ Just cid
+                            ecid <- runDB $ insertBy $ Category normalizedTitle Nothing
+                            let cid = either entityKey id ecid
+                            _    <- runDB $ insertUnique $ Translation En CategoryType (fromSqlKey cid) "title" (unpack $ title)
+                            return cid
 
                     maybePhoto <- fromMaybe (return Nothing) $ flip parseMaybe obj $ \o -> do
                          name       <- o  .: "File:FileName" :: Parser String
@@ -81,12 +72,15 @@ getInstallExifR = do
                          height     <- o  .: "File:ImageHeight"
                          dir        <- o  .: "File:Directory"
                          author     <- o  .: "EXIF:Artist"
-                         caption    <- o  .: "EXIF:Software"
+                         caption    <- o  .: "IPTC:Caption-Abstract"
+
                          let thumb  = Just (dir ++ "/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
                          let insertPhoto = do
-                              aid <- runDB $ insertUnique $ Author author
-                              let photo = Photo name src thumb width height exifData 0 aid
+                              eaid <- runDB $ insertBy $ Author author
+--                              let aid = case eaid of {Left e -> entityKey e; Right k-> k}
+                              let aid = either entityKey id eaid
+                              let photo = Photo name src thumb width height exifData 0 (Just aid)
                               pid <- runDB $ insert photo
                               _   <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" caption
                               return $ Just pid
@@ -94,7 +88,7 @@ getInstallExifR = do
 
                     case maybePhoto of
                         Just pid -> do
-                            _ <- sequence $ flip map (catMaybes maybeCategories) $ \cid -> runDB $ insertUnique $ PhotoCategory cid pid
+                            _ <- sequence $ flip map categories $ \cid -> runDB $ insertUnique $ PhotoCategory cid pid
                             return $ Just pid
                         Nothing ->
                             return Nothing
