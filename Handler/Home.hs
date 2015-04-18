@@ -9,6 +9,7 @@ import Codec.Picture.Types (dynamicMap)
 import Data.Aeson (decode, encode, Object)
 import Data.Aeson.Types (parseMaybe, Parser)
 import Database.Persist.Sql (fromSqlKey)
+import Data.Time.Format (readTime)
 import qualified Data.Text as T (replace)
 
 -- This is a handler function for the GET request method on the HomeR
@@ -40,7 +41,7 @@ getInstallR = do
                 let thumb = Just $ thumbPath ++ name
                 let width  = dynamicMap imageWidth  image
                 let height = dynamicMap imageHeight image
-                let photo = Photo name src thumb width height "" 0 Nothing
+                let photo = Photo name src thumb width height "" 0 Nothing Nothing Nothing
                 photoId <- runDB $ insert photo
                 return $ Just photoId
 
@@ -73,14 +74,16 @@ getInstallExifR = do
                          dir        <- o  .: "File:Directory"
                          author     <- o  .: "EXIF:Artist"
                          caption    <- o  .: "IPTC:Caption-Abstract"
+                         dateString   <- o  .: "EXIF:CreateDate"
 
                          let thumb  = Just (dir ++ "/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
+                         let datetime = readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" dateString :: UTCTime
                          let insertPhoto = do
                               eaid <- runDB $ insertBy $ Author author
 --                              let aid = case eaid of {Left e -> entityKey e; Right k-> k}
                               let aid = either entityKey id eaid
-                              let photo = Photo name src thumb width height exifData 0 (Just aid)
+                              let photo = Photo name src thumb width height exifData 0 (Just aid) (Just datetime) Nothing
                               pid <- runDB $ insert photo
                               _   <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" caption
                               return $ Just pid

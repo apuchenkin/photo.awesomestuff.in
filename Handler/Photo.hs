@@ -24,7 +24,7 @@ getPhotosR = do
                     E.on $ category ^. CategoryId              E.==. pc     ^. PhotoCategoryCategory
                     E.on $ photo    ^. PhotoId                 E.==. pc     ^. PhotoCategoryPhoto
                     E.on $ E.just (author   ^. AuthorId)       E.==. photo  ^. PhotoAuthor
-
+                    E.orderBy [E.asc (photo ^. PhotoDatetime)]
                     E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
                     return (photo, author)
 

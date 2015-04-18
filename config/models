@@ -37,6 +37,8 @@ Photo json
     exif Text
     views Int
     author AuthorId Maybe
+    datetime UTCTime Maybe
+    order Int Maybe
     deriving Show
 
 Translation json
