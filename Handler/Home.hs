@@ -11,6 +11,7 @@ import Data.Aeson.Types (parseMaybe, Parser)
 import Database.Persist.Sql (fromSqlKey)
 import Data.Time.Format (readTime)
 import qualified Data.Text as T (replace)
+import Data.Aeson ((.:?))
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -34,16 +35,15 @@ getInstallR = do
      createPhoto srcPath = \ name -> do
         let src = srcPath ++ name
         mImage <- liftIO $ readImage src
-        case mImage of
-            Left _  -> return Nothing
-            Right image -> do
-                let thumbPath = "static/gallery/thumb/"
-                let thumb = Just $ thumbPath ++ name
-                let width  = dynamicMap imageWidth  image
-                let height = dynamicMap imageHeight image
-                let photo = Photo name src thumb width height "" 0 Nothing Nothing Nothing
-                photoId <- runDB $ insert photo
-                return $ Just photoId
+        pid <- either (\_ -> return Nothing) (\image -> do
+           let thumbPath = "static/gallery/thumb/"
+           let thumb = Just $ thumbPath ++ name
+           let width  = dynamicMap imageWidth  image
+           let height = dynamicMap imageHeight image
+           let photo = Photo name src thumb width height "" 0 Nothing Nothing Nothing
+           photoId <- runDB $ insert photo
+           return $ Just photoId) mImage
+        return pid
 
 getInstallExifR :: Handler Value
 getInstallExifR = do
@@ -67,26 +67,33 @@ getInstallExifR = do
                             return cid
 
                     maybePhoto <- fromMaybe (return Nothing) $ flip parseMaybe obj $ \o -> do
-                         name       <- o  .: "File:FileName" :: Parser String
-                         src        <- o  .: "SourceFile"
-                         width      <- o  .: "File:ImageWidth"
-                         height     <- o  .: "File:ImageHeight"
-                         dir        <- o  .: "File:Directory"
-                         author     <- o  .: "EXIF:Artist"
-                         caption    <- o  .: "IPTC:Caption-Abstract"
-                         dateString   <- o  .: "EXIF:CreateDate"
+                         name           <- o  .:  "File:FileName" :: Parser String
+                         src            <- o  .:  "SourceFile"
+                         width          <- o  .:  "File:ImageWidth"
+                         height         <- o  .:  "File:ImageHeight"
+                         dir            <- o  .:  "File:Directory"
+                         author         <- o  .:? "EXIF:Artist"
+                         caption        <- o  .:? "IPTC:Caption-Abstract"
+                         dateString     <- o  .:? "EXIF:CreateDate"
 
                          let thumb  = Just (dir ++ "/thumb/" ++ name)
                          let exifData = toStrict $ decodeUtf8 $ encode obj
-                         let datetime = readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" dateString :: UTCTime
+                         let datetime = flip fmap dateString $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
                          let insertPhoto = do
-                              eaid <- runDB $ insertBy $ Author author
---                              let aid = case eaid of {Left e -> entityKey e; Right k-> k}
-                              let aid = either entityKey id eaid
-                              let photo = Photo name src thumb width height exifData 0 (Just aid) (Just datetime) Nothing
+                              aid <- maybe (return Nothing) persistAuthor author
+                              let photo = Photo name src thumb width height exifData 0 aid datetime Nothing
                               pid <- runDB $ insert photo
-                              _   <- runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" caption
+                              _   <- maybe (return Nothing) (persistTranslation pid) caption
                               return $ Just pid
+                              where
+                                persistAuthor :: String -> Handler (Maybe (Key Author))
+                                persistAuthor a = do
+                                  eaid <- runDB $ insertBy $ Author a
+                                  return $ Just (either entityKey id eaid)
+
+                                persistTranslation :: Key Photo -> String -> Handler (Maybe (Key Translation))
+                                persistTranslation pid c = runDB $ insertUnique $ Translation En PhotoType (fromSqlKey pid) "caption" c
+
                          return insertPhoto
 
                     case maybePhoto of
