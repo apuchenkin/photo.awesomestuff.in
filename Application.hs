@@ -28,6 +28,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
 import Network.Wai.Middleware.Cors          (simpleCors)
+import qualified Data.List                   as L (elem)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -74,7 +75,7 @@ makeFoundation appSettings args = do
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
     -- Performs installation
-    case (elem "install" args) of 
+    case (L.elem "install" args) of
         True  -> runSqlPool doInstall pool
         False -> return ()
 

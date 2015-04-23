@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-
 module Handler.Home where
 
 import           Data.Aeson           (Object, decode, encode)
@@ -9,7 +8,6 @@ import qualified Data.Text            as T (replace)
 import           Data.Time.Format     (readTime)
 import           Database.Persist.Sql (fromSqlKey)
 import           Import
-import           System.Directory     (getDirectoryContents)
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -59,9 +57,9 @@ doInstall = do
                          let insertPhoto = do
                               aid <- maybe (return Nothing) persistAuthor author
                               let photo = Photo name src thumb width height exifData 0 aid datetime Nothing
-                              pid <- insert photo
-                              _   <- maybe (return Nothing) (persistTranslation pid) caption
-                              return $ Just pid
+                              pid <- insertUnique photo
+                              _ <- return $ liftM2 persistTranslation pid caption
+                              return pid
                               where
                                 persistAuthor :: String -> SqlPersistT IO (Maybe (Key Author))
                                 persistAuthor a = do

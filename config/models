@@ -39,6 +39,7 @@ Photo json
     author AuthorId Maybe
     datetime UTCTime Maybe
     order Int Maybe
+    UniquePhoto src
     deriving Show
 
 Translation json

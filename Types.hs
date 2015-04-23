@@ -2,7 +2,6 @@
 module Types where
 
 import ClassyPrelude.Yesod
-import Database.Persist.TH
 
 data TranslationType = CategoryType | PhotoType
     deriving (Show, Read, Eq)
