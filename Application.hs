@@ -46,8 +46,8 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and return a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: AppSettings -> IO App
-makeFoundation appSettings = do
+makeFoundation :: AppSettings -> [Text] -> IO App
+makeFoundation appSettings args = do
     -- Some basic initializations: HTTP connection manager, logger, and static
     -- subsite.
     appHttpManager <- newManager
@@ -72,6 +72,11 @@ makeFoundation appSettings = do
 
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+
+    -- Performs installation
+    case (elem "install" args) of 
+        True  -> runSqlPool doInstall pool
+        False -> return ()
 
     -- Return the foundation
     return $ mkFoundation pool
@@ -114,7 +119,8 @@ warpSettings foundation =
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
     settings <- getAppSettings
-    foundation <- makeFoundation settings
+    args <- getArgs
+    foundation <- makeFoundation settings args
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
     return (wsettings, simpleCors app)
@@ -130,21 +136,19 @@ develMain = develMainHelper getApplicationDev
 appMain :: IO ()
 appMain = do
     -- Get the settings from all relevant sources
-    settings <- loadAppSettingsArgs
-        -- fall back to compile-time values, set to [] to require values at runtime
-        [configSettingsYmlValue]
+    settings <- getAppSettings
 
-        -- allow environment variables to override
-        useEnv
+    -- Arguments
+    args <- getArgs
 
     -- Generate the foundation from the settings
-    foundation <- makeFoundation settings
+    foundation <- makeFoundation settings args
 
     -- Generate a WAI Application from the foundation
     app <- makeApplication foundation
 
     -- Run the application with Warp
-    runSettings (warpSettings foundation) (simpleCors app)
+    runSettings (warpSettings foundation) app
 
 
 --------------------------------------------------------------
@@ -153,7 +157,8 @@ appMain = do
 getApplicationRepl :: IO (Int, App, Application)
 getApplicationRepl = do
     settings <- getAppSettings
-    foundation <- makeFoundation settings
+    args <- getArgs
+    foundation <- makeFoundation settings args
     wsettings <- getDevSettings $ warpSettings foundation
     app1 <- makeApplication foundation
     return (getPort wsettings, foundation, app1)
@@ -168,7 +173,11 @@ shutdownApp _ = return ()
 
 -- | Run a handler
 handler :: Handler a -> IO a
-handler h = getAppSettings >>= makeFoundation >>= flip unsafeHandler h
+handler h = do
+    settings <- getAppSettings
+    args <- getArgs
+    foundation <- makeFoundation settings args
+    unsafeHandler foundation h
 
 -- | Run DB queries
 db :: ReaderT SqlBackend (HandlerT App IO) a -> IO a

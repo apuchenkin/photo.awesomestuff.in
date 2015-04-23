@@ -16,6 +16,6 @@
 
 -- admin routes
 
-/install InstallR GET
-/install-exif InstallExifR GET
+-- /install InstallR GET
+-- /install-exif InstallExifR GET
 
