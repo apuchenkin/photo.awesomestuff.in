@@ -2,8 +2,6 @@
 
 module Handler.Home where
 
-import           Codec.Picture        (Image (..), readImage)
-import           Codec.Picture.Types  (dynamicMap)
 import           Data.Aeson           (Object, decode, encode)
 import           Data.Aeson           ((.:?))
 import           Data.Aeson.Types     (Parser, parseMaybe)
@@ -23,28 +21,6 @@ import           System.Directory     (getDirectoryContents)
 getHomeR :: Handler Value
 getHomeR = do
      returnJson ()
-
-getInstallR :: Handler Value
-getInstallR = do
-     let path = "static/gallery/src/"
-     srcs <- liftIO $ getDirectoryContents path
-     ids <- sequence $ map (createPhoto path) srcs
-     returnJson ids
-     where
-     createPhoto :: String -> String -> Handler (Maybe (Key Photo))
-     createPhoto srcPath = \ name -> do
-        let src = srcPath ++ name
-        mImage <- liftIO $ readImage src
-        pid <- either (\_ -> return Nothing) (\image -> do
-           let thumbPath = "static/gallery/thumb/"
-           let thumb = Just $ thumbPath ++ name
-           let width  = dynamicMap imageWidth  image
-           let height = dynamicMap imageHeight image
-           let photo = Photo name src thumb width height "" 0 Nothing Nothing Nothing
-           photoId <- runDB $ insert photo
-           return $ Just photoId) mImage
-        return pid
-
 
 doInstall :: SqlPersistT IO ()
 doInstall = do

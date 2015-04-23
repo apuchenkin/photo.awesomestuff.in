@@ -2,10 +2,8 @@ module Foundation where
 
 import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Text.Hamlet          (hamletFile)
-import Text.Jasmine         (minifym)
 import Yesod.Auth.BrowserId (authBrowserId)
-import Yesod.Default.Util   (addStaticContentExternal)
+-- import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 
@@ -43,24 +41,8 @@ instance Yesod App where
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
     approot = ApprootMaster $ appRoot . appSettings
 
-
     -- Sessions is disabled
     makeSessionBackend _ = return Nothing
-
-    defaultLayout widget = do
-        master <- getYesod
-        mmsg <- getMessage
-
-        -- We break up the default layout into two components:
-        -- default-layout is the contents of the body tag, and
-        -- default-layout-wrapper is the entire page. Since the final
-        -- value passed to hamletToRepHtml cannot be a widget, this allows
-        -- you to use normal widget features in default-layout.
-
-        pc <- widgetToPageContent $ do
-            addStylesheet $ StaticR css_bootstrap_css
-            $(widgetFile "default-layout")
-        withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR LoginR
@@ -72,24 +54,24 @@ instance Yesod App where
     -- Default to Authorized for now.
     isAuthorized _ _ = return Authorized
 
-    -- This function creates static content files in the static folder
-    -- and names them based on a hash of their content. This allows
-    -- expiration dates to be set far in the future without worry of
-    -- users receiving stale content.
-    addStaticContent ext mime content = do
-        master <- getYesod
-        let staticDir = appStaticDir $ appSettings master
-        addStaticContentExternal
-            minifym
-            genFileName
-            staticDir
-            (StaticR . flip StaticRoute [])
-            ext
-            mime
-            content
-      where
-        -- Generate a unique filename based on the content itself
-        genFileName lbs = "autogen-" ++ base64md5 lbs
+    -- -- This function creates static content files in the static folder
+    -- -- and names them based on a hash of their content. This allows
+    -- -- expiration dates to be set far in the future without worry of
+    -- -- users receiving stale content.
+    -- addStaticContent ext mime content = do
+    --     master <- getYesod
+    --     let staticDir = appStaticDir $ appSettings master
+    --     addStaticContentExternal
+    --         minifym
+    --         genFileName
+    --         staticDir
+    --         (StaticR . flip StaticRoute [])
+    --         ext
+    --         mime
+    --         content
+    --   where
+    --     -- Generate a unique filename based on the content itself
+    --     genFileName lbs = "autogen-" ++ base64md5 lbs
 
     -- What messages should be logged. The following includes all messages when
     -- in development, and warnings and errors in production.
