@@ -43,20 +43,19 @@ doInstall = do
 
                     maybePhoto <- fromMaybe (return Nothing) $ flip parseMaybe obj $ \o -> do
                          name           <- o  .:  "File:FileName" :: Parser String
-                         src            <- o  .:  "SourceFile"
+                         src            <- o  .:  "SourceFile" :: Parser Text
                          width          <- o  .:  "File:ImageWidth"
                          height         <- o  .:  "File:ImageHeight"
-                         dir            <- o  .:  "File:Directory"
                          author         <- o  .:? "EXIF:Artist"
                          caption        <- o  .:? "IPTC:Caption-Abstract"
                          dateString     <- o  .:? "EXIF:CreateDate"
 
-                         let thumb  = Just (dir ++ "/thumb/" ++ name)
+                         let thumb  = Just $ unpack $ T.replace "static/gallery" "static/thumb" src
                          let exifData = toStrict $ decodeUtf8 $ encode obj
                          let datetime = flip fmap dateString $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
                          let insertPhoto = do
                               aid <- maybe (return Nothing) persistAuthor author
-                              let photo = Photo name src thumb width height exifData 0 aid datetime Nothing
+                              let photo = Photo name (unpack src) thumb width height exifData 0 aid datetime Nothing
                               pid <- insertUnique photo
                               _ <- return $ liftM2 persistTranslation pid caption
                               return pid
