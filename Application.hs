@@ -120,8 +120,7 @@ warpSettings foundation =
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
     settings <- getAppSettings
-    args <- getArgs
-    foundation <- makeFoundation settings args
+    foundation <- makeFoundation settings ["install"]
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
     return (wsettings, simpleCors app)

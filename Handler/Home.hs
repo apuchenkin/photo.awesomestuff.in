@@ -51,21 +51,21 @@ doInstall appSettings = do
                          src            <- o  .:  (src meta)  :: Parser Text
                          width          <- o  .:  (width meta)
                          height         <- o  .:  (height meta)
-                         author         <- o  .:? (author meta)
-                         caption        <- o  .:? (caption meta) :: Parser (Maybe (Text))
+                         mauthor        <- o  .:? (author meta)
+                         mcaption       <- o  .:? (caption meta) :: Parser (Maybe (Text))
                          dateString     <- o  .:? (date meta)
 
                          let thumb  = Just $ unpack $ T.replace "static/gallery" "static/thumb" src
                          let exifData = toStrict $ decodeUtf8 $ encode obj
                          let datetime = flip fmap dateString $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
                          let insertPhoto = do
-                              aid <- maybe (return Nothing) persistAuthor author
+                              aid <- maybe (return Nothing) persistAuthor mauthor
                               let photo = Photo name (unpack src) thumb width height exifData 0 aid datetime Nothing
                               putStrLn $ "insertBy: " ++ (pack $ show photo)
                               epid <- insertBy photo
                               let pid = either entityKey id epid
-                              _ <- return $ liftM (persistTranslation pid) caption
-                              return  $ Just pid
+                              _ <- maybe (return Nothing) (persistTranslation pid) mcaption
+                              return $ Just pid
                               where
                                 persistAuthor :: String -> SqlPersistT IO (Maybe (Key Author))
                                 persistAuthor a = do
@@ -74,11 +74,12 @@ doInstall appSettings = do
                                   eaid <- insertBy ea
                                   return $ Just (either entityKey id eaid)
 
-                                persistTranslation :: Key Photo -> Text -> SqlPersistT IO (Entity Translation)
+                                persistTranslation :: Key Photo -> Text -> SqlPersistT IO (Maybe (Entity Translation))
                                 persistTranslation pid c = do
                                     let translation = Translation En PhotoType (fromSqlKey pid) "caption" c
                                     putStrLn $ "upsert: " ++ (pack $ show translation)
-                                    upsert translation [TranslationValue =. c]
+                                    et <- upsert translation [TranslationValue =. c]
+                                    return $ Just et
 
                          return insertPhoto
 
