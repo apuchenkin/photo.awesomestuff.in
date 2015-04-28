@@ -18,6 +18,27 @@ import Yesod.Default.Config2      (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util         (WidgetFileSettings, widgetFileNoReload,
                                    widgetFileReload)
 
+data PhotoMetadata = PhotoMetadata {
+    name    :: Text,
+    src     :: Text,
+    width   :: Text,
+    height  :: Text,
+    author  :: Text,
+    caption :: Text,
+    date    :: Text
+}
+
+instance FromJSON PhotoMetadata where
+    parseJSON = withObject "PhotoMetadata" $ \o -> do
+        name        <- o .: "name"
+        src         <- o .: "src"
+        width       <- o .: "width"
+        height      <- o .: "height"
+        author      <- o .: "author"
+        caption     <- o .: "caption"
+        date        <- o .: "date"
+        return PhotoMetadata {..}
+
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
@@ -26,6 +47,8 @@ data AppSettings = AppSettings
     -- ^ Directory from which to serve static files.
     , appDatabaseConf           :: MySQLConf
     -- ^ Configuration settings for accessing the database.
+    , appMetadata               :: PhotoMetadata
+    -- ^ Configuration for the photo metadata readings
     , appRoot                   :: Text
     -- ^ Base for all generated URLs.
     , appHost                   :: HostPreference
@@ -64,6 +87,7 @@ instance FromJSON AppSettings where
 #endif
         appStaticDir              <- o .: "static-dir"
         appDatabaseConf           <- o .: "database"
+        appMetadata               <- o .: "metadata"
         appRoot                   <- o .: "approot"
         appHost                   <- fromString <$> o .: "host"
         appPort                   <- o .: "port"

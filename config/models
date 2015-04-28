@@ -47,6 +47,6 @@ Translation json
     type TranslationType sqltype=enum('CategoryType','PhotoType')
     refId Int64
     field String
-    value String
+    value Text
     UniqueTranslation language type refId field
     deriving Show

@@ -25,5 +25,14 @@ database:
   database: "_env:MYSQL_DATABASE:aws-photo-service"
   poolsize: "_env:MYSQL_POOLSIZE:10"
 
+metadata:
+  name:         "File:FileName"
+  src:          "SourceFile"
+  width:        "File:ImageWidth"
+  height:       "File:ImageHeight"
+  author:       "EXIF:Artist"
+  caption:      "IPTC:Caption-Abstract"
+  date:         "EXIF:CreateDate"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

@@ -76,7 +76,7 @@ makeFoundation appSettings args = do
 
     -- Performs installation
     case (L.elem "install" args) of
-        True  -> runSqlPool doInstall pool
+        True  -> runSqlPool (doInstall appSettings) pool
         False -> return ()
 
     -- Return the foundation
