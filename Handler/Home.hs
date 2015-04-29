@@ -1,9 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Handler.Home where
 
-import           Data.Aeson           (Object, decode, encode)
-import           Data.Aeson           ((.:?))
-import           Data.Aeson.Types     (Parser, parseMaybe)
+import           Data.Aeson           (Object, decode, encode, withObject, (.:?))
 import qualified Data.Text            as T (replace)
 import           Data.Time.Format     (readTime)
 import           Database.Persist.Sql (fromSqlKey)
@@ -20,72 +18,75 @@ getHomeR :: Handler Value
 getHomeR = do
      returnJson ()
 
-doInstall :: AppSettings -> SqlPersistT IO ()
-doInstall appSettings = do
+data ExifData = ExifData {
+    categories  :: [Text],
+    name        :: String,
+    src         :: Text,
+    width       :: Int,
+    height      :: Int,
+    author      :: Maybe (String),
+    caption     :: Maybe (Text),
+    date        :: Maybe (String),
+    exifObject    :: Object
+}
+
+instance FromJSON ExifData where
+    parseJSON = withObject "ExifData" $ \o -> do
+        let exifObject = o
+        categories  <- o .:  "IPTC:Keywords"
+        name        <- o .:  "File:FileName"
+        src         <- o .:  "SourceFile"
+        width       <- o .:  "File:ImageWidth"
+        height      <- o .:  "File:ImageHeight"
+        author      <- o .:? "EXIF:Artist"
+        caption     <- o .:? "EXIF:ImageDescription"
+        date        <- o .:? "EXIF:CreateDate"
+
+        return ExifData {..}
+
+doInstall :: SqlPersistT IO ()
+doInstall = do
     exifFile <- liftIO $ readFile "exif.json"
-    let maybeExif = decode exifFile :: Maybe [Object]
-    case maybeExif of
-        Nothing -> return ()
-        Just exif -> do
-            _ <- sequence $ map createPhoto exif
+    let exif = fromMaybe [] $ decode exifFile :: [ExifData]
+    _ <- sequence $ map persistData exif
+    return ()
+
+    where
+        persistData :: ExifData -> SqlPersistT IO ()
+        persistData exif = do
+            aid <- maybe (return Nothing) persistAuthor (author exif)
+            categories <- sequence $ map persistCategory (categories exif)
+            pid <- persistPhoto exif aid
+            _ <- sequence $ flip map categories $ \cid -> insertUnique $ PhotoCategory cid pid
             return ()
+
             where
-                createPhoto :: Object -> SqlPersistT IO ()
-                createPhoto obj = do
-                    let meta = appMetadata appSettings
-                    categories <- fromMaybe (return []) $ flip parseMaybe obj $ \o -> do
-                         categories <- o  .: "IPTC:Keywords"  :: Parser [Text]
-                         return $ sequence $ flip map categories $ \title -> do
-                            let normalizedTitle = unpack $ T.replace " " "-" (toLower title)
-                            let category = Category normalizedTitle Nothing
-                            putStrLn $ "insertBy: " ++ (pack $ show category)
-                            ecid <- insertBy category
-                            let cid = either entityKey id ecid
-                            let translation = Translation En CategoryType (fromSqlKey cid) "title" title
-                            putStrLn $ "upsert: " ++ (pack $ show translation)
-                            _    <- upsert translation [TranslationValue =. title]
-                            return cid
+                persistTranslation :: TranslationType -> Int64 -> String -> Text -> SqlPersistT IO (Maybe (Key Translation))
+                persistTranslation t refId f v = do
+                    let translation = Translation En t refId f v
+                    insertUnique translation
 
-                    maybePhoto <- fromMaybe (return Nothing) $ flip parseMaybe obj $ \o -> do
-                         name           <- o  .:  (name meta) :: Parser String
-                         src            <- o  .:  (src meta)  :: Parser Text
-                         width          <- o  .:  (width meta)
-                         height         <- o  .:  (height meta)
-                         mauthor        <- o  .:? (author meta)
-                         mcaption       <- o  .:? (caption meta) :: Parser (Maybe (Text))
-                         dateString     <- o  .:? (date meta)
+                persistAuthor :: String -> SqlPersistT IO (Maybe (Key Author))
+                persistAuthor a = do
+                    eaid <- insertBy $ Author a
+                    return $ Just (either entityKey id eaid)
 
-                         let thumb  = Just $ unpack $ T.replace "static/gallery" "static/thumb" src
-                         let exifData = toStrict $ decodeUtf8 $ encode obj
-                         let datetime = flip fmap dateString $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
-                         let insertPhoto = do
-                              aid <- maybe (return Nothing) persistAuthor mauthor
-                              let photo = Photo name (unpack src) thumb width height exifData 0 aid datetime Nothing
-                              putStrLn $ "insertBy: " ++ (pack $ show photo)
-                              epid <- insertBy photo
-                              let pid = either entityKey id epid
-                              _ <- maybe (return Nothing) (persistTranslation pid) mcaption
-                              return $ Just pid
-                              where
-                                persistAuthor :: String -> SqlPersistT IO (Maybe (Key Author))
-                                persistAuthor a = do
-                                  let ea = Author a
-                                  putStrLn $ "insertBy: " ++ (pack $ show ea)
-                                  eaid <- insertBy ea
-                                  return $ Just (either entityKey id eaid)
+                persistCategory :: Text -> SqlPersistT IO (Key Category)
+                persistCategory title = do
+                    let normalizedTitle = unpack $ T.replace " " "-" (toLower title)
+                        category = Category normalizedTitle Nothing
+                    ecid <- insertBy category
+                    let cid = either entityKey id ecid
+                    _ <- persistTranslation CategoryType (fromSqlKey cid) "title" title
+                    return cid
 
-                                persistTranslation :: Key Photo -> Text -> SqlPersistT IO (Maybe (Entity Translation))
-                                persistTranslation pid c = do
-                                    let translation = Translation En PhotoType (fromSqlKey pid) "caption" c
-                                    putStrLn $ "upsert: " ++ (pack $ show translation)
-                                    et <- upsert translation [TranslationValue =. c]
-                                    return $ Just et
-
-                         return insertPhoto
-
-                    case maybePhoto of
-                        Just pid -> do
-                            _ <- sequence $ flip map categories $ \cid -> insertUnique $ PhotoCategory cid pid
-                            return ()
-                        Nothing ->
-                            return ()
+                persistPhoto :: ExifData -> Maybe (Key Author) -> SqlPersistT IO (Key Photo)
+                persistPhoto e aid = do
+                    let thumb  = Just $ unpack $ T.replace "static/gallery" "static/thumb" (src e)
+                        exifData = toStrict $ decodeUtf8 $ encode (exifObject e)
+                        datetime = flip fmap (date e) $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
+                        photo = Photo (name e) (unpack $ src e) thumb (width e) (height e) exifData 0 aid datetime Nothing
+                    epid <- insertBy photo
+                    let pid = either entityKey id epid
+                    _ <- maybe (return Nothing) (persistTranslation PhotoType (fromSqlKey pid) "caption") (caption exif)
+                    return pid
