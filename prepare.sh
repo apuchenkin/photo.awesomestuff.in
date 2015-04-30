@@ -1,1 +1,1 @@
-exiftool static/gallery/* -G -j 1>exif.json
+exiftool static/src/* -G -j 1>exif.json
