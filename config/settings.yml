@@ -25,5 +25,8 @@ database:
   database: "_env:MYSQL_DATABASE:aws-photo-service"
   poolsize: "_env:MYSQL_POOLSIZE:10"
 
+secret:     "secret"
+cache-path: "static/cache/"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

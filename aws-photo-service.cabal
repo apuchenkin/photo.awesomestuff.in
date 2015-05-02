@@ -1,5 +1,5 @@
 name:              aws-photo-service
-version:           1.0.3
+version:           1.1.0
 cabal-version:     >= 1.8
 build-type:        Simple
 
@@ -85,6 +85,13 @@ library
                  , time
                  , esqueleto
                  , wai-cors
+                 , friday                       >= 0.2          && < 0.3
+                 , friday-devil
+                 , base64-bytestring
+                 , utf8-string
+                 , filepath
+                 , cryptohash
+                 , byteable
 
 executable         aws-photo-service
     if flag(library-only)
@@ -127,7 +134,6 @@ test-suite test
                  , persistent-mysql
                  , resourcet
                  , monad-logger
-                 , shakespeare
                  , transformers
                  , hspec >= 2.0.0
                  , classy-prelude

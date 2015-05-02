@@ -82,7 +82,7 @@ doInstall = do
 
                 persistPhoto :: ExifData -> Maybe (Key Author) -> SqlPersistT IO (Key Photo)
                 persistPhoto e aid = do
-                    let thumb  = Just $ unpack $ T.replace "static/gallery" "static/thumb" (src e)
+                    let thumb  = Just $ unpack $ T.replace "static/src" "static/thumb" (src e)
                         exifData = toStrict $ decodeUtf8 $ encode (exifObject e)
                         datetime = flip fmap (date e) $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
                         photo = Photo (name e) (unpack $ src e) thumb (width e) (height e) exifData 0 aid datetime Nothing
