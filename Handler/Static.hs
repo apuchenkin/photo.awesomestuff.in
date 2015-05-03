@@ -60,7 +60,7 @@ getStaticPhotoR pid w' h' sign = do
                 True    -> sendFile typeJpeg cacheFile
                 False   -> do
                     liftIO $ openCVresize (photoSrc photo) cacheFile w'' h''
-                    sendFile typeJpeg cachePath
+                    sendFile typeJpeg cacheFile
 
 
 getStaticImageR :: String -> Int -> Int -> String -> Handler TypedContent
