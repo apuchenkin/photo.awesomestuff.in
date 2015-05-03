@@ -1,5 +1,5 @@
 name:              aws-photo-service
-version:           1.1.0
+version:           1.1.1
 cabal-version:     >= 1.8
 build-type:        Simple
 
@@ -26,6 +26,7 @@ library
                      Handler.Photo
                      Handler.Category
                      Handler.Translation
+                     Handler.Static
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -85,8 +86,7 @@ library
                  , time
                  , esqueleto
                  , wai-cors
-                 , friday                       >= 0.2          && < 0.3
-                 , friday-devil
+                 , HOpenCV
                  , base64-bytestring
                  , utf8-string
                  , filepath
