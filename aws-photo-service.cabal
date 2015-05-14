@@ -92,6 +92,8 @@ library
                  , filepath
                  , cryptohash
                  , byteable
+                 , wai
+                 , word8
 
 executable         aws-photo-service
     if flag(library-only)

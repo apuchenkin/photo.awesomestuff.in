@@ -27,7 +27,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
-import Network.Wai.Middleware.Cors          (simpleCors)
+import Network.Wai.Middleware.Cors          (cors, CorsResourcePolicy (..), simpleMethods)
 import qualified Data.List                   as L (elem)
 
 -- Import all relevant handler modules here.
@@ -124,7 +124,17 @@ getApplicationDev = do
     foundation <- makeFoundation settings ["install"]
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
-    return (wsettings, simpleCors app)
+    let corsResourcePolicy = CorsResourcePolicy
+            { corsOrigins = Nothing
+            , corsMethods = simpleMethods
+            , corsRequestHeaders = ["Accept", "Authorization", "Content-Type"]
+            , corsExposedHeaders = Nothing
+            , corsMaxAge = Nothing
+            , corsVaryOrigin = False
+            , corsRequireOrigin = False
+            , corsIgnoreFailures = False
+            }
+    return (wsettings, cors (const $ Just corsResourcePolicy) app)
 
 getAppSettings :: IO AppSettings
 getAppSettings = loadAppSettings [configSettingsYml] [] useEnv

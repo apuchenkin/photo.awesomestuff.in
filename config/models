@@ -1,7 +1,7 @@
 User
-    ident Text
+    email Text
     password Text Maybe
-    UniqueUser ident
+    UniqueUser email
     deriving Typeable
 
 --Email

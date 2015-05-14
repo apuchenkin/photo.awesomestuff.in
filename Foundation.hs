@@ -2,10 +2,12 @@ module Foundation where
 
 import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Yesod.Auth.BrowserId (authBrowserId)
--- import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
+import Data.ByteString.Base64   (decodeLenient)
+import Data.Word8               (_space, _colon)
 import qualified Yesod.Core.Unsafe as Unsafe
+import qualified Network.Wai.Internal  as W (requestHeaders)
+import qualified Data.ByteString as B
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -54,25 +56,6 @@ instance Yesod App where
     -- Default to Authorized for now.
     isAuthorized _ _ = return Authorized
 
-    -- -- This function creates static content files in the static folder
-    -- -- and names them based on a hash of their content. This allows
-    -- -- expiration dates to be set far in the future without worry of
-    -- -- users receiving stale content.
-    -- addStaticContent ext mime content = do
-    --     master <- getYesod
-    --     let staticDir = appStaticDir $ appSettings master
-    --     addStaticContentExternal
-    --         minifym
-    --         genFileName
-    --         staticDir
-    --         (StaticR . flip StaticRoute [])
-    --         ext
-    --         mime
-    --         content
-    --   where
-    --     -- Generate a unique filename based on the content itself
-    --     genFileName lbs = "autogen-" ++ base64md5 lbs
-
     -- What messages should be logged. The following includes all messages when
     -- in development, and warnings and errors in production.
     shouldLog app _source level =
@@ -95,26 +78,32 @@ instance YesodPersistRunner App where
 instance YesodAuth App where
     type AuthId App = UserId
 
-    -- Where to send a user after successful login
-    loginDest _ = HomeR
-    -- Where to send a user after logout
-    logoutDest _ = HomeR
-    -- Override the above two destinations when a Referer: header is present
-    redirectToReferer _ = True
-
     getAuthId creds = runDB $ do
         x <- getBy $ UniqueUser $ credsIdent creds
         case x of
             Just (Entity uid _) -> return $ Just uid
             Nothing -> Just <$> insert User
-                { userIdent = credsIdent creds
+                { userEmail = credsIdent creds
                 , userPassword = Nothing
                 }
 
-    -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def]
+    authPlugins _ = []
 
-    authHttpManager = getHttpManager
+    maybeAuthId = do
+        request <- waiRequest
+        let authorization = lookup "Authorization" (W.requestHeaders request)
+        case authorization of
+            Just header -> do
+                let (_, v) = B.breakByte _space header
+                let (username, password) = B.breakByte _colon $ decodeLenient v
+                case B.uncons password of
+                    Just (_, p) -> checkCreds (decodeUtf8 username) (decodeUtf8 p)
+                    _ -> return Nothing
+            _ -> return Nothing
+        where
+            checkCreds ident password = runDB $ do
+            user <- selectKeysList [UserEmail ==. ident, UserPassword ==. Just password] [LimitTo 1]
+            return $ listToMaybe user
 
 instance YesodAuthPersist App
 

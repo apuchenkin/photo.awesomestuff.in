@@ -13,7 +13,7 @@
 /category           CategoryR GET
 /translation        TranslationR GET
 
-/hs/image/#String/#Int/#Int/#String     StaticImageR  GET
+/hs/image/#String/#Int/#Int/#String         StaticImageR  GET
 /hs/photo/#PhotoId/#Int/#Int/#String        StaticPhotoR  GET
 
 -- admin routes
