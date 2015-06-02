@@ -1,11 +1,13 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Handler.Home where
 
-import           Data.Aeson           (Object, decode, encode, withObject, (.:?))
+import           Data.Aeson           (Object, decode, eitherDecode, encode, withObject, (.:?))
+import           Data.Aeson.Types     (parseMaybe)
 import qualified Data.Text            as T (replace)
 import           Data.Time.Format     (readTime)
 import           Database.Persist.Sql (fromSqlKey)
 import           Import
+-- import qualified Data.ByteString.Lazy.Internal      as B (ByteString)
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -28,7 +30,7 @@ data ExifData = ExifData {
     caption     :: Maybe (Text),
     date        :: Maybe (String),
     exifObject    :: Object
-}
+} deriving Show
 
 instance FromJSON ExifData where
     parseJSON = withObject "ExifData" $ \o -> do
@@ -39,7 +41,7 @@ instance FromJSON ExifData where
         width       <- o .:  "File:ImageWidth"
         height      <- o .:  "File:ImageHeight"
         author      <- o .:? "EXIF:Artist"
-        caption     <- o .:? "EXIF:ImageDescription"
+        caption     <- o .:? "EXIF:Artist"
         date        <- o .:? "EXIF:CreateDate"
 
         return ExifData {..}
@@ -47,8 +49,13 @@ instance FromJSON ExifData where
 doInstall :: SqlPersistT IO ()
 doInstall = do
     exifFile <- liftIO $ readFile "exif.json"
-    let exif = fromMaybe [] $ decode exifFile :: [ExifData]
-    _ <- sequence $ map persistData exif
+    let eresult = eitherDecode exifFile :: Either String [Value]
+    case eresult of
+        Left err -> liftIO $ putStrLn $ pack err
+        Right objects -> do 
+            let exif = map (parseMaybe parseJSON) objects :: [Maybe ExifData]
+            _ <- sequence $ map persistData (catMaybes exif)
+            return ()
     return ()
 
     where
