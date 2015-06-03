@@ -27,7 +27,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
-import Network.Wai.Middleware.Cors          (cors, CorsResourcePolicy (..), simpleMethods)
+import Network.Wai.Middleware.Cors          (cors, CorsResourcePolicy (..))
 import qualified Data.List                   as L (elem)
 
 -- Import all relevant handler modules here.
@@ -75,10 +75,11 @@ makeFoundation appSettings args = do
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
-    -- Performs installation
-    case (L.elem "install" args) of
-        True  -> runSqlPool doInstall pool
-        False -> return ()
+    runSqlPool doInstall pool
+    -- -- Performs installation
+    -- case (L.elem "install" args) of
+    --     True  -> runSqlPool doInstall pool
+    --     False -> return ()
 
     -- Return the foundation
     return $ mkFoundation pool
@@ -126,7 +127,7 @@ getApplicationDev = do
     app <- makeApplication foundation
     let corsResourcePolicy = CorsResourcePolicy
             { corsOrigins = Nothing
-            , corsMethods = simpleMethods
+            , corsMethods = [ "GET", "HEAD", "POST", "PATCH" ]
             , corsRequestHeaders = ["Accept", "Authorization", "Content-Type"]
             , corsExposedHeaders = Nothing
             , corsMaxAge = Nothing

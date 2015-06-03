@@ -92,7 +92,18 @@ doInstall = do
                     let thumb  = Just $ unpack $ T.replace "static/src" "static/thumb" (src e)
                         exifData = toStrict $ decodeUtf8 $ encode (exifObject e)
                         datetime = flip fmap (date e) $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
-                        photo = Photo (name e) (unpack $ src e) thumb (width e) (height e) exifData 0 aid datetime Nothing
+                        photo = Photo 
+                            (name e)
+                            (unpack $ src e) 
+                            thumb (width e) 
+                            (height e) 
+                            exifData 
+                            0 
+                            aid 
+                            datetime 
+                            Nothing
+                            False
+
                     epid <- insertBy photo
                     let pid = either entityKey id epid
                     _ <- maybe (return Nothing) (persistTranslation PhotoType (fromSqlKey pid) "caption") (caption exif)

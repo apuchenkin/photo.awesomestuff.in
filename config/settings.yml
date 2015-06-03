@@ -22,7 +22,7 @@ database:
   password: "_env:MYSQL_PASSWORD:r00t"
   host:     "_env:MYSQL_HOST:localhost"
   port:     "_env:MYSQL_PORT:5432"
-  database: "_env:MYSQL_DATABASE:aws-photo-service"
+  database: "_env:MYSQL_DATABASE:aws-photo"
   poolsize: "_env:MYSQL_POOLSIZE:10"
 
 secret:     "secret"
