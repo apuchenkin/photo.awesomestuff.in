@@ -5,6 +5,7 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Yesod.Core.Types     (Logger)
 import Data.ByteString.Base64   (decodeLenient)
 import Data.Word8               (_space, _colon)
+import qualified Yesod.Auth.Message as Msg
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Network.Wai.Internal  as W (requestHeaders)
 import qualified Data.ByteString as B
@@ -54,7 +55,12 @@ instance Yesod App where
     isAuthorized FaviconR _ = return Authorized
     isAuthorized RobotsR _ = return Authorized
     -- Default to Authorized for now.
-    isAuthorized _ _ = return Authorized
+    isAuthorized _ False = return Authorized
+    isAuthorized _ _ = do
+        mu <- maybeAuthId
+        return $ case mu of
+            Nothing -> AuthenticationRequired
+            Just _ -> Authorized
 
     -- What messages should be logged. The following includes all messages when
     -- in development, and warnings and errors in production.
@@ -78,16 +84,12 @@ instance YesodPersistRunner App where
 instance YesodAuth App where
     type AuthId App = UserId
 
-    getAuthId creds = runDB $ do
-        x <- getBy $ UniqueUser $ credsIdent creds
-        case x of
-            Just (Entity uid _) -> return $ Just uid
-            Nothing -> Just <$> insert User
-                { userEmail = credsIdent creds
-                , userPassword = Nothing
-                }
-
     authPlugins _ = []
+
+    authenticate creds = runDB $ do
+        muid <- getBy $ UniqueUser $ credsIdent creds
+        -- todo: check pwd
+        return $ maybe (UserError Msg.InvalidLogin) (Authenticated . entityKey) muid
 
     maybeAuthId = do
         request <- waiRequest
@@ -97,13 +99,13 @@ instance YesodAuth App where
                 let (_, v) = B.breakByte _space header
                 let (username, password) = B.breakByte _colon $ decodeLenient v
                 case B.uncons password of
-                    Just (_, p) -> checkCreds (decodeUtf8 username) (decodeUtf8 p)
+                    Just (_, p) -> do
+                        auth <- authenticate $ Creds "" (decodeUtf8 username) [("password", (decodeUtf8 p))]
+                        return $ case auth of
+                            Authenticated auid -> Just auid
+                            _ -> Nothing
                     _ -> return Nothing
             _ -> return Nothing
-        where
-            checkCreds ident password = runDB $ do
-            user <- selectKeysList [UserEmail ==. ident, UserPassword ==. Just password] [LimitTo 1]
-            return $ listToMaybe user
 
 instance YesodAuthPersist App
 

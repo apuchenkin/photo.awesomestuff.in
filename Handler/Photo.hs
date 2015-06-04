@@ -51,17 +51,16 @@ patchPhotoR :: PhotoId -> Handler Value
 patchPhotoR photoId = do
     request <- waiRequest
     body    <- liftIO $ W.requestBody request
-    let maybeData = eitherDecodeStrict body
-    case maybeData of 
+    case (eitherDecodeStrict body) of 
         Left err -> invalidArgs [(pack err)]
         Right photoData -> do
-            liftIO $ putStrLn $ pack $ show photoData
             runDB $ update photoId (toFilter photoData)
             photo     <- runDB $ get photoId
             returnJson photo
 
 getPhotosR :: Handler Value
 getPhotosR = do
+    maid <- maybeAuthId
     maybeCategoryName <- lookupGetParam "category"
     case maybeCategoryName of
         Nothing -> do
@@ -75,9 +74,16 @@ getPhotosR = do
                     E.on $ E.just (author   ^. AuthorId)       E.==. photo  ^. PhotoAuthor
                     E.orderBy [E.asc (photo ^. PhotoDatetime)]
                     E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
+                    case maid of 
+                        Nothing -> E.where_ (photo ^. PhotoHidden E.==. E.val (False))
+                        Just _  -> return ()
+
                     return (photo, author)
 
-            returnJson $ map toCollectionPhoto photos
+            returnJson $ map (case maid of 
+                Nothing -> toCollectionPhoto
+                Just _ ->  toJSON . (\(p,a) -> p)
+                ) photos
     where
         toCollectionPhoto :: (Entity Photo, Entity Author) -> Value
         toCollectionPhoto (Entity pid Photo {..}, Entity _ author) = object [
