@@ -38,6 +38,7 @@ import Handler.Photo
 import Handler.Category
 import Handler.Translation
 import Handler.Static
+import Handler.PhotoGroup
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -75,11 +76,10 @@ makeFoundation appSettings args = do
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
-    runSqlPool doInstall pool
-    -- -- Performs installation
-    -- case (L.elem "install" args) of
-    --     True  -> runSqlPool doInstall pool
-    --     False -> return ()
+    -- Performs installation
+    case (L.elem "install" args) of
+        True  -> runSqlPool doInstall pool
+        False -> return ()
 
     -- Return the foundation
     return $ mkFoundation pool
@@ -122,7 +122,7 @@ warpSettings foundation =
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
     settings <- getAppSettings
-    foundation <- makeFoundation settings ["install"]
+    foundation <- makeFoundation settings [] --["install"]
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
     let corsResourcePolicy = CorsResourcePolicy

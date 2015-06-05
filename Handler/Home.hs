@@ -1,13 +1,13 @@
 {-# LANGUAGE FlexibleInstances #-}
+
 module Handler.Home where
 
-import           Data.Aeson           (Object, decode, eitherDecode, encode, withObject, (.:?))
+import           Data.Aeson           (Object, eitherDecode, encode, withObject, (.:?))
 import           Data.Aeson.Types     (parseMaybe)
 import qualified Data.Text            as T (replace)
 import           Data.Time.Format     (readTime)
 import           Database.Persist.Sql (fromSqlKey)
 import           Import
--- import qualified Data.ByteString.Lazy.Internal      as B (ByteString)
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -17,8 +17,7 @@ import           Import
 -- functions. You can spread them across multiple files if you are so
 -- inclined, or create a single monolithic file.
 getHomeR :: Handler Value
-getHomeR = do
-     returnJson ()
+getHomeR = returnJson ()
 
 data ExifData = ExifData {
     categories  :: [Text],
@@ -26,10 +25,10 @@ data ExifData = ExifData {
     src         :: Text,
     width       :: Int,
     height      :: Int,
-    author      :: Maybe (String),
-    caption     :: Maybe (Text),
-    date        :: Maybe (String),
-    exifObject    :: Object
+    author      :: Maybe String,
+    caption     :: Maybe Text,
+    date        :: Maybe String,
+    exifObject  :: Object
 } deriving Show
 
 instance FromJSON ExifData where
@@ -52,9 +51,9 @@ doInstall = do
     let eresult = eitherDecode exifFile :: Either String [Value]
     case eresult of
         Left err -> liftIO $ putStrLn $ pack err
-        Right objects -> do 
+        Right objects -> do
             let exif = map (parseMaybe parseJSON) objects :: [Maybe ExifData]
-            _ <- sequence $ map persistData (catMaybes exif)
+            _ <- mapM persistData (catMaybes exif)
             return ()
     return ()
 
@@ -62,9 +61,9 @@ doInstall = do
         persistData :: ExifData -> SqlPersistT IO ()
         persistData exif = do
             aid <- maybe (return Nothing) persistAuthor (author exif)
-            categories <- sequence $ map persistCategory (categories exif)
+            categories <- mapM persistCategory (categories exif)
             pid <- persistPhoto exif aid
-            _ <- sequence $ flip map categories $ \cid -> insertUnique $ PhotoCategory cid pid
+            _   <- mapM (\cid -> insertUnique $ PhotoCategory cid pid) categories
             return ()
 
             where
@@ -92,17 +91,19 @@ doInstall = do
                     let thumb  = Just $ unpack $ T.replace "static/src" "static/thumb" (src e)
                         exifData = toStrict $ decodeUtf8 $ encode (exifObject e)
                         datetime = flip fmap (date e) $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
-                        photo = Photo 
-                            (name e)
-                            (unpack $ src e) 
-                            thumb (width e) 
-                            (height e) 
-                            exifData 
-                            0 
-                            aid 
-                            datetime 
-                            Nothing
-                            False
+                        photo = Photo
+                            (name e)            -- name
+                            (unpack $ src e)    -- src
+                            thumb               -- thumb
+                            (width e)           -- width
+                            (height e)          -- height
+                            exifData            -- exif
+                            0                   -- views
+                            aid                 -- author
+                            datetime            -- datetime
+                            Nothing             -- order
+                            False               -- hidden
+                            Nothing             -- group
 
                     epid <- insertBy photo
                     let pid = either entityKey id epid

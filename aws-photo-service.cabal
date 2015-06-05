@@ -27,6 +27,7 @@ library
                      Handler.Category
                      Handler.Translation
                      Handler.Static
+                     Handler.PhotoGroup
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
