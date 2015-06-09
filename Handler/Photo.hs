@@ -48,6 +48,7 @@ getPhotoR photoId = do
     photo <- runDB $ get photoId
     let mViews = fmap (succ . photoViews) photo
     runDB $ update photoId [PhotoViews  =. fromMaybe 0 mViews]
+    cacheSeconds 86400
     returnJson photo
 
 patchPhotoR :: PhotoId -> Handler Value
@@ -82,6 +83,7 @@ getPhotosR = do
 
           return (photo, author)
 
+      cacheSeconds 86400
       returnJson $ map (case maid of
         Nothing -> toCollectionPhoto
         Just _  -> toJSON . fst

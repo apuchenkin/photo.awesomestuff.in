@@ -40,7 +40,7 @@ instance FromJSON ExifData where
         width       <- o .:  "File:ImageWidth"
         height      <- o .:  "File:ImageHeight"
         author      <- o .:? "EXIF:Artist"
-        caption     <- o .:? "EXIF:Artist"
+        caption     <- o .:? "EXIF:ImageDescription"
         date        <- o .:? "EXIF:CreateDate"
 
         return ExifData {..}
