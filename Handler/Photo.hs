@@ -98,5 +98,6 @@ getPhotosR = do
         "height"    .= photoHeight,
         "views"     .= photoViews,
         "group"     .= photoGroup,
+        "datetime"  .= photoDatetime,
         "author"    .= authorName author
       ]
