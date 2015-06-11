@@ -70,6 +70,7 @@ instance Yesod App where
             || level == LevelError
 
     makeLogger = return . appLogger
+    yesodMiddleware h = h -- do nothing on Middleware
 
 -- How to run database actions.
 instance YesodPersist App where
