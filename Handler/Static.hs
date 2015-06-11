@@ -59,12 +59,15 @@ getStaticPhotoR pid w' h' sign = do
                 cacheFile   = cachePath ++ pth ++ takeExtension (photoSrc photo)
 
             neverExpires
-            isCached    <- liftIO $ doesFileExist cacheFile
-            if isCached
+            if h'' > h || w'' > w
+              then sendFile typeJpeg $ photoSrc photo
+              else do
+              isCached    <- liftIO $ doesFileExist cacheFile
+              if isCached
                 then sendFile typeJpeg cacheFile
                 else do
-                    liftIO $ openCVresize (photoSrc photo) cacheFile w'' h''
-                    sendFile typeJpeg cacheFile
+                  liftIO $ openCVresize (photoSrc photo) cacheFile w'' h''
+                  sendFile typeJpeg cacheFile
 
 getStaticImageR :: String -> Int -> Int -> String -> Handler TypedContent
 getStaticImageR encpath w' h' s = processPhoto (B64.decodeLenient $ fromString encpath)
