@@ -9,6 +9,8 @@ import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import qualified Network.Wai             as W
 import           Data.Aeson              (eitherDecodeStrict, withObject, (.:?))
+import qualified Data.HashMap.Strict     as H
+import           Database.Persist.Sql    (fromSqlKey)
 
 data FieldValue e = forall typ. PersistField typ => FieldValue { unField :: EntityField e typ, unValue :: typ}
 
@@ -45,11 +47,28 @@ toFilter photoData = map buildFilter $ photoDataReader photoData where
 
 getPhotoR :: PhotoId -> Handler Value
 getPhotoR photoId = do
-    photo <- runDB $ get photoId
+    cacheSeconds 86400
+    langs   <- languages
+    photo   <- runDB $ get photoId
+    ma      <- case join $ photoAuthor <$> photo of
+      Nothing   -> return Nothing
+      Just aid  -> runDB $ get aid
+
+    mt      <- runDB $ getBy $ UniqueTranslation
+      (pickLanguadge langs)
+      PhotoType
+      (fromSqlKey photoId)
+      "caption"
+
     let mViews = fmap (succ . photoViews) photo
     runDB $ update photoId [PhotoViews  =. fromMaybe 0 mViews]
-    cacheSeconds 86400
-    returnJson photo
+    let (Object r) = toJSON photo
+        (Object e) = object [
+            "caption" .= fmap (translationValue . entityVal) mt,
+            "author"  .= ma
+          ]
+
+    return $ Object $ H.union e r
 
 patchPhotoR :: PhotoId -> Handler Value
 patchPhotoR photoId = do
@@ -64,6 +83,7 @@ patchPhotoR photoId = do
 
 getPhotosR :: Handler Value
 getPhotosR = do
+  cacheSeconds 86400
   maid <- maybeAuthId
   maybeCategoryName <- lookupGetParam "category"
   case maybeCategoryName of
@@ -71,26 +91,26 @@ getPhotosR = do
     Just categoryName -> do
       photos <- runDB
        $ E.select
-       $ E.from $ \(author `E.InnerJoin` photo `E.InnerJoin` pc `E.InnerJoin` category ) -> do
-          E.on $ category ^. CategoryId              E.==. pc     ^. PhotoCategoryCategory
-          E.on $ photo    ^. PhotoId                 E.==. pc     ^. PhotoCategoryPhoto
-          E.on $ E.just (author   ^. AuthorId)       E.==. photo  ^. PhotoAuthor
+       $ E.from $ \(  photo
+       `E.InnerJoin`  pc
+       `E.InnerJoin`  category ) -> do
+          E.on $ category ^. CategoryId   E.==. pc     ^. PhotoCategoryCategory
+          E.on $ photo    ^. PhotoId      E.==. pc     ^. PhotoCategoryPhoto
           E.orderBy [E.asc (photo ^. PhotoDatetime)]
           E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
           case maid of
             Nothing -> E.where_ (photo ^. PhotoHidden E.==. E.val False)
             Just _  -> return ()
 
-          return (photo, author)
+          return photo
 
-      cacheSeconds 86400
       returnJson $ map (case maid of
         Nothing -> toCollectionPhoto
-        Just _  -> toJSON . fst
+        Just _  -> toJSON
         ) photos
   where
-    toCollectionPhoto :: (Entity Photo, Entity Author) -> Value
-    toCollectionPhoto (Entity pid Photo {..}, Entity _ author) = object [
+    toCollectionPhoto :: Entity Photo -> Value
+    toCollectionPhoto (Entity pid Photo {..}) = object [
         "id"        .= pid,
         "src"       .= photoSrc,
         "thumb"     .= photoThumb,
@@ -98,6 +118,5 @@ getPhotosR = do
         "height"    .= photoHeight,
         "views"     .= photoViews,
         "group"     .= photoGroup,
-        "datetime"  .= photoDatetime,
-        "author"    .= authorName author
+        "datetime"  .= photoDatetime
       ]
