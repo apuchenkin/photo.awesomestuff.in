@@ -54,6 +54,7 @@ getStaticPhotoR pid w' h' sign = do
   where
     processPhoto :: String -> Photo -> Handler TypedContent
     processPhoto cachePath photo = do
+      addHeader "Content-Disposition" $ "inline; filename=\"" ++ pack (photoName photo) ++ "\""
       let (w, h)      = (photoWidth photo, photoHeight photo)
           (h'', w'')  = remap h w h' w'
           pth         = show (fromSqlKey pid) ++ "-" ++ show w'' ++ "x" ++ show h''
