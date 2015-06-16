@@ -9,7 +9,7 @@ import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import qualified Network.Wai             as W
 import           Data.Aeson              (eitherDecodeStrict, withObject, (.:?))
-import qualified Data.HashMap.Strict     as H
+import qualified Data.HashMap.Strict     as H (union)
 import           Database.Persist.Sql    (fromSqlKey)
 
 data FieldValue e = forall typ. PersistField typ => FieldValue { unField :: EntityField e typ, unValue :: typ}
@@ -48,6 +48,7 @@ toFilter photoData = map buildFilter $ photoDataReader photoData where
 getPhotoR :: PhotoId -> Handler Value
 getPhotoR photoId = do
     cacheSeconds 86400
+    addHeader "Vary" "Accept-Language"
     langs   <- languages
     photo   <- runDB $ get photoId
     ma      <- case join $ photoAuthor <$> photo of
@@ -84,6 +85,7 @@ patchPhotoR photoId = do
 getPhotosR :: Handler Value
 getPhotosR = do
   cacheSeconds 86400
+  addHeader "Vary" "Accept-Language"
   maid <- maybeAuthId
   maybeCategoryName <- lookupGetParam "category"
   case maybeCategoryName of

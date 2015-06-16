@@ -24,8 +24,9 @@ derivePersistField "Language"
 pickLanguadge :: [Text] -> Language
 pickLanguadge [] = En
 pickLanguadge (x:_)
-  | x == "ru" = Ru
-  | otherwise = En
+  | x == "ru"     = Ru
+  | x == "ru-RU"  = Ru
+  | otherwise     = En
 
 instance FromJSON Language where
     parseJSON lang = case lang of
