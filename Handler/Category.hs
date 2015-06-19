@@ -8,9 +8,10 @@ import qualified Database.Esqueleto.Internal.Sql as EIS (veryUnsafeCoerceSqlExpr
 
 getCategoryR :: Handler Value
 getCategoryR = do
-  cacheSeconds 604800
-  addHeader "Vary" "Accept-Language"
+  cacheSeconds $ 60 * 60 * 24 * 30 -- month
+  addHeader "Vary" "Accept-Language, Authorization"
   langs <- languages
+  maid  <- maybeAuthId
   result <- runDB
       $ E.select
       $ E.from $ \(category `E.LeftOuterJoin` translation) -> do
@@ -18,6 +19,9 @@ getCategoryR = do
           E.&&. (translation ?. TranslationLanguage E.==. E.val (Just (pickLanguadge langs)))
           E.&&. (translation ?. TranslationType     E.==. E.val (Just CategoryType))
           E.&&. (translation ?. TranslationField    E.==. E.val (Just "title"))
+        case maid of
+          Nothing -> E.where_ (category ^. CategoryHidden E.==. E.val False)
+          Just _  -> return ()
 
         return (category, translation ?. TranslationValue)
 

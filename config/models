@@ -15,6 +15,8 @@ User
 Category json
     name String
     parent CategoryId Maybe
+    hidden Bool
+    image String Maybe
     UniqueName name
     deriving Show
 

@@ -47,7 +47,7 @@ toFilter photoData = map buildFilter $ photoDataReader photoData where
 
 getPhotoR :: PhotoId -> Handler Value
 getPhotoR photoId = do
-    cacheSeconds 86400
+    cacheSeconds $ 24 * 60 * 60 -- day
     addHeader "Vary" "Accept-Language"
     langs   <- languages
     photo   <- runDB $ get photoId
@@ -84,8 +84,8 @@ patchPhotoR photoId = do
 
 getPhotosR :: Handler Value
 getPhotosR = do
-  cacheSeconds 86400
-  addHeader "Vary" "Accept-Language"
+  cacheSeconds $ 24 * 60 * 60 -- day
+  addHeader "Vary" "Accept-Language, Authorization"
   maid <- maybeAuthId
   maybeCategoryName <- lookupGetParam "category"
   case maybeCategoryName of
@@ -101,7 +101,9 @@ getPhotosR = do
           E.orderBy [E.asc (photo ^. PhotoDatetime)]
           E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
           case maid of
-            Nothing -> E.where_ (photo ^. PhotoHidden E.==. E.val False)
+            Nothing -> do
+              E.where_ (photo ^. PhotoHidden E.==. E.val False)
+              E.where_ (category ^. CategoryHidden E.==. E.val False)
             Just _  -> return ()
 
           return photo
