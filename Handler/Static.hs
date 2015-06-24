@@ -80,12 +80,10 @@ getStaticImageR encpath w' h' s = processPhoto (B64.decodeLenient $ fromString e
 
       let settings = appSettings app
           path    = toString bpath
-          pth     = encpath ++ "-" ++ show w' ++ "x" ++ show h'
-          digest  = hmac (fromString $ secret settings) $ fromString pth :: HMAC SHA1
-          sign = digestToHexByteString $ hmacGetDigest digest
-          cacheFile = cachePath settings ++ pth ++ takeExtension path
+          phrase  = encpath ++ "-" ++ show w' ++ "x" ++ show h'
+          cacheFile = cachePath settings ++ phrase ++ takeExtension path
 
-      _           <- unless (sign == fromString s) notFound
+      _           <- unless (checkSign phrase (secret settings) s) notFound
       isCached    <- liftIO $ doesFileExist cacheFile
 
       if isCached
