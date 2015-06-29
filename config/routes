@@ -9,9 +9,10 @@
 -- public exposed API
 /photo              PhotosR GET
 /photo/#PhotoId     PhotoR  GET PATCH
-!/photo/group 		PhotoGroupsR POST
+!/photo/group       PhotoGroupsR POST
 
 /category           CategoryR GET
+/category/#CategoryId/photo           CategoryPhotoR LINK UNLINK
 /translation        TranslationR GET
 
 -- static image server

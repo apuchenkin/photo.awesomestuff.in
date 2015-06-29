@@ -127,7 +127,7 @@ getApplicationDev = do
     app <- makeApplication foundation
     let corsResourcePolicy = CorsResourcePolicy
             { corsOrigins = Nothing
-            , corsMethods = [ "GET", "HEAD", "POST", "PATCH" ]
+            , corsMethods = [ "GET", "HEAD", "POST", "PATCH", "LINK", "UNLINK" ]
             , corsRequestHeaders = ["Accept", "Authorization", "Content-Type"]
             , corsExposedHeaders = Nothing
             , corsMaxAge = Nothing
