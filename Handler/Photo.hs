@@ -7,8 +7,7 @@ module Handler.Photo where
 import Import
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
-import qualified Network.Wai             as W
-import           Data.Aeson              (eitherDecodeStrict, withObject, (.:?))
+import           Data.Aeson              (withObject, (.:?))
 import qualified Data.HashMap.Strict     as H (union)
 import           Database.Persist.Sql    (fromSqlKey)
 
@@ -18,7 +17,7 @@ data PhotoData = PhotoData {
     name    :: Maybe Text,
     order   :: Maybe Int,
     hidden  :: Maybe Bool,
-    group   :: Maybe Int
+    group   :: Maybe (Maybe Int)
 } deriving Show
 
 instance FromJSON PhotoData where
@@ -35,7 +34,7 @@ photoDataReader PhotoData {..} = catMaybes [
     FieldValue PhotoName  . unpack <$> name,
     FieldValue PhotoOrder . Just   <$> order,
     FieldValue PhotoHidden         <$> hidden,
-    FieldValue PhotoGroup . Just   <$> group
+    FieldValue PhotoGroup          <$> group
   ];
 
 toFilter :: PhotoData -> [Update Photo]
@@ -73,14 +72,9 @@ getPhotoR photoId = do
 
 patchPhotoR :: PhotoId -> Handler Value
 patchPhotoR photoId = do
-    request <- waiRequest
-    body    <- liftIO $ W.requestBody request
-    case eitherDecodeStrict body of
-        Left  err -> invalidArgs [pack err]
-        Right photoData -> do
-            runDB $ update photoId (toFilter photoData)
-            photo     <- runDB $ get photoId
-            returnJson photo
+  photoData <- getRequestBody :: Handler PhotoData
+  photo     <- runDB $ updateGet photoId (toFilter photoData)
+  returnJson photo
 
 getPhotosR :: Handler Value
 getPhotosR = do
@@ -117,7 +111,6 @@ getPhotosR = do
     toCollectionPhoto (Entity pid Photo {..}) = object [
         "id"        .= pid,
         "src"       .= photoSrc,
-        "thumb"     .= photoThumb,
         "width"     .= photoWidth,
         "height"    .= photoHeight,
         "views"     .= photoViews,

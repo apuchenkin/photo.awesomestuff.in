@@ -10,6 +10,7 @@
 /photo              PhotosR GET
 /photo/#PhotoId     PhotoR  GET PATCH
 !/photo/group       PhotoGroupsR POST
+/photo/group/#Int   PhotoGroupR LINK UNLINK
 
 /category           CategoryR GET
 /category/#CategoryId/photo           CategoryPhotoR LINK UNLINK

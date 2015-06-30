@@ -1,11 +1,9 @@
 module Handler.Category where
 
 import Import
-import qualified Network.Wai             as W
 import qualified Data.HashMap.Strict     as H (union)
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.), (?.))
-import           Data.Aeson              (eitherDecodeStrict)
 import qualified Database.Esqueleto.Internal.Sql as EIS (veryUnsafeCoerceSqlExprValue)
 
 getCategoryR :: Handler Value
@@ -41,22 +39,12 @@ getCategoryR = do
 
 linkCategoryPhotoR :: CategoryId -> Handler Value
 linkCategoryPhotoR cid = do
-  request <- waiRequest
-  body    <- liftIO $ W.requestBody request
-  let epid = eitherDecodeStrict body :: Either String [PhotoId]
-  case epid of
-    Left err    -> invalidArgs [pack err]
-    Right pids  -> do
-      pcid <- runDB $ mapM (insertUnique . PhotoCategory cid) pids
-      returnJson pcid
+  pids <- getRequestBody :: Handler [PhotoId]
+  pcid <- runDB $ mapM (insertUnique . PhotoCategory cid) pids
+  returnJson pcid
 
 unlinkCategoryPhotoR :: CategoryId -> Handler Value
 unlinkCategoryPhotoR cid = do
-  request <- waiRequest
-  body    <- liftIO $ W.requestBody request
-  let epid = eitherDecodeStrict body :: Either String [PhotoId]
-  case epid of
-    Left err    -> invalidArgs [pack err]
-    Right pids  -> do
-      pcid <- runDB $ mapM (deleteBy . UniquePhotoCategory cid) pids
-      returnJson pcid
+  pids <- getRequestBody :: Handler [PhotoId]
+  pcid <- runDB $ mapM (deleteBy . UniquePhotoCategory cid) pids
+  returnJson pcid

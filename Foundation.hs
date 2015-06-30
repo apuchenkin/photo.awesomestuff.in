@@ -1,14 +1,15 @@
 module Foundation where
 
 import Import.NoFoundation
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Yesod.Core.Types     (Logger)
-import Data.ByteString.Base64   (decodeLenient)
-import Data.Word8               (_space, _colon)
-import qualified Yesod.Auth.Message as Msg
-import qualified Yesod.Core.Unsafe as Unsafe
-import qualified Network.Wai.Internal  as W (requestHeaders)
-import qualified Data.ByteString as B
+import Database.Persist.Sql             (ConnectionPool, runSqlPool)
+import Yesod.Core.Types                 (Logger)
+import Data.ByteString.Base64           (decodeLenient)
+import Data.Word8                       (_space, _colon)
+import Data.Aeson                       (eitherDecodeStrict)
+import qualified Yesod.Auth.Message     as Msg
+import qualified Yesod.Core.Unsafe      as Unsafe
+import qualified Network.Wai.Internal   as W (requestHeaders, requestBody)
+import qualified Data.ByteString        as B
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -125,3 +126,12 @@ unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
 -- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
 -- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
+
+getRequestBody :: FromJSON a => Handler a
+getRequestBody = do
+  request <- waiRequest
+  body    <- liftIO $ W.requestBody request
+  let result = eitherDecodeStrict body
+  case result of
+    Left  err     -> invalidArgs [pack err]
+    Right value   -> return value
