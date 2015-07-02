@@ -62,7 +62,7 @@ getPhotoR photoId = do
 
     let mViews = fmap (succ . photoViews) photo
     runDB $ update photoId [PhotoViews  =. fromMaybe 0 mViews]
-    let (Object r) = toJSON photo
+    let (Object r) = toJSON $ Entity photoId <$> photo
         (Object e) = object [
             "caption" .= fmap (translationValue . entityVal) mt,
             "author"  .= ma
