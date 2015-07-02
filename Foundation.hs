@@ -10,6 +10,7 @@ import qualified Yesod.Auth.Message     as Msg
 import qualified Yesod.Core.Unsafe      as Unsafe
 import qualified Network.Wai.Internal   as W (requestHeaders, requestBody)
 import qualified Data.ByteString        as B
+import qualified Crypto.Hash            as C (hash, SHA256, Digest, digestToHexByteString)
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -36,7 +37,7 @@ instance HasHttpManager App where
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
 -- | A convenient synonym for creating forms.
-type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
+-- type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
@@ -90,8 +91,13 @@ instance YesodAuth App where
 
     authenticate creds = runDB $ do
         muid <- getBy $ UniqueUser $ credsIdent creds
-        -- todo: check pwd
-        return $ maybe (UserError Msg.InvalidLogin) (Authenticated . entityKey) muid
+        case muid of
+          Nothing -> return $ UserError Msg.InvalidLogin
+          Just uid -> do
+            let p = lookup "password" $ credsExtra creds
+            return $ case p == userPassword (entityVal uid) of
+              False -> UserError Msg.InvalidLogin
+              True  -> Authenticated $ entityKey uid
 
     maybeAuthId = do
         request <- waiRequest
@@ -102,7 +108,8 @@ instance YesodAuth App where
                 let (username, password) = B.breakByte _colon $ decodeLenient v
                 case B.uncons password of
                     Just (_, p) -> do
-                        auth <- authenticate $ Creds "" (decodeUtf8 username) [("password", (decodeUtf8 p))]
+                        let hash = C.hash p :: C.Digest C.SHA256
+                        auth <- authenticate $ Creds "" (decodeUtf8 username) [("password", decodeUtf8 $ C.digestToHexByteString hash)]
                         return $ case auth of
                             Authenticated auid -> Just auid
                             _ -> Nothing
