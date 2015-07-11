@@ -72,7 +72,9 @@ instance Yesod App where
             || level == LevelError
 
     makeLogger = return . appLogger
-    yesodMiddleware h = h -- do nothing on Middleware
+    yesodMiddleware handler = do
+        authorizationCheck
+        handler
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -87,7 +89,10 @@ instance YesodPersistRunner App where
 instance YesodAuth App where
     type AuthId App = UserId
 
-    authPlugins _ = []
+    authPlugins _   = []
+    loginDest _     = HomeR
+    logoutDest _    = HomeR
+    authHttpManager = error "authHttpManager"
 
     authenticate creds = runDB $ do
         muid <- getBy $ UniqueUser $ credsIdent creds

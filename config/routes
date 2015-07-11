@@ -14,7 +14,7 @@
 
 /category           CategoryR GET
 /category/#CategoryId/photo           CategoryPhotoR LINK UNLINK
-/translation        TranslationR GET
+-- /translation        TranslationR GET
 
 -- static image server
 /hs/image/#String/#Int/#Int/#String         StaticImageR  GET

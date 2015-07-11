@@ -49,19 +49,21 @@ getPhotoR photoId = do
     cacheSeconds $ 24 * 60 * 60 -- day
     addHeader "Vary" "Accept-Language"
     langs   <- languages
-    mphoto   <- runDB $ get photoId
+    maid    <- maybeAuthId
+    mphoto  <- runDB $ get photoId
     case mphoto of
       Nothing -> notFound
       Just photo -> do
-        ma      <- maybe (return Nothing) (runDB . get) (photoAuthor photo)
-        mt      <- runDB $ getBy $ UniqueTranslation
+        _   <- when (photoHidden photo && isNothing maid) notFound
+        ma  <- maybe (return Nothing) (runDB . get) (photoAuthor photo)
+        mt  <- runDB $ getBy $ UniqueTranslation
           (pickLanguadge langs)
           PhotoType
           (fromSqlKey photoId)
           "caption"
 
         runDB $ update photoId [PhotoViews  =. succ (photoViews photo)]
-        let (Object r) = toJSON $ Entity photoId  photo
+        let (Object r) = toJSON $ Entity photoId photo
             (Object e) = object [
                 "caption" .= fmap (translationValue . entityVal) mt,
                 "author"  .= ma

@@ -44,16 +44,22 @@ openCVresize src dest w h = do
 getStaticPhotoR :: PhotoId -> Int -> Int -> String -> Handler TypedContent
 getStaticPhotoR pid w' h' sign = do
   neverExpires
-  app <- getYesod
-  let settings = appSettings app
-      phrase   = show (fromSqlKey pid) ++ "-" ++ show w' ++ "x" ++ show h'
+  settings <- getSettings
   _ <- unless (checkSign phrase (secret settings) sign) notFound
-
   mphoto <- runDB $ get pid
-  case mphoto of {Nothing -> notFound; Just photo -> processPhoto (cachePath settings) photo}
+  case mphoto of
+    Nothing     -> notFound
+    Just photo  -> processPhoto (cachePath settings) photo
   where
+    phrase   = show (fromSqlKey pid) ++ "-" ++ show w' ++ "x" ++ show h'
+    getSettings :: Handler AppSettings
+    getSettings = liftM appSettings getYesod
+
     processPhoto :: String -> Photo -> Handler TypedContent
     processPhoto cachePath photo = do
+      maid  <- maybeAuthId
+      _     <- when (photoHidden photo && isNothing maid) notFound
+
       addHeader "Content-Disposition" $ "inline; filename=\"" ++ pack (photoName photo) ++ "\""
       let (w, h)      = (photoWidth photo, photoHeight photo)
           (h'', w'')  = remap h w h' w'
@@ -78,11 +84,13 @@ getStaticImageR encpath w' h' s = processPhoto (B64.decodeLenient $ fromString e
       neverExpires
       app <- getYesod
 
-      let settings = appSettings app
-          path    = toString bpath
-          phrase  = encpath ++ "-" ++ show w' ++ "x" ++ show h'
+      let settings  = appSettings app
+          path      = toString bpath
+          phrase    = encpath ++ "-" ++ show w' ++ "x" ++ show h'
           cacheFile = cachePath settings ++ phrase ++ takeExtension path
 
+      _           <- when (".." `isInfixOf` path) notFound
+      _           <- unless ("static" `isPrefixOf` path) notFound
       _           <- unless (checkSign phrase (secret settings) s) notFound
       isCached    <- liftIO $ doesFileExist cacheFile
 
