@@ -1,5 +1,5 @@
 name:              aws-photo-service
-version:           1.2.2
+version:           1.2.3
 cabal-version:     >= 1.8
 build-type:        Simple
 
@@ -25,9 +25,9 @@ library
                      Handler.Home
                      Handler.Photo
                      Handler.Category
-                     Handler.Translation
                      Handler.Static
                      Handler.PhotoGroup
+                     Handler.Author
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

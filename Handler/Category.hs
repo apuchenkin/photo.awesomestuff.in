@@ -5,14 +5,15 @@ import qualified Data.HashMap.Strict     as H (union)
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.), (?.))
 import qualified Database.Esqueleto.Internal.Sql as EIS (veryUnsafeCoerceSqlExprValue)
+import qualified Handler.Photo           as Photo
 
 getCategoryR :: Handler Value
 getCategoryR = do
   cacheSeconds $ 60 * 60 * 24 * 30 -- month
   addHeader "Vary" "Accept-Language, Authorization"
-  langs <- languages
-  maid  <- maybeAuthId
-  result <- runDB
+  langs   <- languages
+  maid    <- maybeAuthId
+  result  <- runDB
       $ E.select
       $ E.from $ \(category `E.LeftOuterJoin` translation) -> do
         E.on   $ (category ^. CategoryId E.==. unsafeInt64ToKey (translation ?. TranslationRefId))
@@ -36,6 +37,25 @@ getCategoryR = do
       (Object e) = object [
           "title" .= E.unValue title
         ]
+
+getCategoryPhotoR :: CategoryId -> Handler Value
+getCategoryPhotoR cid = do
+  cacheSeconds $ 24 * 60 * 60 -- day
+  addHeader "Vary" "Accept-Language, Authorization"
+  mcategory <-  runDB $ get cid
+  category  <- maybe notFound return mcategory
+  maid      <- maybeAuthId
+  request   <- getRequest
+  when (categoryHidden category && isNothing maid) notFound
+
+  let f = Photo.parseFilter request
+      filterLens x = x { Photo.filterCategory = Just $ categoryName category }
+      photoFilter = filterLens f
+
+  photos  <- Photo.listPhotos photoFilter maid
+  returnJson $ flip map photos $ case maid of
+      Nothing -> Photo.toCollectionPhoto
+      Just _  -> toJSON
 
 linkCategoryPhotoR :: CategoryId -> Handler Value
 linkCategoryPhotoR cid = do

@@ -7,15 +7,17 @@
 / HomeR GET
 
 -- public exposed API
-/photo              PhotosR GET
+
 /photo/#PhotoId     PhotoR  GET PATCH
 !/photo/group       PhotoGroupsR POST
 /photo/group/#Int   PhotoGroupR LINK UNLINK
 
-/category           CategoryR GET
-/category/#CategoryId/photo           CategoryPhotoR LINK UNLINK
--- /translation        TranslationR GET
+/category                                   CategoryR GET
+/category/#CategoryId/photo                 CategoryPhotoR GET LINK UNLINK
+
+/author/#AuthorId/photo                     AuthorPhotoR GET
 
 -- static image server
 /hs/image/#String/#Int/#Int/#String         StaticImageR  GET
 /hs/photo/#PhotoId/#Int/#Int/#String        StaticPhotoR  GET
+

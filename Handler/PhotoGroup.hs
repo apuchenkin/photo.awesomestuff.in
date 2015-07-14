@@ -5,7 +5,6 @@ import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import           Data.List               as L (head)
 
-
 postPhotoGroupsR :: Handler Value
 postPhotoGroupsR = do
   pids    <- getRequestBody :: Handler [PhotoId]
