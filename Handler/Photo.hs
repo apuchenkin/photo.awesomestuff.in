@@ -10,6 +10,8 @@ import           Database.Esqueleto      ((^.))
 import           Data.Aeson              (withObject, (.:?))
 import qualified Data.HashMap.Strict     as H (union)
 import           Database.Persist.Sql    (fromSqlKey)
+import           Data.Text.Read          (decimal)
+import           Data.Either.Combinators (rightToMaybe)
 
 data FieldValue e = forall typ. PersistField typ => FieldValue { unField :: EntityField e typ, unValue :: typ}
 
@@ -83,6 +85,15 @@ getPhotosR = do
   addHeader "Vary" "Accept-Language, Authorization"
   maid <- maybeAuthId
   maybeCategoryName <- lookupGetParam "category"
+  maybeHidden       <- lookupGetParam "hidden"
+  maybeAuthor       <- lookupGetParam "author"
+
+  let mh = case maybeHidden of
+            Nothing -> Nothing
+            Just "true" -> Just True
+            Just _ -> Just False
+
+  let ma = fst <$> join ((rightToMaybe . decimal) <$> maybeAuthor)
   case maybeCategoryName of
     Nothing -> returnJson ()
     Just categoryName -> do
@@ -94,12 +105,14 @@ getPhotosR = do
           E.on $ category ^. CategoryId   E.==. pc     ^. PhotoCategoryCategory
           E.on $ photo    ^. PhotoId      E.==. pc     ^. PhotoCategoryPhoto
           E.orderBy [E.asc (photo ^. PhotoDatetime)]
-          E.where_ (category ^. CategoryName E.==. E.val (unpack categoryName))
+          E.where_ $ category ^. CategoryName E.==. E.val (unpack categoryName)
+          when (isJust maybeAuthor) $ E.where_ (photo ^. PhotoAuthor E.==. E.val (E.toSqlKey <$> ma))
           case maid of
             Nothing -> do
               E.where_ (photo ^. PhotoHidden E.==. E.val False)
               E.where_ (category ^. CategoryHidden E.==. E.val False)
-            Just _  -> return ()
+            Just _  -> do
+              maybe (return ()) (\hidden -> E.where_ $ photo ^. PhotoHidden E.==. E.val hidden) mh
 
           return photo
 

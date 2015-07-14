@@ -57,9 +57,6 @@ getStaticPhotoR pid w' h' sign = do
 
     processPhoto :: String -> Photo -> Handler TypedContent
     processPhoto cachePath photo = do
-      maid  <- maybeAuthId
-      _     <- when (photoHidden photo && isNothing maid) notFound
-
       addHeader "Content-Disposition" $ "inline; filename=\"" ++ pack (photoName photo) ++ "\""
       let (w, h)      = (photoWidth photo, photoHeight photo)
           (h'', w'')  = remap h w h' w'

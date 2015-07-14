@@ -95,6 +95,7 @@ library
                  , byteable
                  , wai
                  , word8
+                 , either
 
 executable         aws-photo-service
     if flag(library-only)
