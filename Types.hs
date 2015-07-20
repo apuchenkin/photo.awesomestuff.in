@@ -2,6 +2,17 @@
 module Types where
 
 import ClassyPrelude.Yesod
+import Text.Read              (reads)
+
+instance ToJSON Day where
+    toJSON = toJSON . show
+
+instance FromJSON Day where
+    parseJSON x = do
+        s <- parseJSON x
+        case reads s of
+            (d, _):_ -> return d
+            [] -> mzero
 
 data TranslationType = CategoryType | PhotoType
     deriving (Show, Read, Eq)

@@ -12,6 +12,7 @@ import qualified Data.HashMap.Strict     as H (union)
 import           Database.Persist.Sql    (fromSqlKey)
 import           Data.Text.Read          (decimal)
 import           Data.Either.Combinators (rightToMaybe)
+import qualified Database.Esqueleto.Internal.Sql as EIS (veryUnsafeCoerceSqlExprValue)
 
 data FieldValue e = forall typ. PersistField typ => FieldValue { unField :: EntityField e typ, unValue :: typ}
 
@@ -68,14 +69,39 @@ getPhotoR photoId = do
       (fromSqlKey photoId)
       "caption"
 
+    pc      <- runDB
+      $ E.select
+      $ E.from $ \(  pc
+      `E.InnerJoin`  category
+      `E.InnerJoin`  translation
+       ) -> do
+        E.on $ (category ^. CategoryId E.==. unsafeInt64ToKey (translation ^. TranslationRefId))
+          E.&&. (translation ^. TranslationLanguage E.==. E.val (pickLanguadge langs))
+          E.&&. (translation ^. TranslationType     E.==. E.val CategoryType)
+          E.&&. (translation ^. TranslationField    E.==. E.val "title")
+        E.on $ category ^. CategoryId E.==. pc     ^. PhotoCategoryCategory
+        E.where_  $ pc ^. PhotoCategoryPhoto E.==. E.val photoId
+
+        return (category, translation ^. TranslationValue)
+
     runDB $ update photoId [PhotoViews  =. succ (photoViews photo)]
     let (Object r) = toJSON $ Entity photoId photo
         (Object e) = object [
-            "caption" .= fmap (translationValue . entityVal) mt,
-            "author"  .= ma
+            "caption"     .= fmap (translationValue . entityVal) mt,
+            "categories"  .= fmap parseCategory pc,
+            "author"      .= ma
           ]
 
     return $ Object $ H.union e r
+  where
+  unsafeInt64ToKey :: E.SqlExpr (E.Value Int64) -> E.SqlExpr (E.Value (Key Category))
+  unsafeInt64ToKey = EIS.veryUnsafeCoerceSqlExprValue
+  parseCategory :: (Entity Category, E.Value Text) -> Value
+  parseCategory (Entity cid category, title) = object [
+      "id"    .= cid,
+      "name"  .= categoryName category,
+      "title" .= E.unValue title
+    ]
 
 patchPhotoR :: PhotoId -> Handler Value
 patchPhotoR photoId = do

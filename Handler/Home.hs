@@ -80,7 +80,7 @@ doInstall = do
                 persistCategory :: Text -> SqlPersistT IO (Key Category)
                 persistCategory title = do
                     let normalizedTitle = unpack $ T.replace " " "-" (toLower title)
-                        category = Category normalizedTitle Nothing False Nothing
+                        category = Category normalizedTitle Nothing False Nothing Nothing
                     ecid <- insertBy category
                     let cid = either entityKey id ecid
                     _ <- persistTranslation CategoryType (fromSqlKey cid) "title" title

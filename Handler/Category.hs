@@ -20,6 +20,8 @@ getCategoryR = do
           E.&&. (translation ?. TranslationLanguage E.==. E.val (Just (pickLanguadge langs)))
           E.&&. (translation ?. TranslationType     E.==. E.val (Just CategoryType))
           E.&&. (translation ?. TranslationField    E.==. E.val (Just "title"))
+        E.orderBy [E.desc (category ^. CategoryDate)]
+
         case maid of
           Nothing -> E.where_ (category ^. CategoryHidden E.==. E.val False)
           Just _  -> return ()

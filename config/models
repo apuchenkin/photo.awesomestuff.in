@@ -17,6 +17,7 @@ Category json
     parent CategoryId Maybe
     hidden Bool
     image String Maybe
+    date Day Maybe
     UniqueName name
     deriving Show
 
