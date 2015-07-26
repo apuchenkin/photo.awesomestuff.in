@@ -3,6 +3,9 @@ module Handler.Common where
 
 import Data.FileEmbed (embedFile)
 import Import
+import qualified Data.HashMap.Strict     as H (union)
+import qualified Database.Esqueleto      as E
+import           Database.Esqueleto      ((^.))
 
 -- These handlers embed files in the executable at compile time to avoid a
 -- runtime dependency, and for efficiency.
@@ -14,3 +17,24 @@ getFaviconR = return $ TypedContent "image/x-icon"
 getRobotsR :: Handler TypedContent
 getRobotsR = return $ TypedContent typePlain
                     $ toContent $(embedFile "config/robots.txt")
+
+appendTranslations :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity record] -> TranslationType -> Handler Value
+appendTranslations list typ = do
+  langs         <- languages
+  translations  <- runDB
+      $ E.select
+      $ E.from $ \translation -> do
+        E.where_ $ translation ^. TranslationLanguage E.==. E.val (pickLanguadge langs)
+        E.where_ $ translation ^. TranslationType     E.==. E.val typ
+
+        return translation
+
+  returnJson $ map (parseResult translations) list
+  where
+  parseResult :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity Translation] -> Entity record -> Value
+  parseResult translations (Entity key entity) = Object $ H.union e c
+    where
+      (Object c) = toJSON $ Entity key entity
+      (Object e) = object [
+          "translation" .= filter (\(Entity _ t) -> translationRefId t == E.fromSqlKey key) translations
+        ]
