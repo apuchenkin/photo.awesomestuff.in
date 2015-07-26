@@ -3,7 +3,7 @@ module Handler.Common where
 
 import Data.FileEmbed (embedFile)
 import Import
-import qualified Data.HashMap.Strict     as H (union)
+import qualified Data.HashMap.Strict     as H (union, fromList)
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 
@@ -32,9 +32,9 @@ appendTranslations list typ = do
   returnJson $ map (parseResult translations) list
   where
   parseResult :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity Translation] -> Entity record -> Value
-  parseResult translations (Entity key entity) = Object $ H.union e c
+  parseResult translations (Entity key entity) = Object $ H.union e tl
     where
-      (Object c) = toJSON $ Entity key entity
-      (Object e) = object [
-          "translation" .= filter (\(Entity _ t) -> translationRefId t == E.fromSqlKey key) translations
-        ]
+      filtered = flip filter translations $ \ (Entity _ t) -> translationRefId t == E.fromSqlKey key
+      translationValues = flip map filtered $ \ (Entity _ t) -> (pack $ translationField t, toJSON $ translationValue t)
+      (Object e) = toJSON $ Entity key entity
+      tl = H.fromList translationValues
