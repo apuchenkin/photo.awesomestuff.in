@@ -42,9 +42,12 @@ mkYesodData "App" $(parseRoutesFile "config/routes")
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
-    -- Controls the base of generated URLs. For more information on modifying,
-    -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
-    approot = ApprootMaster $ appRoot . appSettings
+  -- Controls the base of generated URLs. For more information on modifying,
+  -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
+    approot = ApprootRequest $ \app req ->
+        case appRoot $ appSettings app of
+            Nothing -> getApprootText guessApproot app req
+            Just root -> root
 
     -- Sessions is disabled
     makeSessionBackend _ = return Nothing
@@ -53,11 +56,11 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     -- Routes not requiring authentication.
-    isAuthorized (AuthR _) _ = return Authorized
-    isAuthorized FaviconR _ = return Authorized
-    isAuthorized RobotsR _ = return Authorized
+    isAuthorized (AuthR _) _  = return Authorized
+    isAuthorized FaviconR _   = return Authorized
+    isAuthorized RobotsR _    = return Authorized
     -- Default to Authorized for now.
-    isAuthorized _ False = return Authorized
+    isAuthorized _ False      = return Authorized
     isAuthorized _ _ = do
         mu <- maybeAuthId
         return $ case mu of

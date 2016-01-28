@@ -8,9 +8,11 @@ config/client_session_key.aes
 .hsenv*
 .idea
 cabal-dev/
+.stack-work/
 yesod-devel/
 .cabal-sandbox
 cabal.sandbox.config
 .DS_Store
 *.swp
+*.keter
 exif.json

@@ -25,7 +25,7 @@ appendTranslations list typ = do
       $ E.select
       $ E.from $ \translation -> do
         E.where_ $ translation ^. TranslationLanguage E.==. E.val (pickLanguadge langs)
-        E.where_ $ translation ^. TranslationType     E.==. E.val typ
+        E.where_ $ translation ^. TranslationRefType     E.==. E.val typ
 
         return translation
 

@@ -1,8 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
+
 module Model where
 
-import Database.Persist.TH
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
 import Types

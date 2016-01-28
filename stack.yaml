@@ -1,0 +1,42 @@
+# For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
+
+# Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
+resolver: lts-5.0
+
+# Local packages, usually specified by relative directory name
+packages:
+- '.'
+- location:
+    git: https://github.com/acowley/HOpenCV.git
+    commit: 4c0e5d3e93ae80937fd54eb5aeaa09b709b45632
+
+# Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
+extra-deps:
+- HOpenCV-0.4.0
+
+# Override default flag values for local packages and extra-deps
+flags:
+  aws-photo-service:
+    library-only: false
+    dev: false
+
+# Extra package databases containing global packages
+extra-package-dbs: []
+
+# Control whether we use the GHC we find on the path
+# system-ghc: true
+
+# Require a specific version of stack, using version ranges
+# require-stack-version: -any # Default
+# require-stack-version: >= 1.0.0
+
+# Override the architecture used by stack, especially useful on Windows
+# arch: i386
+# arch: x86_64
+
+# Extra directories used by stack for building
+extra-include-dirs:
+- C:\opencv\build\include
+extra-lib-dirs:
+- C:\opencv\build\x64\vc10\bin
+# - C:\opencv\build\x64\vc10\lib
