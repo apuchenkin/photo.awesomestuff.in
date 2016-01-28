@@ -4,6 +4,8 @@ import RouteParser exposing (..)
 import History exposing (path, setPath)
 import Task exposing (Task)
 import Effects exposing (Never, toTask)
+import Json.Decode exposing (list, string)
+import Http
 
 -- global routing:
 
@@ -23,7 +25,11 @@ type Handler = Html
 type alias State = (Html, Effects.Effects ())
 
 homeHandler : State
-homeHandler = (div [] [text "homeHandler"], Effects.none)
+homeHandler =
+  let
+    tsk = Http.get Json.Decode.string ("http://photo.awesomestuff.in/api/v1/category")
+  in
+    (div [] [text "userHandler"], Effects.task <| Task.map (\_ -> ()) <| Task.toMaybe tsk)
 
 userHandler : State
 userHandler = (div [] [text "userHandler"], Effects.none)
@@ -45,15 +51,6 @@ type alias App =
     { response : Signal Html
     , tasks : Signal (Task.Task Never ())
     }
-
-
--- app : Signal String -> Signal Html
--- app sig =
---   let
---     messages = Signal.mailbox []
---   in
---     Signal.map router sig
--- dispatch
 
 app : App
 app =
