@@ -25,86 +25,98 @@ adminMatchers =
 
 routes = Tree (static Home "home") [Tree (static (Admin Dashboard) "admin") [], Tree (static (Admin Users) "users") []]
 
-runRouter : Signal String -> Signal Html
-runRouter path =
+type alias SignalResult state =
+    { html  : Signal Html
+    , state : Signal state
+    , tasks : Signal (Task.Task Never ())
+    }
+
+type alias Result state =
+    { html  : Html
+    , state : state
+    , effects : Effects.Effects (Task.Task Never ())
+    }
+
+runRouter : Signal String -> SignalResult (List String)
+runRouter pathSignal =
   let
-    mapPath p =
+    pathHandlers : String -> List (Handler (List String))
+    pathHandlers path =
       let
-        -- singleton : action -> List action
-        singleton action = [ action ]
+        mapSegment s (forest, acc) =
+          let
+            maybeRoute = match (List.indexedMap (\i v -> mapMatcher (\m -> (i,m)) (datum v)) forest) s
+            forest' = Maybe.withDefault [] <| Maybe.andThen maybeRoute (\m -> Maybe.map children (Array.get (fst m) (Array.fromList forest)))
+            acc' = acc ++ [Maybe.map snd maybeRoute]
+          in (forest', acc')
 
-        -- messages : Signal.Mailbox (List action)
-        messages = Signal.mailbox []
+        maybeRoutes = snd
+            <| List.foldl mapSegment ([routes], [])
+            <| List.filter (not << String.isEmpty)
+            <| String.split "/" path
 
-        -- address : Signal.Address action
-        address = Signal.forwardTo messages.address singleton
+        handlers = List.map mapHandler maybeRoutes
 
-        r = snd <| List.foldl mapSegment ([routes], []) <| List.filter (not << String.isEmpty) <| String.split "/" p
-        handlers = List.map mapHandler r
+      in handlers
 
-        updateStep action ((state, effects)) =
-            let
-                (state', effects') = toState <| action state
-            in
-                (state', Effects.batch [effects, effects'])
+    -- singleton : action -> List action
+    singleton action = [ action ]
 
-        update actions (state, _) = List.foldl updateStep (state, Effects.none) actions
+    messages : Signal.Mailbox (List (Action (List String)))
+    messages = Signal.mailbox []
 
-        sList = List.foldl (\h acc -> h.inputs ++ acc) [] handlers
-        inputs = Signal.mergeMany (messages.signal :: List.map (Signal.map singleton) sList)
+    -- address : Signal.Address action
+    address = Signal.forwardTo messages.address singleton
 
-        result = Signal.foldp update ([], Effects.none) inputs
+    updateStep action (state, effects) =
+        let
+            (state', effects') = toState <| action state
+        in
+            (state', Effects.batch [effects, effects'])
 
-        -- state = Signal.map fst result
+    update actions = List.foldl updateStep ([], Effects.none) actions
 
-      -- in List.foldr (\h mh -> Signal.map (h.view address) state) (Signal.constant Nothing) handlers
-      in div [] [text "nothing"]
+    signalHandlers = Signal.map pathHandlers pathSignal
 
-    mapSegment s (forest, acc) =
-      let
-        maybeRoute = match (List.indexedMap (\i v -> mapMatcher (\m -> (i,m)) (datum v)) forest) s
-        forest' = Maybe.withDefault [] <| Maybe.andThen maybeRoute (\m -> Maybe.map children (Array.get (fst m) (Array.fromList forest)))
-        acc' = acc ++ [Maybe.map snd maybeRoute]
-      in (forest', acc')
+    inputs = Signal.merge (Signal.map (\h -> List.foldl ((++) << .inputs) [] h) signalHandlers) messages.signal
 
-  in Signal.map mapPath path
+    views = Signal.map (List.map .view) signalHandlers
+
+    -- result = Signal.foldp update ({html = text "initial", state = [], effects = Effects.none }) inputs
+    result = Signal.map update inputs
+
+    state = Signal.map fst result
+    html  = Signal.map2 (\s vl -> List.foldr (\v parsed -> v address s) (text "initial") vl) state views
+  in
+    {
+      html  = html
+    , state = state
+    , tasks = Signal.map (Effects.toTask messages.address << snd) result
+    }
 
   -- case match matchers path of
+
 mapHandler : Maybe Route -> Handler (List String)
 mapHandler r = case r of
   Just Home               -> homeHandler
   Nothing                 -> homeHandler
   _                       -> homeHandler
 
-type alias State    = (Html, Effects ())
 
 homeHandler : Handler (List String)
 homeHandler = {
-    init = [],
-    view = (\sa s -> div [] [text "homeHandler"]),
+    init = ["1"],
+    view = (\sa s -> div [] [text <| "homeHandler: " ++ toString s]),
     inputs = [
-      Signal.constant loadCategories
+      loadCategories
     ]
   }
-  -- let
-  --   tsk = Http.get Json.Decode.string ("http://photo.awesomestuff.in/api/v1/category")
-  -- in
-  --   (div [] [text "userHandler"], Effects.task <| Task.map (\_ -> ()) <| Task.toMaybe tsk)
-
--- userHandler : State
--- userHandler = (div [] [text "userHandler"], Effects.none)
---
--- dashboardHandler : State
--- dashboardHandler = (div [] [text "dashboardHandler"], Effects.none)
---
--- errorHandler : State
--- errorHandler = (div [] [text "errorHandler"], Effects.task (setPath "404"))
 
 loadCategories : Action (List String)
 loadCategories state =
   let
     tsk = Http.get Json.Decode.string ("http://photo.awesomestuff.in/api/v1/category")
-    tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (updateCategories <| Maybe.withDefault "sup" r))
+    tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (updateCategories <| Maybe.withDefault "supgf" r))
   in DirtyState (state, Effects.task <| tsk')
 
 updateCategories : String -> Action (List String)
@@ -120,5 +132,5 @@ type alias Action state = state -> DirtyState state
 type alias Handler state =
     { init    : state
     , view    : Signal.Address (Action state) -> state -> Html
-    , inputs  : List (Signal.Signal (Action state))
+    , inputs  : List (Action state)
     }
