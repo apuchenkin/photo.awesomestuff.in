@@ -80,7 +80,11 @@ runRouter config =
     result = Signal.map update inputs
 
     state = Signal.map fst result
-    html  = Signal.map2 (\s vl -> List.foldr (\v parsed -> v address s parsed) (text "initial") vl) state views
+
+    -- renderView : (Signal.Address (Action state) -> state -> Maybe Html -> Maybe Html) -> Maybe Html -> Maybe Html
+    -- renderView view parsed = view address state parsed
+
+    html  = Signal.map2 (\state viewList -> Maybe.withDefault (text "error") <| List.foldr (\view parsed -> view address state parsed) Nothing viewList) state views
   in
     {
       html  = html
@@ -103,6 +107,6 @@ toState (DirtyState s) = s
 type alias Action state = state -> DirtyState state
 
 type alias Handler state = {
-    view    : Signal.Address (Action state) -> state -> Html -> Html
+    view    : Signal.Address (Action state) -> state -> Maybe Html -> Maybe Html
   , inputs  : List (Action state)
   }

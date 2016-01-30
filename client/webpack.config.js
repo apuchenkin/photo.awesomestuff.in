@@ -34,7 +34,14 @@ module.exports = {
   devServer: {
     inline: true,
     stats: 'errors-only',
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+            '/api/v1*': {
+                target: 'http://photo.awesomestuff.in',
+                changeOrigin: true,
+                secure: false,
+            },
+        },
   },
 
   // plugins: [

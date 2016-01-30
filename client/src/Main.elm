@@ -17,13 +17,12 @@ result = runRouter {
   inputs = []
   }
 
-
-type Route = Home | Error | Admin AdminRoute
+type Route = Home | Error | Category String | Admin AdminRoute
 type AdminRoute = Dashboard | Users
-
 
 routes : Tree (Matcher Route)
 routes = Tree (static Home "") [
+  Tree (dyn1 Category "" string "") [],
   Tree (static Error "404") [],
   Tree (static (Admin Dashboard) "admin") [],
   Tree (static (Admin Users) "users") []
@@ -33,6 +32,7 @@ mapHandler : Route -> Handler State
 mapHandler r = case r of
   Home               -> homeHandler
   Error              -> errorHandler
+  Category category  -> categoryHandler category
   Admin Dashboard    -> adminHandler
   _                  -> forwardHandler
 

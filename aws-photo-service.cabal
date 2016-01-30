@@ -35,8 +35,6 @@ library
     else
         ghc-options:   -Wall -fwarn-tabs -O2
 
-    include-dirs:	C:\\opencv\\build\\include
-    extra-lib-dirs:	C:\\opencv\\build\\x64\\vc10\\bin
     extensions: TemplateHaskell
                 QuasiQuotes
                 OverloadedStrings
