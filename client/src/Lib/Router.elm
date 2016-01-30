@@ -3,15 +3,17 @@ module Lib.Router where
 import Task
 import String
 import Array
+import Regex
 import RouteParser as R exposing (Matcher, match, mapMatcher, static)
 import Html     exposing (Html, text, div)
 import Html.Events exposing (onWithOptions)
 import Effects  exposing (Effects, Never)
 import History  exposing (path)
 import RouteParser
-import MultiwayTree as Tree exposing (..)
+import MultiwayTree as Tree exposing (Tree (..))
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
+import List.Extra as L exposing ((!!))
 
 
 -- definitions
@@ -27,10 +29,11 @@ type alias RouterState = {
     handlers: List (Handler (List String))
   }
 
-type alias RouteConfig state = {
-    url: String,
-    params: List R.Param,
-    handler: Handler state
+type alias RouteConfig state route = {
+      url:          String
+    , constructor:  List String -> route
+    , params:       List (String, String)
+    , handler:      Handler state
   }
 
 type alias RouterConfig state route = {
@@ -58,26 +61,55 @@ type alias Handler state = {
   }
 
 -- type alias HandlerMap state route = route -> Handler state
-type alias Config state route = route -> RouteConfig state
+type alias Config state route = route -> RouteConfig state route
 
 router : RouterConfig state route -> Router state route
 router config =
   let
     -- decompose Route to string
-    -- TODO: implement
+    buildUrl route =
+      let
+        cfg = config.config route
+        url = List.foldl (\p string -> Regex.replace Regex.All (Regex.regex <| "#" ++ fst p) (\_ -> snd p) string) cfg.url cfg.params
+      in url
 
-    buildUrl : route -> String
-    buildUrl r = "todo: buildUrl"
 
-    -- buildUrl' : RouteConfig state -> String
-    -- buildUrl' r = r.url
+    -- TODO: R2, R3, abstract, Optional params support
+    -- buildMatcher : route -> Matcher route
+    buildMatcher route =
+      let
+        isStatic sergment = String.startsWith "#" sergment
+        cfg = config.config route
+        url = cfg.url
+        segments  = String.split "/" url
+        segments' = List.filterMap (\s -> case isStatic s of
+            True  -> Maybe.map (\r -> (True, snd r)) <| String.uncons s
+            False -> Just (False, s)
+          ) segments
+        -- _ = Debug.log "s" <| toString segments'
+        dynCount = List.length <| List.filter fst segments'
+        -- groups = L.groupBy (\a b -> fst a == fst b) <| (False,"") :: segments' ++ [(False,"")]
+        -- segments'' = List.map (\g -> List.foldl (\(i,s) acc -> acc ++ s) "" g) groups
+        strings = Regex.split Regex.All (Regex.regex "#[^/]+") url
+        -- _ = Debug.log "test:" <| toString <|
+        segments'' = L.interweave (List.map (\s -> (False,s)) strings) (List.filter fst segments')
+        _ = Debug.log "test:" <| toString <| segments''
 
-    -- TODO: implement
-    buildMatcher : route -> Matcher route
-    buildMatcher route = static route ""
+        seg : Int -> String
+        seg idx = Maybe.withDefault "" <| Maybe.map snd <| segments'' !! idx
+
+        -- matcher : R.Matcher route
+        matcher = case dynCount of
+          0 -> static route url
+          1 -> R.dyn1 (\a -> cfg.constructor [a]) (seg 0) R.string (seg 2)
+          -- 2 ->
+          -- 3 ->
+          _ -> static route url
+      in
+        matcher
 
     -- binds forward action to existing HTML attributes
-    bindForward : route -> List Html.Attribute -> List Html.Attribute
+    -- bindForward : route -> List Html.Attribute -> List Html.Attribute
     bindForward route attrs =
       let
         options = {stopPropagation = True, preventDefault = True}
@@ -87,7 +119,7 @@ router config =
         :: href (buildUrl route)
         :: attrs
 
-    forward : route -> Action state
+    -- forward : route -> Action state
     forward route state =
       let
         tsk  = History.setPath <| buildUrl route
@@ -110,8 +142,8 @@ pathHandlers router url =
   let
     mapSegment s (forest, acc) =
       let
-        maybeRoute = match (List.indexedMap (\i v -> mapMatcher (\m -> (i,m)) (datum v)) forest) s
-        forest' = Maybe.withDefault [] <| Maybe.andThen maybeRoute (\m -> Maybe.map children (Array.get (fst m) (Array.fromList forest)))
+        maybeRoute = match (List.indexedMap (\i v -> mapMatcher (\m -> (i,m)) (Tree.datum v)) forest) s
+        forest' = Maybe.withDefault [] <| Maybe.andThen maybeRoute (\m -> Maybe.map Tree.children (Array.get (fst m) (Array.fromList forest)))
         acc' = acc ++ [Maybe.map snd maybeRoute]
       in (forest', acc')
 

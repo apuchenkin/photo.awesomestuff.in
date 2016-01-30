@@ -26,6 +26,7 @@ homeHandler router =
 categoryHandler : Router State Route -> String -> Handler State
 categoryHandler router category =
   let
+    _ = Debug.log "category:" category
     view address state parsed = Just <| div [] [text <| category]
   in
     {
@@ -33,7 +34,7 @@ categoryHandler router category =
       inputs = [
         (\state -> case List.filter (\c -> c.name == category) state of
           []         -> router.forward Route.Error state
-          [caregory] -> DirtyState (state, Effects.none)
+          [category] -> DirtyState (state, Effects.none)
           _          -> router.forward Route.Error state
         )
       ]
