@@ -1,15 +1,15 @@
 module Lib.Router where
 
-
 import Task
 import String
 import Array
+import RouteParser as R exposing (Matcher, match, mapMatcher, static)
 import Html     exposing (Html, text, div)
 import Html.Events exposing (onWithOptions)
 import Effects  exposing (Effects, Never)
 import History  exposing (path)
-import RouteParser exposing (..)
-import MultiwayTree exposing (..)
+import RouteParser
+import MultiwayTree as Tree exposing (..)
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 
@@ -27,17 +27,28 @@ type alias RouterState = {
     handlers: List (Handler (List String))
   }
 
+type alias RouteConfig state = {
+    url: String,
+    params: List R.Param,
+    handler: Handler state
+  }
+
 type alias RouterConfig state route = {
   init:       state,
-  handlerMap: HandlerMap state route,
-  routes:     Tree (Matcher route),
+  config:     Config state route,
+  routes:     Tree route,
   inputs:     List (Signal.Signal (Action state))
 }
 
-type DirtyState state = DirtyState (state, Effects (Action state))
+type alias Router state route = {
+  config        : RouterConfig state route,
+  bindForward   : route -> List Html.Attribute -> List Html.Attribute,
+  buildUrl      : route -> String,
+  buildMatcher  : route -> Matcher route,
+  forward       : route -> Action state
+}
 
-toState : DirtyState state -> (state, Effects (Action state))
-toState (DirtyState s) = s
+type DirtyState state = DirtyState (state, Effects (Action state))
 
 type alias Action state = state -> DirtyState state
 
@@ -46,13 +57,56 @@ type alias Handler state = {
   , inputs  : List (Action state)
   }
 
--- transitionTo : Maybe Route -> Route
--- transitionTo mfrom to =
+-- type alias HandlerMap state route = route -> Handler state
+type alias Config state route = route -> RouteConfig state
 
-type alias HandlerMap state route = route -> Handler state
+router : RouterConfig state route -> Router state route
+router config =
+  let
+    -- decompose Route to string
+    -- TODO: implement
 
-pathHandlers : Tree (Matcher route) -> HandlerMap state route -> String -> List (Handler state)
-pathHandlers routes rmap url =
+    buildUrl : route -> String
+    buildUrl r = "todo: buildUrl"
+
+    -- buildUrl' : RouteConfig state -> String
+    -- buildUrl' r = r.url
+
+    -- TODO: implement
+    buildMatcher : route -> Matcher route
+    buildMatcher route = static route ""
+
+    -- binds forward action to existing HTML attributes
+    bindForward : route -> List Html.Attribute -> List Html.Attribute
+    bindForward route attrs =
+      let
+        options = {stopPropagation = True, preventDefault = True}
+        action _ = Signal.message address <| forward route
+      in
+           onWithOptions "click" options Json.value action
+        :: href (buildUrl route)
+        :: attrs
+
+    forward : route -> Action state
+    forward route state =
+      let
+        tsk  = History.setPath <| buildUrl route
+        tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (\a -> DirtyState (a, Effects.none)))
+      in DirtyState (state, Effects.task <| tsk')
+  in {
+    config        = config
+  , bindForward   = bindForward
+  , buildUrl      = buildUrl
+  , buildMatcher  = buildMatcher
+  , forward       = forward
+  }
+
+
+toState : DirtyState state -> (state, Effects (Action state))
+toState (DirtyState s) = s
+
+pathHandlers : Router state route -> String -> List (Handler state)
+pathHandlers router url =
   let
     mapSegment s (forest, acc) =
       let
@@ -62,11 +116,10 @@ pathHandlers routes rmap url =
       in (forest', acc')
 
     maybeRoutes = snd
-        <| List.foldl mapSegment ([routes], [])
-        -- <| List.filter (not << String.isEmpty)
+        <| List.foldl mapSegment ([Tree.map router.buildMatcher router.config.routes], [])
         <| String.split "/" url
 
-    handlers = List.filterMap (\r -> Maybe.map rmap r) maybeRoutes
+    handlers = List.filterMap (\r -> Maybe.map (.handler << router.config.config) r) maybeRoutes
 
   in handlers
 
@@ -101,11 +154,11 @@ runHandlers initial handlers =
     result = Signal.map update inputs
   in result
 
-runRouter : RouterConfig state route -> Result state
-runRouter config =
+runRouter : Router state route -> Result state
+runRouter router =
   let
-    signalHandlers = Signal.map (pathHandlers config.routes config.handlerMap) path
-    result = runHandlers config.init signalHandlers
+    signalHandlers = Signal.map (pathHandlers router) path
+    result = runHandlers router.config.init signalHandlers
     state = Signal.map fst result
     views = Signal.map (List.map .view) signalHandlers
     html  = Signal.map2 (\state viewList -> Maybe.withDefault (text "error") <| List.foldr (\view parsed -> view address state parsed) Nothing viewList) state views
@@ -114,27 +167,4 @@ runRouter config =
       html  = html
     , state = state
     , tasks = Signal.map (Effects.toTask mailbox.address << snd) result
-
     }
-
--- binds forward action to existing HTML attributes
-bindForward : route -> List Html.Attribute -> List Html.Attribute
-bindForward route attrs =
-  let
-    options = {stopPropagation = True, preventDefault = True}
-    action _ = Signal.message address <| forward route
-  in
-       onWithOptions "click" options Json.value action
-    :: href (buildUrl route)
-    :: attrs
-
--- decompose Route to string
-buildUrl : route -> String
-buildUrl r = "todo: buildUrl"
-
-forward : route -> Action state
-forward route state =
-  let
-    tsk  = History.setPath <| buildUrl route
-    tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (\a -> DirtyState (a, Effects.none)))
-  in DirtyState (state, Effects.task <| tsk')

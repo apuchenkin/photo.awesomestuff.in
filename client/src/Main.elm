@@ -8,21 +8,45 @@ import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
 
-result : Lib.Router.Result State
-result = runRouter {
+config : Route -> RouteConfig State
+config r = case r of
+  Home               -> home
+  Error              -> error404
+  Category c         -> category c
+  _                  -> error404
+
+router : Router State Route
+router = Lib.Router.router {
   init = [],
   routes = routes,
-  handlerMap = mapHandler,
+  config = config,
   inputs = []
   }
 
-mapHandler : Route -> Handler State
-mapHandler r = case r of
-  Home               -> homeHandler
-  Error              -> errorHandler
-  Category category  -> categoryHandler category
-  Admin Dashboard    -> adminHandler
-  _                  -> forwardHandler
+result : Lib.Router.Result State
+result = runRouter router
+
+home : RouteConfig State
+home = {
+    url = "",
+    params = [],
+    handler = homeHandler router
+  }
+
+error404 : RouteConfig State
+error404 = {
+    url = "404",
+    params = [],
+    handler = homeHandler router
+  }
+
+category : String -> RouteConfig State
+category c = {
+    url = "#category",
+    -- params = [("category", c)],
+    params = [],
+    handler = categoryHandler router c
+  }
 
 main : Signal Html
 main = result.html
