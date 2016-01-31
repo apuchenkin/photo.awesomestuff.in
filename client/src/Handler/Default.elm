@@ -1,19 +1,19 @@
 module Handler.Default where
 
 import Handler.Actions exposing (..)
-import Lib.Router exposing (Router, Handler, DirtyState (..))
+import Lib.Router exposing (Router (..), Handler, Response (..))
 import Html exposing (div, text, Html, button)
 import Effects  exposing (Effects, Never)
 import Html.Attributes exposing (href)
 import Handler.Routes as Route exposing (Route)
 import Html.Events
 
-homeHandler : Router State Route -> Handler State
-homeHandler router =
+homeHandler : Router Route State -> Handler State
+homeHandler (Router router) =
   let
     home = Html.a [href "/"] [text "HOME"]
     view address state parsed = Just <| case parsed of
-      Nothing   -> div [] [home, div [] <| List.map (\c -> Html.a ((router.bindForward (Route.Category c.name)) []) [text c.title]) state]
+      Nothing   -> div [] [home, div [] <| List.map (\c -> Html.a ((router.bindForward (Route.Category c.name)) []) [text c.title]) state.categories]
       Just html -> div [] [home, html]
   in
     {
@@ -23,17 +23,17 @@ homeHandler router =
       ]
     }
 
-categoryHandler : Router State Route -> String -> Handler State
-categoryHandler router category =
+categoryHandler : Router Route State -> String -> Handler State
+categoryHandler (Router router) category =
   let
     view address state parsed = let _ = Debug.log "category" state in Just <| div [] [text <| category]
   in
     {
       view = view,
       inputs = [
-        (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state of
+        (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state.categories of
           []         -> router.forward Route.Error state
-          [category] -> DirtyState (state, Effects.none)
+          [category] -> Response (state, Effects.none)
           _          -> router.forward Route.Error state
         )
       ]
@@ -49,7 +49,7 @@ categoryHandler router category =
 --       inputs = []
 --     }
 
-errorHandler : Router State Route -> Handler State
+errorHandler : Router Route State -> Handler State
 errorHandler _ =
   let
     view address state parsed = Just <| div [] [text <| "404"]
@@ -61,8 +61,8 @@ errorHandler _ =
       ]
     }
 
-forwardHandler : Router State Route -> Handler State
-forwardHandler router =
+forwardHandler : Router Route State -> Handler State
+forwardHandler (Router router) =
   let
     view address state parsed = Nothing
   in

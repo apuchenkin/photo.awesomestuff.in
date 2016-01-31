@@ -9,16 +9,22 @@ import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
 import RouteParser as R exposing (static, dyn1)
 
-config : Route -> RouteConfig State Route
+config : Route -> RouteConfig Route State
 config r = case r of
   Home               -> home
   Error              -> error404
   Category c         -> category c
   _                  -> error404
 
-router : Router State Route
+initialState : State
+initialState = {
+    categories = [],
+    router = Lib.Router.initialState
+  }
+
+router : Router Route State
 router = Lib.Router.router {
-  init = [],
+  init = initialState,
   routes = routes,
   config = config,
   inputs = []
@@ -27,17 +33,17 @@ router = Lib.Router.router {
 result : Lib.Router.Result State
 result = runRouter router
 
-home : RouteConfig State Route
+home : RouteConfig Route State
 home = {
     url = "",
     buildUrl = "",
-    matcher = static Home "",
+    matcher = static Home "/",
     -- constructor = (\_ -> Home),
     -- params = [],
     handler = homeHandler router
   }
 
-error404 : RouteConfig State Route
+error404 : RouteConfig Route State
 error404 = {
     url = "404",
     buildUrl = "404",
@@ -45,7 +51,7 @@ error404 = {
     handler = homeHandler router
   }
 
-category : String -> RouteConfig State Route
+category : String -> RouteConfig Route State
 category c = {
     url = "#category",
     buildUrl = c,

@@ -5,8 +5,11 @@ import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
 import Lib.Router exposing (..)
+import Handler.Routes exposing (Route)
 
-type alias State = List Category
+type alias State = WithRouter Route
+  {categories: List Category}
+
 
 type alias Category = {
     id: Int,
@@ -25,7 +28,7 @@ loadCategories state =
   let
     tsk = Http.get decodeCategories ("/api/v1/category")
     tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (updateCategories <| Maybe.withDefault [] r))
-  in DirtyState (state, Effects.task <| tsk')
+  in Response (state, Effects.task <| tsk')
 
 updateCategories : List Category -> Action State
-updateCategories categories state = DirtyState (categories, Effects.none)
+updateCategories categories state = Response ({state | categories = categories}, Effects.none)
