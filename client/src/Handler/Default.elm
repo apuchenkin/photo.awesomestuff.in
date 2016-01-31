@@ -26,13 +26,12 @@ homeHandler router =
 categoryHandler : Router State Route -> String -> Handler State
 categoryHandler router category =
   let
-    _ = Debug.log "category:" category
-    view address state parsed = Just <| div [] [text <| category]
+    view address state parsed = let _ = Debug.log "category" state in Just <| div [] [text <| category]
   in
     {
       view = view,
       inputs = [
-        (\state -> case List.filter (\c -> c.name == category) state of
+        (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state of
           []         -> router.forward Route.Error state
           [category] -> DirtyState (state, Effects.none)
           _          -> router.forward Route.Error state

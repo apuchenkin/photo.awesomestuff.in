@@ -12,7 +12,7 @@ import RouteParser
 import MultiwayTree as Tree exposing (Tree (..))
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
-
+import Signal.Extra exposing (fairMerge, foldp')
 
 -- definitions
 type alias Result state =
@@ -22,8 +22,8 @@ type alias Result state =
     }
 
 type alias RouterState route = {
-    state:    Maybe route,
-    params:   List
+    route:    Maybe route,
+    params:   List String
   }
 
 type alias RouteConfig state route = {
@@ -42,6 +42,7 @@ type alias RouterConfig state route = {
 
 type alias Router state route = {
   config        : RouterConfig state route,
+  state         : RouterState route,
   bindForward   : route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : route -> String,
   buildMatcher  : route -> Matcher route,
@@ -58,6 +59,9 @@ type alias Handler state = {
   }
 
 type alias Transition state route = route -> route -> Action state
+
+initialState : RouterState route
+initialState = {route = Nothing, params = []}
 
 router : RouterConfig state route -> Router state route
 router config =
@@ -92,15 +96,12 @@ router config =
       in DirtyState (state, Effects.task <| tsk')
   in {
     config        = config
+  , state         = initialState
   , bindForward   = bindForward
   , buildUrl      = buildUrl
   , buildMatcher  = buildMatcher
   , forward       = forward
   }
-
-
-toState : DirtyState state -> (state, Effects (Action state))
-toState (DirtyState s) = s
 
 pathHandlers : Router state route -> String -> List (Handler state)
 pathHandlers router url =
@@ -129,33 +130,56 @@ mailbox = Signal.mailbox []
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
 
-runHandlers : state -> Signal (List (Handler state)) -> Signal (state, Effects (Action state))
-runHandlers initial handlers =
+runHandlers : List (Handler state) -> Action state
+runHandlers handlers =
   let
-    updateStep action (state, effects) =
+    runAction action (state, effects) =
         let
-            (state', effects') = toState <| action state
+            (DirtyState (state', effects')) = action state
+            -- task = Effects.toTask mailbox.address effects
+            -- effects'' = Effects.task <| Task.andThen task (\_ -> Task.succeed action)
         in
-            (state', Effects.batch [effects, effects'])
+            -- (state', effects'')
+            (state', effects')
 
-    update actions = List.foldl updateStep (initial, Effects.none) actions
+    update actions ds = List.foldl (\a (s,e) -> runAction a (s,e)) ds actions
+    -- result =
 
-    inputs = Signal.mergeMany <|
-         Signal.map (\h -> List.foldl ((++) << .inputs) [] h) handlers
-      :: mailbox.signal
-      :: []
+    -- inputs = Signal.mergeMany <|
+    --      Signal.map (\h -> List.foldl ((++) << .inputs) [] h) handlers
+    --   :: mailbox.signal
+    --   :: []
+
       -- :: List.map (Signal.map singleton) config.inputs
 
     -- update' actions (s,_) = List.foldl updateStep ([], Effects.none) actions
     -- result = Signal.foldp update' (["f"], Effects.none) inputs
-    result = Signal.map update inputs
-  in result
+    -- result = Signal.map update inputs
+  in (\initial -> DirtyState <| List.foldl update (initial, Effects.none) <| List.map .inputs handlers)
 
 runRouter : Router state route -> Result state
 runRouter router =
   let
     signalHandlers = Signal.map (pathHandlers router) path
-    result = runHandlers router.config.init signalHandlers
+    transitionAction = Signal.map runHandlers signalHandlers
+
+    inputs = Signal.mergeMany <|
+         Signal.map singleton transitionAction
+      :: mailbox.signal
+      :: List.map (Signal.map singleton) router.config.inputs
+      -- :: []
+
+    runAction action (state, effects) =
+        let
+            (DirtyState (state', effects')) = action state
+        in
+            (state', Effects.batch [effects, effects'])
+
+    update actions ds = List.foldl runAction ds actions
+    update' actions (s,_) = List.foldl runAction (s, Effects.none) actions
+    result = foldp' update (\a -> update a (router.config.init,Effects.none)) inputs
+    -- result = Signal.foldp update' (router.config.init,Effects.none) inputs
+
     state = Signal.map fst result
     views = Signal.map (List.map .view) signalHandlers
     html  = Signal.map2 (\state viewList -> Maybe.withDefault (text "error") <| List.foldr (\view parsed -> view address state parsed) Nothing viewList) state views
