@@ -3,7 +3,6 @@ module Lib.Router where
 import Task
 import String
 import Array
-import Regex
 import RouteParser as R exposing (Matcher, match, mapMatcher, static)
 import Html     exposing (Html, text, div)
 import Html.Events exposing (onWithOptions)
@@ -13,32 +12,30 @@ import RouteParser
 import MultiwayTree as Tree exposing (Tree (..))
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
-import List.Extra as L exposing ((!!))
 
 
 -- definitions
-
 type alias Result state =
     { html  : Signal Html
     , state : Signal state
     , tasks : Signal (Task.Task Never ())
     }
 
-type alias RouterState = {
-    state:  Maybe String,
-    handlers: List (Handler (List String))
+type alias RouterState route = {
+    state:    Maybe route,
+    params:   List
   }
 
 type alias RouteConfig state route = {
       url:          String
-    , constructor:  List String -> route
-    , params:       List (String, String)
+    , buildUrl:     String
+    , matcher:      Matcher route
     , handler:      Handler state
   }
 
 type alias RouterConfig state route = {
   init:       state,
-  config:     Config state route,
+  config:     route -> RouteConfig state route,
   routes:     Tree route,
   inputs:     List (Signal.Signal (Action state))
 }
@@ -60,53 +57,21 @@ type alias Handler state = {
   , inputs  : List (Action state)
   }
 
--- type alias HandlerMap state route = route -> Handler state
-type alias Config state route = route -> RouteConfig state route
+type alias Transition state route = route -> route -> Action state
 
 router : RouterConfig state route -> Router state route
 router config =
   let
     -- decompose Route to string
     buildUrl route =
-      let
-        cfg = config.config route
-        url = List.foldl (\p string -> Regex.replace Regex.All (Regex.regex <| "#" ++ fst p) (\_ -> snd p) string) cfg.url cfg.params
+      let url = .buildUrl <| config.config route
       in url
 
-
-    -- TODO: R2, R3, abstract, Optional params support
+    -- TODO: Nesting
     -- buildMatcher : route -> Matcher route
     buildMatcher route =
-      let
-        isStatic sergment = String.startsWith "#" sergment
-        cfg = config.config route
-        url = cfg.url
-        segments  = String.split "/" url
-        segments' = List.filterMap (\s -> case isStatic s of
-            True  -> Maybe.map (\r -> (True, snd r)) <| String.uncons s
-            False -> Just (False, s)
-          ) segments
-        -- _ = Debug.log "s" <| toString segments'
-        dynCount = List.length <| List.filter fst segments'
-        -- groups = L.groupBy (\a b -> fst a == fst b) <| (False,"") :: segments' ++ [(False,"")]
-        -- segments'' = List.map (\g -> List.foldl (\(i,s) acc -> acc ++ s) "" g) groups
-        strings = Regex.split Regex.All (Regex.regex "#[^/]+") url
-        -- _ = Debug.log "test:" <| toString <|
-        segments'' = L.interweave (List.map (\s -> (False,s)) strings) (List.filter fst segments')
-        _ = Debug.log "test:" <| toString <| segments''
-
-        seg : Int -> String
-        seg idx = Maybe.withDefault "" <| Maybe.map snd <| segments'' !! idx
-
-        -- matcher : R.Matcher route
-        matcher = case dynCount of
-          0 -> static route url
-          1 -> R.dyn1 (\a -> cfg.constructor [a]) (seg 0) R.string (seg 2)
-          -- 2 ->
-          -- 3 ->
-          _ -> static route url
-      in
-        matcher
+      let matcher = .matcher <| config.config route
+      in  matcher
 
     -- binds forward action to existing HTML attributes
     -- bindForward : route -> List Html.Attribute -> List Html.Attribute

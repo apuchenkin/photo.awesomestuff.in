@@ -7,6 +7,7 @@ import Effects exposing (Never)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
+import RouteParser as R exposing (static, dyn1)
 
 config : Route -> RouteConfig State Route
 config r = case r of
@@ -29,25 +30,26 @@ result = runRouter router
 home : RouteConfig State Route
 home = {
     url = "",
-    constructor = (\_ -> Home),
-    params = [],
+    buildUrl = "",
+    matcher = static Home "",
+    -- constructor = (\_ -> Home),
+    -- params = [],
     handler = homeHandler router
   }
 
 error404 : RouteConfig State Route
 error404 = {
     url = "404",
-    constructor = (\_ -> Error),
-    params = [],
+    buildUrl = "404",
+    matcher = static Error "404",
     handler = homeHandler router
   }
 
 category : String -> RouteConfig State Route
 category c = {
     url = "#category",
-    params = [("category", c)],
-    constructor = (\a -> Category <| Maybe.withDefault "" <| List.head a),
-    -- params = [],
+    buildUrl = c,
+    matcher = dyn1 Category "" R.string "",
     handler = categoryHandler router c
   }
 
