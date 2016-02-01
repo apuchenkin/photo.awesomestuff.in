@@ -22,10 +22,51 @@ initialState = {
     router = Lib.Router.initialState
   }
 
+home : RouteConfig Route State
+home = {
+    parent = Nothing,
+    url = "/",
+    buildUrl = "/",
+    matcher = static Home "/",
+    handler = [homeHandler router]
+  }
+
+error404 : RouteConfig Route State
+error404 = {
+    parent = Nothing,
+    url = "/404",
+    buildUrl = "/404",
+    matcher = static Error "/404",
+    handler = [homeHandler router]
+  }
+
+category : String -> RouteConfig Route State
+category c = {
+    parent = Just Home,
+    url = "/:category",
+    buildUrl = "/" ++ c,
+    matcher = dyn1 Category "/" R.string "",
+    handler = [homeHandler router, categoryHandler router c]
+  }
+
+-- photo : String -> Int -> RouteConfig Route State
+-- photo category pid = {
+--     parent = Just (Category category),
+--     url = "/photo/:id",
+--     buildUrl = "/" ++ category ++ "/photo/" ++ toString pid,
+--     matcher = R.dyn2 Photo "/" R.string "/photo/" R.int "",
+--     handler = [homeHandler router, categoryHandler router category]
+--   }
+
 router : Router Route State
 router = Lib.Router.router {
   init = initialState,
-  routes = routes,
+  routes = [
+    Home,
+    Error,
+    Category ""
+    -- photo "" 0
+  ],
   config = config,
   inputs = []
   }
@@ -33,31 +74,7 @@ router = Lib.Router.router {
 result : Lib.Router.Result State
 result = runRouter router
 
-home : RouteConfig Route State
-home = {
-    url = "/",
-    buildUrl = "/",
-    matcher = static Home "/",
-    -- constructor = (\_ -> Home),
-    -- params = [],
-    handler = homeHandler router
-  }
 
-error404 : RouteConfig Route State
-error404 = {
-    url = "/404",
-    buildUrl = "/404",
-    matcher = static Error "/404",
-    handler = homeHandler router
-  }
-
-category : String -> RouteConfig Route State
-category c = {
-    url = "#category",
-    buildUrl = "/" ++ c,
-    matcher = dyn1 Category "/" R.string "",
-    handler = categoryHandler router c
-  }
 
 main : Signal Html
 main = result.html

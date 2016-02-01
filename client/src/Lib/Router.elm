@@ -9,7 +9,7 @@ import Html.Events exposing (onWithOptions)
 import Effects  exposing (Effects, Never)
 import History  exposing (path)
 -- import RouteParser
-import MultiwayTree as Tree exposing (Tree (..), Forest)
+
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
@@ -31,16 +31,17 @@ type RouterState route = RouterState {
 type alias WithRouter route state = { state | router : RouterState route }
 
 type alias RouteConfig route state = {
-      url:          String
+      parent:       Maybe route
+    , url:          String
     , buildUrl:     String
     , matcher:      Matcher route
-    , handler:      Handler state
+    , handler:      List (Handler state)
   }
 
 type alias RouterConfig route state = {
   init:       state,
   config:     route -> RouteConfig route state,
-  routes:     Forest route,
+  routes:     List (route),
   inputs:     List (Signal.Signal (Action state))
 }
 
@@ -50,7 +51,7 @@ type Router route state = Router {
   matchRoute    : String -> Maybe route,
   bindForward   : route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : route -> String,
-  buildMatcher  : route -> Matcher route,
+  -- buildMatcher  : route -> Matcher route,
   forward       : route -> Action state
 }
 
@@ -98,30 +99,30 @@ transition router from to state =
     _ = Debug.log "transition: to" to
     _ = Debug.log "transition: state" state
 
-    signalHandlers = pathHandlers router to
-    transitionAction = runHandlers signalHandlers
+    signalHandlers = routeHandlers router from to
 
     -- action state = Response (state, Effects.none)
     -- task = Task.succeed <| action
   in
-    transitionAction state
+    runHandlers signalHandlers state
 
 router : RouterConfig route state -> Router route state
 router config =
   let
     -- matchRoute : String -> Maybe route
-    matchRoute url = match (List.map (Tree.datum) <| List.map (Tree.map buildMatcher) config.routes) url
+    matchRoute url =
+      let matchers = List.map (.matcher << config.config) config.routes
+      in match matchers url
 
     -- decompose Route to string
     buildUrl route =
       let url = .buildUrl <| config.config route
       in url
 
-    -- TODO: Nesting
     -- buildMatcher : route -> Matcher route
-    buildMatcher route =
-      let matcher = .matcher <| config.config route
-      in  matcher
+    -- buildMatcher route =
+    --   let matcher = .matcher <| config.config route
+    --   in  matcher
 
     -- binds forward action to existing HTML attributes
     -- bindForward : route -> List Html.Attribute -> List Html.Attribute
@@ -149,26 +150,27 @@ router config =
   , state         = initialState
   , bindForward   = bindForward
   , buildUrl      = buildUrl
-  , buildMatcher  = buildMatcher
+  -- , buildMatcher  = buildMatcher
   , forward       = forward
   }
 
-pathHandlers : Router route state -> route -> List (Handler state)
-pathHandlers (Router router) route =
-  let
-    mapSegment s (forest, acc) =
-      let
-        maybeRoute = match (List.indexedMap (\i v -> mapMatcher (\m -> (i,m)) (Tree.datum v)) forest) s
-        forest' = Maybe.withDefault [] <| Maybe.andThen maybeRoute (\m -> Maybe.map Tree.children (Array.get (fst m) (Array.fromList forest)))
-        acc' = acc ++ [Maybe.map snd maybeRoute]
-      in (forest', acc')
+-- routeChain : Router route state -> Maybe route -> route -> List (route)
+-- routeChain (Router router) from to =
+--   let
+--     config = router.config.config to
+--     result = [to]
+--   in case config.parent of
+--     Nothing    -> result
+--     Just route -> case from of
+--       Nothing -> (routeChain (Router router) from route) ++ result
+--       Just f  -> case route == f of
+--         True  -> route :: result
+--         False -> (routeChain (Router router) from route) ++ result
 
-    maybeRoutes = [Just route]
-
-    handlers = List.filterMap (\r -> Maybe.map (.handler << router.config.config) r) maybeRoutes
-    _ = Debug.log "pathHandlers" <| toString handlers
-
-  in handlers
+routeHandlers : Router route state -> Maybe route -> route -> List (Handler state)
+routeHandlers (Router router) from to = (.handler << router.config.config) to
+  -- let chain = routeChain (Router router) from to
+  -- in List.map (.handler << router.config.config) chain
 
 singleton : a -> List a
 singleton action = [ action ]
@@ -189,9 +191,9 @@ runHandlers handlers =
             -- effects'' = Effects.task <| Task.andThen task (\_ -> Task.succeed action)
         in
             -- (state', effects'')
-            (state', effects')
+            (state', Effects.batch [effects, effects'])
 
-    update actions ds = List.foldl (\a (s,e) -> runAction a (s,e)) ds actions
+    update actions ds = List.foldl runAction ds actions
     _ = Debug.log "runHandlers" <| toString handlers
     -- result =
 
