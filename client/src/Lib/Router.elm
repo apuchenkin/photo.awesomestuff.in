@@ -68,6 +68,9 @@ type alias Handler state = {
 
 type alias Transition route state = Maybe route -> route -> Action state
 
+noFx : state -> (state, Effects a)
+noFx state = (state, Effects.none)
+
 initialState : RouterState route
 initialState = RouterState {route = Nothing, params = []}
 
@@ -141,7 +144,7 @@ router config =
       let
         _ = Debug.crash "forward"
         tsk  = History.setPath <| buildUrl route
-        tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (\a -> Response (a, Effects.none)))
+        tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed <| Response << noFx)
       in Response (state, Effects.task <| tsk')
 
   in Router {
@@ -181,6 +184,38 @@ mailbox = Signal.mailbox []
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
 
+chainActions : List (Action state) -> Action state
+chainActions actions state =
+  let
+    -- first = List.head actions
+    -- response = case first of
+    --   Nothing -> Response (noFx state)
+    --   Just action ->
+    --     let tail = List.tail actions
+    --     case tail of
+    --       Nothing -> action state
+    --       Just actions' ->
+    --         Response <| List.foldl
+    --         let task = Task.succeed action
+
+
+    runAction action (state, effects) =
+        let
+            task = Effects.toTask mailbox.address effects
+            effects'' = Effects.task <| Task.andThen task (\act -> Task.succeed action)
+            -- (Response (state', effects')) = action state
+        in
+            (state, effects'')
+
+    -- update actions state = Response <| List.foldl runAction (noFx state) actions
+    -- run action (s, e) = Task.succeed action `Task.andThen`
+    -- action = List.foldl run (noFx state) actions
+    -- tasks   = List.map Task.succeed actions
+    -- effects = Effects.task <| Task.sequence tasks
+    -- effects' = Effects.map (\actions s -> ) effects
+
+  in Response <| List.foldl runAction (noFx state) actions
+
 runHandlers : List (Handler state) -> Action state
 runHandlers handlers =
   let
@@ -193,7 +228,9 @@ runHandlers handlers =
             -- (state', effects'')
             (state', Effects.batch [effects, effects'])
 
-    update actions ds = List.foldl runAction ds actions
+    update actions state = Response <| List.foldl runAction (noFx state) actions
+    actions = List.map (update << .inputs) handlers
+
     _ = Debug.log "runHandlers" <| toString handlers
     -- result =
 
@@ -207,7 +244,8 @@ runHandlers handlers =
     -- update' actions (s,_) = List.foldl updateStep ([], Effects.none) actions
     -- result = Signal.foldp update' (["f"], Effects.none) inputs
     -- result = Signal.map update inputs
-  in (\initial -> Response <| List.foldl update (initial, Effects.none) <| List.map .inputs handlers)
+  -- in (\initial -> Response <| List.foldl update (noFx initial) <| List.map .inputs handlers)
+  in chainActions actions
 
 runRouter : Router route (WithRouter route state) -> Result (WithRouter route state)
 runRouter (Router router) =
@@ -242,8 +280,8 @@ runRouter (Router router) =
         in
             (state', Effects.batch [effects, effects'])
     --
-    update actions (s,_) = List.foldl runAction (s, Effects.none) <| snd actions
-    update' actions = List.foldl runAction (router.config.init, Effects.none) <| fst actions
+    update actions (s,_) = List.foldl runAction (noFx s) <| snd actions
+    update' actions = List.foldl runAction (noFx router.config.init) <| fst actions
     -- update'' actions = List.foldl runAction (router.config.init, Effects.none) actions
     result = foldp' update update' sig
     -- result = Signal.foldp update' (router.config.init, Effects.none) inputs
