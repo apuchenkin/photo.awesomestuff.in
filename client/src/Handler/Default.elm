@@ -20,6 +20,7 @@ homeHandler (Router router) =
       view = view,
       inputs = [
         loadCategories
+        -- updateCategories [{id = 1, name = "cartegory", title = "Category"}]
       ]
     }
 
@@ -32,9 +33,9 @@ categoryHandler (Router router) category =
       view = view,
       inputs = [
         (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state.categories of
-          []         -> router.forward Route.Error state
+          []         -> Response (state, Effects.none)
           [category] -> Response (state, Effects.none)
-          _          -> router.forward Route.Error state
+          _          -> Response (state, Effects.none) --router.forward Route.Error state
         )
       ]
     }

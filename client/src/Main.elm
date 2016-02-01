@@ -35,8 +35,8 @@ result = runRouter router
 
 home : RouteConfig Route State
 home = {
-    url = "",
-    buildUrl = "",
+    url = "/",
+    buildUrl = "/",
     matcher = static Home "/",
     -- constructor = (\_ -> Home),
     -- params = [],
@@ -45,17 +45,17 @@ home = {
 
 error404 : RouteConfig Route State
 error404 = {
-    url = "404",
-    buildUrl = "404",
-    matcher = static Error "404",
+    url = "/404",
+    buildUrl = "/404",
+    matcher = static Error "/404",
     handler = homeHandler router
   }
 
 category : String -> RouteConfig Route State
 category c = {
     url = "#category",
-    buildUrl = c,
-    matcher = dyn1 Category "" R.string "",
+    buildUrl = "/" ++ c,
+    matcher = dyn1 Category "/" R.string "",
     handler = categoryHandler router c
   }
 

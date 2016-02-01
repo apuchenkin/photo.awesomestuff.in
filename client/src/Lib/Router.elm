@@ -9,7 +9,7 @@ import Html.Events exposing (onWithOptions)
 import Effects  exposing (Effects, Never)
 import History  exposing (path)
 -- import RouteParser
-import MultiwayTree as Tree exposing (Tree (..))
+import MultiwayTree as Tree exposing (Tree (..), Forest)
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
@@ -40,7 +40,7 @@ type alias RouteConfig route state = {
 type alias RouterConfig route state = {
   init:       state,
   config:     route -> RouteConfig route state,
-  routes:     Tree route,
+  routes:     Forest route,
   inputs:     List (Signal.Signal (Action state))
 }
 
@@ -81,23 +81,36 @@ setState : WithRouter route state -> RouterState route -> WithRouter route state
 setState state routerState =
   { state | router = routerState }
 
-setRoute : route -> Action (WithRouter route state)
-setRoute route state =
+setRoute : Router route (WithRouter route state) -> route -> Action (WithRouter route state)
+setRoute router route state =
   let
+    _ = Debug.log "setRoute" route
     (RouterState rs) = getState state
     from  = rs.route
     state' = setState state <| RouterState { rs | route = Just route }
   in
-    transition from route state'
+    transition router from route state'
 
-transition : Transition route state
-transition from to = (\state -> Response (state, Effects.none))
+transition : Router route state -> Transition route state
+transition router from to state =
+  let
+    _ = Debug.log "transition: from" from
+    _ = Debug.log "transition: to" to
+    _ = Debug.log "transition: state" state
+
+    signalHandlers = pathHandlers router to
+    transitionAction = runHandlers signalHandlers
+
+    -- action state = Response (state, Effects.none)
+    -- task = Task.succeed <| action
+  in
+    transitionAction state
 
 router : RouterConfig route state -> Router route state
 router config =
   let
     -- matchRoute : String -> Maybe route
-    matchRoute url = match (List.map (Tree.datum) [Tree.map buildMatcher config.routes]) url
+    matchRoute url = match (List.map (Tree.datum) <| List.map (Tree.map buildMatcher) config.routes) url
 
     -- decompose Route to string
     buildUrl route =
@@ -114,6 +127,7 @@ router config =
     -- bindForward : route -> List Html.Attribute -> List Html.Attribute
     bindForward route attrs =
       let
+        _ = Debug.crash "bindForward"
         options = {stopPropagation = True, preventDefault = True}
         action _ = Signal.message address <| forward route
       in
@@ -124,6 +138,7 @@ router config =
     -- forward : route -> Action route state
     forward route state =
       let
+        _ = Debug.crash "forward"
         tsk  = History.setPath <| buildUrl route
         tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (\a -> Response (a, Effects.none)))
       in Response (state, Effects.task <| tsk')
@@ -138,10 +153,8 @@ router config =
   , forward       = forward
   }
 
-
-
-pathHandlers : Router route state -> String -> List (Handler state)
-pathHandlers (Router router) url =
+pathHandlers : Router route state -> route -> List (Handler state)
+pathHandlers (Router router) route =
   let
     mapSegment s (forest, acc) =
       let
@@ -150,11 +163,10 @@ pathHandlers (Router router) url =
         acc' = acc ++ [Maybe.map snd maybeRoute]
       in (forest', acc')
 
-    maybeRoutes = snd
-        <| List.foldl mapSegment ([Tree.map router.buildMatcher router.config.routes], [])
-        <| String.split "/" url
+    maybeRoutes = [Just route]
 
     handlers = List.filterMap (\r -> Maybe.map (.handler << router.config.config) r) maybeRoutes
+    _ = Debug.log "pathHandlers" <| toString handlers
 
   in handlers
 
@@ -180,6 +192,7 @@ runHandlers handlers =
             (state', effects')
 
     update actions ds = List.foldl (\a (s,e) -> runAction a (s,e)) ds actions
+    _ = Debug.log "runHandlers" <| toString handlers
     -- result =
 
     -- inputs = Signal.mergeMany <|
@@ -208,16 +221,17 @@ runRouter (Router router) =
 
     act = Signal.map (\p -> case (router.matchRoute p) of
         Nothing    -> Debug.crash <| toString p
-        Just route -> setRoute route
+        Just route -> setRoute (Router router) route
       ) path
 
-    -- signalHandlers = Signal.map (pathHandlers router) path
-    -- transitionAction = Signal.map runHandlers signalHandlers
+
+    -- _ = Debug.log "handlers" <| toString signalHandlers
     --
     inputs = Signal.mergeMany <|
-         Signal.map singleton act
-      :: mailbox.signal
+         mailbox.signal
       :: List.map (Signal.map singleton) router.config.inputs
+
+    sig = Signal.map2 (,) (Signal.map singleton act) inputs
       -- :: []
     --
     runAction action (state, effects) =
@@ -226,14 +240,17 @@ runRouter (Router router) =
         in
             (state', Effects.batch [effects, effects'])
     --
-    update actions ds = List.foldl runAction ds actions
-    update' actions (s,_) = List.foldl runAction (s, Effects.none) actions
-    update'' actions = List.foldl runAction (router.config.init, Effects.none) actions
-    result = foldp' update' (\a -> update a (router.config.init,Effects.none)) inputs
+    update actions (s,_) = List.foldl runAction (s, Effects.none) <| snd actions
+    update' actions = List.foldl runAction (router.config.init, Effects.none) <| fst actions
+    -- update'' actions = List.foldl runAction (router.config.init, Effects.none) actions
+    result = foldp' update update' sig
     -- result = Signal.foldp update' (router.config.init, Effects.none) inputs
 
     -- result = Signal.map update'' inputs
     state = Signal.map fst result
+
+    -- st = Signal.map getState state
+    -- signalHandlers = Signal.map (\(RouterState s) -> pathHandlers (Router router) <| .route s) st
     -- views = Signal.map (List.map .view) signalHandlers
     -- html  = Signal.map2 (\state viewList -> Maybe.withDefault (text "error") <| List.foldr (\view parsed -> view address state parsed) Nothing viewList) state views
   in

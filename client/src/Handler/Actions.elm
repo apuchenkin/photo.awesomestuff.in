@@ -26,9 +26,14 @@ decodeCategories = Json.list <| Json.object3 Category
 loadCategories : Action State
 loadCategories state =
   let
+    _ = Debug.log "loadCategories" state
     tsk = Http.get decodeCategories ("/api/v1/category")
-    tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (updateCategories <| Maybe.withDefault [] r))
+    tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (updateCategories <| Maybe.withDefault [{id = 1, name = "cartegory", title = "Category"}] r))
   in Response (state, Effects.task <| tsk')
 
 updateCategories : List Category -> Action State
-updateCategories categories state = Response ({state | categories = categories}, Effects.none)
+updateCategories categories state =
+  let
+    _ = Debug.log "updateCategories" categories
+  in
+    Response ({state | categories = categories}, Effects.none)

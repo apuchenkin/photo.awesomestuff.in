@@ -35,13 +35,13 @@ module.exports = {
     inline: true,
     stats: 'errors-only',
     historyApiFallback: true,
-    proxy: {
-            '/api/v1*': {
-                target: 'http://photo.awesomestuff.in',
-                changeOrigin: true,
-                secure: false,
-            },
-        },
+    // proxy: {
+    //     '/api/v1*': {
+    //         target: 'http://photo.awesomestuff.in',
+    //         changeOrigin: true,
+    //         secure: false,
+    //     },
+    // },
   },
 
   // plugins: [
