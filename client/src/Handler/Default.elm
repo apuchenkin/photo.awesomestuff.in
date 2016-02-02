@@ -6,7 +6,6 @@ import Html exposing (div, text, Html, button)
 import Effects  exposing (Effects, Never)
 import Html.Attributes exposing (href)
 import Handler.Routes as Route exposing (Route)
-import Html.Events
 
 homeHandler : Router Route State -> Handler State
 homeHandler (Router router) =
@@ -20,7 +19,7 @@ homeHandler (Router router) =
       view = view,
       inputs = [
         loadCategories
-        -- updateCategories [{id = 1, name = "cartegory", title = "Category"}]
+        -- (\state -> let _ = Debug.log "categoryi" state in Response (state, Nothing))
       ]
     }
 
@@ -32,11 +31,12 @@ categoryHandler (Router router) category =
     {
       view = view,
       inputs = [
-        (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state.categories of
-          []         -> Response (state, Effects.none)
-          [category] -> Response (state, Effects.none)
-          _          -> Response (state, Effects.none) --router.forward Route.Error state
-        )
+        (\state -> let _ = Debug.log "categoryHandler: i1" state in Response (state, Nothing))
+        -- (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state.categories of
+        --   []         -> Response (state, Nothing)
+        --   [category] -> Response (state, Nothing)
+        --   _          -> Response (state, Nothing) --router.forward Route.Error state
+        -- )
       ]
     }
 

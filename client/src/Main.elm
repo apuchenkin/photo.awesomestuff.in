@@ -74,10 +74,8 @@ router = Lib.Router.router {
 result : Lib.Router.Result State
 result = runRouter router
 
-
-
 main : Signal Html
 main = result.html
 
-port tasks : Signal (Task Never (List ()))
+port tasks : Signal (Task Never ())
 port tasks = result.tasks -- Signal.map (\_ -> ) main
