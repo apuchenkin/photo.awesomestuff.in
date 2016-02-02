@@ -1,31 +1,48 @@
 module Lib.Router where
 
-import Task
-import String
-import Array
-import RouteParser exposing (Matcher, match, mapMatcher)
-import Html     exposing (Html, text, div)
-import Html.Events exposing (onWithOptions)
-import Effects  exposing (Effects, Never)
-import History  exposing (path)
--- import RouteParser
+import Task         exposing (Task)
+import RouteParser  exposing (Matcher, match, mapMatcher)
+import Html         exposing (Html, text, div)
+import Html.Events  exposing (onWithOptions)
+import Effects      exposing (Never)
+import History      exposing (path)
+
 
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
-import Response as R
+-- import Response as R
 
 -- definitions
+-----------------------------------------
+-- State
+-----------------------------------------
+
+type alias Action state = state -> Response state
+type alias MaybeTask state = Maybe (Task Never (Action state))
+
 type alias Result state =
     { html  : Signal Html
     , state : Signal state
-    , tasks : Signal (Task.Task Never ())
+    -- , tasks : Signal (Task.Task Never (List ()))
+    , tasks : Signal (Task Never ())
     }
+
+type alias Handler state = {
+    view    : Signal.Address (Action state) -> state -> Maybe Html -> Maybe Html
+  , inputs  : List (Action state)
+  }
+
+type Response state = Response (state, (MaybeTask state))
 
 type RouterState route = RouterState {
     route:    Maybe route,
     params:   List String
   }
+
+-----------------------------------------
+-- Route
+-----------------------------------------
 
 {-| Type extension for the model. -}
 type alias WithRouter route state = { state | router : RouterState route }
@@ -55,21 +72,9 @@ type Router route state = Router {
   forward       : route -> Action state
 }
 
-type Response state = Response (R.Response state (Action state))
+type alias Transition route state = Maybe route -> route -> List (Action state)
 
--- type DirtyState route state = DirtyState ((WithRouter route state), Effects (Action route (WithRouter route state)))
-
-type alias Action state = state -> Response state
-
-type alias Handler state = {
-    view    : Signal.Address (Action state) -> state -> Maybe Html -> Maybe Html
-  , inputs  : List (Action state)
-  }
-
-type alias Transition route state = Maybe route -> route -> Action state
-
-noFx : state -> (state, Effects a)
-noFx state = (state, Effects.none)
+--------------------------------------------------------------------------------
 
 initialState : RouterState route
 initialState = RouterState {route = Nothing, params = []}
@@ -93,21 +98,22 @@ setRoute router route state =
     from  = rs.route
     state' = setState state <| RouterState { rs | route = Just route }
   in
-    transition router from route state'
+    Response <| (state', Nothing)
+    -- transition router from route state'
 
-transition : Router route state -> Transition route state
-transition router from to state =
-  let
-    _ = Debug.log "transition: from" from
-    _ = Debug.log "transition: to" to
-    _ = Debug.log "transition: state" state
-
-    signalHandlers = routeHandlers router from to
-
-    -- action state = Response (state, Effects.none)
-    -- task = Task.succeed <| action
-  in
-    runHandlers signalHandlers state
+-- transition : Router route state -> Transition route state
+-- transition router from to state =
+--   let
+--     _ = Debug.log "transition: from" from
+--     _ = Debug.log "transition: to" to
+--     _ = Debug.log "transition: state" state
+--
+--     signalHandlers = routeHandlers router from to
+--
+--     -- action state = Response (state, Effects.none)
+--     -- task = Task.succeed <| action
+--   in
+--     List.map (\state -> runHandlers  state) signalHandlers
 
 router : RouterConfig route state -> Router route state
 router config =
@@ -144,8 +150,8 @@ router config =
       let
         _ = Debug.crash "forward"
         tsk  = History.setPath <| buildUrl route
-        tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed <| Response << noFx)
-      in Response (state, Effects.task <| tsk')
+        tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (\a -> Response (a, Nothing)))
+      in Response (state, Just tsk')
 
   in Router {
     config        = config
@@ -184,68 +190,44 @@ mailbox = Signal.mailbox []
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
 
-chainActions : List (Action state) -> Action state
-chainActions actions state =
-  let
-    -- first = List.head actions
-    -- response = case first of
-    --   Nothing -> Response (noFx state)
-    --   Just action ->
-    --     let tail = List.tail actions
-    --     case tail of
-    --       Nothing -> action state
-    --       Just actions' ->
-    --         Response <| List.foldl
-    --         let task = Task.succeed action
-
-
-    runAction action (state, effects) =
-        let
-            task = Effects.toTask mailbox.address effects
-            effects'' = Effects.task <| Task.andThen task (\act -> Task.succeed action)
-            -- (Response (state', effects')) = action state
-        in
-            (state, effects'')
-
-    -- update actions state = Response <| List.foldl runAction (noFx state) actions
-    -- run action (s, e) = Task.succeed action `Task.andThen`
-    -- action = List.foldl run (noFx state) actions
-    -- tasks   = List.map Task.succeed actions
-    -- effects = Effects.task <| Task.sequence tasks
-    -- effects' = Effects.map (\actions s -> ) effects
-
-  in Response <| List.foldl runAction (noFx state) actions
-
-runHandlers : List (Handler state) -> Action state
+runHandlers : List (Handler state) -> List (Action state)
 runHandlers handlers =
   let
-    runAction action (state, effects) =
-        let
-            (Response (state', effects')) = action state
-            -- task = Effects.toTask mailbox.address effects
-            -- effects'' = Effects.task <| Task.andThen task (\_ -> Task.succeed action)
-        in
-            -- (state', effects'')
-            (state', Effects.batch [effects, effects'])
+    run actions state = Response <| List.foldl chainAction (state, Nothing) actions
+  in List.map run <| List.map .inputs handlers
 
-    update actions state = Response <| List.foldl runAction (noFx state) actions
-    actions = List.map (update << .inputs) handlers
+-- runAction : Action state -> (state, MaybeTask state) -> (state, MaybeTask state)
+-- runAction action (state, mtask) =
+--     let
+--         (Response (state', mtask')) = action state
+--         task'' = case mtask' of
+--           Nothing    -> mtask
+--           Just task' -> Maybe.map (\t -> t `Task.andThen` (always task')) mtask
+--     in
+--         (state', task'')
 
-    _ = Debug.log "runHandlers" <| toString handlers
-    -- result =
+chainAction : Action state -> (state, MaybeTask state) -> (state, MaybeTask state)
+chainAction action (state, mtask) =
+    let
+        (Response (state', mtask'))  = action <| state
+        r = case mtask of
+          Nothing    -> (state', mtask')
+          Just task  ->
+            let combinedTask = task `Task.andThen` (\ta ->
+              case mtask' of
+                Nothing    -> Task.succeed ta
+                Just task' -> (Task.succeed ta) `Task.andThen` (always task')
+              )
+                -- Maybe.withDefault () (Maybe.map ))  -- (\ta -> Task.succeed ta)
+            in (state, Just combinedTask)
 
-    -- inputs = Signal.mergeMany <|
-    --      Signal.map (\h -> List.foldl ((++) << .inputs) [] h) handlers
-    --   :: mailbox.signal
-    --   :: []
-
-      -- :: List.map (Signal.map singleton) config.inputs
-
-    -- update' actions (s,_) = List.foldl updateStep ([], Effects.none) actions
-    -- result = Signal.foldp update' (["f"], Effects.none) inputs
-    -- result = Signal.map update inputs
-  -- in (\initial -> Response <| List.foldl update (noFx initial) <| List.map .inputs handlers)
-  in chainActions actions
+        -- (Response (state', mtask')) = action state
+        -- task'' = case mtask' of
+        --   Nothing    -> mtask
+        --   Just task' -> case mtask of
+        --     Nothing   -> Just task'
+        --     Just task -> Just <| task `Task.andThen` (always task')
+    in r
 
 runRouter : Router route (WithRouter route state) -> Result (WithRouter route state)
 runRouter (Router router) =
@@ -259,29 +241,29 @@ runRouter (Router router) =
     -- in
     --   config.mountRoute prevRoute route newModel
 
-    act = Signal.map (\p -> case (router.matchRoute p) of
+    actions = Signal.map (\p -> case (router.matchRoute p) of
         Nothing    -> Debug.crash <| toString p
-        Just route -> setRoute (Router router) route
+        Just route ->
+          let
+           action = setRoute (Router router) route
+           handlers = routeHandlers (Router router) Nothing route
+           actions = runHandlers handlers
+
+          in action :: actions
       ) path
 
 
     -- _ = Debug.log "handlers" <| toString signalHandlers
     --
     inputs = Signal.mergeMany <|
-         mailbox.signal
+         mailbox.signal -- actions from events
       :: List.map (Signal.map singleton) router.config.inputs
 
-    sig = Signal.map2 (,) (Signal.map singleton act) inputs
-      -- :: []
-    --
-    runAction action (state, effects) =
-        let
-            (Response (state', effects')) = action state
-        in
-            (state', Effects.batch [effects, effects'])
-    --
-    update actions (s,_) = List.foldl runAction (noFx s) <| snd actions
-    update' actions = List.foldl runAction (noFx router.config.init) <| fst actions
+    sig = Signal.map2 (,) actions inputs
+
+    update actions (s,_) = List.foldl chainAction (s, Nothing) <| snd actions
+
+    update' actions = List.foldl chainAction (router.config.init, Nothing) <| fst actions
     -- update'' actions = List.foldl runAction (router.config.init, Effects.none) actions
     result = foldp' update update' sig
     -- result = Signal.foldp update' (router.config.init, Effects.none) inputs
@@ -297,5 +279,6 @@ runRouter (Router router) =
     {
       html  = Signal.map (text << toString) state
     , state = state
-    , tasks = Signal.map (Effects.toTask mailbox.address << snd) result
+    -- , tasks = Signal.map (\lt -> Task.sequence <| List.map (Effects.toTask mailbox.address) (snd lt)) result
+    , tasks = Signal.map (\r -> Effects.toTask mailbox.address <| Maybe.withDefault Effects.none <| Maybe.map Effects.task (snd r)) result
     }

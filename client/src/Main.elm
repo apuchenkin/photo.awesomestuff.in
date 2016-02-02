@@ -74,8 +74,6 @@ router = Lib.Router.router {
 result : Lib.Router.Result State
 result = runRouter router
 
-
-
 main : Signal Html
 main = result.html
 
