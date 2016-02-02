@@ -93,8 +93,8 @@ setState : WithRouter route state -> RouterState route -> WithRouter route state
 setState state routerState =
   { state | router = routerState }
 
-setRoute : Router route (WithRouter route state) -> route -> Action (WithRouter route state)
-setRoute router route state =
+setRoute : route -> Action (WithRouter route state)
+setRoute route state =
   let
     _ = Debug.log "setRoute" route
     (RouterState rs) = getState state
@@ -118,7 +118,7 @@ setRoute router route state =
 --   in
 --     List.map (\state -> runHandlers  state) signalHandlers
 
-router : RouterConfig route state -> Router route state
+router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
   let
     -- matchRoute : String -> Maybe route
@@ -150,9 +150,9 @@ router config =
     -- forward : route -> Action route state
     forward route state =
       let
-        tsk  = History.setPath <| buildUrl route
-        tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (\a -> Response (noFx a)))
-      in Response (state, Effects.task tsk')
+        _ = Debug.log "forward" route
+        task  = History.setPath (buildUrl route) |> Task.map (\_ -> setRoute route)
+      in Response (state, Effects.task task)
 
   in Router {
     config        = config
@@ -224,12 +224,11 @@ runRouter (Router router) =
         Nothing    -> Debug.crash <| toString p
         Just route ->
           let
-           action = setRoute (Router router) route
+           action = setRoute route
            handlers = routeHandlers (Router router) Nothing route
 
           in action :: runHandlers handlers
       ) path
-
 
     inputs =  List.foldl (Signal.Extra.fairMerge List.append)
       mailbox.signal <| -- actions from events
