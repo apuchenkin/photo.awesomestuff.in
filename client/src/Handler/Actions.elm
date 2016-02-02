@@ -8,8 +8,10 @@ import Lib.Router exposing (..)
 import Handler.Routes exposing (Route)
 
 type alias State = WithRouter Route
-  {categories: List Category}
-
+  {
+    categories: List Category,
+    isLoading: Bool
+  }
 
 type alias Category = {
     id: Int,
@@ -28,12 +30,12 @@ loadCategories state =
   let
     _ = Debug.log "loadCategories" state
     tsk = Http.get decodeCategories ("/api/v1/category")
-    tsk' = Task.andThen (Task.toMaybe tsk) (\r -> Task.succeed (updateCategories <| Maybe.withDefault [{id = 1, name = "cartegory", title = "Category"}] r))
-  in Response (state, Just tsk')
+    tsk' = Task.andThen (Task.toMaybe tsk) (\categories -> Task.succeed (updateCategories <| Maybe.withDefault [{id = 1, name = "cartegory", title = "Category"}] categories))
+  in Response ({state | isLoading = True}, Effects.task tsk')
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
   let
     _ = Debug.log "updateCategories" categories
   in
-    Response ({state | categories = categories}, Nothing)
+    Response <| noFx {state | isLoading = False, categories = categories}

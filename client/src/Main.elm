@@ -19,6 +19,7 @@ config r = case r of
 initialState : State
 initialState = {
     categories = [],
+    isLoading = False,
     router = Lib.Router.initialState
   }
 
