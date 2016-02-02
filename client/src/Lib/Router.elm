@@ -69,11 +69,12 @@ type Router route state = Router {
   matchRoute    : String -> Maybe route,
   bindForward   : route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : route -> String,
-  -- buildMatcher  : route -> Matcher route,
+  getHandlers   : Maybe route -> route -> List (Handler state),
+  setRoute      : route -> Action state,
   forward       : route -> Action state
 }
 
-type alias Transition route state = Maybe route -> route -> List (Action state)
+type alias Transition route state = Maybe route -> route -> Action state
 
 --------------------------------------------------------------------------------
 noFx : state -> (state, ActionEffects state)
@@ -93,30 +94,6 @@ setState : WithRouter route state -> RouterState route -> WithRouter route state
 setState state routerState =
   { state | router = routerState }
 
-setRoute : route -> Action (WithRouter route state)
-setRoute route state =
-  let
-    _ = Debug.log "setRoute" route
-    (RouterState rs) = getState state
-    from  = rs.route
-    state' = setState state <| RouterState { rs | route = Just route }
-  in
-    Response <| noFx state'
-    -- transition router from route state'
-
--- transition : Router route state -> Transition route state
--- transition router from to state =
---   let
---     _ = Debug.log "transition: from" from
---     _ = Debug.log "transition: to" to
---     _ = Debug.log "transition: state" state
---
---     signalHandlers = routeHandlers router from to
---
---     -- action state = Response (state, Effects.none)
---     -- task = Task.succeed <| action
---   in
---     List.map (\state -> runHandlers  state) signalHandlers
 
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
@@ -138,6 +115,31 @@ router config =
 
     -- binds forward action to existing HTML attributes
     -- bindForward : route -> List Html.Attribute -> List Html.Attribute
+
+    -- getHandlers : Maybe route -> route -> List (Handler state)
+    getHandlers from to = (.handler << config.config) to
+
+    -- setRoute : route -> Action (WithRouter route state)
+    setRoute route state =
+      let
+        _ = Debug.log "setRoute" route
+        (RouterState rs) = getState state
+        from  = rs.route
+        state' = setState state <| RouterState { rs | route = Just route }
+      in
+        transition from route state'
+
+    -- transition : Transition route state
+    transition from to state =
+      let
+        _ = Debug.log "transition: from" from
+        _ = Debug.log "transition: to" to
+        _ = Debug.log "transition: state" state
+
+        signalHandlers = getHandlers from to
+        actions = runHandlers signalHandlers
+      in  Response <| List.foldl chainAction (noFx state) actions
+
     bindForward route attrs =
       let
         options = {stopPropagation = True, preventDefault = True}
@@ -147,7 +149,7 @@ router config =
         :: href (buildUrl route)
         :: attrs
 
-    -- forward : route -> Action route state
+    -- forward : route -> state -> Action (WithRouter route state)
     forward route state =
       let
         _ = Debug.log "forward" route
@@ -160,33 +162,20 @@ router config =
   , state         = initialState
   , bindForward   = bindForward
   , buildUrl      = buildUrl
+  , getHandlers   = getHandlers
+  , setRoute      = setRoute
   -- , buildMatcher  = buildMatcher
   , forward       = forward
   }
-
--- routeChain : Router route state -> Maybe route -> route -> List (route)
--- routeChain (Router router) from to =
---   let
---     config = router.config.config to
---     result = [to]
---   in case config.parent of
---     Nothing    -> result
---     Just route -> case from of
---       Nothing -> (routeChain (Router router) from route) ++ result
---       Just f  -> case route == f of
---         True  -> route :: result
---         False -> (routeChain (Router router) from route) ++ result
-
-routeHandlers : Router route state -> Maybe route -> route -> List (Handler state)
-routeHandlers (Router router) from to = (.handler << router.config.config) to
-  -- let chain = routeChain (Router router) from to
-  -- in List.map (.handler << router.config.config) chain
 
 singleton : a -> List a
 singleton action = [ action ]
 
 mailbox : Signal.Mailbox (List (Action state))
 mailbox = Signal.mailbox []
+
+mailbox' : Signal.Mailbox (Action state)
+mailbox' = Signal.mailbox (\state -> Response <| noFx state)
 
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
@@ -206,38 +195,39 @@ chainAction action (state, effects) =
         (state', Effects.batch [effects, effects'])
 
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
-render router state =
+render (Router router) state =
     let
       _ = Debug.log "render" state
       (RouterState rs) = getState state
       route = rs.route
-      handlers = Maybe.withDefault [] <| Maybe.map (routeHandlers router Nothing) route
+      handlers = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
       views =  List.map .view handlers
       html = List.foldr (\view parsed -> view address state parsed) Nothing views
     in Maybe.withDefault (text "error") html
 
+
+setUrl : Router route (WithRouter route state) -> String -> Action (WithRouter route state)
+setUrl (Router router) url = case (router.matchRoute url) of
+    Nothing    -> Debug.crash <| url
+    Just route -> router.setRoute route
+
 runRouter : Router route (WithRouter route state) -> Result (WithRouter route state)
 runRouter (Router router) =
   let
+    init =
+      Signal.merge
+      (Signal.map (setUrl (Router router)) path)
+      mailbox'.signal
 
-    init = Signal.map (\p -> case (router.matchRoute p) of
-        Nothing    -> Debug.crash <| toString p
-        Just route ->
-          let
-           action = setRoute route
-           handlers = routeHandlers (Router router) Nothing route
-
-          in action :: runHandlers handlers
-      ) path
-
-    inputs =  List.foldl (Signal.Extra.fairMerge List.append)
+    inputs =
+      List.foldl (Signal.Extra.fairMerge List.append)
       mailbox.signal <| -- actions from events
       List.map (Signal.map singleton) router.config.inputs
 
     update  actions (state,_) = List.foldl chainAction (noFx state)              <| snd actions
-    update' actions           = List.foldl chainAction (noFx router.config.init) <| fst actions
+    update' action            = let (Response s) = (fst action) router.config.init in s
 
-    result = foldp' update update' <| Signal.map2 (,) init inputs
+    result = foldp' update update' <| Signal.Extra.zip init inputs
     state = Signal.map fst result
   in
     {

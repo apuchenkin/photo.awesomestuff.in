@@ -61,15 +61,15 @@ category c = {
 
 router : Router Route State
 router = Lib.Router.router {
-  init = initialState,
-  routes = [
-    Home,
-    Error,
-    Category ""
-    -- photo "" 0
-  ],
-  config = config,
-  inputs = []
+    init = initialState,
+    routes = [
+      Home,
+      Error,
+      Category ""
+      -- photo "" 0
+    ],
+    config = config,
+    inputs = []
   }
 
 result : Lib.Router.Result State
