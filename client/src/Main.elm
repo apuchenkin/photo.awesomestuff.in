@@ -79,5 +79,5 @@ result = runRouter router
 main : Signal Html
 main = result.html
 
-port tasks : Signal (Task Never ())
+port tasks : Signal (Task Never (List ()))
 port tasks = result.tasks -- Signal.map (\_ -> ) main
