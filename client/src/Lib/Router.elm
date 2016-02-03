@@ -70,7 +70,7 @@ type alias RouterConfig route state = {
 type Router route state = Router {
   config        : RouterConfig route state,
   state         : RouterState route,
-  matchRoute    : String -> Maybe route,
+  matchRoute    : String -> Maybe (route, List (String, String)),
   bindForward   : route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : route -> String,
   getHandlers   : Maybe route -> route -> List (Handler state),
@@ -115,6 +115,10 @@ match config tree url =
       [] -> [raw]
       p  -> Regex.split Regex.All (Regex.regex <| String.join "|" <| List.map ((++) ":") p) raw
 
+    _ = Debug.log "url" url
+    _ = Debug.log "params" <| params
+    _ = Debug.log "strings" <| strings
+
     sParsers = List.map (\p -> Combine.string p) strings
     pParsers = List.map (\p -> stringParser) params
 
@@ -123,27 +127,31 @@ match config tree url =
       Just v  -> v
 
     parsers = List.map2 (\p1 p2 -> p1 *> p2) sParsers pParsers
-    -- strings =  == ["a","b","c","d"]
-    _ = Debug.log "params" <| params
-    _ = Debug.log "strings" <| strings
+
     ----------------------------------------------------------------
-    parser = (List.foldl (\p pacc -> p `Combine.andThen` (\r -> (++) r <$> pacc))
-       (singleton <$> Combine.succeed "")
+
+    parser = (List.foldr (\p pacc -> p `Combine.andThen` (\r -> (++) r <$> pacc))
+       (singleton <$> last)
        (List.map (Combine.map singleton) parsers)
-       )
-       <* last
-       <* Combine.end
+       ) -- <* Combine.end
 
     result = Combine.parse parser url
-    _ = Debug.log "url" url
+
     _ = Debug.log "!" result
     url' = .input <| snd result
   in
+    -- case (fst result) of
+    --   Ok  r -> Just (datum tree, List.map2 (,) params r)
+    --   Err _ -> case children tree of
+    --     []        -> Nothing
+    --     forest    -> List.head <| List.filterMap (flip (match config) url') forest
     case (fst result) of
-      Ok  r -> Just (datum tree, List.map2 (,) params r)
-      Err _ -> case children tree of
-        []        -> Nothing
-        forest    -> List.head <| List.filterMap (flip (match config) url') forest
+      Err _ -> Nothing
+      Ok  r -> case String.isEmpty url' of
+        True  -> Just (datum tree, List.map2 (,) params r)
+        False -> case children tree of
+          []        -> Nothing
+          forest    -> Maybe.map (\(f,p) -> (f,p ++ List.map2 (,) params r)) <| List.head <| List.filterMap (flip (match config) url') forest
 
 
 
@@ -151,19 +159,17 @@ router : RouterConfig route (WithRouter route state) -> Router route (WithRouter
 router config =
   let
     -- matchRoute : String -> Maybe route
-    matchRoute url =
-      let
-        forest = config.routes
-        matches = List.map (flip (match config) url) forest
-        _ = Debug.crash <| toString matches
-      in Nothing
+    matchRoute url = List.head <| List.filterMap (flip (match config) url) <| config.routes
+        -- _ = Debug.crash <| toString matches
+      -- in
+
       -- let matchers = List.map (.matcher << config.config) config.routes
       -- in match matchers url
 
     -- decompose Route to string
     buildUrl route =
       let
-        _ = Debug.crash "todo: implement matchRoute"
+        _ = Debug.crash "todo: implement buildUrl"
       in ""
       --
       -- let url = .buildUrl <| config.config route
@@ -180,7 +186,7 @@ router config =
     -- getHandlers : Maybe route -> route -> List (Handler state)
     getHandlers from to =
       let
-        _ = Debug.crash "todo: implement matchRoute"
+        _ = Debug.crash "todo: implement getHandlers"
       in []
 
     -- setRoute : route -> Action (WithRouter route state)
@@ -268,8 +274,8 @@ render (Router router) state =
 
 setUrl : Router route (WithRouter route state) -> String -> Action (WithRouter route state)
 setUrl (Router router) url = case (router.matchRoute url) of
-    Nothing    -> Debug.crash <| url
-    Just route -> router.setRoute route
+    Nothing               -> Debug.crash <| url
+    Just (route, params)  -> router.setRoute route
 
 runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)
 runRouter (Router router) =
