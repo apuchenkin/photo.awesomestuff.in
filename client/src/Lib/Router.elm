@@ -145,15 +145,15 @@ router config =
         options = {stopPropagation = True, preventDefault = True}
         action _ = Signal.message address <| forward route
       in
-           onWithOptions "click" options Json.value action
-        :: href (buildUrl route)
+        href (buildUrl route)
+        :: onWithOptions "click" options Json.value action
         :: attrs
 
     -- forward : route -> state -> Action (WithRouter route state)
     forward route state =
       let
         _ = Debug.log "forward" route
-        task  = History.setPath (buildUrl route) |> Task.map (\_ -> setRoute route)
+        task  = History.setPath (buildUrl route) |> Task.map (always (\s -> Response <| noFx s))
       in Response (state, Effects.task task)
 
   in Router {
@@ -164,7 +164,6 @@ router config =
   , buildUrl      = buildUrl
   , getHandlers   = getHandlers
   , setRoute      = setRoute
-  -- , buildMatcher  = buildMatcher
   , forward       = forward
   }
 
@@ -173,9 +172,6 @@ singleton action = [ action ]
 
 mailbox : Signal.Mailbox (List (Action state))
 mailbox = Signal.mailbox []
-
-mailbox' : Signal.Mailbox (Action state)
-mailbox' = Signal.mailbox (\state -> Response <| noFx state)
 
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
@@ -215,24 +211,27 @@ runRouter : Router route (WithRouter route state) -> Result (WithRouter route st
 runRouter (Router router) =
   let
     init =
-      Signal.merge
-      (Signal.map (setUrl (Router router)) path)
-      mailbox'.signal
+      (Signal.map (singleton << (,) True << setUrl (Router router)) path)
 
+    -- inputs : Signal (List (Bool, Action state))
     inputs =
       List.foldl (Signal.Extra.fairMerge List.append)
-      mailbox.signal <| -- actions from events
-      List.map (Signal.map singleton) router.config.inputs
+      (Signal.map (List.map ((,) False)) mailbox.signal) <| -- actions from events
+      init
+      :: List.map (Signal.map (singleton << (,) False)) router.config.inputs
 
-    update  actions (state,_) = List.foldl chainAction (noFx state)              <| snd actions
-    update' action            = let (Response s) = (fst action) router.config.init in s
+    -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)
+    update  actions (state,_) = List.foldl chainAction (noFx state)       <| List.map snd actions
 
-    result = foldp' update update' <| Signal.Extra.zip init inputs
+    -- update' : List (Bool, Action state) -> (state, ActionEffects state)
+    update' actions           = List.foldl chainAction (noFx router.config.init) <| List.map snd <| List.filter fst actions -- let (Response s) = (fst action) router.config.init in s
+
+    -- result : Signal (state, ActionEffects state)
+    result = foldp' update update' inputs
     state = Signal.map fst result
   in
     {
       html  = Signal.map (render (Router router)) state
     , state = state
-    -- , tasks = Signal.map (\lt -> Task.sequence <| List.map (Effects.toTask mailbox.address) (snd lt)) result
     , tasks = Signal.map (Effects.toTask mailbox.address << snd) result
     }
