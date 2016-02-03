@@ -7,13 +7,12 @@ import Effects exposing (Never)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
-import RouteParser as R exposing (static, dyn1)
 
-config : Route -> RouteConfig Route State
-config r = case r of
+config : Route -> RouteConfig State
+config route = case route of
   Home               -> home
   Error              -> error404
-  Category c         -> category c
+  Category           -> category
   _                  -> error404
 
 initialState : State
@@ -23,31 +22,31 @@ initialState = {
     router = Lib.Router.initialState
   }
 
-home : RouteConfig Route State
+home : RouteConfig State
 home = {
-    parent = Nothing,
+    -- parent = Nothing,
     url = "/",
-    buildUrl = "/",
-    matcher = static Home "/",
-    handler = [homeHandler router]
+    -- buildUrl = "/",
+    -- matcher = static Home "/",
+    handler = homeHandler router
   }
 
-error404 : RouteConfig Route State
+error404 : RouteConfig State
 error404 = {
-    parent = Nothing,
+    -- parent = Nothing,
     url = "/404",
-    buildUrl = "/404",
-    matcher = static Error "/404",
-    handler = [homeHandler router]
+    -- buildUrl = "/404",
+    -- matcher = static Error "/404",
+    handler = homeHandler router
   }
 
-category : String -> RouteConfig Route State
-category c = {
-    parent = Just Home,
+category : RouteConfig State
+category = {
+    -- parent = Just Home,
     url = "/:category",
-    buildUrl = "/" ++ c,
-    matcher = dyn1 Category "/" R.string "",
-    handler = [homeHandler router, categoryHandler router c]
+    -- buildUrl = "/" ++ c,
+    -- matcher = dyn1 Category "/" R.string "",
+    handler = categoryHandler router
   }
 
 -- photo : String -> Int -> RouteConfig Route State
@@ -62,12 +61,7 @@ category c = {
 router : Router Route State
 router = Lib.Router.router {
     init = initialState,
-    routes = [
-      Home,
-      Error,
-      Category ""
-      -- photo "" 0
-    ],
+    routes = routes,
     config = config,
     inputs = []
   }

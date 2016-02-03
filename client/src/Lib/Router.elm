@@ -1,12 +1,11 @@
 module Lib.Router where
 
 import Task         exposing (Task)
-import RouteParser  exposing (Matcher, match, mapMatcher)
 import Html         exposing (Html, text, div)
 import Html.Events  exposing (onWithOptions)
 import Effects      exposing (Effects, Never)
 import History      exposing (path)
-
+import MultiwayTree exposing (Tree (..), Forest)
 
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
@@ -48,18 +47,15 @@ type RouterState route = RouterState {
 {-| Type extension for the model. -}
 type alias WithRouter route state = { state | router : RouterState route }
 
-type alias RouteConfig route state = {
-      parent:       Maybe route
-    , url:          String
-    , buildUrl:     String
-    , matcher:      Matcher route
-    , handler:      List (Handler state)
+type alias RouteConfig state = {
+      url:          String
+    , handler:      Handler state
   }
 
 type alias RouterConfig route state = {
   init:       state,
-  config:     route -> RouteConfig route state,
-  routes:     List (route),
+  config:     route -> RouteConfig state,
+  routes:     Forest route,
   inputs:     List (Signal.Signal (Action state))
 }
 
@@ -100,13 +96,20 @@ router config =
   let
     -- matchRoute : String -> Maybe route
     matchRoute url =
-      let matchers = List.map (.matcher << config.config) config.routes
-      in match matchers url
+      let
+        _ = Debug.crash "todo: implement matchRoute"
+      in Nothing
+      -- let matchers = List.map (.matcher << config.config) config.routes
+      -- in match matchers url
 
     -- decompose Route to string
     buildUrl route =
-      let url = .buildUrl <| config.config route
-      in url
+      let
+        _ = Debug.crash "todo: implement matchRoute"
+      in ""
+      --
+      -- let url = .buildUrl <| config.config route
+      -- in url
 
     -- buildMatcher : route -> Matcher route
     -- buildMatcher route =
@@ -117,7 +120,10 @@ router config =
     -- bindForward : route -> List Html.Attribute -> List Html.Attribute
 
     -- getHandlers : Maybe route -> route -> List (Handler state)
-    getHandlers from to = (.handler << config.config) to
+    getHandlers from to =
+      let
+        _ = Debug.crash "todo: implement matchRoute"
+      in []
 
     -- setRoute : route -> Action (WithRouter route state)
     setRoute route state =

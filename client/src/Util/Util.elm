@@ -22,5 +22,5 @@ treeLookup value z =
   in case Tree.datum tree == value of
     True -> Just z
     False -> case Tree.children tree of
-      [] -> Nothing
+      []     -> Nothing
       childs -> List.head <| List.filterMap (\idx -> treeLookup value (unsafeFromJust <| flip goToChild z idx)) [0.. List.length childs - 1]
