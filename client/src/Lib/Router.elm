@@ -1,15 +1,23 @@
 module Lib.Router where
 
+import String
+import Regex
 import Task         exposing (Task)
 import Html         exposing (Html, text, div)
 import Html.Events  exposing (onWithOptions)
 import Effects      exposing (Effects, Never)
 import History      exposing (path)
-import MultiwayTree exposing (Tree (..), Forest)
+import MultiwayTree exposing (Tree (..), Forest, datum, children)
 
+import List.Extra
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
+import Result       exposing (Result (..))
+
+import Combine
+import Combine.Char
+import Combine.Infix exposing ((<$>), (<$), (<?>), (<*>), (*>), (<*), (<|>))
 -- import Response as R
 
 -- definitions
@@ -21,7 +29,7 @@ type alias Action state = state -> Response state
 type alias ActionEffects state = Effects (Action state)
 -- type alias MaybeTask state = Maybe (Task Never (Action state))
 
-type alias Result state =
+type alias RouterResult state =
     { html  : Signal Html
     , state : Signal state
     -- , tasks : Signal (Task.Task Never (List ()))
@@ -37,7 +45,7 @@ type Response state = Response (state, ActionEffects state)
 
 type RouterState route = RouterState {
     route:    Maybe route,
-    params:   List String
+    params:   List (String, String)
   }
 
 -----------------------------------------
@@ -91,13 +99,63 @@ setState state routerState =
   { state | router = routerState }
 
 
+match : RouterConfig route state -> Tree route -> String -> Maybe (route, List (String, String))
+match config tree url =
+  let
+    raw = .url <| config.config <| datum tree
+    stringParser = String.fromList <$> Combine.many1 (Combine.Char.noneOf [ '/', ':', '#', '?' ])
+    paramParser = Combine.Char.char ':' *> stringParser
+    paramsParser = Combine.many <| Combine.while ((/=) ':') *> paramParser <* Combine.while ((/=) ':')
+
+    params = case fst <| Combine.parse paramsParser raw of
+      Err _ -> Debug.crash "case Combine.parse paramsParser raw of"
+      Ok p  -> p
+
+    strings = case params of
+      [] -> [raw]
+      p  -> Regex.split Regex.All (Regex.regex <| String.join "|" <| List.map ((++) ":") p) raw
+
+    sParsers = List.map (\p -> Combine.string p) strings
+    pParsers = List.map (\p -> stringParser) params
+
+    last = case List.Extra.last sParsers of
+      Nothing -> Debug.crash "List.Extra.last sParsers"
+      Just v  -> v
+
+    parsers = List.map2 (\p1 p2 -> p1 *> p2) sParsers pParsers
+    -- strings =  == ["a","b","c","d"]
+    _ = Debug.log "params" <| params
+    _ = Debug.log "strings" <| strings
+    ----------------------------------------------------------------
+    parser = (List.foldl (\p pacc -> p `Combine.andThen` (\r -> (++) r <$> pacc))
+       (singleton <$> Combine.succeed "")
+       (List.map (Combine.map singleton) parsers)
+       )
+       <* last
+       <* Combine.end
+
+    result = Combine.parse parser url
+    _ = Debug.log "url" url
+    _ = Debug.log "!" result
+    url' = .input <| snd result
+  in
+    case (fst result) of
+      Ok  r -> Just (datum tree, List.map2 (,) params r)
+      Err _ -> case children tree of
+        []        -> Nothing
+        forest    -> List.head <| List.filterMap (flip (match config) url') forest
+
+
+
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
   let
     -- matchRoute : String -> Maybe route
     matchRoute url =
       let
-        _ = Debug.crash "todo: implement matchRoute"
+        forest = config.routes
+        matches = List.map (flip (match config) url) forest
+        _ = Debug.crash <| toString matches
       in Nothing
       -- let matchers = List.map (.matcher << config.config) config.routes
       -- in match matchers url
@@ -213,7 +271,7 @@ setUrl (Router router) url = case (router.matchRoute url) of
     Nothing    -> Debug.crash <| url
     Just route -> router.setRoute route
 
-runRouter : Router route (WithRouter route state) -> Result (WithRouter route state)
+runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)
 runRouter (Router router) =
   let
     init =

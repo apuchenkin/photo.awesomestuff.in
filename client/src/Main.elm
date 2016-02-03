@@ -13,7 +13,8 @@ config route = case route of
   Home               -> home
   Error              -> error404
   Category           -> category
-  _                  -> error404
+  Photo              -> photo
+  -- _                  -> error404
 
 initialState : State
 initialState = {
@@ -43,20 +44,17 @@ error404 = {
 category : RouteConfig State
 category = {
     -- parent = Just Home,
-    url = "/:category",
+    url = ":category/:subcategory",
     -- buildUrl = "/" ++ c,
     -- matcher = dyn1 Category "/" R.string "",
     handler = categoryHandler router
   }
 
--- photo : String -> Int -> RouteConfig Route State
--- photo category pid = {
---     parent = Just (Category category),
---     url = "/photo/:id",
---     buildUrl = "/" ++ category ++ "/photo/" ++ toString pid,
---     matcher = R.dyn2 Photo "/" R.string "/photo/" R.int "",
---     handler = [homeHandler router, categoryHandler router category]
---   }
+photo : RouteConfig State
+photo = {
+    url = "/:photo",
+    handler = categoryHandler router
+  }
 
 router : Router Route State
 router = Lib.Router.router {
@@ -66,7 +64,7 @@ router = Lib.Router.router {
     inputs = []
   }
 
-result : Lib.Router.Result State
+result : RouterResult State
 result = runRouter router
 
 main : Signal Html
