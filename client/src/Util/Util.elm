@@ -24,8 +24,8 @@ treeLookup : a -> Zipper a -> Maybe (Zipper a)
 treeLookup value z =
   let
     tree = fst z
-    _ = Debug.log "treeLookup" value
-    _ = Debug.log "treeLookup" <| Tree.datum tree
+    -- _ = Debug.log "treeLookup" value
+    -- _ = Debug.log "treeLookup" <| Tree.datum tree
     -- ++ "|" ++ ()
     unsafeFromJust : Maybe a -> a
     unsafeFromJust mb = case mb of

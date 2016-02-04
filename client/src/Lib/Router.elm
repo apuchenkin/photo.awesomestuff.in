@@ -89,7 +89,7 @@ transition config from to state =
   in  Response <| List.foldl chainAction (noFx state) actions
 
 -- binds forward action to existing HTML attributes
-bindForward : RouterConfig route state -> state -> Route route -> List Html.Attribute -> List Html.Attribute
+bindForward : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> List Html.Attribute -> List Html.Attribute
 bindForward config state route attrs =
   let
     options = {stopPropagation = True, preventDefault = True}
@@ -100,17 +100,13 @@ bindForward config state route attrs =
     :: attrs
 
 -- decompose Route to string
-buildUrl : RouterConfig route state -> state -> Route route -> String
-buildUrl config state (route, params) =
+buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
+buildUrl config state route =
   let
     _ = Debug.log "buildUrl" (route, params)
-    zipper   = List.head <| List.filterMap (\r -> Util.Util.treeLookup route (r, [])) config.routes
-    traverse = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipper
-    segments = List.map (.url << config.config) traverse
-    rawUrl = List.foldl (flip (++)) "" segments
-
-    _ = Debug.log "segments" segments
-  in rawUrl
+    params = getState state |> .params
+  in
+    Lib.Matcher.buildUrl config.config config.routes <| combineParams params route
 
 
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
@@ -126,10 +122,12 @@ getHandlers config from to =
     routes = case traverseTo of
       [] -> []
       _  -> case (List.head traverseTo) == (List.head traverseFrom) of
-        False -> traverseTo
-        True  -> List.map fst <| List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
+        False -> []
+        True  -> List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
 
-  in List.map (.handler << config.config) routes
+    routes' = List.drop (List.length routes) traverseTo
+
+  in List.map (.handler << config.config) routes'
 
 
 setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
@@ -138,12 +136,12 @@ setRoute config (route, params) state =
     _ = Debug.log "setRoute" route
     (rs) = getState state
     from  = rs.route
-    state' = setState state <| { rs | route = Just route }
+    state' = setState state <| { rs | route = Just route, params = params }
   in
     transition config from route state'
 
 
-forward : RouterConfig route state -> Route route -> Action state
+forward : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
 forward config route state =
   let
     _ = Debug.log "forward" route

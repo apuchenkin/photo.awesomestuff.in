@@ -18,9 +18,10 @@ homeHandler (Router router) =
     loader = Html.div [class "loader"] []
     view address state parsed =
       let
+        -- _ = Debug.log "homeHandler" state
         home = Html.a (router.bindForward state (Route.Home,Dict.empty) []) [text "HOME"]
         rest = case parsed of
-          Nothing   -> [Html.div [class "categories"] <| List.map (\c -> Html.a (router.bindForward state (Route.Category, Dict.empty) []) [text c.title]) state.categories]
+          Nothing   -> [Html.div [class "categories"] <| List.map (\c -> Html.a (router.bindForward state (Route.Category, Dict.fromList [("category", c.name)]) []) [text c.title]) state.categories]
           Just html -> [html]
       in Just <| div [] <| case state.isLoading of
         True  -> loader :: home :: rest
@@ -40,7 +41,7 @@ categoryHandler (Router router) =
     view address state _ =
       let
         _ = Debug.log "categoryHandler" state
-        mc = L.find (\c -> c.name == "todo: category") state.categories
+        mc = L.find (\c -> Just c.name == Dict.get "category" state.router.params) state.categories
       in Maybe.map (\c -> div [] [text <| toString c]) mc
   in
     {
