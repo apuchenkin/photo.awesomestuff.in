@@ -38,7 +38,7 @@ error404 = {
 
 category : RouteConfig State
 category = {
-    url = ":category",
+    url = ":category[/:subcategory]",
     handler = categoryHandler router
   }
 

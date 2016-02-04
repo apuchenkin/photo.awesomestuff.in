@@ -1,4 +1,7 @@
-module Lib.Matcher (match, combineParams, buildUrl) where
+module Lib.Matcher
+ -- (match, combineParams, buildUrl)
+ (..) -- test
+  where
 
 import Regex
 import String
@@ -17,6 +20,14 @@ import Lib.Helpers  exposing (singleton)
 paramChar : Char
 paramChar = ':'
 
+-- left delimiter
+ld : Char
+ld = '['
+
+-- right delimiter
+rd : Char
+rd = ']'
+
 stringParser : Parser String
 stringParser = String.fromList <$> many1 (noneOf [ '/', paramChar, '#', '?' ])
 
@@ -33,6 +44,9 @@ getParams string = case fst <| parse paramsParser string of
 
 combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union dict params)
+
+unwrap : String -> List String
+unwrap url = [url]
 
 match : GetRouteConfig route state -> Tree route -> String -> Maybe (Route route)
 match getConfig tree url =
