@@ -2,13 +2,15 @@ module Lib.Matcher (match) where
 
 import Regex
 import String
+import Dict
+
 import MultiwayTree exposing (Tree (..), Forest, datum, children)
 import List.Extra
 import Combine        exposing (Parser, many1, parse, many, while)
 import Combine.Char   exposing (char, noneOf)
 import Combine.Infix  exposing ((<$>), (*>), (<*))
 
-import Lib.Types    exposing (GetRouteConfig)
+import Lib.Types    exposing (GetRouteConfig, RouteParams)
 import Lib.Helpers  exposing (singleton)
 
 paramChar : Char
@@ -28,7 +30,10 @@ getParams string = case fst <| parse paramsParser string of
   Err _     -> Debug.crash "getParams : String -> List String"
   Ok param  -> param
 
-match : GetRouteConfig route state -> Tree route -> String -> Maybe (route, List (String, String))
+combineParams : RouteParams -> (route, RouteParams) -> (route, RouteParams)
+combineParams dict (route, params) = (route, Dict.union dict params)
+
+match : GetRouteConfig route state -> Tree route -> String -> Maybe (route, RouteParams)
 match getConfig tree url =
   let
     raw = .url << getConfig <| datum tree
@@ -64,9 +69,13 @@ match getConfig tree url =
     -- _ = Debug.log "!" result
     url' = .input <| snd result
   in case (fst result) of
-    Err _ -> Nothing
-    Ok  r -> case String.isEmpty url' of
-      True  -> Just (datum tree, List.map2 (,) params r)
-      False -> case children tree of
-        []        -> Nothing
-        forest    -> Maybe.map (\(f,p) -> (f,p ++ List.map2 (,) params r)) <| List.head <| List.filterMap (flip (match getConfig) url') forest
+    Err _       -> Nothing
+    Ok  values  ->
+      let dict = Dict.fromList <| List.map2 (,) params values
+      in case String.isEmpty url' of
+        True  -> Just (datum tree, dict)
+        False -> case children tree of
+          []        -> Nothing
+          forest    ->
+            let child = List.head <| List.filterMap (flip (match getConfig) url') forest
+            in Maybe.map (combineParams dict) child

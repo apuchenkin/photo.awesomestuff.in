@@ -1,5 +1,6 @@
 module Lib.Router (router, runRouter, initialState) where
 
+import Dict
 import Task         exposing (Task)
 import Html         exposing (Html, text, div)
 import Html.Events  exposing (onWithOptions)
@@ -16,7 +17,7 @@ import Lib.Types    exposing (..)
 -- import Response as R
 
 initialState : RouterState route
-initialState = RouterState {route = Nothing, params = []}
+initialState = RouterState {route = Nothing, params = Dict.empty}
 
 -- Private: extract state from state
 getState : WithRouter route state -> RouterState route

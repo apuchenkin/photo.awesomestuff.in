@@ -1,6 +1,7 @@
-module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouterState (..),
+module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState (..),
                   GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition) where
 
+import Dict           exposing (Dict)
 import Html           exposing (Html)
 import Task           exposing (Task)
 import Effects        exposing (Effects, Never)
@@ -33,9 +34,11 @@ type alias RouterResult state =
     , tasks : Signal (Task Never ())
     }
 
+type alias RouteParams  = Dict String String
+
 type RouterState route = RouterState {
     route:    Maybe route,
-    params:   List (String, String)
+    params:   RouteParams
   }
 
 -----------------------------------------
@@ -57,7 +60,7 @@ type alias RouterConfig route state = {
 type Router route state = Router {
   config        : RouterConfig route state,
   state         : RouterState route,
-  matchRoute    : String -> Maybe (route, List (String, String)),
+  matchRoute    : String -> Maybe (route, RouteParams),
   bindForward   : route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : route -> String,
   getHandlers   : Maybe route -> route -> List (Handler state),
