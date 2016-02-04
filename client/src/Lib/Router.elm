@@ -1,6 +1,8 @@
 module Lib.Router (router, runRouter, initialState) where
 
 import Dict
+import List.Extra
+import MultiwayTree as Tree
 import Task         exposing (Task)
 import Html         exposing (Html, text, div)
 import Html.Events  exposing (onWithOptions)
@@ -14,10 +16,17 @@ import Signal.Extra exposing (fairMerge, foldp')
 import Lib.Helpers  exposing (..)
 import Lib.Matcher  exposing (..)
 import Lib.Types    exposing (..)
+import Util.Util
 -- import Response as R
 
 initialState : RouterState route
-initialState = RouterState {route = Nothing, params = Dict.empty}
+initialState = {route = Nothing, params = Dict.empty}
+
+mailbox : Signal.Mailbox (List (Action state))
+mailbox = Signal.mailbox []
+
+address : Signal.Address (Action state)
+address = Signal.forwardTo mailbox.address singleton
 
 -- Private: extract state from state
 getState : WithRouter route state -> RouterState route
@@ -57,16 +66,31 @@ router config =
     -- getHandlers : Maybe route -> route -> List (Handler state)
     getHandlers from to =
       let
-        _ = Debug.crash "todo: implement getHandlers"
-      in []
+        _ = Debug.log "getHandlers" (from, to)
+        zipperTo =   List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
+        zipperFrom = List.head <| List.filterMap (\r -> from `Maybe.andThen` (flip Util.Util.treeLookup (r, []))) config.routes
+
+        traverseTo   = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperTo
+        traverseFrom = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperFrom
+
+        -- _ = Debug.log "traverse" <|  List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
+        -- _ = Debug.log "traverseFrom" traverseFrom
+        -- _ = Debug.crash "todo: implement getHandlers"
+        routes = case traverseTo of
+          [] -> []
+          _  -> case (List.head traverseTo) == (List.head traverseFrom) of
+            False -> traverseTo
+            True  -> List.map fst <| List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
+
+      in List.map (.handler << config.config) routes
 
     -- setRoute : route -> Action (WithRouter route state)
     setRoute route state =
       let
         _ = Debug.log "setRoute" route
-        (RouterState rs) = getState state
+        (rs) = getState state
         from  = rs.route
-        state' = setState state <| RouterState { rs | route = Just route }
+        state' = setState state <| { rs | route = Just route }
       in
         transition from route state'
 
@@ -108,12 +132,6 @@ router config =
   , forward       = forward
   }
 
-mailbox : Signal.Mailbox (List (Action state))
-mailbox = Signal.mailbox []
-
-address : Signal.Address (Action state)
-address = Signal.forwardTo mailbox.address singleton
-
 runHandlers : List (Handler state) -> List (Action state)
 runHandlers handlers =
   let
@@ -132,7 +150,7 @@ render : Router route (WithRouter route state) -> (WithRouter route state) -> Ht
 render (Router router) state =
     let
       _ = Debug.log "render" state
-      (RouterState rs) = getState state
+      (rs) = getState state
       route = rs.route
       handlers = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
       views =  List.map .view handlers
@@ -159,12 +177,13 @@ runRouter (Router router) =
       :: List.map (Signal.map (singleton << (,) False)) router.config.inputs
 
     -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)
-    update  actions (state,_) = List.foldl chainAction (noFx state)       <| List.map snd actions
+    update  actions (state,_) = List.foldl chainAction (noFx state)
+      <| List.map snd actions
 
     -- update' : List (Bool, Action state) -> (state, ActionEffects state)
-    update' actions           = List.foldl chainAction (noFx router.config.init) <| List.map snd <| List.filter fst actions -- let (Response s) = (fst action) router.config.init in s
+    update' actions           = List.foldl chainAction (noFx router.config.init)
+      <| List.map snd <| List.filter fst actions
 
-    -- result : Signal (state, ActionEffects state)
     result = foldp' update update' inputs
     state = Signal.map fst result
   in

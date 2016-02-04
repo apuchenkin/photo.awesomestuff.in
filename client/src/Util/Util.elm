@@ -1,11 +1,24 @@
-import MultiwayTree as Tree exposing (Tree (..), Forest)
-import MultiwayTreeZipper exposing (Zipper, goToChild)
+module Util.Util where
+
+import MultiwayTree as Tree exposing (Tree (..), Forest, datum)
+import MultiwayTreeZipper exposing (Zipper, Context (..), goToChild, goUp)
+
+leftContext : Context a -> List (Tree a)
+leftContext (Context _ left _) = left
 
 treeToList : Tree a -> List a
 treeToList tree =
   let
     tail = List.concatMap treeToList (Tree.children tree)
   in (Tree.datum tree) :: tail
+
+traverseUp : Zipper a -> List a
+traverseUp zipper =
+  let value = [datum <| fst zipper]
+  in case goUp zipper of
+    Nothing      -> value
+    Just zipper' -> traverseUp zipper' ++ value
+
 
 treeLookup : a -> Zipper a -> Maybe (Zipper a)
 treeLookup value z =

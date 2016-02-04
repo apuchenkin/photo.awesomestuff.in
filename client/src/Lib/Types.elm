@@ -1,4 +1,4 @@
-module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState (..),
+module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState,
                   GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition) where
 
 import Dict           exposing (Dict)
@@ -36,7 +36,7 @@ type alias RouterResult state =
 
 type alias RouteParams  = Dict String String
 
-type RouterState route = RouterState {
+type alias RouterState route = {
     route:    Maybe route,
     params:   RouteParams
   }
