@@ -1,88 +1,19 @@
-module Lib.Router where
+module Lib.Router (router, runRouter, initialState) where
 
-import String
-import Regex
 import Task         exposing (Task)
 import Html         exposing (Html, text, div)
 import Html.Events  exposing (onWithOptions)
 import Effects      exposing (Effects, Never)
 import History      exposing (path)
-import MultiwayTree exposing (Tree (..), Forest, datum, children)
 
-import List.Extra
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
-import Result       exposing (Result (..))
 
-import Combine
-import Combine.Char
-import Combine.Infix exposing ((<$>), (<$), (<?>), (<*>), (*>), (<*), (<|>))
+import Lib.Helpers  exposing (..)
+import Lib.Matcher  exposing (..)
+import Lib.Types    exposing (..)
 -- import Response as R
-
--- definitions
------------------------------------------
--- State
------------------------------------------
-
-type alias Action state = state -> Response state
-type alias ActionEffects state = Effects (Action state)
--- type alias MaybeTask state = Maybe (Task Never (Action state))
-
-type alias RouterResult state =
-    { html  : Signal Html
-    , state : Signal state
-    -- , tasks : Signal (Task.Task Never (List ()))
-    , tasks : Signal (Task Never ())
-    }
-
-type alias Handler state = {
-    view    : Signal.Address (Action state) -> state -> Maybe Html -> Maybe Html
-  , inputs  : List (Action state)
-  }
-
-type Response state = Response (state, ActionEffects state)
-
-type RouterState route = RouterState {
-    route:    Maybe route,
-    params:   List (String, String)
-  }
-
------------------------------------------
--- Route
------------------------------------------
-
-{-| Type extension for the model. -}
-type alias WithRouter route state = { state | router : RouterState route }
-
-type alias RouteConfig state = {
-      url:          String
-    , handler:      Handler state
-  }
-
-type alias RouterConfig route state = {
-  init:       state,
-  config:     route -> RouteConfig state,
-  routes:     Forest route,
-  inputs:     List (Signal.Signal (Action state))
-}
-
-type Router route state = Router {
-  config        : RouterConfig route state,
-  state         : RouterState route,
-  matchRoute    : String -> Maybe (route, List (String, String)),
-  bindForward   : route -> List Html.Attribute -> List Html.Attribute,
-  buildUrl      : route -> String,
-  getHandlers   : Maybe route -> route -> List (Handler state),
-  setRoute      : route -> Action state,
-  forward       : route -> Action state
-}
-
-type alias Transition route state = Maybe route -> route -> Action state
-
---------------------------------------------------------------------------------
-noFx : state -> (state, ActionEffects state)
-noFx state = (state, Effects.none)
 
 initialState : RouterState route
 initialState = RouterState {route = Nothing, params = []}
@@ -99,72 +30,11 @@ setState state routerState =
   { state | router = routerState }
 
 
-match : RouterConfig route state -> Tree route -> String -> Maybe (route, List (String, String))
-match config tree url =
-  let
-    raw = .url <| config.config <| datum tree
-    stringParser = String.fromList <$> Combine.many1 (Combine.Char.noneOf [ '/', ':', '#', '?' ])
-    paramParser = Combine.Char.char ':' *> stringParser
-    paramsParser = Combine.many <| Combine.while ((/=) ':') *> paramParser <* Combine.while ((/=) ':')
-
-    params = case fst <| Combine.parse paramsParser raw of
-      Err _ -> Debug.crash "case Combine.parse paramsParser raw of"
-      Ok p  -> p
-
-    strings = case params of
-      [] -> [raw]
-      p  -> Regex.split Regex.All (Regex.regex <| String.join "|" <| List.map ((++) ":") p) raw
-
-    _ = Debug.log "url" url
-    _ = Debug.log "params" <| params
-    _ = Debug.log "strings" <| strings
-
-    sParsers = List.map (\p -> Combine.string p) strings
-    pParsers = List.map (\p -> stringParser) params
-
-    last = case List.Extra.last sParsers of
-      Nothing -> Debug.crash "List.Extra.last sParsers"
-      Just v  -> v
-
-    parsers = List.map2 (\p1 p2 -> p1 *> p2) sParsers pParsers
-
-    ----------------------------------------------------------------
-
-    parser = (List.foldr (\p pacc -> p `Combine.andThen` (\r -> (++) r <$> pacc))
-       (singleton <$> last)
-       (List.map (Combine.map singleton) parsers)
-       ) -- <* Combine.end
-
-    result = Combine.parse parser url
-
-    _ = Debug.log "!" result
-    url' = .input <| snd result
-  in
-    -- case (fst result) of
-    --   Ok  r -> Just (datum tree, List.map2 (,) params r)
-    --   Err _ -> case children tree of
-    --     []        -> Nothing
-    --     forest    -> List.head <| List.filterMap (flip (match config) url') forest
-    case (fst result) of
-      Err _ -> Nothing
-      Ok  r -> case String.isEmpty url' of
-        True  -> Just (datum tree, List.map2 (,) params r)
-        False -> case children tree of
-          []        -> Nothing
-          forest    -> Maybe.map (\(f,p) -> (f,p ++ List.map2 (,) params r)) <| List.head <| List.filterMap (flip (match config) url') forest
-
-
-
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
   let
     -- matchRoute : String -> Maybe route
-    matchRoute url = List.head <| List.filterMap (flip (match config) url) <| config.routes
-        -- _ = Debug.crash <| toString matches
-      -- in
-
-      -- let matchers = List.map (.matcher << config.config) config.routes
-      -- in match matchers url
+    matchRoute url = List.head <| List.filterMap (flip (match config.config) url) <| config.routes
 
     -- decompose Route to string
     buildUrl route =
@@ -236,9 +106,6 @@ router config =
   , setRoute      = setRoute
   , forward       = forward
   }
-
-singleton : a -> List a
-singleton action = [ action ]
 
 mailbox : Signal.Mailbox (List (Action state))
 mailbox = Signal.mailbox []

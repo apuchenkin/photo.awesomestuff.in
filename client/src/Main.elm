@@ -1,5 +1,3 @@
-import Lib.Router exposing (..)
-
 import Task exposing (Task)
 import Html exposing (Html)
 import Effects exposing (Never)
@@ -7,6 +5,9 @@ import Effects exposing (Never)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
+
+import Lib.Router exposing (..)
+import Lib.Types  exposing (RouteConfig, Router, RouterResult)
 
 config : Route -> RouteConfig State
 config route = case route of

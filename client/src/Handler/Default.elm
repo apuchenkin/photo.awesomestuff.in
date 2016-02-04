@@ -1,7 +1,9 @@
 module Handler.Default where
 
+import Lib.Helpers exposing (noFx)
 import Handler.Actions exposing (..)
-import Lib.Router exposing (Router (..), Handler, Response (..), noFx)
+import Lib.Types exposing (Router (..), Handler, Response (..))
+
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
 import Handler.Routes as Route exposing (Route)
