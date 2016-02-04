@@ -26,28 +26,19 @@ initialState = {
 
 home : RouteConfig State
 home = {
-    -- parent = Nothing,
     url = "/",
-    -- buildUrl = "/",
-    -- matcher = static Home "/",
     handler = homeHandler router
   }
 
 error404 : RouteConfig State
 error404 = {
-    -- parent = Nothing,
     url = "/404",
-    -- buildUrl = "/404",
-    -- matcher = static Error "/404",
     handler = homeHandler router
   }
 
 category : RouteConfig State
 category = {
-    -- parent = Just Home,
     url = ":category/:subcategory",
-    -- buildUrl = "/" ++ c,
-    -- matcher = dyn1 Category "/" R.string "",
     handler = categoryHandler router
   }
 

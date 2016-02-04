@@ -1,4 +1,4 @@
-module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState,
+module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState, Route,
                   GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition) where
 
 import Dict           exposing (Dict)
@@ -36,6 +36,8 @@ type alias RouterResult state =
 
 type alias RouteParams  = Dict String String
 
+type alias Route route = (route, RouteParams)
+
 type alias RouterState route = {
     route:    Maybe route,
     params:   RouteParams
@@ -59,13 +61,11 @@ type alias RouterConfig route state = {
 
 type Router route state = Router {
   config        : RouterConfig route state,
-  state         : RouterState route,
-  matchRoute    : String -> Maybe (route, RouteParams),
-  bindForward   : route -> List Html.Attribute -> List Html.Attribute,
-  buildUrl      : route -> String,
+  bindForward   : state -> Route route -> List Html.Attribute -> List Html.Attribute,
+  buildUrl      : state -> Route route -> String,
   getHandlers   : Maybe route -> route -> List (Handler state),
-  setRoute      : route -> Action state,
-  forward       : route -> Action state
+  setRoute      : Route route -> Action state,
+  forward       : Route route -> Action state
 }
 
 type alias Transition route state = Maybe route -> route -> Action state

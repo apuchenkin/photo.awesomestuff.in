@@ -1,8 +1,6 @@
 module Lib.Router (router, runRouter, initialState) where
 
 import Dict
-import List.Extra
-import MultiwayTree as Tree
 import Task         exposing (Task)
 import Html         exposing (Html, text, div)
 import Html.Events  exposing (onWithOptions)
@@ -31,106 +29,13 @@ address = Signal.forwardTo mailbox.address singleton
 -- Private: extract state from state
 getState : WithRouter route state -> RouterState route
 getState state = state.router
-  -- case state.router of
-  --   RouterState router -> router
 
 -- Private: set state in state
 setState : WithRouter route state -> RouterState route -> WithRouter route state
 setState state routerState =
   { state | router = routerState }
 
-
-router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
-router config =
-  let
-    -- matchRoute : String -> Maybe route
-    matchRoute url = List.head <| List.filterMap (flip (match config.config) url) <| config.routes
-
-    -- decompose Route to string
-    buildUrl route =
-      let
-        _ = Debug.crash "todo: implement buildUrl"
-      in ""
-      --
-      -- let url = .buildUrl <| config.config route
-      -- in url
-
-    -- buildMatcher : route -> Matcher route
-    -- buildMatcher route =
-    --   let matcher = .matcher <| config.config route
-    --   in  matcher
-
-    -- binds forward action to existing HTML attributes
-    -- bindForward : route -> List Html.Attribute -> List Html.Attribute
-
-    -- getHandlers : Maybe route -> route -> List (Handler state)
-    getHandlers from to =
-      let
-        _ = Debug.log "getHandlers" (from, to)
-        zipperTo =   List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
-        zipperFrom = List.head <| List.filterMap (\r -> from `Maybe.andThen` (flip Util.Util.treeLookup (r, []))) config.routes
-
-        traverseTo   = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperTo
-        traverseFrom = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperFrom
-
-        -- _ = Debug.log "traverse" <|  List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
-        -- _ = Debug.log "traverseFrom" traverseFrom
-        -- _ = Debug.crash "todo: implement getHandlers"
-        routes = case traverseTo of
-          [] -> []
-          _  -> case (List.head traverseTo) == (List.head traverseFrom) of
-            False -> traverseTo
-            True  -> List.map fst <| List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
-
-      in List.map (.handler << config.config) routes
-
-    -- setRoute : route -> Action (WithRouter route state)
-    setRoute route state =
-      let
-        _ = Debug.log "setRoute" route
-        (rs) = getState state
-        from  = rs.route
-        state' = setState state <| { rs | route = Just route }
-      in
-        transition from route state'
-
-    -- transition : Transition route state
-    transition from to state =
-      let
-        _ = Debug.log "transition: from" from
-        _ = Debug.log "transition: to" to
-        _ = Debug.log "transition: state" state
-
-        signalHandlers = getHandlers from to
-        actions = runHandlers signalHandlers
-      in  Response <| List.foldl chainAction (noFx state) actions
-
-    bindForward route attrs =
-      let
-        options = {stopPropagation = True, preventDefault = True}
-        action _ = Signal.message address <| forward route
-      in
-        href (buildUrl route)
-        :: onWithOptions "click" options Json.value action
-        :: attrs
-
-    -- forward : route -> state -> Action (WithRouter route state)
-    forward route state =
-      let
-        _ = Debug.log "forward" route
-        task  = History.setPath (buildUrl route) |> Task.map (always (\s -> Response <| noFx s))
-      in Response (state, Effects.task task)
-
-  in Router {
-    config        = config
-  , matchRoute    = matchRoute
-  , state         = initialState
-  , bindForward   = bindForward
-  , buildUrl      = buildUrl
-  , getHandlers   = getHandlers
-  , setRoute      = setRoute
-  , forward       = forward
-  }
+---------------------------------------------------------------------------
 
 runHandlers : List (Handler state) -> List (Action state)
 runHandlers handlers =
@@ -146,6 +51,10 @@ chainAction action (state, effects) =
     in
         (state', Effects.batch [effects, effects'])
 
+--------------------------------------------------------------------------------------
+-- router functions
+--------------------------------------------------------------------------------------
+
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 render (Router router) state =
     let
@@ -158,16 +67,105 @@ render (Router router) state =
     in Maybe.withDefault (text "error") html
 
 
-setUrl : Router route (WithRouter route state) -> String -> Action (WithRouter route state)
-setUrl (Router router) url = case (router.matchRoute url) of
+setUrl : RouterConfig route (WithRouter route state) -> String -> Action (WithRouter route state)
+setUrl config url = case (matchRoute config url) of
     Nothing               -> Debug.crash <| url
-    Just (route, params)  -> router.setRoute route
+    Just route            -> setRoute config route
+
+
+matchRoute : RouterConfig route state -> String -> Maybe (Route route)
+matchRoute config url = List.head <| List.filterMap (flip (match config.config) url) <| config.routes
+
+
+transition : RouterConfig route state -> Transition route state
+transition config from to state =
+  let
+    _ = Debug.log "transition: from" from
+    _ = Debug.log "transition: to" to
+    _ = Debug.log "transition: state" state
+
+    handlers = getHandlers config from to
+    actions  = runHandlers handlers
+  in  Response <| List.foldl chainAction (noFx state) actions
+
+-- binds forward action to existing HTML attributes
+bindForward : RouterConfig route state -> state -> Route route -> List Html.Attribute -> List Html.Attribute
+bindForward config state route attrs =
+  let
+    options = {stopPropagation = True, preventDefault = True}
+    action _ = Signal.message address <| forward config route
+  in
+    href (buildUrl config state route)
+    :: onWithOptions "click" options Json.value action
+    :: attrs
+
+-- decompose Route to string
+buildUrl : RouterConfig route state -> state -> Route route -> String
+buildUrl config state (route, params) =
+  let
+    _ = Debug.log "buildUrl" (route, params)
+    zipper   = List.head <| List.filterMap (\r -> Util.Util.treeLookup route (r, [])) config.routes
+    traverse = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipper
+    segments = List.map (.url << config.config) traverse
+    rawUrl = List.foldl (flip (++)) "" segments
+
+    _ = Debug.log "segments" segments
+  in rawUrl
+
+
+getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
+getHandlers config from to =
+  let
+    _ = Debug.log "getHandlers" (from, to)
+    zipperTo =   List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
+    zipperFrom = List.head <| List.filterMap (\r -> from `Maybe.andThen` (flip Util.Util.treeLookup (r, []))) config.routes
+
+    traverseTo   = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperTo
+    traverseFrom = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperFrom
+
+    routes = case traverseTo of
+      [] -> []
+      _  -> case (List.head traverseTo) == (List.head traverseFrom) of
+        False -> traverseTo
+        True  -> List.map fst <| List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
+
+  in List.map (.handler << config.config) routes
+
+
+setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
+setRoute config (route, params) state =
+  let
+    _ = Debug.log "setRoute" route
+    (rs) = getState state
+    from  = rs.route
+    state' = setState state <| { rs | route = Just route }
+  in
+    transition config from route state'
+
+
+forward : RouterConfig route state -> Route route -> Action state
+forward config route state =
+  let
+    _ = Debug.log "forward" route
+    url   = buildUrl config state route
+    task  = History.setPath url |> Task.map (always (\s -> Response <| noFx s))
+  in Response (state, Effects.task task)
+
+
+router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
+router config = Router {
+    config        = config
+  , bindForward   = bindForward   config
+  , buildUrl      = buildUrl      config
+  , getHandlers   = getHandlers   config
+  , setRoute      = setRoute      config
+  , forward       = forward       config
+  }
 
 runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)
 runRouter (Router router) =
   let
-    init =
-      (Signal.map (singleton << (,) True << setUrl (Router router)) path)
+    init = (Signal.map (singleton << (,) True << setUrl router.config) path)
 
     -- inputs : Signal (List (Bool, Action state))
     inputs =

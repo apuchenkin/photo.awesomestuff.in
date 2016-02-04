@@ -1,5 +1,6 @@
 module Handler.Default where
 
+import Dict
 import Lib.Helpers exposing (noFx)
 import Handler.Actions exposing (..)
 import Lib.Types exposing (Router (..), Handler, Response (..))
@@ -17,9 +18,9 @@ homeHandler (Router router) =
     loader = Html.div [class "loader"] []
     view address state parsed =
       let
-        home = Html.a ((router.bindForward Route.Home) []) [text "HOME"]
+        home = Html.a (router.bindForward state (Route.Home,Dict.empty) []) [text "HOME"]
         rest = case parsed of
-          Nothing   -> [Html.div [class "categories"] <| List.map (\c -> Html.a ((router.bindForward Route.Category) []) [text c.title]) state.categories]
+          Nothing   -> [Html.div [class "categories"] <| List.map (\c -> Html.a (router.bindForward state (Route.Category, Dict.empty) []) [text c.title]) state.categories]
           Just html -> [html]
       in Just <| div [] <| case state.isLoading of
         True  -> loader :: home :: rest
@@ -54,15 +55,6 @@ categoryHandler (Router router) =
       ]
     }
 
--- adminHandler : Handler State
--- adminHandler =
---   let
---     view address state parsed = Just <| div [] [Html.button [Html.Events.onClick address (updateCategories [])] [text "admin"]]
---   in
---     {
---       view = view,
---       inputs = []
---     }
 
 errorHandler : Router Route State -> Handler State
 errorHandler _ =
@@ -71,9 +63,7 @@ errorHandler _ =
   in
     {
       view = view,
-      inputs = [
-        -- forward
-      ]
+      inputs = []
     }
 
 forwardHandler : Router Route State -> Handler State
@@ -84,6 +74,6 @@ forwardHandler (Router router) =
     {
       view = view,
       inputs = [
-        router.forward Route.Error
+        router.forward (Route.Error, Dict.empty)
       ]
     }
