@@ -10,9 +10,9 @@ import Dict
 import Util.Util      exposing (treeLookup, traverseUp)
 import MultiwayTree   exposing (Tree (..), Forest, datum, children)
 import List.Extra
-import Combine        exposing (Parser, many1, parse, many, while)
+import Combine        exposing (Parser, many1, parse, many, while, between, end)
 import Combine.Char   exposing (char, noneOf)
-import Combine.Infix  exposing ((<$>), (*>), (<*))
+import Combine.Infix  exposing ((<$>), (*>), (<*), (<|>))
 
 import Lib.Types    exposing (GetRouteConfig, RouteParams, Route)
 import Lib.Helpers  exposing (singleton)
@@ -45,8 +45,19 @@ getParams string = case fst <| parse paramsParser string of
 combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union dict params)
 
+{-| Parse something between square brackets `[]`. -}
+brackets : Parser res -> Parser res
+brackets = between (char ld) (char rd)
+
 unwrap : String -> List String
-unwrap url = [url]
+unwrap url =
+  let
+    ch = noneOf [ ld, rd ]
+    parser = brackets (many1 ch) <|> wrappedParser
+    wrappedParser = while ((/=) ld) *> parser <* many ch <* end
+    result = parse (wrappedParser) url
+    _ = Debug.log "result" result
+  in [url]
 
 match : GetRouteConfig route state -> Tree route -> String -> Maybe (Route route)
 match getConfig tree url =
