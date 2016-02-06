@@ -72,10 +72,8 @@ setUrl config url = case (matchRoute config url) of
     Nothing               -> Debug.crash <| url
     Just route            -> setRoute config route
 
-
 matchRoute : RouterConfig route state -> String -> Maybe (Route route)
-matchRoute config url = List.head <| List.filterMap (flip (match <| .url << config.config) url) <| config.routes
-
+matchRoute config url = match (.url << config.config) config.routes url
 
 transition : RouterConfig route state -> Transition route state
 transition config from to state =

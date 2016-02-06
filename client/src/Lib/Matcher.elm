@@ -46,7 +46,7 @@ getParams string = case fst <| parse paramsParser string of
   Ok param  -> param
 
 combineParams : RouteParams -> Route route -> Route route
-combineParams dict (route, params) = (route, Dict.union dict params)
+combineParams dict (route, params) = (route, Dict.union params dict)
 
 -- TODO: regex version of function
 -- TODO: Perfomance?
@@ -132,23 +132,24 @@ parseUrlParams raw url =
     zipValues values = Dict.fromList <| List.map2 (,) params values
   in (Result.map zipValues result, context.input)
 
-match : (route -> RawURL) -> Tree route -> URL -> Maybe (Route route)
-match rawRoute tree url =
-  let
-    raw = rawRoute <| datum tree
-    raws = unwrap raw
+match : (route -> RawURL) -> Forest route -> URL -> Maybe (Route route)
+match rawRoute forest url = List.head <| List.filterMap (\tree ->
+    let
+      raw = rawRoute <| datum tree
+      raws = unwrap raw
 
-  in List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern url
-     in case result of
-      Err _       -> Nothing
-      Ok  dict    -> case String.isEmpty url' of
-          True  -> Just (datum tree, dict)
-          False -> case children tree of
-            []        -> Nothing
-            forest    ->
-              let child = List.head <| List.filterMap (flip (match rawRoute) url') forest
-              in Maybe.map (combineParams dict) child
-    ) raws
+    in List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern url
+       in case result of
+        Err _       -> Nothing
+        Ok  dict    -> case String.isEmpty url' of
+            True  -> Just (datum tree, dict)
+            False -> case children tree of
+              []        -> Nothing
+              forest    ->
+                let child = match rawRoute forest url'
+                in Maybe.map (combineParams dict) child
+      ) raws
+    ) forest
 
 -- decompose Route to string
 buildUrl : (route -> RawURL) -> Forest route -> Route route -> URL
