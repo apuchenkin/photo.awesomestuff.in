@@ -1,6 +1,7 @@
 module Handler.Default where
 
 import Dict
+import Either exposing (Either (..))
 import Lib.Helpers exposing (noFx)
 import Handler.Actions exposing (..)
 import Lib.Types exposing (Router (..), Handler, Response (..))
@@ -14,14 +15,14 @@ homeHandler (Router router) =
   let
     loader = Html.div [class "loader"] []
 
-    categoryLink state category =
+    categoryLink state (Category category) =
       let
       params = [("category", category.name)]
       params' = case category.parent of
         Nothing -> params
         Just p -> case p of
           Left _ -> params
-          Right pc ->  [("category", pc.name), ("subcategory", category.name)]
+          Right (Category pc) ->  [("category", pc.name), ("subcategory", category.name)]
 
       in Html.a (router.bindForward state (Route.Category, Dict.fromList params') []) [text category.title]
 
@@ -57,14 +58,7 @@ categoryHandler (Router router) =
   in
     {
       view = view,
-      inputs = [
-        (\state -> let _ = Debug.log "categoryHandler: i1" state in Response (noFx state))
-        -- (\state -> let _ = Debug.log "categoryi" state in case List.filter (\c -> c.name == category) state.categories of
-        --   []         -> Response (state, Nothing)
-        --   [category] -> Response (state, Nothing)
-        --   _          -> Response (state, Nothing) --router.forward Route.Error state
-        -- )
-      ]
+      inputs = [loadPhotos]
     }
 
 notFoundHandler : Router Route State -> Handler State
