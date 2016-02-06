@@ -74,7 +74,7 @@ setUrl config url = case (matchRoute config url) of
 
 
 matchRoute : RouterConfig route state -> String -> Maybe (Route route)
-matchRoute config url = List.head <| List.filterMap (flip (match config.config) url) <| config.routes
+matchRoute config url = List.head <| List.filterMap (flip (match <| .url << config.config) url) <| config.routes
 
 
 transition : RouterConfig route state -> Transition route state
@@ -106,7 +106,7 @@ buildUrl config state route =
     _ = Debug.log "buildUrl" (route, params)
     params = getState state |> .params
   in
-    Lib.Matcher.buildUrl config.config config.routes <| combineParams params route
+    Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams params route
 
 -- TODO: move abstract part to Matcher
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
