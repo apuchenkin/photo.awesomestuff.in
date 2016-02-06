@@ -29,7 +29,8 @@ testMatcher = suite "matcher" [
     testUnwrap,
     testParseUrlParams,
     testMatch,
-    testBuildUrl
+    testBuildUrl,
+    testReversible
   ]
 
 {-| Private -}
@@ -79,4 +80,21 @@ testMatch = suite "match"
   ]
 
 testBuildUrl : Test
-testBuildUrl = suite "buildUrl" []
+testBuildUrl = suite "buildUrl"
+  [
+    test "home"         <| flip assertEqual (buildUrl routeMap routeTree (Home, Dict.empty))                                                          <| "/",
+    test "category"     <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("category","param")])))                          <| "/param",
+    test "subcategory"  <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("category","param"),("subcategory","param2")]))) <| "/param/param2",
+    test "photo"  <| flip assertEqual (buildUrl routeMap routeTree (Photo, (Dict.fromList [("category","param"),("photo","123")])))                   <| "/param/photo/123"
+  ]
+
+testReversible : Test
+testReversible = suite "reversible"
+  [
+    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/"))                     <| Just "/",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param"))                <| Just "/param",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/404"))                  <| Just "/404",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param/param2"))         <| Just "/param/param2",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param/photo/3"))        <| Just "/param/photo/3",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param/param2/photo/4")) <| Just "/param/param2/photo/4"
+  ]

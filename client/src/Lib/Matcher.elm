@@ -160,11 +160,16 @@ buildUrl rawRoute tree (route, params) =
     traverse = Maybe.withDefault [] <| Maybe.map traverseUp zipper
     segments = List.map rawRoute traverse
     rawUrl = List.foldl (flip (++)) "" segments
-    url = Dict.foldl (\param value string -> Regex.replace
-      (Regex.AtMost 1)
-      (Regex.regex <| paramChar `String.cons` param)
-      (always value)
-      string
-    ) rawUrl params
+    raws = unwrap rawUrl
+    urls = List.map (\raw -> Dict.foldl (\param value string -> Regex.replace
+            (Regex.AtMost 1)
+            (Regex.regex <| paramChar `String.cons` param)
+            (always value)
+            string
+          ) raw params
+      ) raws
+    urls' = List.filter (not << String.contains (String.fromChar paramChar)) urls
 
-  in url
+  in case List.head urls' of
+    Nothing -> Debug.crash "not enough params to build URL"
+    Just url -> url
