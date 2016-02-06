@@ -1,6 +1,7 @@
-import Task exposing (Task)
-import Html exposing (Html)
-import Effects exposing (Never)
+import Task     exposing (Task)
+import Html     exposing (Html)
+import Effects  exposing (Never)
+import Dict     exposing (Dict)
 
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
@@ -12,17 +13,9 @@ import Lib.Types  exposing (RouteConfig, Router, RouterResult)
 config : Route -> RouteConfig State
 config route = case route of
   Home               -> home
-  Error              -> error404
+  NotFound           -> notFound
   Category           -> category
   Photo              -> photo
-  -- _                  -> error404
-
-initialState : State
-initialState = {
-    categories = [],
-    isLoading = False,
-    router = Lib.Router.initialState
-  }
 
 home : RouteConfig State
 home = {
@@ -30,10 +23,10 @@ home = {
     handler = homeHandler router
   }
 
-error404 : RouteConfig State
-error404 = {
+notFound : RouteConfig State
+notFound = {
     url = "/404",
-    handler = homeHandler router
+    handler = notFoundHandler router
   }
 
 category : RouteConfig State
@@ -46,6 +39,13 @@ photo : RouteConfig State
 photo = {
     url = "/:photo",
     handler = categoryHandler router
+  }
+
+initialState : State
+initialState = {
+    categories = Dict.empty,
+    isLoading = False,
+    router = Lib.Router.initialState
   }
 
 router : Router Route State

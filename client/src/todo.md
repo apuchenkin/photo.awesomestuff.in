@@ -2,7 +2,7 @@
 >> params dict
 >> improve handlers chain
 >> nested route parser
-- optional params
+>> optional params
 - general refactoring
 - i18n
 - meta information ports

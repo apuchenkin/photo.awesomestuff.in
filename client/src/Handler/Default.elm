@@ -8,20 +8,29 @@ import Lib.Types exposing (Router (..), Handler, Response (..))
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
 import Handler.Routes as Route exposing (Route)
-import List.Extra as L
 
 homeHandler : Router Route State -> Handler State
 homeHandler (Router router) =
   let
-    -- _ = Debug.log "homeHandler" state
-
     loader = Html.div [class "loader"] []
+
+    categoryLink state category =
+      let
+      params = [("category", category.name)]
+      params' = case category.parent of
+        Nothing -> params
+        Just p -> case p of
+          Left _ -> params
+          Right pc ->  [("category", pc.name), ("subcategory", category.name)]
+
+      in Html.a (router.bindForward state (Route.Category, Dict.fromList params') []) [text category.title]
+
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state
         home = Html.a (router.bindForward state (Route.Home,Dict.empty) []) [text "HOME"]
         rest = case parsed of
-          Nothing   -> [Html.div [class "categories"] <| List.map (\c -> Html.a (router.bindForward state (Route.Category, Dict.fromList [("category", c.name)]) []) [text c.title]) state.categories]
+          Nothing   -> [Html.div [class "categories"] <| List.map (categoryLink state << snd) <| Dict.toList state.categories]
           Just html -> [html]
       in Just <| div [] <| case state.isLoading of
         True  -> loader :: home :: rest
@@ -29,10 +38,7 @@ homeHandler (Router router) =
   in
     {
       view = view,
-      inputs = [
-        loadCategories
-        -- (\state -> let _ = Debug.log "categoryi" state in Response (state, Nothing))
-      ]
+      inputs = [loadCategories]
     }
 
 categoryHandler : Router Route State -> Handler State
@@ -41,7 +47,12 @@ categoryHandler (Router router) =
     view address state _ =
       let
         _ = Debug.log "categoryHandler" state
-        mc = L.find (\c -> Just c.name == Dict.get "category" state.router.params) state.categories
+        category = Dict.get "category" state.router.params
+        category' = case Dict.get "subcategory" state.router.params of
+          Nothing -> category
+          c -> c
+
+        mc =  Maybe.map (flip Dict.get state.categories) category'
       in Maybe.map (\c -> div [] [text <| toString c]) mc
   in
     {
@@ -56,25 +67,12 @@ categoryHandler (Router router) =
       ]
     }
 
-
-errorHandler : Router Route State -> Handler State
-errorHandler _ =
+notFoundHandler : Router Route State -> Handler State
+notFoundHandler _ =
   let
     view address state parsed = Just <| div [] [text <| "404"]
   in
     {
       view = view,
       inputs = []
-    }
-
-forwardHandler : Router Route State -> Handler State
-forwardHandler (Router router) =
-  let
-    view address state parsed = Nothing
-  in
-    {
-      view = view,
-      inputs = [
-        router.forward (Route.Error, Dict.empty)
-      ]
     }

@@ -85,6 +85,7 @@ testBuildUrl = suite "buildUrl"
     test "home"         <| flip assertEqual (buildUrl routeMap routeTree (Home, Dict.empty))                                                          <| "/",
     test "category"     <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("category","param")])))                          <| "/param",
     test "subcategory"  <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("category","param"),("subcategory","param2")]))) <| "/param/param2",
+    test "subcategory"  <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("subcategory","param2"),("category","param")]))) <| "/param/param2",
     test "photo"  <| flip assertEqual (buildUrl routeMap routeTree (Photo, (Dict.fromList [("category","param"),("photo","123")])))                   <| "/param/photo/123"
   ]
 
