@@ -48,17 +48,12 @@ categoryHandler (Router router) =
     view address state parsed =
       let
         _ = Debug.log "categoryHandler" state
-        category = Dict.get "category" state.router.params
-        category' = case Dict.get "subcategory" state.router.params of
-          Nothing -> category
-          c -> c
-
-        mc =  Maybe.map (flip Dict.get state.categories) category'
+        category = getCategory state
         photoLinks = flip List.map state.photos <| \photo -> --photo
           Html.a (router.bindForward state (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-      in Maybe.map (\c -> div [] [text <| toString c, div [] photoLinks, parsed'] ) mc
+      in Maybe.map (\c -> div [] [text <| toString c, div [] photoLinks, parsed'] ) category
   in
     {
       view = view,
@@ -76,7 +71,9 @@ photoHandler (Router router) =
   in
     {
       view = view,
-      inputs = []
+      inputs = [
+        loadPhoto
+      ]
     }
 
 notFoundHandler : Router Route State -> Handler State

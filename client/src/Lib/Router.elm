@@ -15,6 +15,8 @@ import Lib.Helpers  exposing (..)
 import Lib.Matcher  exposing (..)
 import Lib.Types    exposing (..)
 import Util.Util
+
+
 -- import Response as R
 
 initialState : RouterState route
@@ -101,7 +103,7 @@ bindForward config state route attrs =
 buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
 buildUrl config state route =
   let
-    _ = Debug.log "buildUrl" (route, params)
+    -- _ = Debug.log "buildUrl" (route, params)
     params = getState state |> .params
   in
     Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams params route
@@ -110,7 +112,7 @@ buildUrl config state route =
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
 getHandlers config from to =
   let
-    _ = Debug.log "getHandlers" (from, to)
+    -- _ = Debug.log "getHandlers" (from, to)
     zipperTo =   List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
     zipperFrom = List.head <| List.filterMap (\r -> from `Maybe.andThen` (flip Util.Util.treeLookup (r, []))) config.routes
 
@@ -131,7 +133,7 @@ getHandlers config from to =
 setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
 setRoute config (route, params) state =
   let
-    _ = Debug.log "setRoute" route
+    -- _ = Debug.log "setRoute" route
     (rs) = getState state
     from  = rs.route
     state' = setState state <| { rs | route = Just route, params = params }
@@ -176,7 +178,8 @@ runRouter (Router router) =
 
     -- update' : List (Bool, Action state) -> (state, ActionEffects state)
     update' actions           = List.foldl chainAction (noFx router.config.init)
-      <| List.map snd <| List.filter fst actions
+      <| List.map snd
+      <| List.filter fst actions
 
     result = foldp' update update' inputs
     state = Signal.map fst result

@@ -33,6 +33,7 @@ initialState : State
 initialState = {
     categories = Dict.empty,
     photos = [],
+    photo = Nothing,
     isLoading = False,
     router = Lib.Router.initialState
   }
