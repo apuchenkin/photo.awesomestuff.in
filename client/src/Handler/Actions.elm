@@ -87,6 +87,7 @@ loadCategories state =
         update = updateCategories categories
       in Task.succeed <| case state.router.route of
         Just (Routes.Category) -> update `chainAction` loadPhotos
+        Just (Routes.Photo)    -> update `chainAction` loadPhotos
         _ -> update
 
   in Response ({state | isLoading = True}, Effects.task task)

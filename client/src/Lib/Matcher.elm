@@ -48,9 +48,13 @@ getParams string = case fst <| parse paramsParser string of
 combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union params dict)
 
+cache : List String
+cache = []
+
 unwrap : String -> List String
 unwrap raw =
   let
+    cache = "s" :: cache
     regex   = Regex.regex "^(.*)\\[([^\\]\\[]+)\\](.*)$"
     matches = Regex.find (Regex.AtMost 1) regex raw
     result = case matches of
@@ -89,6 +93,7 @@ parseUrlParams raw url =
     zipValues values = Dict.fromList <| List.map2 (,) params values
   in (Result.map zipValues result, context.input)
 
+-- TODO: cache unwrap?
 match : (route -> RawURL) -> Forest route -> URL -> Maybe (Route route)
 match rawRoute forest url = List.head <| List.filterMap (\tree ->
     let
@@ -109,6 +114,7 @@ match rawRoute forest url = List.head <| List.filterMap (\tree ->
     ) forest
 
 -- decompose Route to string
+-- TODO: cache unwrap?
 buildUrl : (route -> RawURL) -> Forest route -> Route route -> URL
 buildUrl rawRoute tree (route, params) =
   let

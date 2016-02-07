@@ -93,6 +93,7 @@ buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route stat
 buildUrl config state route = Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams state.router.params route
 
 -- TODO: move abstract part to Matcher
+-- TODO: perfomance
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
 getHandlers config from to =
   let
