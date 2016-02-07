@@ -6,9 +6,12 @@ import Dict     exposing (Dict)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
+import Lib.Helpers exposing (..)
 
 import Lib.Router exposing (..)
-import Lib.Types  exposing (RouteConfig, Router, RouterResult)
+import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..))
+
+import Mouse
 
 config : Route -> RouteConfig State
 config route = case route of
@@ -25,7 +28,7 @@ config route = case route of
       handler = categoryHandler router
     }
   Photo -> {
-      url = "/:photo",
+      url = "/photo/:photo",
       handler = photoHandler router
     }
 
@@ -43,7 +46,9 @@ router = Lib.Router.router {
     init = initialState,
     routes = routes,
     config = config,
-    inputs = []
+    inputs = [
+      -- Signal.map (\p -> (\state -> Response <| noFx state)) Mouse.position
+    ]
   }
 
 result : RouterResult State

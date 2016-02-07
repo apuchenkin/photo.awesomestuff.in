@@ -3,6 +3,7 @@
 >> improve handlers chain
 >> nested route parser
 >> optional params
+- decentralize state to handlers: see (https://gist.github.com/evancz/2b2ba366cae1887fe621#focus)
 - move router events to difffent mailbox (reduce re-render operations)
 - router cache
 - how to bypass state to buildURL to simplify API?
