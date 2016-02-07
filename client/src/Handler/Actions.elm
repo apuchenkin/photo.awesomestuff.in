@@ -79,7 +79,7 @@ decodePhotos = Json.list decodePhoto
 loadCategories : Action State
 loadCategories state =
   let
-    _ = Debug.log "loadCategories" state
+    -- _ = Debug.log "loadCategories" state
     fetch = Task.toMaybe <| Http.get decodeCategories ("/api/v1/category")
     task = fetch `Task.andThen` \mcategories ->
       let
@@ -95,7 +95,7 @@ loadCategories state =
 loadPhotos : Action State
 loadPhotos state =
   let
-    _ = Debug.log "loadPhotos" state
+    -- _ = Debug.log "loadPhotos" state
     effects = case Dict.isEmpty state.categories of
       True   -> Effects.none
       False  ->
@@ -120,23 +120,23 @@ loadPhoto state =
   in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
 
 updatePhotos : List Photo -> Action State
-updatePhotos photos state =
-  let
-    _ = Debug.log "updatePhotos" photos
-  in
-    Response <| noFx {state | isLoading = False, photos = photos}
+updatePhotos photos state = Response <| noFx {state | isLoading = False, photos = photos}
+  -- let
+  --   _ = Debug.log "updatePhotos" photos
+  -- in
+
 
 updatePhoto : Maybe Photo -> Action State
-updatePhoto photo state =
-  let
-    _ = Debug.log "updatePhoto" photo
-  in
-    Response <| noFx {state | isLoading = False, photo = photo}
+updatePhoto photo state = Response <| noFx {state | isLoading = False, photo = photo}
+  -- let
+  --   _ = Debug.log "updatePhoto" photo
+  -- in
+
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
   let
-    _ = Debug.log "updateCategories" state
+    -- _ = Debug.log "updateCategories" state
     dict  = Dict.fromList   <| List.map (\(Category c) -> (c.name, c)) categories
     dict' = Dict.fromList   <| List.map (\(Category c) -> (c.id, c))   categories
 

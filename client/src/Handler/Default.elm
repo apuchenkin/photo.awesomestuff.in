@@ -47,7 +47,7 @@ categoryHandler (Router router) =
   let
     view address state parsed =
       let
-        _ = Debug.log "categoryHandler" state
+        -- _ = Debug.log "categoryHandler" state
         category = getCategory state
         photoLinks = flip List.map state.photos <| \photo -> --photo
           Html.a (router.bindForward state (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
@@ -65,7 +65,7 @@ photoHandler (Router router) =
   let
     view address state _ =
       let
-        _ = Debug.log "photoHandler" state
+        -- _ = Debug.log "photoHandler" state
         photo = Dict.get "photo" state.router.params
       in Maybe.map (\p -> div [] [text <| toString p] ) photo
   in

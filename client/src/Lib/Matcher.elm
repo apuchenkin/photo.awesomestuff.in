@@ -7,7 +7,7 @@ import Regex
 import String
 import Dict
 
-import Util.Util      exposing (treeLookup, traverseUp)
+import Util.Util      exposing (treeLookup, traverse)
 import MultiwayTree   exposing (Tree (..), Forest, datum, children)
 import List.Extra
 import Combine        exposing (Parser, many1, parse, many, while, between, end, rec, manyTill)
@@ -120,8 +120,8 @@ buildUrl rawRoute tree (route, params) =
   let
     -- _ = Debug.log "buildUrl" (route, params)
     zipper   = List.head <| List.filterMap (\r -> treeLookup route (r, [])) tree
-    traverse = Maybe.withDefault [] <| Maybe.map traverseUp zipper
-    segments = List.map rawRoute traverse
+    path = Maybe.withDefault [] <| Maybe.map traverse zipper
+    segments = List.map rawRoute path
     rawUrl = List.foldl (flip (++)) "" segments
     raws = unwrap rawUrl
     urls = List.map (\raw -> Dict.foldl (\param value string -> Regex.replace

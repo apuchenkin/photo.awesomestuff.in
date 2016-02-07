@@ -50,7 +50,6 @@ runAction action (state, effects) =
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 render (Router router) state =
     let
-      _ = Debug.log "render" state
       route = state.router.route
       handlers = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
       views =  List.map .view handlers
@@ -69,9 +68,9 @@ matchRoute config url = match (.url << config.config) config.routes url
 transition : RouterConfig route state -> Transition route state
 transition config from to state =
   let
-    _ = Debug.log "transition: from" from
-    _ = Debug.log "transition: to" to
-    _ = Debug.log "transition: state" state
+    -- _ = Debug.log "transition: from" from
+    -- _ = Debug.log "transition: to" to
+    -- _ = Debug.log "transition: state" state
 
     handlers = getHandlers config from to
     actions  = runHandlers handlers
@@ -92,27 +91,20 @@ bindForward config state route attrs =
 buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
 buildUrl config state route = Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams state.router.params route
 
--- TODO: move abstract part to Matcher
--- TODO: perfomance
+-- TODO: cache
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
 getHandlers config from to =
-  let
-    -- _ = Debug.log "getHandlers" (from, to)
-    zipperTo =   List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
-    zipperFrom = List.head <| List.filterMap (\r -> from `Maybe.andThen` (flip Util.Util.treeLookup (r, []))) config.routes
+  let routes = case from == Just to of
+    True -> [to]
+    False ->
+      let
+        lca = from `Maybe.andThen` \from' -> Util.Util.lca config.routes from' to
+        zipperTo = List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
+      in Maybe.withDefault []
+        <| flip Maybe.map zipperTo
+        <| \z -> Util.Util.traverseFrom z lca
 
-    traverseTo   = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperTo
-    traverseFrom = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperFrom
-
-    routes = case traverseTo of
-      [] -> []
-      _  -> case (List.head traverseTo) == (List.head traverseFrom) of
-        False -> []
-        True  -> List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
-
-    routes' = List.drop (List.length routes) traverseTo
-
-  in List.map (.handler << config.config) routes'
+  in List.map (.handler << config.config) <| routes
 
 
 setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
