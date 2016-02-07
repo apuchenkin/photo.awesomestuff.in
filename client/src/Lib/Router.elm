@@ -28,26 +28,16 @@ mailbox = Signal.mailbox []
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
 
--- Private: extract state from state
-getState : WithRouter route state -> RouterState route
-getState state = state.router
-
--- Private: set state in state
-setState : WithRouter route state -> RouterState route -> WithRouter route state
-setState state routerState =
-  { state | router = routerState }
-
 ---------------------------------------------------------------------------
 
 runHandlers : List (Handler state) -> List (Action state)
 runHandlers handlers =
   let
-    run actions state = Response <| List.foldl chainAction (noFx state) actions
+    run actions state = Response <| List.foldl runAction (noFx state) actions
   in List.map run <| List.map .inputs handlers
 
-
-chainAction : Action state -> (state, ActionEffects state) -> (state, ActionEffects state)
-chainAction action (state, effects) =
+runAction : Action state -> (state, ActionEffects state) -> (state, ActionEffects state)
+runAction action (state, effects) =
     let
         (Response (state', effects')) = action state
     in
@@ -61,8 +51,7 @@ render : Router route (WithRouter route state) -> (WithRouter route state) -> Ht
 render (Router router) state =
     let
       _ = Debug.log "render" state
-      (rs) = getState state
-      route = rs.route
+      route = state.router.route
       handlers = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
       views =  List.map .view handlers
       html = List.foldr (\view parsed -> view address state parsed) Nothing views
@@ -86,7 +75,7 @@ transition config from to state =
 
     handlers = getHandlers config from to
     actions  = runHandlers handlers
-  in  Response <| List.foldl chainAction (noFx state) actions
+  in  Response <| List.foldl runAction (noFx state) actions
 
 -- binds forward action to existing HTML attributes
 bindForward : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> List Html.Attribute -> List Html.Attribute
@@ -101,12 +90,7 @@ bindForward config state route attrs =
 
 -- decompose Route to string
 buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
-buildUrl config state route =
-  let
-    -- _ = Debug.log "buildUrl" (route, params)
-    params = getState state |> .params
-  in
-    Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams params route
+buildUrl config state route = Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams state.router.params route
 
 -- TODO: move abstract part to Matcher
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
@@ -134,9 +118,9 @@ setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action 
 setRoute config (route, params) state =
   let
     -- _ = Debug.log "setRoute" route
-    (rs) = getState state
-    from  = rs.route
-    state' = setState state <| { rs | route = Just route, params = params }
+    rs = state.router
+    from  = state.router.route
+    state' = { state | router = { rs | route = Just route, params = params }}
   in
     transition config from route state'
 
@@ -173,11 +157,11 @@ runRouter (Router router) =
       :: List.map (Signal.map (singleton << (,) False)) router.config.inputs
 
     -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)
-    update  actions (state,_) = List.foldl chainAction (noFx state)
+    update  actions (state,_) = List.foldl runAction (noFx state)
       <| List.map snd actions
 
     -- update' : List (Bool, Action state) -> (state, ActionEffects state)
-    update' actions           = List.foldl chainAction (noFx router.config.init)
+    update' actions           = List.foldl runAction (noFx router.config.init)
       <| List.map snd
       <| List.filter fst actions
 

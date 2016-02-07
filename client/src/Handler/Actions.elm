@@ -8,7 +8,7 @@ import Effects exposing (Never)
 import Task exposing (Task)
 import Lib.Types exposing (WithRouter, Action, Response (..))
 import Handler.Routes as Routes exposing (Route)
-import Lib.Helpers exposing (noFx)
+import Lib.Helpers exposing (noFx, chainAction)
 import Maybe.Extra exposing (join)
 
 type alias Promise value = Either (Task Http.Error value) value
@@ -46,12 +46,6 @@ type alias Photo = {
 -- views: 96
 -- width: 2423
 
-chain : Action State -> Action State -> Action State
-chain action1 action2 state =
-  let
-    (Response (state', effects)) = action1 state
-    (Response (state'', effects')) = action2 state'
-  in Response (state'', Effects.batch [effects, effects'])
 
 -- Category constuctor
 category : Int -> String -> String -> Maybe (Either Int Category) -> Category
@@ -92,7 +86,7 @@ loadCategories state =
         categories = Maybe.withDefault [] mcategories
         update = updateCategories categories
       in Task.succeed <| case state.router.route of
-        Just (Routes.Category) -> update `chain` loadPhotos
+        Just (Routes.Category) -> update `chainAction` loadPhotos
         _ -> update
 
   in Response ({state | isLoading = True}, Effects.task task)
