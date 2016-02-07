@@ -2,7 +2,7 @@ module Handler.Default where
 
 import Dict
 import Either exposing (Either (..))
-import Lib.Helpers exposing (noFx)
+import Lib.Helpers exposing (noFx, singleton)
 import Handler.Actions exposing (..)
 import Lib.Types exposing (Router (..), Handler, Response (..))
 
@@ -45,7 +45,7 @@ homeHandler (Router router) =
 categoryHandler : Router Route State -> Handler State
 categoryHandler (Router router) =
   let
-    view address state _ =
+    view address state parsed =
       let
         _ = Debug.log "categoryHandler" state
         category = Dict.get "category" state.router.params
@@ -56,12 +56,27 @@ categoryHandler (Router router) =
         mc =  Maybe.map (flip Dict.get state.categories) category'
         photoLinks = flip List.map state.photos <| \photo -> --photo
           Html.a (router.bindForward state (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
+        parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-      in Maybe.map (\c -> div [] [text <| toString c, div [] photoLinks] ) mc
+      in Maybe.map (\c -> div [] [text <| toString c, div [] photoLinks, parsed'] ) mc
   in
     {
       view = view,
       inputs = [loadPhotos]
+    }
+
+photoHandler : Router Route State -> Handler State
+photoHandler (Router router) =
+  let
+    view address state _ =
+      let
+        _ = Debug.log "photoHandler" state
+        photo = Dict.get "photo" state.router.params
+      in Maybe.map (\p -> div [] [text <| toString p] ) photo
+  in
+    {
+      view = view,
+      inputs = []
     }
 
 notFoundHandler : Router Route State -> Handler State

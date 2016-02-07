@@ -26,7 +26,7 @@ config route = case route of
     }
   Photo -> {
       url = "/:photo",
-      handler = notFoundHandler router
+      handler = photoHandler router
     }
 
 initialState : State
