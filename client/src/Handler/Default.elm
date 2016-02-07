@@ -54,7 +54,10 @@ categoryHandler (Router router) =
           c -> c
 
         mc =  Maybe.map (flip Dict.get state.categories) category'
-      in Maybe.map (\c -> div [] [text <| toString c]) mc
+        photoLinks = flip List.map state.photos <| \photo -> --photo
+          Html.a (router.bindForward state (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
+
+      in Maybe.map (\c -> div [] [text <| toString c, div [] photoLinks] ) mc
   in
     {
       view = view,

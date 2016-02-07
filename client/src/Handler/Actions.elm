@@ -7,14 +7,16 @@ import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
 import Lib.Types exposing (WithRouter, Action, Response (..))
-import Handler.Routes exposing (Route)
+import Handler.Routes as Routes exposing (Route)
 import Lib.Helpers exposing (noFx)
+import Maybe.Extra exposing (join)
 
 type alias Promise value = Either (Task Http.Error value) value
 
 type alias State = WithRouter Route
   {
     categories: Dict String Category,
+    photos: List Photo,
     isLoading: Bool
   }
 
@@ -32,6 +34,13 @@ type alias Photo = {
   width: Int,
   height: Int
 }
+
+chain : Action State -> Action State -> Action State
+chain action1 action2 state =
+  let
+    (Response (state', effects)) = action1 state
+    (Response (state'', effects')) = action2 state'
+  in Response (state'', Effects.batch [effects, effects'])
 
 -- Category constuctor
 category : Int -> String -> String -> Maybe (Either Int Category) -> Category
@@ -55,24 +64,50 @@ loadCategories : Action State
 loadCategories state =
   let
     _ = Debug.log "loadCategories" state
-    tsk = Http.get decodeCategories ("/api/v1/category")
-    tsk' = Task.andThen (Task.toMaybe tsk) (\categories -> Task.succeed (updateCategories <| Maybe.withDefault [] categories))
-  in Response ({state | isLoading = True}, Effects.task tsk')
+    fetch = Task.toMaybe <| Http.get decodeCategories ("/api/v1/category")
+    task = fetch `Task.andThen` \mcategories ->
+      let
+        categories = Maybe.withDefault [] mcategories
+        update = updateCategories categories
+      in Task.succeed <| case state.router.route of
+        Just (Routes.Category) -> update `chain` loadPhotos
+        _ -> update
+
+  in Response ({state | isLoading = True}, Effects.task task)
 
 loadPhotos : Action State
 loadPhotos state =
   let
     _ = Debug.log "loadPhotos" state
-    tsk = Http.get decodeCategories ("/api/v1/category/photo")
-    tsk' = Task.andThen (Task.toMaybe tsk) (\categories -> Task.succeed (updateCategories <| Maybe.withDefault [] categories))
-  in Response ({state | isLoading = True}, Effects.task tsk')
+    effects = case Dict.isEmpty state.categories of
+      True   -> Effects.none
+      False  ->
+        let
+          param = case Dict.get "subcategory" state.router.params of
+            Nothing -> Dict.get "category" state.router.params
+            c -> c
+          category = join <| Maybe.map (flip Dict.get state.categories) param
+          task = flip Maybe.map category <| \(Category c) ->
+            let fetch = Task.toMaybe <| Http.get decodePhotos ("/api/v1/category/" ++ toString c.id ++ "/photo")
+            in fetch `Task.andThen` \photos -> Task.succeed <| updatePhotos <| Maybe.withDefault [] photos
+
+        in Maybe.withDefault Effects.none <| Maybe.map Effects.task task
+
+  in Response ({state | isLoading = True}, effects)
+
+updatePhotos : List Photo -> Action State
+updatePhotos photos state =
+  let
+    _ = Debug.log "updatePhotos" photos
+  in
+    Response <| noFx {state | isLoading = False, photos = photos}
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
   let
-    _ = Debug.log "updateCategories" categories
-    dict = Dict.fromList  <| List.map (\(Category c) -> (c.name, c)) categories
-    dict' = Dict.fromList <| List.map (\(Category c) -> (c.id, c))   categories
+    _ = Debug.log "updateCategories" state
+    dict  = Dict.fromList   <| List.map (\(Category c) -> (c.name, c)) categories
+    dict' = Dict.fromList   <| List.map (\(Category c) -> (c.id, c))   categories
 
     castegoris' = Dict.map (\name category -> Category {category | parent = Maybe.map (\p ->
       case p of

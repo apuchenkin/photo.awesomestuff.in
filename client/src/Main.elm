@@ -12,38 +12,27 @@ import Lib.Types  exposing (RouteConfig, Router, RouterResult)
 
 config : Route -> RouteConfig State
 config route = case route of
-  Home               -> home
-  NotFound           -> notFound
-  Category           -> category
-  Photo              -> photo
-
-home : RouteConfig State
-home = {
-    url = "/",
-    handler = homeHandler router
-  }
-
-notFound : RouteConfig State
-notFound = {
-    url = "/404",
-    handler = notFoundHandler router
-  }
-
-category : RouteConfig State
-category = {
-    url = ":category[/:subcategory]",
-    handler = categoryHandler router
-  }
-
-photo : RouteConfig State
-photo = {
-    url = "/:photo",
-    handler = categoryHandler router
-  }
+  Home -> {
+      url = "/",
+      handler = homeHandler router
+    }
+  NotFound -> {
+      url = "/404",
+      handler = notFoundHandler router
+    }
+  Category -> {
+      url = ":category[/:subcategory]",
+      handler = categoryHandler router
+    }
+  Photo -> {
+      url = "/:photo",
+      handler = notFoundHandler router
+    }
 
 initialState : State
 initialState = {
     categories = Dict.empty,
+    photos = [],
     isLoading = False,
     router = Lib.Router.initialState
   }
