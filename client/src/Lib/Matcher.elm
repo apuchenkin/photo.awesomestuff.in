@@ -48,62 +48,19 @@ getParams string = case fst <| parse paramsParser string of
 combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union params dict)
 
--- TODO: regex version of function
--- TODO: Perfomance?
 unwrap : String -> List String
 unwrap raw =
   let
-    _ = Debug.log "unwrap" raw
-    ch : Parser Char
-    ch = noneOf [ld, rd]
+    regex   = Regex.regex "^(.*)\\[([^\\]\\[]+)\\](.*)$"
+    matches = Regex.find (Regex.AtMost 1) regex raw
+    result = case matches of
+      []         -> [raw]
+      [match]    -> case match.submatches of
+        [Just a, Just b, Just c] -> List.concat <| List.map unwrap [a ++ b ++ c, a ++ c]
+        _ -> [raw]
+      _ -> Debug.crash "result = case matches of _"
 
-    space : Parser String
-    space = String.fromList <$> many ch
-
-    plain : Parser String
-    plain  = String.fromList <$> (many1 ch)
-    -- plain  = Combine.regex "^[^\\[\\]]+"
-
-    brackets : Parser a -> Parser a
-    brackets = between (char ld) (char rd)
-
-    -- nested : Parser (List String)
-    -- nested = List.concat <$> (many1 <| List.append <$>  (((List.append << singleton) <$> space) <*> (brackets parser)) <*> (singleton <$> space))
-    --
-    -- parser :  Parser (List String)
-    -- parser = rec (\_ -> nested <|> (singleton <$> plain))
-
-    nested : Parser (Forest String)
-    nested = List.concat <$> (many1 <|
-       (List.append << singleton)
-       <$> ((Tree <$> space) <*> brackets parser)
-       <*> ((\r -> case r of
-          "" -> []
-          _  -> singleton (Tree r [])) <$> space)
-    )
-
-    parser :  Parser (Forest String)
-    parser = rec (\_ -> nested <|> ((singleton << (flip Tree [])) <$> plain))
-    -- parser   = Combine.or (singleton <$> plain <* end) <| between space space <| List.concat <$> many (Combine.brackets (between space space <| many (Combine.brackets plain))) -- etalon
-
-    result = parse (parser <* end) raw
-    -- _ = Debug.log "result" result
-
-    flatten : Forest String -> List String
-    flatten forest =
-      let
-        opts = List.map (\tree ->
-          let ch = (flatten <| children tree)
-          in datum tree :: List.map ((++) (datum tree)) ch) forest
-
-        -- _ = Debug.log "flatten" opts
-      in List.Extra.dropDuplicates <| List.foldl (\o acc-> List.concat <| List.map (\a -> List.map (flip (++) a) acc) o) [""] opts
-
-    variations = case fst result of
-      Ok forest -> flatten forest
-      Err _     -> [Debug.crash "cannot parse provided string: \"" ++ raw ++ "\""]
-
-    in List.reverse <| List.sortBy String.length variations
+  in List.reverse <| List.sortBy String.length <| List.Extra.dropDuplicates <| result
 
 -- TODO: Regex free?
 -- TODO: Perfomance?
