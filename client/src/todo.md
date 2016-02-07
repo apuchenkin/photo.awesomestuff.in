@@ -3,7 +3,8 @@
 >> improve handlers chain
 >> nested route parser
 >> optional params
-- unwrap cache
+- move router events to difffent mailbox (reduce re-render operations)
+- router cache
 - how to bypass state to buildURL to simplify API?
 - general refactoring
 - perfomance

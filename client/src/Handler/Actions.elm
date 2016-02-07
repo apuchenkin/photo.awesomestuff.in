@@ -121,17 +121,9 @@ loadPhoto state =
 
 updatePhotos : List Photo -> Action State
 updatePhotos photos state = Response <| noFx {state | isLoading = False, photos = photos}
-  -- let
-  --   _ = Debug.log "updatePhotos" photos
-  -- in
-
 
 updatePhoto : Maybe Photo -> Action State
 updatePhoto photo state = Response <| noFx {state | isLoading = False, photo = photo}
-  -- let
-  --   _ = Debug.log "updatePhoto" photo
-  -- in
-
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
