@@ -15,6 +15,8 @@ import Lib.Helpers  exposing (..)
 import Lib.Matcher  exposing (..)
 import Lib.Types    exposing (..)
 import Util.Util
+
+
 -- import Response as R
 
 initialState : RouterState route
@@ -26,26 +28,16 @@ mailbox = Signal.mailbox []
 address : Signal.Address (Action state)
 address = Signal.forwardTo mailbox.address singleton
 
--- Private: extract state from state
-getState : WithRouter route state -> RouterState route
-getState state = state.router
-
--- Private: set state in state
-setState : WithRouter route state -> RouterState route -> WithRouter route state
-setState state routerState =
-  { state | router = routerState }
-
 ---------------------------------------------------------------------------
 
 runHandlers : List (Handler state) -> List (Action state)
 runHandlers handlers =
   let
-    run actions state = Response <| List.foldl chainAction (noFx state) actions
+    run actions state = Response <| List.foldl runAction (noFx state) actions
   in List.map run <| List.map .inputs handlers
 
-
-chainAction : Action state -> (state, ActionEffects state) -> (state, ActionEffects state)
-chainAction action (state, effects) =
+runAction : Action state -> (state, ActionEffects state) -> (state, ActionEffects state)
+runAction action (state, effects) =
     let
         (Response (state', effects')) = action state
     in
@@ -58,9 +50,7 @@ chainAction action (state, effects) =
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 render (Router router) state =
     let
-      _ = Debug.log "render" state
-      (rs) = getState state
-      route = rs.route
+      route = state.router.route
       handlers = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
       views =  List.map .view handlers
       html = List.foldr (\view parsed -> view address state parsed) Nothing views
@@ -72,21 +62,19 @@ setUrl config url = case (matchRoute config url) of
     Nothing               -> Debug.crash <| url
     Just route            -> setRoute config route
 
-
 matchRoute : RouterConfig route state -> String -> Maybe (Route route)
-matchRoute config url = List.head <| List.filterMap (flip (match config.config) url) <| config.routes
-
+matchRoute config url = match (.url << config.config) config.routes url
 
 transition : RouterConfig route state -> Transition route state
 transition config from to state =
   let
-    _ = Debug.log "transition: from" from
-    _ = Debug.log "transition: to" to
-    _ = Debug.log "transition: state" state
+    -- _ = Debug.log "transition: from" from
+    -- _ = Debug.log "transition: to" to
+    -- _ = Debug.log "transition: state" state
 
     handlers = getHandlers config from to
     actions  = runHandlers handlers
-  in  Response <| List.foldl chainAction (noFx state) actions
+  in  Response <| List.foldl runAction (noFx state) actions
 
 -- binds forward action to existing HTML attributes
 bindForward : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> List Html.Attribute -> List Html.Attribute
@@ -101,42 +89,31 @@ bindForward config state route attrs =
 
 -- decompose Route to string
 buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
-buildUrl config state route =
-  let
-    _ = Debug.log "buildUrl" (route, params)
-    params = getState state |> .params
-  in
-    Lib.Matcher.buildUrl config.config config.routes <| combineParams params route
+buildUrl config state route = Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams state.router.params route
 
--- TODO: move abstract part to Matcher
+-- TODO: cache
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
 getHandlers config from to =
-  let
-    _ = Debug.log "getHandlers" (from, to)
-    zipperTo =   List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
-    zipperFrom = List.head <| List.filterMap (\r -> from `Maybe.andThen` (flip Util.Util.treeLookup (r, []))) config.routes
+  let routes = case from == Just to of
+    True -> [to]
+    False ->
+      let
+        lca = from `Maybe.andThen` \from' -> Util.Util.lca config.routes from' to
+        zipperTo = List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
+      in Maybe.withDefault []
+        <| flip Maybe.map zipperTo
+        <| \z -> Util.Util.traverseFrom z lca
 
-    traverseTo   = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperTo
-    traverseFrom = Maybe.withDefault [] <| Maybe.map (Util.Util.traverseUp) zipperFrom
-
-    routes = case traverseTo of
-      [] -> []
-      _  -> case (List.head traverseTo) == (List.head traverseFrom) of
-        False -> []
-        True  -> List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
-
-    routes' = List.drop (List.length routes) traverseTo
-
-  in List.map (.handler << config.config) routes'
+  in List.map (.handler << config.config) <| routes
 
 
 setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
 setRoute config (route, params) state =
   let
-    _ = Debug.log "setRoute" route
-    (rs) = getState state
-    from  = rs.route
-    state' = setState state <| { rs | route = Just route, params = params }
+    -- _ = Debug.log "setRoute" route
+    rs = state.router
+    from  = state.router.route
+    state' = { state | router = { rs | route = Just route, params = params }}
   in
     transition config from route state'
 
@@ -173,12 +150,13 @@ runRouter (Router router) =
       :: List.map (Signal.map (singleton << (,) False)) router.config.inputs
 
     -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)
-    update  actions (state,_) = List.foldl chainAction (noFx state)
+    update  actions (state,_) = List.foldl runAction (noFx state)
       <| List.map snd actions
 
     -- update' : List (Bool, Action state) -> (state, ActionEffects state)
-    update' actions           = List.foldl chainAction (noFx router.config.init)
-      <| List.map snd <| List.filter fst actions
+    update' actions           = List.foldl runAction (noFx router.config.init)
+      <| List.map snd
+      <| List.filter fst actions
 
     result = foldp' update update' inputs
     state = Signal.map fst result
