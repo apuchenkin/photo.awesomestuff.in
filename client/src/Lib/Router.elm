@@ -50,10 +50,11 @@ runAction action (state, effects) =
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 render (Router router) state =
     let
-      route = state.router.route
-      handlers = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
-      views =  List.map .view handlers
-      html = List.foldr (\view parsed -> view address state parsed) Nothing views
+      _ = Debug.log "render" state.router
+      route     = state.router.route
+      handlers  = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
+      views     = List.map .view handlers
+      html      = List.foldr (\view parsed -> view address state parsed) Nothing views
     in Maybe.withDefault (text "error") html
 
 
@@ -145,8 +146,8 @@ runRouter (Router router) =
     -- inputs : Signal (List (Bool, Action state))
     inputs =
       List.foldl (Signal.Extra.fairMerge List.append)
-      (Signal.map (List.map ((,) False)) mailbox.signal) <| -- actions from events
-      init
+      init <|
+      (Signal.map (List.map ((,) False)) mailbox.signal) -- actions from events
       :: List.map (Signal.map (singleton << (,) False)) router.config.inputs
 
     -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)

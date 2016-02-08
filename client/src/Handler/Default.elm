@@ -8,6 +8,7 @@ import Lib.Types exposing (Router (..), Handler, Response (..))
 
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
+import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Handler.Routes as Route exposing (Route)
 
 homeHandler : Router Route State -> Handler State
@@ -29,7 +30,7 @@ homeHandler (Router router) =
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state
-        home = Html.a (router.bindForward state (Route.Home,Dict.empty) []) [text "HOME"]
+        home = lazy (always <| Html.a (router.bindForward state (Route.Home,Dict.empty) []) [text "HOME"]) ()
         rest = case parsed of
           Nothing   -> [Html.div [class "categories"] <| List.map (categoryLink state << snd) <| Dict.toList state.categories]
           Just html -> [html]
@@ -42,6 +43,8 @@ homeHandler (Router router) =
       inputs = [loadCategories]
     }
 
+photoLink photo router state = Html.a (router.bindForward state (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
+
 categoryHandler : Router Route State -> Handler State
 categoryHandler (Router router) =
   let
@@ -49,11 +52,11 @@ categoryHandler (Router router) =
       let
         -- _ = Debug.log "categoryHandler" state
         category = getCategory state
-        photoLinks = flip List.map state.photos <| \photo -> --photo
-          Html.a (router.bindForward state (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
+
+        photos =  lazy (\l -> div [] <| List.map (\p -> lazy3 photoLink p router state) l) state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-      in Maybe.map (\c -> div [] [text <| toString c, div [] photoLinks, parsed'] ) category
+      in Maybe.map (\c -> div [] [text <| toString c, photos, parsed'] ) category
   in
     {
       view = view,
