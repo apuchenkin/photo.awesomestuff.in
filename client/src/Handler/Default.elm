@@ -53,7 +53,7 @@ categoryHandler (Router router) =
         -- _ = Debug.log "categoryHandler" state
         category = getCategory state
 
-        photos =  lazy (\l -> div [] <| List.map (\p -> lazy3 photoLink p router state) l) state.photos
+        photos =  lazy (\l -> div [] <| List.map (\p -> photoLink p router state) l) state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
       in Maybe.map (\c -> div [] [text <| toString c, photos, parsed'] ) category

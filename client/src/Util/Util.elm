@@ -24,6 +24,12 @@ traverseFrom zipper value =
         Nothing      -> [value']
         Just zipper' -> traverseFrom zipper' value ++ [value']
 
+zipper : Tree a -> Zipper a
+zipper tree = (tree, [])
+
+forestLookup : a -> Forest a -> Maybe (Zipper a)
+forestLookup value forest = List.head <| List.filterMap (\tree -> treeLookup value (zipper tree)) forest
+
 treeLookup : a -> Zipper a -> Maybe (Zipper a)
 treeLookup value z =
   let
