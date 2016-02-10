@@ -47,36 +47,51 @@ runAction action (state, effects) =
 -- router functions
 --------------------------------------------------------------------------------------
 
+-- @private
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 render (Router router) state =
     let
       _ = Debug.log "render" state.router
       route     = state.router.route
-      handlers  = Maybe.withDefault [] <| Maybe.map (router.getHandlers Nothing) route
-      views     = List.map .view handlers
+      handlers  = Maybe.withDefault [] <| Maybe.map (getHandlers router.config Nothing) route
+      views     = List.map (\h -> (h (Router router)).view) handlers
       html      = List.foldr (\view parsed -> view address state parsed) Nothing views
     in Maybe.withDefault (text "error") html
 
-
-setUrl : RouterConfig route (WithRouter route state) -> String -> Action (WithRouter route state)
-setUrl config url = case (matchRoute config url) of
+-- @private
+setUrl : Router route (WithRouter route state) -> String -> Action (WithRouter route state)
+setUrl (Router router) url = case (matchRoute router.config url) of
     Nothing               -> Debug.crash <| url
-    Just route            -> setRoute config route
+    Just route            -> setRoute (Router router) route
 
-matchRoute : RouterConfig route state -> String -> Maybe (Route route)
-matchRoute config url = match (.url << config.config) config.routes url
+-- @private
+setRoute : Router route (WithRouter route state) -> Route route -> Action (WithRouter route state)
+setRoute router (route, params) state =
+  let
+    -- _ = Debug.log "setRoute" route
+    rs = state.router
+    from  = state.router.route
+    state' = { state | router = { rs | route = Just route, params = params }}
+  in
+    transition router from route state'
 
-transition : RouterConfig route state -> Transition route state
-transition config from to state =
+-- @private
+transition : Router route state -> Transition route state
+transition (Router router) from to state =
   let
     -- _ = Debug.log "transition: from" from
     -- _ = Debug.log "transition: to" to
     -- _ = Debug.log "transition: state" state
 
-    handlers = getHandlers config from to
-    actions  = runHandlers handlers
+    handlers = getHandlers router.config from to
+    actions  = runHandlers <| List.map (\h -> h (Router router)) handlers
   in  Response <| List.foldl runAction (noFx state) actions
 
+-- @private
+matchRoute : RouterConfig route state -> String -> Maybe (Route route)
+matchRoute config url = match (.url << config.config) config.routes url
+
+-- @public
 -- binds forward action to existing HTML attributes
 bindForward : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> List Html.Attribute -> List Html.Attribute
 bindForward config state route attrs =
@@ -97,7 +112,7 @@ buildUrl config state (route, params) =
   in Lib.Matcher.buildRawUrl raws <| combineParams state.router.params (route, params)
 
 -- TODO: cache
-getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
+getHandlers : RouterConfig route state -> Maybe route -> route -> List (Router route state -> Handler state)
 getHandlers config from to =
   let routes = case from == Just to of
     True -> [to]
@@ -112,17 +127,6 @@ getHandlers config from to =
   in List.map (.handler << config.config) <| routes
 
 
-setRoute : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
-setRoute config (route, params) state =
-  let
-    -- _ = Debug.log "setRoute" route
-    rs = state.router
-    from  = state.router.route
-    state' = { state | router = { rs | route = Just route, params = params }}
-  in
-    transition config from route state'
-
-
 forward : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
 forward config route state =
   let
@@ -135,10 +139,8 @@ forward config route state =
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config = Router {
     config        = config
-  , bindForward   = bindForward   config
-  , buildUrl      = buildUrl      config
-  , getHandlers   = getHandlers   config
-  , setRoute      = setRoute      config
+  , bindForward   = bindForward   config config.init
+  , buildUrl      = buildUrl      config config.init
   , forward       = forward       config
   }
 
@@ -159,7 +161,7 @@ runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter ro
 runRouter (Router router) =
   let
     initialState = prepareCache router.config.init router.config
-    init = (Signal.map (singleton << (,) True << setUrl router.config) path)
+    init = (Signal.map (singleton << (,) True << setUrl (Router router)) path)
 
     -- inputs : Signal (List (Bool, Action state))
     inputs =

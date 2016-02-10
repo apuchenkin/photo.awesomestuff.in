@@ -131,7 +131,6 @@ buildTreeUrl rawRoute forest route =
   in List.foldl (flip (++)) "" segments
 
 -- decompose Route to string
--- TODO: cache unwrap?
 buildUrl : (route -> RawURL) -> Forest route -> Route route -> URL
 buildUrl rawRoute forest (route, params) =
   let  raws = unwrap <| buildTreeUrl rawRoute forest route

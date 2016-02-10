@@ -13,23 +13,23 @@ import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..))
 
 import Mouse
 
-config : Route -> RouteConfig State
+config : Route -> RouteConfig Route State
 config route = case route of
   Home -> {
       url = "/",
-      handler = homeHandler router
+      handler = homeHandler
     }
   NotFound -> {
       url = "/404",
-      handler = notFoundHandler router
+      handler = notFoundHandler
     }
   Category -> {
       url = ":category[/:subcategory]",
-      handler = categoryHandler router
+      handler = categoryHandler
     }
   Photo -> {
       url = "/photo/:photo",
-      handler = photoHandler router
+      handler = photoHandler
     }
 
 initialState : State

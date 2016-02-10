@@ -22,9 +22,9 @@ type alias Handler state = {
   , inputs  : List (Action state)
   }
 
-type alias RouteConfig state = {
+type alias RouteConfig route state = {
       url:          String
-    , handler:      Handler state
+    , handler:      Router route state -> Handler state
   }
 
 type alias RouterResult state =
@@ -51,7 +51,7 @@ type alias RouterState route = {
 -- Route
 -----------------------------------------
 
-type alias GetRouteConfig route state = route -> RouteConfig state
+type alias GetRouteConfig route state = route -> RouteConfig route state
 
 {-| Type extension for the model. -}
 type alias WithRouter route state = { state | router : RouterState route }
@@ -65,10 +65,8 @@ type alias RouterConfig route state = {
 
 type Router route state = Router {
   config        : RouterConfig route state,
-  bindForward   : state -> Route route -> List Html.Attribute -> List Html.Attribute,
-  buildUrl      : state -> Route route -> String,
-  getHandlers   : Maybe route -> route -> List (Handler state),
-  setRoute      : Route route -> Action state,
+  bindForward   : Route route -> List Html.Attribute -> List Html.Attribute,
+  buildUrl      : Route route -> String,
   forward       : Route route -> Action state
 }
 
