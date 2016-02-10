@@ -39,8 +39,12 @@ type alias RouteParams  = Dict String String
 type alias Route route = (route, RouteParams)
 
 type alias RouterState route = {
-    route:    Maybe route,
-    params:   RouteParams
+    route: Maybe route,
+    params: RouteParams,
+    cache: {
+      treeUrl: Dict String String,
+      unwrap: Dict String (List String)
+    }
   }
 
 -----------------------------------------

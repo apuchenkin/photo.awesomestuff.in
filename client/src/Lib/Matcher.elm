@@ -7,8 +7,6 @@ import Regex
 import String
 import Dict
 
-import Lazy exposing (Lazy)
-import Lazy.List as List' exposing (LazyList)
 import Util.Util      exposing (treeLookup, forestLookup, traverse)
 import MultiwayTree   exposing (Tree (..), Forest, datum, children)
 import List.Extra
@@ -50,6 +48,7 @@ getParams string = case fst <| parse paramsParser string of
 combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union params dict)
 
+-- TODO: Perfomance?
 unwrap : String -> List String
 unwrap raw =
   let
@@ -64,27 +63,6 @@ unwrap raw =
 
   in List.reverse <| List.sortBy String.length <| List.Extra.dropDuplicates <| result
 
-unwrap' : Lazy String -> LazyList String
-unwrap' raw' = Lazy.andThen raw' <| \raw ->
-  let
-    regex   = Regex.regex "^(.*)\\[([^\\]\\[]+)\\](.*)$"
-    matches = Regex.find (Regex.AtMost 1) regex raw
-    result  =  case matches of
-      []         -> List'.singleton raw
-      [match]    -> case match.submatches of
-        [Just a, Just b, Just c]  ->
-          let
-           l = List'.map (\v -> Lazy.lazy (\_ -> v)) <| List'.fromList [a ++ b ++ c, a ++ c]
-           m = List'.map unwrap' l
-          in List'.foldl List'.append List'.empty m
-        _ -> List'.singleton raw
-      _ -> List'.empty
-
-  in --List.reverse <| List.sortBy String.length <|
-    List'.unique <| result
-
--- TODO: Regex free?
--- TODO: Perfomance?
 parseUrlParams : RawURL -> URL -> (Result (List String) RouteParams, String)
 parseUrlParams raw url =
   let
@@ -110,14 +88,9 @@ parseUrlParams raw url =
     zipValues values = Dict.fromList <| List.map2 (,) params values
   in (Result.map zipValues result, context.input)
 
--- TODO: cache unwrap?
-match : (route -> RawURL) -> Forest route -> URL -> Maybe (Route route)
-match rawRoute forest url = List.head <| List.filterMap (\tree ->
-    let
-      raw = rawRoute <| datum tree
-      raws = unwrap' <| Lazy.lazy (\_ -> raw)
-
-    in List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern url
+matchRaw : (route -> List RawURL) -> Forest route -> URL -> Maybe (Route route)
+matchRaw rawRoute forest url = List.head <| List.filterMap (\tree ->
+    List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern url
        in case result of
         Err _       -> Nothing
         Ok  dict    -> case String.isEmpty url' of
@@ -125,31 +98,41 @@ match rawRoute forest url = List.head <| List.filterMap (\tree ->
             False -> case children tree of
               []        -> Nothing
               forest    ->
-                let child = match rawRoute forest url'
+                let child = matchRaw rawRoute forest url'
                 in Maybe.map (combineParams dict) child
-      ) (List'.toList raws)
+      ) (rawRoute <| datum tree)
     ) forest
 
--- decompose Route to string
--- TODO: cache unwrap?
-buildUrl : (route -> RawURL) -> Forest route -> Route route -> URL
-buildUrl rawRoute forest (route, params) =
+match : (route -> RawURL) -> Forest route -> URL -> Maybe (Route route)
+match rawRoute forest url = matchRaw (unwrap << rawRoute) forest url
+
+buildRawUrl : List RawURL -> Route route -> URL
+buildRawUrl raws (route, params) =
   let
-    -- _ = Debug.log "buildUrl" (route, params)
-    zipper = forestLookup route forest
-    path   = Maybe.withDefault [] <| Maybe.map traverse zipper
-    segments = List.map rawRoute path
-    rawUrl = List.foldl (flip (++)) "" segments
-    raws = unwrap' <| Lazy.lazy (\_ ->  rawUrl)
-    urls = List'.map (\raw -> Dict.foldl (\param value string -> Regex.replace
+    urls = List.map (\raw -> Dict.foldl (\param value string -> Regex.replace
             (Regex.AtMost 1)
             (Regex.regex <| paramChar `String.cons` param)
             (always value)
             string
           ) raw params
       ) raws
-    urls' = List'.dropIf (String.contains (String.fromChar paramChar)) urls
+    urls' = List.filter (not << String.contains (String.fromChar paramChar)) urls
 
-  in case List'.head urls' of
+  in case List.head urls' of
     Nothing -> Debug.crash "not enough params to build URL"
     Just url -> url
+
+buildTreeUrl : (route -> RawURL) -> Forest route -> route -> RawURL
+buildTreeUrl rawRoute forest route =
+  let
+      zipper = forestLookup route forest
+      path   = Maybe.withDefault [] <| Maybe.map traverse zipper
+      segments = List.map rawRoute path
+  in List.foldl (flip (++)) "" segments
+
+-- decompose Route to string
+-- TODO: cache unwrap?
+buildUrl : (route -> RawURL) -> Forest route -> Route route -> URL
+buildUrl rawRoute forest (route, params) =
+  let  raws = unwrap <| buildTreeUrl rawRoute forest route
+  in buildRawUrl raws (route, params)

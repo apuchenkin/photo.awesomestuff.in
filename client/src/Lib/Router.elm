@@ -20,7 +20,7 @@ import Util.Util
 -- import Response as R
 
 initialState : RouterState route
-initialState = {route = Nothing, params = Dict.empty}
+initialState = {route = Nothing, params = Dict.empty, cache = {unwrap = Dict.empty, treeUrl = Dict.empty}}
 
 mailbox : Signal.Mailbox (List (Action state))
 mailbox = Signal.mailbox []
@@ -90,7 +90,11 @@ bindForward config state route attrs =
 
 -- decompose Route to string
 buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
-buildUrl config state route = Lib.Matcher.buildUrl (.url << config.config) config.routes <| combineParams state.router.params route
+buildUrl config state (route, params) =
+  let
+  raw =  Maybe.withDefault (Lib.Matcher.buildTreeUrl (.url << config.config) config.routes route) <| Dict.get (toString route) state.router.cache.treeUrl
+  raws = Maybe.withDefault (Lib.Matcher.unwrap raw) <| Dict.get raw state.router.cache.unwrap
+  in Lib.Matcher.buildRawUrl raws <| combineParams state.router.params (route, params)
 
 -- TODO: cache
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Handler state)
@@ -138,9 +142,23 @@ router config = Router {
   , forward       = forward       config
   }
 
+prepareCache : (WithRouter route state) -> RouterConfig route (WithRouter route state) -> (WithRouter route state)
+prepareCache state config =
+  let
+    router = state.router
+    routes = List.concat <| List.map Util.Util.treeToList config.routes
+    urls = flip List.map routes <| \r -> (toString r, Lib.Matcher.buildTreeUrl (.url << config.config) config.routes r)
+    urls' = List.map (.url << config.config) routes
+    unwraps = flip List.map (urls' ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
+    treeUrl = Dict.fromList urls
+    unwrap  = Dict.fromList unwraps
+    cache = {treeUrl = Dict.empty, unwrap = Dict.empty}
+  in {state | router = {router | cache = cache}}
+
 runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)
 runRouter (Router router) =
   let
+    initialState = prepareCache router.config.init router.config
     init = (Signal.map (singleton << (,) True << setUrl router.config) path)
 
     -- inputs : Signal (List (Bool, Action state))
@@ -155,7 +173,7 @@ runRouter (Router router) =
       <| List.map snd actions
 
     -- update' : List (Bool, Action state) -> (state, ActionEffects state)
-    update' actions           = List.foldl runAction (noFx router.config.init)
+    update' actions           = List.foldl runAction (noFx initialState)
       <| List.map snd
       <| List.filter fst actions
 
