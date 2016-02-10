@@ -47,7 +47,7 @@ router = Lib.Router.router {
     routes = routes,
     config = config,
     inputs = [
-      Signal.map (\p -> (\state -> Response <| noFx state)) Mouse.position
+      -- Signal.map (\p -> (\state -> Response <| noFx state)) Mouse.position
     ]
   }
 

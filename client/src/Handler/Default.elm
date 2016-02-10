@@ -11,28 +11,31 @@ import Html.Attributes exposing (href,class)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Handler.Routes as Route exposing (Route)
 
+categoryLink : Category -> Router Route State -> Html
+categoryLink (Category category) (Router router) =
+  let
+    params = [("category", category.name)]
+    params' = case category.parent of
+      Nothing -> params
+      Just p -> case p of
+        Left _ -> params
+        Right (Category pc) ->  [("category", pc.name), ("subcategory", category.name)]
+  in Html.a (router.bindForward (Route.Category, Dict.fromList params') []) [text category.title]
+
+photoLink : Photo -> Router Route State -> Html
+photoLink photo (Router router) = Html.a (router.bindForward (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
+
 homeHandler : Router Route State -> Handler State
 homeHandler (Router router) =
   let
     loader = Html.div [class "loader"] []
-
-    categoryLink state (Category category) =
-      let
-      params = [("category", category.name)]
-      params' = case category.parent of
-        Nothing -> params
-        Just p -> case p of
-          Left _ -> params
-          Right (Category pc) ->  [("category", pc.name), ("subcategory", category.name)]
-
-      in Html.a (router.bindForward (Route.Category, Dict.fromList params') []) [text category.title]
-
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state
         home = lazy (always <| Html.a (router.bindForward (Route.Home,Dict.empty) []) [text "HOME"]) ()
+        categories c = Html.div [class "categories"] <| List.map (\c -> lazy2 categoryLink (snd c) (Router router)) <| Dict.toList c
         rest = case parsed of
-          Nothing   -> [Html.div [class "categories"] <| List.map (categoryLink state << snd) <| Dict.toList state.categories]
+          Nothing   -> [lazy categories state.categories]
           Just html -> [html]
       in Just <| div [] <| case state.isLoading of
         True  -> loader :: home :: rest
@@ -43,8 +46,6 @@ homeHandler (Router router) =
       inputs = [loadCategories]
     }
 
-photoLink photo router = Html.a (router.bindForward (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
-
 categoryHandler : Router Route State -> Handler State
 categoryHandler (Router router) =
   let
@@ -53,7 +54,7 @@ categoryHandler (Router router) =
         -- _ = Debug.log "categoryHandler" state
         category = getCategory state
 
-        photos =  lazy (\l -> div [] <| List.map (\p -> photoLink p router) l) state.photos
+        photos =  lazy (\l -> div [] <| List.map (\p -> lazy2 photoLink p (Router router)) l) state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
       in Maybe.map (\c -> div [] [text <| toString c, photos, parsed'] ) category

@@ -12,7 +12,7 @@ import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
 
 import Lib.Helpers  exposing (..)
-import Lib.Matcher  exposing (..)
+import Lib.Matcher
 import Lib.Types    exposing (..)
 import Util.Util
 
@@ -51,16 +51,17 @@ runAction action (state, effects) =
 render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 render (Router router) state =
     let
-      _ = Debug.log "render" state.router
+      -- _ = Debug.log "render" state.router
+      router'   = { router | buildUrl = buildUrl router.config state.router, bindForward = bindForward router.config state.router}
       route     = state.router.route
       handlers  = Maybe.withDefault [] <| Maybe.map (getHandlers router.config Nothing) route
-      views     = List.map (\h -> (h (Router router)).view) handlers
+      views     = List.map (\h -> (h (Router router')).view) handlers
       html      = List.foldr (\view parsed -> view address state parsed) Nothing views
     in Maybe.withDefault (text "error") html
 
 -- @private
-setUrl : Router route (WithRouter route state) -> String -> Action (WithRouter route state)
-setUrl (Router router) url = case (matchRoute router.config url) of
+setUrl : Router route (WithRouter route state) -> RouterState route -> String -> Action (WithRouter route state)
+setUrl (Router router) state url = case (matchRoute router.config state url) of
     Nothing               -> Debug.crash <| url
     Just route            -> setRoute (Router router) route
 
@@ -76,24 +77,30 @@ setRoute router (route, params) state =
     transition router from route state'
 
 -- @private
-transition : Router route state -> Transition route state
+transition : Router route (WithRouter route state) -> Transition route (WithRouter route state)
 transition (Router router) from to state =
   let
     -- _ = Debug.log "transition: from" from
     -- _ = Debug.log "transition: to" to
     -- _ = Debug.log "transition: state" state
-
+    router'   = { router | buildUrl = buildUrl router.config state.router, bindForward = bindForward router.config state.router}
     handlers = getHandlers router.config from to
-    actions  = runHandlers <| List.map (\h -> h (Router router)) handlers
+    actions  = runHandlers <| List.map (\h -> h (Router router')) handlers
   in  Response <| List.foldl runAction (noFx state) actions
 
 -- @private
-matchRoute : RouterConfig route state -> String -> Maybe (Route route)
-matchRoute config url = match (.url << config.config) config.routes url
+matchRoute : RouterConfig route state -> RouterState route -> String -> Maybe (Route route)
+matchRoute config state url =
+  let
+    rawRoute route = case Dict.get (.url <| config.config route) state.cache.unwrap of
+      Just value -> value
+      Nothing -> Lib.Matcher.unwrap <| .url <| config.config route
+  in
+    Lib.Matcher.matchRaw rawRoute config.routes url
 
 -- @public
 -- binds forward action to existing HTML attributes
-bindForward : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> List Html.Attribute -> List Html.Attribute
+bindForward : RouterConfig route (WithRouter route state) -> RouterState route -> Route route -> List Html.Attribute -> List Html.Attribute
 bindForward config state route attrs =
   let
     options = {stopPropagation = True, preventDefault = True}
@@ -104,12 +111,18 @@ bindForward config state route attrs =
     :: attrs
 
 -- decompose Route to string
-buildUrl : RouterConfig route (WithRouter route state) -> (WithRouter route state) -> Route route -> String
+buildUrl : RouterConfig route (WithRouter route state) -> RouterState route -> Route route -> String
 buildUrl config state (route, params) =
   let
-  raw =  Maybe.withDefault (Lib.Matcher.buildTreeUrl (.url << config.config) config.routes route) <| Dict.get (toString route) state.router.cache.treeUrl
-  raws = Maybe.withDefault (Lib.Matcher.unwrap raw) <| Dict.get raw state.router.cache.unwrap
-  in Lib.Matcher.buildRawUrl raws <| combineParams state.router.params (route, params)
+  raw =  case Dict.get (toString route) state.cache.treeUrl of
+    Just value -> value
+    Nothing -> Lib.Matcher.buildTreeUrl (.url << config.config) config.routes route
+
+  raws = case Dict.get raw state.cache.unwrap of
+    Just value -> value
+    Nothing -> Lib.Matcher.unwrap raw
+
+  in Lib.Matcher.buildRawUrl raws <| Lib.Matcher.combineParams state.params (route, params)
 
 -- TODO: cache
 getHandlers : RouterConfig route state -> Maybe route -> route -> List (Router route state -> Handler state)
@@ -131,7 +144,7 @@ forward : RouterConfig route (WithRouter route state) -> Route route -> Action (
 forward config route state =
   let
     _ = Debug.log "forward" route
-    url   = buildUrl config state route
+    url   = buildUrl config state.router route
     task  = History.setPath url |> Task.map (always (\s -> Response <| noFx s))
   in Response (state, Effects.task task)
 
@@ -139,8 +152,8 @@ forward config route state =
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config = Router {
     config        = config
-  , bindForward   = bindForward   config config.init
-  , buildUrl      = buildUrl      config config.init
+  , bindForward   = bindForward   config config.init.router
+  , buildUrl      = buildUrl      config config.init.router
   , forward       = forward       config
   }
 
@@ -154,14 +167,15 @@ prepareCache state config =
     unwraps = flip List.map (urls' ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
     treeUrl = Dict.fromList urls
     unwrap  = Dict.fromList unwraps
-    cache = {treeUrl = Dict.empty, unwrap = Dict.empty}
+    cache = {treeUrl = treeUrl, unwrap = unwrap}
   in {state | router = {router | cache = cache}}
 
 runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)
 runRouter (Router router) =
   let
     initialState = prepareCache router.config.init router.config
-    init = (Signal.map (singleton << (,) True << setUrl (Router router)) path)
+    -- _ = Debug.log "initialState" initialState
+    init = (Signal.map (singleton << (,) True << setUrl (Router router) initialState.router) path)
 
     -- inputs : Signal (List (Bool, Action state))
     inputs =
