@@ -26,13 +26,13 @@ photoLink : Photo -> Router Route State -> Html
 photoLink photo (Router router) = Html.a (router.bindForward (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
 
 localeHandler : Router Route State -> Handler State
-localeHandler (Router router) =
+localeHandler router =
   let
     view address state parsed = parsed
   in
     {
       view = view,
-      inputs = [loadCategories]
+      inputs = [setLocale router]
     }
 
 homeHandler : Router Route State -> Handler State

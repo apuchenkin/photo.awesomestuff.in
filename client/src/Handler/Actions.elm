@@ -6,7 +6,7 @@ import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
-import Lib.Types exposing (WithRouter, Action, Response (..))
+import Lib.Types exposing (WithRouter, Action, Response (..), Router (..))
 import Handler.Routes as Routes exposing (Route)
 import Lib.Helpers exposing (noFx, chainAction)
 import Maybe.Extra exposing (join)
@@ -141,3 +141,15 @@ updateCategories categories state =
       ) category.parent}) dict
   in
     Response <| noFx {state | isLoading = False, categories = castegoris'}
+
+setLocale : Router Route State ->Action State
+setLocale (Router r) state =
+  let
+    locale = Dict.get "locale" state.router.params
+    _ = Debug.log "locale" locale
+    route = Maybe.withDefault Routes.Home state.router.route
+    act = case locale of
+      Nothing -> r.forward (route, Dict.fromList [("locale", "en")])
+      Just _  -> \state -> Response <| noFx state
+
+  in act state
