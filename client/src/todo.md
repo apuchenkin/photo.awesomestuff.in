@@ -7,6 +7,9 @@
 >> router cache
 >> how to bypass state to buildURL to simplify API?
 >> html cache
+- trailing slash route
+- greedy matcher config (matches first found route or latest one)
+- static routes
 - handlers cache
 - general refactoring
 - perfomance

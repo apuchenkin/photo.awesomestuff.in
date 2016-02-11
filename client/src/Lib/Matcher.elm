@@ -93,13 +93,13 @@ matchRaw rawRoute forest url = List.head <| List.filterMap (\tree ->
     List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern url
        in case result of
         Err _       -> Nothing
-        Ok  dict    -> case String.isEmpty url' of
-            True  -> Just (datum tree, dict)
-            False -> case children tree of
-              []        -> Nothing
-              forest    ->
-                let child = matchRaw rawRoute forest url'
-                in Maybe.map (combineParams dict) child
+        Ok  dict    ->
+          let
+            child = matchRaw rawRoute (children tree) url'
+            childRoute = Maybe.map (combineParams dict) child
+          in case String.isEmpty url' of
+              True  -> Just <| Maybe.withDefault (datum tree, dict) childRoute
+              False -> childRoute
       ) (rawRoute <| datum tree)
     ) forest
 

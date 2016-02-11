@@ -6,22 +6,26 @@ import Dict     exposing (Dict)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
-import Lib.Helpers exposing (..)
+-- import Lib.Helpers exposing (..)
 
 import Lib.Router exposing (..)
 import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..))
 
-import Mouse
+-- import Mouse
 
 config : Route -> RouteConfig Route State
 config route = case route of
-  Home -> {
-      url = "/",
-      handler = homeHandler
+  Locale -> {
+      url = "/[:locale]",
+      handler = localeHandler
     }
   NotFound -> {
       url = "/404",
       handler = notFoundHandler
+    }
+  Home -> {
+      url = "[/]",
+      handler = homeHandler
     }
   Category -> {
       url = ":category[/:subcategory]",

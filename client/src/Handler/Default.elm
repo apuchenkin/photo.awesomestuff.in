@@ -25,6 +25,16 @@ categoryLink (Category category) (Router router) =
 photoLink : Photo -> Router Route State -> Html
 photoLink photo (Router router) = Html.a (router.bindForward (Route.Photo, Dict.fromList [("photo", toString photo.id)]) []) [text photo.src]
 
+localeHandler : Router Route State -> Handler State
+localeHandler (Router router) =
+  let
+    view address state parsed = parsed
+  in
+    {
+      view = view,
+      inputs = [loadCategories]
+    }
+
 homeHandler : Router Route State -> Handler State
 homeHandler (Router router) =
   let
