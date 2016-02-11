@@ -52,10 +52,10 @@ render : Router route (WithRouter route state) -> (WithRouter route state) -> Ht
 render (Router router) state =
     let
       -- _ = Debug.log "render" state.router
-      router'   = { router | buildUrl = buildUrl router.config state.router, bindForward = bindForward router.config state.router}
+      router'   = updateRouter (Router router) state.router
       route     = state.router.route
       handlers  = Maybe.withDefault [] <| Maybe.map (getHandlers router.config Nothing) route
-      views     = List.map (\h -> (h (Router router')).view) handlers
+      views     = flip List.map handlers <| (\handler -> (handler router').view)
       html      = List.foldr (\view parsed -> view address state parsed) Nothing views
     in Maybe.withDefault (text "error") html
 
@@ -83,9 +83,9 @@ transition (Router router) from to state =
     -- _ = Debug.log "transition: from" from
     -- _ = Debug.log "transition: to" to
     -- _ = Debug.log "transition: state" state
-    router'   = { router | buildUrl = buildUrl router.config state.router, bindForward = bindForward router.config state.router}
+    router'   = updateRouter (Router router) state.router
     handlers = getHandlers router.config from to
-    actions  = runHandlers <| List.map (\h -> h (Router router')) handlers
+    actions  = runHandlers <| flip List.map handlers <| \handler -> handler router'
   in  Response <| List.foldl runAction (noFx state) actions
 
 -- @private
@@ -148,12 +148,22 @@ forward config route state =
     task  = History.setPath url |> Task.map (always (\s -> Response <| noFx s))
   in Response (state, Effects.task task)
 
+updateRouter : Router route (WithRouter route state) -> RouterState route -> Router route (WithRouter route state)
+updateRouter (Router router) rs = Router { router |
+    getRoute    = rs.route,
+    getParams   = rs.params,
+    buildUrl    = buildUrl router.config rs,
+    bindForward = bindForward router.config rs
+  }
 
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
-router config = Router {
+router config = let routerState = config.init.router
+  in Router {
     config        = config
-  , bindForward   = bindForward   config config.init.router
-  , buildUrl      = buildUrl      config config.init.router
+  , getRoute      = routerState.route
+  , getParams     = routerState.params
+  , bindForward   = bindForward   config routerState
+  , buildUrl      = buildUrl      config routerState
   , forward       = forward       config
   }
 

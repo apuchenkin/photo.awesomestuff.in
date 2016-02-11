@@ -7,9 +7,8 @@
 >> router cache
 >> how to bypass state to buildURL to simplify API?
 >> html cache
-- getRoute and getParams expose to router public API
-- add route constrints (probably regex check)
-- trailing slash route
+>> getRoute and getParams expose to router public API
+- add route constraints (probably regex check)
 - greedy matcher config (matches first found route or latest one)
 - static routes
 - handlers cache
@@ -20,3 +19,4 @@
 - i18n
 - meta information ports
 - effects
+- trailing slash route?

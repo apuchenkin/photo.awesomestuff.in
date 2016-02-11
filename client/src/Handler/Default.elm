@@ -80,7 +80,7 @@ photoHandler (Router router) =
     view address state _ =
       let
         -- _ = Debug.log "photoHandler" state
-        photo = Dict.get "photo" state.router.params
+        photo = Dict.get "photo" router.getParams
       in Maybe.map (\p -> div [] [text <| toString p] ) photo
   in
     {

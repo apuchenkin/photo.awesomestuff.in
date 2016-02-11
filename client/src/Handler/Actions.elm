@@ -143,13 +143,13 @@ updateCategories categories state =
     Response <| noFx {state | isLoading = False, categories = castegoris'}
 
 setLocale : Router Route State ->Action State
-setLocale (Router r) state =
+setLocale (Router router) state =
   let
-    locale = Dict.get "locale" state.router.params
+    locale = Dict.get "locale" router.getParams
     _ = Debug.log "locale" locale
-    route = Maybe.withDefault Routes.Home state.router.route
+    route = Maybe.withDefault Routes.Home router.getRoute
     act = case locale of
-      Nothing -> r.forward (route, Dict.fromList [("locale", "en")])
+      Nothing -> router.forward (route, Dict.fromList [("locale", "en")])
       Just _  -> \state -> Response <| noFx state
 
   in act state

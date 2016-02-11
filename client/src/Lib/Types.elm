@@ -65,6 +65,8 @@ type alias RouterConfig route state = {
 
 type Router route state = Router {
   config        : RouterConfig route state,
+  getRoute      : Maybe route,
+  getParams     : RouteParams,
   bindForward   : Route route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : Route route -> String,
   forward       : Route route -> Action state
