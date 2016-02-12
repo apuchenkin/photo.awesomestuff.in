@@ -10,11 +10,13 @@ import Lib.Types exposing (WithRouter, Action, Response (..), Router (..))
 import Handler.Routes as Routes exposing (Route)
 import Lib.Helpers exposing (noFx, chainAction)
 import Maybe.Extra exposing (join)
+import Handler.Locale as Locale exposing (Locale)
 
 type alias Promise value = Either (Task Http.Error value) value
 
 type alias State = WithRouter Route
   {
+    locale: Locale,
     categories: Dict String Category,
     photos: List Photo,
     photo: Maybe Photo,
@@ -76,11 +78,19 @@ decodePhoto = Json.object4 Photo
 decodePhotos : Json.Decoder (List Photo)
 decodePhotos = Json.list decodePhoto
 
+getRequest: Json.Decoder value -> String -> State -> Task Http.Error value
+getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSettings
+  { verb = "GET"
+  , headers = [("Accept-languadge", Locale.toString state.locale)]
+  , url = url
+  , body = Http.empty
+  })
+
 loadCategories : Router Route State -> Action State
 loadCategories router state =
   let
     -- _ = Debug.log "loadCategories" state
-    fetch = Task.toMaybe <| Http.get decodeCategories ("/api/v1/category")
+    fetch = Task.toMaybe <| getRequest decodeCategories "/api/v1/category" state
     task = fetch `Task.andThen` \mcategories ->
       let
         categories = Maybe.withDefault [] mcategories
@@ -108,7 +118,7 @@ loadPhotos (Router router) state =
         let
           category = getCategory state
           fetch = flip Maybe.map category <| \(Category c) ->
-            let fetch = Task.toMaybe <| Http.get decodePhotos ("/api/v1/category/" ++ toString c.id ++ "/photo")
+            let fetch = Task.toMaybe <| getRequest decodePhotos ("/api/v1/category/" ++ toString c.id ++ "/photo") state
             in fetch `Task.andThen` \photos -> Task.succeed <| updatePhotos <| Maybe.withDefault [] photos
 
         in Just <| Maybe.withDefault (Task.succeed <| router.forward (Routes.NotFound, Dict.empty)) fetch
@@ -120,7 +130,7 @@ loadPhoto state =
   let
     photoId = Dict.get "photo" state.router.params
     task = flip Maybe.map photoId <| \pid ->
-      let fetch = Task.toMaybe <| Http.get decodePhoto ("/api/v1/photo/" ++ pid)
+      let fetch = Task.toMaybe <| getRequest decodePhoto ("/api/v1/photo/" ++ pid) state
       in fetch `Task.andThen` \photo -> Task.succeed <| updatePhoto photo
 
   in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
@@ -151,11 +161,11 @@ updateCategories categories state =
 setLocale : Router Route State -> Action State
 setLocale (Router router) state =
   let
-    locale = Dict.get "locale" router.getParams
     _ = Debug.log "locale" locale
+    locale = Dict.get "locale" router.getParams
     route = Maybe.withDefault Routes.Home router.getRoute
     act = case locale of
-      Nothing -> router.forward (route, Dict.fromList [("locale", "en")])
-      Just _  -> \state -> Response <| noFx state
+      Nothing -> router.forward (route, Dict.fromList [("locale", Locale.toString state.locale)])
+      Just l  -> \state -> Response <| noFx {state | locale = Locale.fromString l}
 
   in act state

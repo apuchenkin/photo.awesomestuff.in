@@ -3,10 +3,11 @@ import Html     exposing (Html)
 import Effects  exposing (Never)
 import Dict     exposing (Dict)
 
+import Handler.Locale as Locale exposing (Locale)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State)
 import Handler.Routes exposing (..)
--- import Lib.Helpers exposing (..)
+import Lib.Helpers exposing (..)
 
 import Lib.Router exposing (..)
 import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
@@ -43,12 +44,15 @@ config route = case route of
 
 initialState : State
 initialState = {
-    categories = Dict.empty,
-    photos = [],
-    photo = Nothing,
-    isLoading = False,
-    router = Lib.Router.initialState
+    locale      = Locale.fallbackLocale,
+    categories  = Dict.empty,
+    photos      = [],
+    photo       = Nothing,
+    isLoading   = False,
+    router      = Lib.Router.initialState
   }
+
+port localePort : Signal String
 
 router : Router Route State
 router = Lib.Router.router {
@@ -56,6 +60,9 @@ router = Lib.Router.router {
     fallback = (NotFound, Dict.empty),
     routes = routes,
     config = config,
+    inits = [
+      Signal.map (\locale state -> Response <| noFx {state | locale = Locale.fromString locale}) localePort
+    ],
     inputs = [
       -- Signal.map (\p -> (\state -> Response <| noFx state)) Mouse.position
     ]

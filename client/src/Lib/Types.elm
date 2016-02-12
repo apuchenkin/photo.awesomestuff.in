@@ -63,6 +63,7 @@ type alias RouterConfig route state = {
   fallback:   Route route,
   config:     GetRouteConfig route state,
   routes:     Forest route,
+  inits:      List (Signal.Signal (Action state)),
   inputs:     List (Signal.Signal (Action state))
 }
 

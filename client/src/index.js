@@ -3,4 +3,4 @@
 require('./index.html');
 var Elm = require('./Main');
 
-Elm.embed(Elm.Main, document.getElementById('main'));
+Elm.embed(Elm.Main, document.getElementById('main'), {localePort: navigator.language});

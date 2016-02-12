@@ -190,7 +190,8 @@ runRouter (Router router) =
       List.foldl (Signal.Extra.fairMerge List.append)
       init <|
       (Signal.map (List.map ((,) False)) mailbox.signal) -- actions from events
-      :: List.map (Signal.map (singleton << (,) False)) router.config.inputs
+      :: List.map (Signal.map (singleton << (,) True)) router.config.inits
+      ++ List.map (Signal.map (singleton << (,) False)) router.config.inputs
 
     -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)
     update  actions (state,_) = List.foldl runAction (noFx state)

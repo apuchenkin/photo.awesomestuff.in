@@ -11,9 +11,10 @@
 >> add route constraints (probably regex check)
 >> fallback route on failed routematch
 >> forwards
+>> i18n
 
-- i18n
 - handlers cache
+- Less magic -> better perfomance and caching (remove update router and whole state from router)
 - config cache on/off
 
 - tests
