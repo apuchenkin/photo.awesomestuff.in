@@ -9,7 +9,7 @@ import Handler.Routes exposing (..)
 -- import Lib.Helpers exposing (..)
 
 import Lib.Router exposing (..)
-import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..))
+import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
 
 -- import Mouse
 
@@ -17,22 +17,27 @@ config : Route -> RouteConfig Route State
 config route = case route of
   Locale -> {
       url = "/[:locale]",
+      constraints = Dict.fromList [("locale", Enum ["ru", "en"])],
       handler = localeHandler
     }
   NotFound -> {
       url = "/404",
+      constraints = Dict.empty,
       handler = notFoundHandler
     }
   Home -> {
       url = "[/]",
+      constraints = Dict.empty,
       handler = homeHandler
     }
   Category -> {
       url = ":category[/:subcategory]",
+      constraints = Dict.empty,
       handler = categoryHandler
     }
   Photo -> {
       url = "/photo/:photo",
+      constraints = Dict.fromList [("photo", Int)],
       handler = photoHandler
     }
 

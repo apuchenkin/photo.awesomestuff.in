@@ -62,7 +62,7 @@ render (Router router) state =
 -- @private
 setUrl : Router route (WithRouter route state) -> RouterState route -> String -> Action (WithRouter route state)
 setUrl (Router router) state url = case (matchRoute router.config state url) of
-    Nothing               -> Debug.crash <| url
+    Nothing               -> Debug.crash <| url -- TODO: fail behaviour on route match fail
     Just route            -> setRoute (Router router) route
 
 -- @private
@@ -80,9 +80,7 @@ setRoute router (route, params) state =
 transition : Router route (WithRouter route state) -> Transition route (WithRouter route state)
 transition (Router router) from to state =
   let
-    -- _ = Debug.log "transition: from" from
-    -- _ = Debug.log "transition: to" to
-    -- _ = Debug.log "transition: state" state
+    -- _ = Debug.log "transition: from" (from, to)
     router'   = updateRouter (Router router) state.router
     handlers = getHandlers router.config from to
     actions  = runHandlers <| flip List.map handlers <| \handler -> handler router'
@@ -93,8 +91,8 @@ matchRoute : RouterConfig route state -> RouterState route -> String -> Maybe (R
 matchRoute config state url =
   let
     rawRoute route = case Dict.get (.url <| config.config route) state.cache.unwrap of
-      Just value -> value
-      Nothing -> Lib.Matcher.unwrap <| .url <| config.config route
+      Just value -> (value, .constraints <| config.config route)
+      Nothing -> (Lib.Matcher.unwrap <| .url <| config.config route, .constraints <| config.config route)
   in
     Lib.Matcher.matchRaw rawRoute config.routes url
 

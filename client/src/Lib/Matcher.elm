@@ -5,16 +5,17 @@ module Lib.Matcher
 
 import Regex
 import String
-import Dict
+import Dict           exposing (Dict)
 
 import Util.Util      exposing (treeLookup, forestLookup, traverse)
 import MultiwayTree   exposing (Tree (..), Forest, datum, children)
 import List.Extra
 import Combine        exposing (Parser, many1, parse, many, while, between, end, rec, manyTill)
 import Combine.Char   exposing (char, noneOf, anyChar)
+import Combine.Num
 import Combine.Infix  exposing ((<$>), (*>), (<*), (<*>), (<|>))
 
-import Lib.Types    exposing (GetRouteConfig, RouteParams, Route)
+import Lib.Types    exposing (GetRouteConfig, RouteParams, Route, Constraint (..))
 import Lib.Helpers  exposing (singleton)
 
 type alias URL    = String
@@ -63,8 +64,8 @@ unwrap raw =
 
   in List.reverse <| List.sortBy String.length <| List.Extra.dropDuplicates <| result
 
-parseUrlParams : RawURL -> URL -> (Result (List String) RouteParams, String)
-parseUrlParams raw url =
+parseUrlParams : RawURL -> Dict String Constraint -> URL -> (Result (List String) RouteParams, String)
+parseUrlParams raw constraints url =
   let
     params = getParams raw
     strings = case params of
@@ -72,10 +73,15 @@ parseUrlParams raw url =
       p  -> Regex.split Regex.All (Regex.regex <| String.join "|" <| List.map (String.cons paramChar) p) raw
 
     sringParsers = List.map Combine.string        strings
-    paramParsers = List.map (always stringParser) params
+    paramParsers = List.map (\param -> Maybe.withDefault stringParser <| Maybe.map (\c -> case c of
+        Int       -> toString <$> Combine.Num.int
+        Enum list -> Combine.choice <| List.map Combine.string list
+        Regex reg -> Combine.regex reg
+        _         -> stringParser
+      ) <| Dict.get param constraints) params
 
     last = case List.Extra.last sringParsers of
-      Nothing -> Debug.crash "List.Extra.last sParsers"
+      Nothing -> Debug.crash "List.Extra.last sringParsers"
       Just v  -> v
 
     parsers = List.map2 (\p1 p2 -> p1 *> p2) sringParsers paramParsers
@@ -88,9 +94,10 @@ parseUrlParams raw url =
     zipValues values = Dict.fromList <| List.map2 (,) params values
   in (Result.map zipValues result, context.input)
 
-matchRaw : (route -> List RawURL) -> Forest route -> URL -> Maybe (Route route)
+matchRaw : (route -> (List RawURL, Dict String Constraint)) -> Forest route -> URL -> Maybe (Route route)
 matchRaw rawRoute forest url = List.head <| List.filterMap (\tree ->
-    List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern url
+    let (raws, constraints) = rawRoute <| datum tree
+    in List.head <| List.filterMap (\pattern -> let (result, url') = parseUrlParams pattern constraints url
        in case result of
         Err _       -> Nothing
         Ok  dict    ->
@@ -100,11 +107,11 @@ matchRaw rawRoute forest url = List.head <| List.filterMap (\tree ->
           in case String.isEmpty url' of
               True  -> Just <| Maybe.withDefault (datum tree, dict) childRoute
               False -> childRoute
-      ) (rawRoute <| datum tree)
+      ) raws
     ) forest
 
-match : (route -> RawURL) -> Forest route -> URL -> Maybe (Route route)
-match rawRoute forest url = matchRaw (unwrap << rawRoute) forest url
+match : (route -> (RawURL, Dict String Constraint)) -> Forest route -> URL -> Maybe (Route route)
+match rawRoute forest url = matchRaw ((\(r,c) -> (unwrap r, c)) << rawRoute) forest url
 
 buildRawUrl : List RawURL -> Route route -> URL
 buildRawUrl raws (route, params) =

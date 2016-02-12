@@ -1,5 +1,5 @@
 module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState, Route,
-                  GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition) where
+                  GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition, Constraint (..)) where
 
 import Dict           exposing (Dict)
 import Html           exposing (Html)
@@ -22,15 +22,17 @@ type alias Handler state = {
   , inputs  : List (Action state)
   }
 
+type Constraint = Int | String | Enum (List String) | Regex String
+
 type alias RouteConfig route state = {
       url:          String
+    , constraints:  Dict String Constraint
     , handler:      Router route state -> Handler state
   }
 
 type alias RouterResult state =
     { html  : Signal Html
     , state : Signal state
-    -- , tasks : Signal (Task.Task Never (List ()))
     , tasks : Signal (Task Never ())
     }
 
