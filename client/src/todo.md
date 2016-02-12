@@ -12,17 +12,20 @@
 >> fallback route on failed routematch
 >> forwards
 >> i18n
+>> handlers cache
+>> meta information ports
 
-- handlers cache
 - Less magic -> better perfomance and caching (remove update router and whole state from router)
 - config cache on/off
+- drope unneeded deps on libs
 
 - tests
 - static routes
 - general refactoring
 - perfomance
 
-- meta information ports
+- valid HTML
+- styles
 - effects
 
 - (Bug) replacePath instead setPath on fallback (404)

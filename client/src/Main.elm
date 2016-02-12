@@ -5,7 +5,7 @@ import Dict     exposing (Dict)
 
 import Handler.Locale as Locale exposing (Locale)
 import Handler.Default exposing (..)
-import Handler.Actions exposing (State)
+import Handler.Actions exposing (State, Meta)
 import Handler.Routes exposing (..)
 import Lib.Helpers exposing (..)
 
@@ -44,6 +44,7 @@ config route = case route of
 
 initialState : State
 initialState = {
+    meta        = {title = "PHOTO.AWESOMESTUFF.IN"},
     locale      = Locale.fallbackLocale,
     categories  = Dict.empty,
     photos      = [],
@@ -76,3 +77,6 @@ main = result.html
 
 port tasks : Signal (Task Never ())
 port tasks = result.tasks -- Signal.map (\_ -> ) main
+
+port meta : Signal Meta
+port meta = Signal.map .meta result.state

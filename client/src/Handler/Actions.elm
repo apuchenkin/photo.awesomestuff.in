@@ -14,8 +14,13 @@ import Handler.Locale as Locale exposing (Locale)
 
 type alias Promise value = Either (Task Http.Error value) value
 
+type alias Meta = {
+    title: String
+  }
+
 type alias State = WithRouter Route
   {
+    meta: Meta,
     locale: Locale,
     categories: Dict String Category,
     photos: List Photo,
