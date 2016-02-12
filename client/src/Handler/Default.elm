@@ -32,7 +32,7 @@ localeHandler router =
   in
     {
       view = view,
-      inputs = [setLocale router]
+      actions = [setLocale router]
     }
 
 homeHandler : Router Route State -> Handler State
@@ -53,7 +53,7 @@ homeHandler (Router router) =
   in
     {
       view = view,
-      inputs = [
+      actions = [
         loadCategories (Router router)
       ]
     }
@@ -73,7 +73,7 @@ categoryHandler (Router router) =
   in
     {
       view = view,
-      inputs = [
+      actions = [
         loadPhotos (Router router)
       ]
     }
@@ -89,7 +89,7 @@ photoHandler (Router router) =
   in
     {
       view = view,
-      inputs = [
+      actions = [
         loadPhoto
       ]
     }
@@ -101,5 +101,5 @@ notFoundHandler _ =
   in
     {
       view = view,
-      inputs = []
+      actions = []
     }

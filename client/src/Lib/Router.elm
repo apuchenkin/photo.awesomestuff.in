@@ -34,7 +34,7 @@ runHandlers : List (Handler state) -> List (Action state)
 runHandlers handlers =
   let
     run actions state = Response <| List.foldl runAction (noFx state) actions
-  in List.map run <| List.map .inputs handlers
+  in List.map run <| List.map .actions handlers
 
 runAction : Action state -> (state, ActionEffects state) -> (state, ActionEffects state)
 runAction action (state, effects) =

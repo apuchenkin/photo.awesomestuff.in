@@ -19,7 +19,7 @@ type alias Action state = state -> Response state
 
 type alias Handler state = {
     view    : Signal.Address (Action state) -> state -> Maybe Html -> Maybe Html
-  , inputs  : List (Action state)
+  , actions  : List (Action state)
   }
 
 type Constraint = Int | String | Enum (List String) | Regex String
