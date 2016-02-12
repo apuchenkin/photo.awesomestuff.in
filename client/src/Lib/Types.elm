@@ -60,6 +60,7 @@ type alias WithRouter route state = { state | router : RouterState route }
 
 type alias RouterConfig route state = {
   init:       state,
+  fallback:   Route route,
   config:     GetRouteConfig route state,
   routes:     Forest route,
   inputs:     List (Signal.Signal (Action state))

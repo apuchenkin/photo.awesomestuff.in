@@ -53,6 +53,7 @@ initialState = {
 router : Router Route State
 router = Lib.Router.router {
     init = initialState,
+    fallback = (NotFound, Dict.empty),
     routes = routes,
     config = config,
     inputs = [

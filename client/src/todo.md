@@ -9,15 +9,21 @@
 >> html cache
 >> getRoute and getParams expose to router public API
 >> add route constraints (probably regex check)
-- fail behaviour on route match fail
-- greedy matcher config (matches first found route or latest one)
-- static routes
+>> fallback route on failed routematch
+>> forwards
+
+- i18n
 - handlers cache
+- config cache on/off
+
+- tests
+- static routes
 - general refactoring
 - perfomance
-- forwards
-- tests
-- i18n
+
 - meta information ports
 - effects
-- trailing slash route?
+
+- (Bug) replacePath instead setPath on fallback (404)
+- (Improvement) greedy matcher config (matches first found route or latest one)
+- (Improvement) trailing slash route?

@@ -62,7 +62,7 @@ render (Router router) state =
 -- @private
 setUrl : Router route (WithRouter route state) -> RouterState route -> String -> Action (WithRouter route state)
 setUrl (Router router) state url = case (matchRoute router.config state url) of
-    Nothing               -> Debug.crash <| url -- TODO: fail behaviour on route match fail
+    Nothing               -> setRoute (Router router) router.config.fallback
     Just route            -> setRoute (Router router) route
 
 -- @private
@@ -150,7 +150,7 @@ updateRouter : Router route (WithRouter route state) -> RouterState route -> Rou
 updateRouter (Router router) rs = Router { router |
     getRoute    = rs.route,
     getParams   = rs.params,
-    buildUrl    = buildUrl router.config rs,
+    buildUrl    = buildUrl    router.config rs,
     bindForward = bindForward router.config rs
   }
 

@@ -53,7 +53,9 @@ homeHandler (Router router) =
   in
     {
       view = view,
-      inputs = [loadCategories]
+      inputs = [
+        loadCategories (Router router)
+      ]
     }
 
 categoryHandler : Router Route State -> Handler State
@@ -71,7 +73,9 @@ categoryHandler (Router router) =
   in
     {
       view = view,
-      inputs = [loadPhotos]
+      inputs = [
+        loadPhotos (Router router)
+      ]
     }
 
 photoHandler : Router Route State -> Handler State
@@ -93,7 +97,7 @@ photoHandler (Router router) =
 notFoundHandler : Router Route State -> Handler State
 notFoundHandler _ =
   let
-    view address state parsed = Just <| div [] [text <| "404"]
+    view address state _ = Just <| div [] [text <| "404"]
   in
     {
       view = view,
