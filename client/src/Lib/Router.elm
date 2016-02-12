@@ -20,7 +20,7 @@ import Util.Util
 -- import Response as R
 
 initialState : RouterState route
-initialState = {route = Nothing, params = Dict.empty, cache = {unwrap = Dict.empty, treeUrl = Dict.empty}}
+initialState = {route = Nothing, params = Dict.empty, cache = {unwrap = Dict.empty, treeUrl = Dict.empty, routePath = Dict.empty}}
 
 mailbox : Signal.Mailbox (List (Action state))
 mailbox = Signal.mailbox []
@@ -54,7 +54,7 @@ render (Router router) state =
       -- _ = Debug.log "render" state.router
       router'   = updateRouter (Router router) state.router
       route     = state.router.route
-      handlers  = Maybe.withDefault [] <| Maybe.map (getHandlers router.config Nothing) route
+      handlers  = Maybe.withDefault [] <| Maybe.map (getHandlers router.config state.router Nothing) route
       views     = flip List.map handlers <| (\handler -> (handler router').view)
       html      = List.foldr (\view parsed -> view address state parsed) Nothing views
     in Maybe.withDefault (text "error") html
@@ -82,7 +82,7 @@ transition (Router router) from to state =
   let
     -- _ = Debug.log "transition: from" (from, to)
     router'   = updateRouter (Router router) state.router
-    handlers = getHandlers router.config from to
+    handlers = getHandlers router.config state.router from to
     actions  = runHandlers <| flip List.map handlers <| \handler -> handler router'
   in  Response <| List.foldl runAction (noFx state) actions
 
@@ -123,17 +123,13 @@ buildUrl config state (route, params) =
   in Lib.Matcher.buildRawUrl raws <| Lib.Matcher.combineParams state.params (route, params)
 
 -- TODO: cache
-getHandlers : RouterConfig route state -> Maybe route -> route -> List (Router route state -> Handler state)
-getHandlers config from to =
+getHandlers : RouterConfig route state -> RouterState route -> Maybe route -> route -> List (Router route state -> Handler state)
+getHandlers config state from to =
   let routes = case from == Just to of
-    True -> [to]
-    False ->
-      let
-        lca = from `Maybe.andThen` \from' -> Util.Util.lca config.routes from' to
-        zipperTo = List.head <| List.filterMap (\r -> Util.Util.treeLookup to (r, [])) config.routes
-      in Maybe.withDefault []
-        <| flip Maybe.map zipperTo
-        <| \z -> Util.Util.traverseFrom z lca
+    True  -> [to]
+    False -> case Dict.get (Maybe.withDefault "" <| Maybe.map toString from, toString to) state.cache.routePath of
+      Just value -> value
+      Nothing -> Util.Util.getPath config.routes from to
 
   in List.map (.handler << config.config) <| routes
 
@@ -175,7 +171,9 @@ prepareCache state config =
     unwraps = flip List.map (urls' ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
     treeUrl = Dict.fromList urls
     unwrap  = Dict.fromList unwraps
-    cache = {treeUrl = treeUrl, unwrap = unwrap}
+    routePaths = List.foldl (\from acc -> acc ++ List.map (\to -> ((Maybe.withDefault "" <| Maybe.map toString from, toString to), Util.Util.getPath config.routes from to)) routes) [] (Nothing :: List.map Just routes)
+    routePath = Dict.fromList routePaths
+    cache = {treeUrl = treeUrl, unwrap = unwrap, routePath = routePath}
   in {state | router = {router | cache = cache}}
 
 runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)

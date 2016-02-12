@@ -44,8 +44,9 @@ type alias RouterState route = {
     route: Maybe route,
     params: RouteParams,
     cache: {
-      treeUrl: Dict String String,
-      unwrap: Dict String (List String)
+      treeUrl:    Dict String String,
+      unwrap:     Dict String (List String),
+      routePath:  Dict (String, String) (List route)
     }
   }
 
@@ -56,7 +57,7 @@ type alias RouterState route = {
 type alias GetRouteConfig route state = route -> RouteConfig route state
 
 {-| Type extension for the model. -}
-type alias WithRouter route state = { state | router : RouterState route }
+type alias WithRouter route state = { state | router : RouterState route}
 
 type alias RouterConfig route state = {
   init:       state,

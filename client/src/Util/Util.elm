@@ -1,5 +1,6 @@
 module Util.Util where
 
+import Maybe
 import MultiwayTree as Tree exposing (Tree (..), Forest, datum)
 import MultiwayTreeZipper exposing (Zipper, Context (..), goToChild, goUp)
 
@@ -51,14 +52,14 @@ treeLookup value z =
 -- lowest common ancestor
 -- disjoint tree set
 lca : Forest a -> a -> a -> Maybe a
-lca forest from to =
+lca forest a b =
   let
     -- _ = Debug.log "getHandlers" (from, to)
-    zipperTo =   List.head <| List.filterMap (\r -> treeLookup to (r, [])) forest
-    zipperFrom = List.head <| List.filterMap (\r -> treeLookup from (r, [])) forest
+    zipperFrom = List.head <| List.filterMap (\r -> treeLookup a (r, [])) forest
+    zipperTo =   List.head <| List.filterMap (\r -> treeLookup b (r, [])) forest
 
-    traverseTo   = Maybe.withDefault [] <| Maybe.map traverse zipperTo
     traverseFrom = Maybe.withDefault [] <| Maybe.map traverse zipperFrom
+    traverseTo   = Maybe.withDefault [] <| Maybe.map traverse zipperTo
 
     routes = case traverseTo of
       [] -> []
@@ -67,3 +68,11 @@ lca forest from to =
         True  -> List.filter (\(f,t) -> f == t) <| List.map2 (,) traverseFrom traverseTo
 
   in List.head <| List.drop (List.length routes - 1) traverseTo
+
+-- path from node a to node b in the forest
+getPath : Forest a -> Maybe a -> a -> List a
+getPath forest from to = Maybe.withDefault []
+  <| flip Maybe.map (List.head <| List.filterMap (\tree -> treeLookup to (tree, [])) forest)
+  <| \zipper ->
+    let from' = from `Maybe.andThen` (\from' -> lca forest from' to)
+    in traverseFrom zipper from'
