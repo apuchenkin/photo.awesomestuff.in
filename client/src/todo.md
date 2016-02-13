@@ -17,7 +17,7 @@
 
 - Less magic -> better perfomance and caching (remove update router and whole state from router)
 - config cache on/off
-- drope unneeded deps on libs
+- drop unneeded deps on libs
 
 - tests
 - static routes

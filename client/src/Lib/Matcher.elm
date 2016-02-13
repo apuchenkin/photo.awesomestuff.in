@@ -1,5 +1,5 @@
 module Lib.Matcher
- -- (match, combineParams, buildUrl)
+ -- (match, buildUrl)
  (..) -- test
   where
 
@@ -16,7 +16,7 @@ import Combine.Num
 import Combine.Infix  exposing ((<$>), (*>), (<*), (<*>), (<|>))
 
 import Lib.Types    exposing (GetRouteConfig, RouteParams, Route, Constraint (..))
-import Lib.Helpers  exposing (singleton)
+import Lib.Helpers  exposing (singleton, combineParams)
 
 type alias URL    = String
 type alias RawURL = String
@@ -45,9 +45,6 @@ getParams : String -> List String
 getParams string = case fst <| parse paramsParser string of
   Err _     -> Debug.crash "getParams : String -> List String"
   Ok param  -> param
-
-combineParams : RouteParams -> Route route -> Route route
-combineParams dict (route, params) = (route, Dict.union params dict)
 
 -- TODO: Perfomance?
 unwrap : String -> List String

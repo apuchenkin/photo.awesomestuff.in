@@ -1,7 +1,8 @@
-module Lib.Helpers (singleton, noFx, chainAction) where
+module Lib.Helpers (singleton, noFx, chainAction, combineParams) where
 
 import Effects
-import Lib.Types exposing (ActionEffects, Response (..), Action)
+import Dict
+import Lib.Types exposing (ActionEffects, Response (..), Action, RouteParams, Route)
 
 singleton : a -> List a
 singleton action = [ action ]
@@ -15,3 +16,6 @@ chainAction action1 action2 state =
     (Response (state', effects)) = action1 state
     (Response (state'', effects')) = action2 state'
   in Response (state'', Effects.batch [effects, effects'])
+
+combineParams : RouteParams -> Route route -> Route route
+combineParams dict (route, params) = (route, Dict.union params dict)

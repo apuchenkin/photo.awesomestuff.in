@@ -1,5 +1,5 @@
 module Lib.Types (ActionEffects, Response (..), Action, Handler, RouteConfig, RouterResult, RouteParams, RouterState, Route,
-                  GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition, Constraint (..)) where
+                  GetRouteConfig, WithRouter, RouterConfig, Router (..), Transition, Constraint (..), RouterCache) where
 
 import Dict           exposing (Dict)
 import Html           exposing (Html)
@@ -41,15 +41,16 @@ type alias RouteParams  = Dict String String
 type alias Route route = (route, RouteParams)
 
 type alias RouterState route = {
-    route: Maybe route,
+    route:  Maybe route,
     params: RouteParams,
-    cache: {
-      treeUrl:    Dict String String,
-      unwrap:     Dict String (List String),
-      routePath:  Dict (String, String) (List route)
-    }
+    cache:  RouterCache route
   }
 
+type alias RouterCache route = {
+  treeUrl:    Dict String String,
+  unwrap:     Dict String (List String),
+  routePath:  Dict (String, String) (List route)
+}
 -----------------------------------------
 -- Route
 -----------------------------------------
@@ -70,8 +71,6 @@ type alias RouterConfig route state = {
 
 type Router route state = Router {
   config        : RouterConfig route state,
-  getRoute      : Maybe route,
-  getParams     : RouteParams,
   bindForward   : Route route -> List Html.Attribute -> List Html.Attribute,
   buildUrl      : Route route -> String,
   forward       : Route route -> Action state

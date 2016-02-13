@@ -25,7 +25,8 @@ type alias State = WithRouter Route
     categories: Dict String Category,
     photos: List Photo,
     photo: Maybe Photo,
-    isLoading: Bool
+    isLoading: Bool,
+    mouse: (Int, Int)
   }
 
 -- type ParentCategory =
@@ -167,8 +168,8 @@ setLocale : Router Route State -> Action State
 setLocale (Router router) state =
   let
     _ = Debug.log "locale" locale
-    locale = Dict.get "locale" router.getParams
-    route = Maybe.withDefault Routes.Home router.getRoute
+    locale = Dict.get "locale" state.router.params
+    route = Maybe.withDefault Routes.Home state.router.route
     act = case locale of
       Nothing -> router.forward (route, Dict.fromList [("locale", Locale.toString state.locale)])
       Just l  -> \state -> Response <| noFx {state | locale = Locale.fromString l}
