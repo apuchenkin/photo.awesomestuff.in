@@ -14,7 +14,7 @@ import Signal.Extra exposing (fairMerge, foldp')
 import Lib.Helpers  exposing (..)
 import Lib.Matcher
 import Lib.Types    exposing (..)
-import Util.Util
+import MultiwayTreeUtil
 
 
 -- import Response as R
@@ -133,7 +133,7 @@ getHandlers config state from to =
     True  -> [to]
     False -> case Dict.get (Maybe.withDefault "" <| Maybe.map toString from, toString to) state.cache.routePath of
       Just value -> value
-      Nothing -> Util.Util.getPath config.routes from to
+      Nothing -> getPath from to config.routes
 
   in List.map (.handler << config.config) <| routes
 
@@ -160,13 +160,13 @@ prepareCache : (WithRouter route state) -> RouterConfig route (WithRouter route 
 prepareCache state config =
   let
     router = state.router
-    routes = List.concat <| List.map Util.Util.treeToList config.routes
+    routes = List.concat <| List.map MultiwayTreeUtil.flatten config.routes
     urls = flip List.map routes <| \r -> (toString r, Lib.Matcher.buildTreeUrl (.url << config.config) config.routes r)
     urls' = List.map (.url << config.config) routes
     unwraps = flip List.map (urls' ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
     treeUrl = Dict.fromList urls
     unwrap  = Dict.fromList unwraps
-    routePaths = List.foldl (\from acc -> acc ++ List.map (\to -> ((Maybe.withDefault "" <| Maybe.map toString from, toString to), Util.Util.getPath config.routes from to)) routes) [] (Nothing :: List.map Just routes)
+    routePaths = List.foldl (\from acc -> acc ++ List.map (\to -> ((Maybe.withDefault "" <| Maybe.map toString from, toString to), getPath from to config.routes)) routes) [] (Nothing :: List.map Just routes)
     routePath = Dict.fromList routePaths
     cache = {treeUrl = treeUrl, unwrap = unwrap, routePath = routePath}
   in {state | router = {router | cache = cache}}

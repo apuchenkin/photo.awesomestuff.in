@@ -14,8 +14,8 @@
 >> i18n
 >> handlers cache
 >> meta information ports
+>> Less magic -> better perfomance and caching (remove update router and whole state from router)
 
-- Less magic -> better perfomance and caching (remove update router and whole state from router)
 - config cache on/off
 - drop unneeded deps on libs
 

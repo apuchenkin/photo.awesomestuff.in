@@ -12,7 +12,7 @@ import Lib.Helpers exposing (..)
 import Lib.Router exposing (..)
 import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
 
-import Mouse
+-- import Mouse
 
 config : Route -> RouteConfig Route State
 config route = case route of

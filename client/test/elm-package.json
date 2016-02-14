@@ -9,6 +9,7 @@
     ],
     "exposed-modules": [],
     "dependencies": {
+        "apuchenkin/elm-multiway-tree-extra": "1.0.0 <= v < 2.0.0",
         "Apanatshka/elm-signal-extra": "5.7.0 <= v < 6.0.0",
         "Bogdanp/elm-combine": "2.0.0 <= v < 3.0.0",
         "circuithub/elm-list-extra": "3.9.0 <= v < 4.0.0",

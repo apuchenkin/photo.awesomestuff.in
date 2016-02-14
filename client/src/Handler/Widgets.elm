@@ -22,10 +22,10 @@ categoryLink = lazy3 <| \ (Router router) (Category category) dict ->
         Right (Category pc) ->  [("category", pc.name), ("subcategory", category.name)]
   in Html.a (router.bindForward (Routes.Category, Dict.union dict params') []) [Html.text category.title]
 
-photoLink : Router Route State -> Photo -> (String, String, String) -> Html
-photoLink  = lazy3 <| \ (Router router) photo args ->
-  let
-    (locale, category, subcategory) = args
-    params = Dict.fromList [("locale", locale),("category", category), ("subcategory", subcategory)]
-  in
+photoLink : Router Route State -> Photo -> RouteParams -> Html
+photoLink  = lazy3 <| \ (Router router) photo params ->
+  -- let
+  --   (locale, category, subcategory) = args
+  --   params = Dict.fromList [("locale", locale),("category", category), ("subcategory", subcategory)]
+  -- in
   Html.a (router.bindForward (Routes.Photo, Dict.insert "photo" (toString photo.id) params) []) [Html.text photo.src]

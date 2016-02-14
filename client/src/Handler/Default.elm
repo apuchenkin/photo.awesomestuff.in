@@ -7,7 +7,7 @@ import Lib.Types exposing (Router (..), Handler, Response (..))
 
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
-import Html.Lazy exposing (lazy, lazy2, lazy3)
+-- import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Handler.Routes as Route exposing (Route)
 import Handler.Widgets exposing (..)
 
@@ -55,7 +55,7 @@ categoryHandler router =
         category = getCategory state
         -- photoParams = Dict.filter (\k _ -> List.member k ["locale", "category"]) state.router.params
         -- TODO: tuple is not equal by reference
-        photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p ("ru", "patagonia", "los-glaciares")) l) photos) router state.router.params state.photos
+        photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p state.router.params) l) photos) router state.router.params state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
       in Maybe.map (\c -> div [] [text <| toString c, photos, parsed'] ) category

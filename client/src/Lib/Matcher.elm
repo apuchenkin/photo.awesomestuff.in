@@ -7,7 +7,7 @@ import Regex
 import String
 import Dict           exposing (Dict)
 
-import Util.Util      exposing (treeLookup, forestLookup, traverse)
+import MultiwayTreeUtil exposing (treeLookup, forestLookup, traverse)
 import MultiwayTree   exposing (Tree (..), Forest, datum, children)
 import List.Extra
 import Combine        exposing (Parser, many1, parse, many, while, between, end, rec, manyTill)
