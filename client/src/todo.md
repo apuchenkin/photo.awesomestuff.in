@@ -16,18 +16,20 @@
 >> meta information ports
 >> Less magic -> better perfomance and caching (remove update router and whole state from router)
 
+- move to separate repo
 - config cache on/off
 - drop unneeded deps on libs
-
-- tests
-- static routes
+- complete/fix tests
 - general refactoring
-- perfomance
 
+--- app ---
+- static routes
 - valid HTML
+- effects and post libs
 - styles
-- effects
 
+--- post ---
 - (Bug) replacePath instead setPath on fallback (404)
 - (Improvement) greedy matcher config (matches first found route or latest one)
 - (Improvement) trailing slash route?
+- (Improvement) perfomance

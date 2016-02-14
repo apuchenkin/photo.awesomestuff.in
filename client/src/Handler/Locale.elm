@@ -5,6 +5,9 @@ type Locale = Ru | En
 fallbackLocale: Locale
 fallbackLocale = En
 
+locales : List Locale
+locales = [Ru, En]
+
 fromString : String -> Locale
 fromString str = case str of
   "ru" -> Ru

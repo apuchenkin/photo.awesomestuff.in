@@ -7,7 +7,6 @@ import Lib.Types exposing (Router (..), Handler, Response (..))
 
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
--- import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Handler.Routes as Route exposing (Route)
 import Handler.Widgets exposing (..)
 
@@ -24,20 +23,23 @@ localeHandler router =
 homeHandler : Router Route State -> Handler State
 homeHandler router =
   let
-    loader = Html.div [class "loader"] []
+    (Router r) = router
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state
-        -- params = Dict.filter (\k _ -> List.member k ["locale"]) state.router.params
-        (Router r) = router
-        home = homeLink router state.router.params
+        header = homeLink router state.router.params
         categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.router.params) <| Dict.toList c
-        rest = case parsed of
-          Nothing   -> [categories state.categories]
-          Just html -> [html]
-      in Just <| div [] <| case state.isLoading of
-        True  -> home :: rest ++ [loader]
-        False -> home :: rest
+        body = case parsed of
+          Nothing   -> categories state.categories
+          Just v    -> v
+        footer = div [class "footer"] []
+      in Just <| div [] [
+        loader state.isLoading,
+        languageSelector router state,
+        header,
+        body,
+        footer
+      ]
   in
     {
       view = view,

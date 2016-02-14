@@ -1,18 +1,19 @@
 module Test.Lib.Matcher where
 
-import Dict
+import Dict exposing (Dict)
 import MultiwayTree as Tree exposing (Tree (..), Forest)
 import ElmTest      exposing (..)
 import Lib.Matcher  exposing (..)
+import Lib.Types    exposing (Constraint)
 
 type Route = Home | Category | Photo | NotFound
 
-routeMap : Route -> RawURL
+routeMap : Route -> (RawURL, Dict String Constraint)
 routeMap route = case route of
-  Home      -> "/"
-  NotFound  -> "/404"
-  Category  -> ":category[/:subcategory]"
-  Photo     -> "/photo/:photo"
+  Home      -> ("/", Dict.empty)
+  NotFound  -> ("/404", Dict.empty)
+  Category  -> (":category[/:subcategory]", Dict.empty)
+  Photo     -> ("/photo/:photo", Dict.empty)
 
 routeTree : Forest Route
 routeTree = [
@@ -57,12 +58,12 @@ testUnwrap = suite "unwrap"
 testParseUrlParams : Test
 testParseUrlParams = suite "parseUrlParams"
   [
-    test "plain"      <| flip assertEqual (parseUrlParams "/url" "/url")                          (Ok Dict.empty, ""),
-    test "param"      <| flip assertEqual (parseUrlParams "/:param" "/value")                     (Ok (Dict.fromList [("param","value")]), ""),
-    test "combined1"  <| flip assertEqual (parseUrlParams "/path/:param" "/path/value")           (Ok (Dict.fromList [("param","value")]), ""),
-    test "combined2"  <| flip assertEqual (parseUrlParams "/:path/param" "/value/param")          (Ok (Dict.fromList [("path","value")]), ""),
-    test "combined3"  <| flip assertEqual (parseUrlParams "/:path/:param" "/value1/value2")       (Ok (Dict.fromList [("path","value1"), ("param","value2")]), ""),
-    test "fail"       <| flip assertEqual (parseUrlParams "/url" "/path")                         (Err (["expected \"/url\""]),"/path")
+    test "plain"      <| flip assertEqual (parseUrlParams "/url" Dict.empty "/url")                          (Ok Dict.empty, ""),
+    test "param"      <| flip assertEqual (parseUrlParams "/:param" Dict.empty "/value")                     (Ok (Dict.fromList [("param","value")]), ""),
+    test "combined1"  <| flip assertEqual (parseUrlParams "/path/:param" Dict.empty "/path/value")           (Ok (Dict.fromList [("param","value")]), ""),
+    test "combined2"  <| flip assertEqual (parseUrlParams "/:path/param" Dict.empty "/value/param")          (Ok (Dict.fromList [("path","value")]), ""),
+    test "combined3"  <| flip assertEqual (parseUrlParams "/:path/:param" Dict.empty "/value1/value2")       (Ok (Dict.fromList [("path","value1"), ("param","value2")]), ""),
+    test "fail"       <| flip assertEqual (parseUrlParams "/url" Dict.empty "/path")                         (Err (["expected \"/url\""]),"/path")
   ]
 
 testMatch : Test
@@ -82,20 +83,20 @@ testMatch = suite "match"
 testBuildUrl : Test
 testBuildUrl = suite "buildUrl"
   [
-    test "home"         <| flip assertEqual (buildUrl routeMap routeTree (Home, Dict.empty))                                                          <| "/",
-    test "category"     <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("category","param")])))                          <| "/param",
-    test "subcategory"  <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("category","param"),("subcategory","param2")]))) <| "/param/param2",
-    test "subcategory"  <| flip assertEqual (buildUrl routeMap routeTree (Category, (Dict.fromList [("subcategory","param2"),("category","param")]))) <| "/param/param2",
-    test "photo"  <| flip assertEqual (buildUrl routeMap routeTree (Photo, (Dict.fromList [("category","param"),("photo","123")])))                   <| "/param/photo/123"
+    test "home"         <| flip assertEqual (buildUrl (fst << routeMap) routeTree (Home, Dict.empty))                                                          <| "/",
+    test "category"     <| flip assertEqual (buildUrl (fst << routeMap) routeTree (Category, (Dict.fromList [("category","param")])))                          <| "/param",
+    test "subcategory"  <| flip assertEqual (buildUrl (fst << routeMap) routeTree (Category, (Dict.fromList [("category","param"),("subcategory","param2")]))) <| "/param/param2",
+    test "subcategory"  <| flip assertEqual (buildUrl (fst << routeMap) routeTree (Category, (Dict.fromList [("subcategory","param2"),("category","param")]))) <| "/param/param2",
+    test "photo"  <| flip assertEqual (buildUrl (fst << routeMap) routeTree (Photo, (Dict.fromList [("category","param"),("photo","123")])))                   <| "/param/photo/123"
   ]
 
 testReversible : Test
 testReversible = suite "reversible"
   [
-    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/"))                     <| Just "/",
-    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param"))                <| Just "/param",
-    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/404"))                  <| Just "/404",
-    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param/param2"))         <| Just "/param/param2",
-    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param/photo/3"))        <| Just "/param/photo/3",
-    test "match" <| flip assertEqual (Maybe.map (buildUrl routeMap routeTree) <| (match routeMap routeTree "/param/param2/photo/4")) <| Just "/param/param2/photo/4"
+    test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/"))                     <| Just "/",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param"))                <| Just "/param",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/404"))                  <| Just "/404",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2"))         <| Just "/param/param2",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/photo/3"))        <| Just "/param/photo/3",
+    test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2/photo/4")) <| Just "/param/param2/photo/4"
   ]
