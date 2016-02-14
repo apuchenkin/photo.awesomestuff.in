@@ -20,7 +20,11 @@ import MultiwayTreeUtil
 -- import Response as R
 
 initialState : RouterState route
-initialState = {route = Nothing, params = Dict.empty, cache = {unwrap = Dict.empty, treeUrl = Dict.empty, routePath = Dict.empty}}
+initialState = {
+    route = Nothing
+  , params = Dict.empty
+  , cache = {unwrap = Dict.empty, rawUrl = Dict.empty, routePath = Dict.empty}
+  }
 
 mailbox : Signal.Mailbox (List (Action state))
 mailbox = Signal.mailbox []
@@ -94,9 +98,9 @@ transition router from to state =
 matchRoute : RouterConfig route state -> RouterState route -> String -> Maybe (Route route)
 matchRoute config state url =
   let
-    rawRoute route = case Dict.get (.url <| config.config route) state.cache.unwrap of
+    rawRoute route = case Dict.get (.segment <| config.config route) state.cache.unwrap of
       Just value -> (value, .constraints <| config.config route)
-      Nothing -> (Lib.Matcher.unwrap <| .url <| config.config route, .constraints <| config.config route)
+      Nothing -> (Lib.Matcher.unwrap <| .segment <| config.config route, .constraints <| config.config route)
   in
     Lib.Matcher.matchRaw rawRoute config.routes url
 
@@ -116,9 +120,9 @@ bindForward config cache route attrs =
 buildUrl : RouterConfig route (WithRouter route state) -> RouterCache route -> Route route -> String
 buildUrl config cache (route, params) =
   let
-  raw =  case Dict.get (toString route) cache.treeUrl of
+  raw =  case Dict.get (toString route) cache.rawUrl of
     Just value -> value
-    Nothing -> Lib.Matcher.buildTreeUrl (.url << config.config) config.routes route
+    Nothing -> Lib.Matcher.composeRawUrl (.segment << config.config) config.routes route
 
   raws = case Dict.get raw cache.unwrap of
     Just value -> value
@@ -126,7 +130,6 @@ buildUrl config cache (route, params) =
 
   in Lib.Matcher.buildRawUrl raws (route, params) -- Lib.Matcher.combineParams state.params
 
--- TODO: cache
 getHandlers : RouterConfig route state -> RouterState route -> Maybe route -> route -> List (Router route state -> Handler state)
 getHandlers config state from to =
   let routes = case from == Just to of
@@ -148,11 +151,14 @@ forward config route state =
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
   let
-    cachedState = prepareCache config.init config
+    state = if config.useCache
+      then prepareCache config.init config
+      else config.init
+
   in Router {
-    config        = {config | init = cachedState}
-  , bindForward   = bindForward   config cachedState.router.cache
-  , buildUrl      = buildUrl      config cachedState.router.cache
+    config        = {config | init = state}
+  , bindForward   = bindForward   config state.router.cache
+  , buildUrl      = buildUrl      config state.router.cache
   , forward       = forward       config
   }
 
@@ -161,14 +167,14 @@ prepareCache state config =
   let
     router = state.router
     routes = List.concat <| List.map MultiwayTreeUtil.flatten config.routes
-    urls = flip List.map routes <| \r -> (toString r, Lib.Matcher.buildTreeUrl (.url << config.config) config.routes r)
-    urls' = List.map (.url << config.config) routes
+    urls = flip List.map routes <| \r -> (toString r, Lib.Matcher.composeRawUrl (.segment << config.config) config.routes r)
+    urls' = List.map (.segment << config.config) routes
     unwraps = flip List.map (urls' ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
-    treeUrl = Dict.fromList urls
+    rawUrl = Dict.fromList urls
     unwrap  = Dict.fromList unwraps
     routePaths = List.foldl (\from acc -> acc ++ List.map (\to -> ((Maybe.withDefault "" <| Maybe.map toString from, toString to), getPath from to config.routes)) routes) [] (Nothing :: List.map Just routes)
     routePath = Dict.fromList routePaths
-    cache = {treeUrl = treeUrl, unwrap = unwrap, routePath = routePath}
+    cache = {rawUrl = rawUrl, unwrap = unwrap, routePath = routePath}
   in {state | router = {router | cache = cache}}
 
 runRouter : Router route (WithRouter route state) -> RouterResult (WithRouter route state)
@@ -185,7 +191,7 @@ runRouter router =
       List.foldl (Signal.Extra.fairMerge List.append)
       init <|
       (Signal.map (List.map ((,) False)) mailbox.signal) -- actions from events
-      :: List.map (Signal.map (singleton << (,) True)) r.config.inits
+      :: List.map (Signal.map (singleton << (,) True))  r.config.inits
       ++ List.map (Signal.map (singleton << (,) False)) r.config.inputs
 
     -- update : List (Bool, Action state) -> (state, ActionEffects state) -> (state, ActionEffects state)

@@ -17,27 +17,27 @@ import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Co
 config : Route -> RouteConfig Route State
 config route = case route of
   Locale -> {
-      url = "/[:locale]",
+      segment = "/[:locale]",
       constraints = Dict.fromList [("locale", Enum ["ru", "en"])],
       handler = localeHandler
     }
   NotFound -> {
-      url = "/404",
+      segment = "/404",
       constraints = Dict.empty,
       handler = notFoundHandler
     }
   Home -> {
-      url = "[/]",
+      segment = "[/]",
       constraints = Dict.empty,
       handler = homeHandler
     }
   Category -> {
-      url = ":category[/:subcategory]",
+      segment = ":category[/:subcategory]",
       constraints = Dict.empty,
       handler = categoryHandler
     }
   Photo -> {
-      url = "/photo/:photo",
+      segment = "/photo/:photo",
       constraints = Dict.fromList [("photo", Int)],
       handler = photoHandler
     }
@@ -58,16 +58,15 @@ port localePort : Signal String
 
 router : Router Route State
 router = Lib.Router.router {
-    init = initialState,
-    fallback = (NotFound, Dict.empty),
-    routes = routes,
-    config = config,
+    init      = initialState,
+    useCache  = True,
+    fallback  = (NotFound, Dict.empty),
+    routes    = routes,
+    config    = config,
     inits = [
       Signal.map (\locale state -> Response <| noFx {state | locale = Locale.fromString locale}) localePort
     ],
-    inputs = [
-      -- Signal.map (\p -> (\state -> Response <| noFx {state | mouse = p})) Mouse.position
-    ]
+    inputs = []
   }
 
 result : RouterResult State

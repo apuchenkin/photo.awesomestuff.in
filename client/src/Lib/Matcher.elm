@@ -15,11 +15,9 @@ import Combine.Char   exposing (char, noneOf, anyChar)
 import Combine.Num
 import Combine.Infix  exposing ((<$>), (*>), (<*), (<*>), (<|>))
 
-import Lib.Types    exposing (GetRouteConfig, RouteParams, Route, Constraint (..))
+import Lib.Types    exposing (RouteParams, Route, Constraint (..), RawURL, URL, RawSegment)
 import Lib.Helpers  exposing (singleton, combineParams)
 
-type alias URL    = String
-type alias RawURL = String
 
 paramChar : Char
 paramChar = ':'
@@ -126,8 +124,8 @@ buildRawUrl raws (route, params) =
     Nothing -> Debug.crash "not enough params to build URL"
     Just url -> url
 
-buildTreeUrl : (route -> RawURL) -> Forest route -> route -> RawURL
-buildTreeUrl rawRoute forest route =
+composeRawUrl : (route -> RawSegment) -> Forest route -> route -> RawURL
+composeRawUrl rawRoute forest route =
   let
       zipper = forestLookup route forest
       path   = Maybe.withDefault [] <| Maybe.map traverse zipper
@@ -135,7 +133,7 @@ buildTreeUrl rawRoute forest route =
   in List.foldl (flip (++)) "" segments
 
 -- decompose Route to string
-buildUrl : (route -> RawURL) -> Forest route -> Route route -> URL
+buildUrl : (route -> RawSegment) -> Forest route -> Route route -> URL
 buildUrl rawRoute forest (route, params) =
-  let  raws = unwrap <| buildTreeUrl rawRoute forest route
+  let  raws = unwrap <| composeRawUrl rawRoute forest route
   in buildRawUrl raws (route, params)
