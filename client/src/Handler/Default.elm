@@ -17,7 +17,10 @@ localeHandler router =
   in
     {
       view = view,
-      actions = [setLocale router]
+      actions = [
+        setLocale router,
+        createLinks router
+      ]
     }
 
 homeHandler : Router Route State -> Handler State
@@ -27,7 +30,7 @@ homeHandler router =
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state
-        header = homeLink router state.router.params
+        header = homeLink router state.router.params state.locale
         categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.router.params) <| Dict.toList c
         body = case parsed of
           Nothing   -> categories state.categories
@@ -57,10 +60,11 @@ categoryHandler router =
         category = getCategory state
         -- photoParams = Dict.filter (\k _ -> List.member k ["locale", "category"]) state.router.params
         -- TODO: tuple is not equal by reference
+        categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.router.params) <| Dict.toList c
         photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p state.router.params) l) photos) router state.router.params state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-      in Maybe.map (\c -> div [] [text <| toString c, photos, parsed'] ) category
+      in Maybe.map (\c -> div [] [text <| toString c, categories state.categories, photos, parsed'] ) category
   in
     {
       view = view,

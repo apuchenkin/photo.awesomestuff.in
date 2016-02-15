@@ -15,7 +15,8 @@ import Handler.Locale as Locale exposing (Locale)
 type alias Promise value = Either (Task Http.Error value) value
 
 type alias Meta = {
-    title: String
+    title: String,
+    links: List (String, String)
   }
 
 type alias State = WithRouter Route
@@ -44,16 +45,18 @@ type alias Photo = {
   height: Int
 }
 
--- author: {name: "Artem Puchenkin"}
--- caption: "На тропе идущей к кемпингу Пaйне-Гранде (Campamento Paine Grande), национального парка Торрес-дель-Пайне, Патагония, Чили"
--- datetime: "2014-12-30T17:00:53.000Z"
--- height: 1600
--- id: 82
--- name: "DSCF2765.jpg"
--- src: "static/src/chile/DSCF2765.jpg"
--- views: 96
--- width: 2423
+createLinks : Router Route State -> Action State
+createLinks router state =
+  let
+    (Router r) = router
+    meta = state.meta
+    default = flip Maybe.map state.router.route <| \ route ->
+      ("x-default", r.buildUrl (route, Dict.remove "locale" state.router.params))
+      :: (flip List.map Locale.locales
+      <| \locale -> (Locale.toString locale, r.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
+      )
 
+  in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] default}}
 
 -- Category constuctor
 category : Int -> String -> String -> Maybe (Either Int Category) -> Category

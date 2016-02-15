@@ -16,6 +16,7 @@
 >> meta information ports
 >> Less magic -> better perfomance and caching (remove update router and whole state from router)
 
+- bug route with params
 - move to separate repo
 - config cache on/off
 - drop unneeded deps on libs
@@ -23,6 +24,7 @@
 - general refactoring
 
 --- app ---
+- configs??
 - static routes
 - valid HTML
 - effects and post libs

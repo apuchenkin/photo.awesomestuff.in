@@ -10,4 +10,11 @@ Main.ports.meta.subscribe(metaUpdate);
 
 function metaUpdate(meta) {
   document.title = meta.title;
+  meta.links.map(function(data) {
+    var link = document.createElement('link');
+    link.href = data[1];
+    link.rel = "alternate";
+    link.hreflang = data[0];
+    document.head.appendChild(link);
+  })
 }

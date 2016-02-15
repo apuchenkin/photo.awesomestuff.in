@@ -42,9 +42,15 @@ config route = case route of
       handler = photoHandler
     }
 
+initialMeta : Meta
+initialMeta = {
+    title = "PHOTO.AWESOMESTUFF.IN",
+    links = []
+  }
+
 initialState : State
 initialState = {
-    meta        = {title = "PHOTO.AWESOMESTUFF.IN"},
+    meta        = initialMeta,
     locale      = Locale.fallbackLocale,
     categories  = Dict.empty,
     photos      = [],
