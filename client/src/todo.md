@@ -15,8 +15,9 @@
 >> handlers cache
 >> meta information ports
 >> Less magic -> better perfomance and caching (remove update router and whole state from router)
+>> bug route with params
 
-- bug route with params
+- refactor after bugfix
 - move to separate repo
 - config cache on/off
 - drop unneeded deps on libs
@@ -31,6 +32,7 @@
 - styles
 
 --- post ---
+- inject parent to speed up??
 - (Bug) replacePath instead setPath on fallback (404)
 - (Improvement) greedy matcher config (matches first found route or latest one)
 - (Improvement) trailing slash route?

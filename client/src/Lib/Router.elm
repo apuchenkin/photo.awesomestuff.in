@@ -7,6 +7,7 @@ import Html.Events  exposing (onWithOptions)
 import Effects      exposing (Effects, Never)
 import History      exposing (path)
 
+import List.Extra
 import Json.Decode as Json exposing ((:=))
 import Html.Attributes exposing (href)
 import Signal.Extra exposing (fairMerge, foldp')
@@ -115,12 +116,28 @@ getHandlers router state from to =
   let
     (Router r) = router
     fromRoute = Maybe.map fst from
+    fromParams = Maybe.withDefault Dict.empty <| Maybe.map snd from
     toRoute = fst to
-    routes = case fromRoute == Just toRoute of
-      True  -> [toRoute]
-      False -> case Dict.get (Maybe.withDefault "" <| Maybe.map toString fromRoute, toString toRoute) state.cache.routePath of
-        Just path -> path
-        Nothing   -> getPath fromRoute toRoute r.config.routes
+    toParams = snd to
+
+    fromPath = Maybe.withDefault []
+     <| flip Maybe.map fromRoute
+     <| \f -> case Dict.get ("", toString f) state.cache.routePath of
+      Just path -> path
+      Nothing   -> getPath Nothing f r.config.routes
+    toPath = case Dict.get ("", toString toRoute) state.cache.routePath of
+     Just path -> path
+     Nothing   -> getPath Nothing toRoute r.config.routes
+    path = List.map2 (,) fromPath toPath
+
+    fromPath' = Lib.Matcher.mapParams (.segment << r.config.config) fromPath fromParams
+    toPath'   = Lib.Matcher.mapParams (.segment << r.config.config) toPath    toParams
+
+    commons = List.length
+      <| List.Extra.takeWhile (uncurry (==))
+      <| List.map2 (,) fromPath' toPath'
+
+    routes = List.drop commons toPath
 
   in List.map ((\h -> h router) << .handler << r.config.config) <| routes
 

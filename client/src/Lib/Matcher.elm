@@ -31,7 +31,7 @@ rd : Char
 rd = ']'
 
 stringParser : Parser String
-stringParser = String.fromList <$> many1 (noneOf [ '/', paramChar, '#', '?' ])
+stringParser = String.fromList <$> many1 (noneOf [ '/', paramChar, '#', '?', ld, rd ])
 
 paramParser : Parser String
 paramParser = char paramChar *> stringParser
@@ -137,3 +137,8 @@ buildUrl : (route -> RawSegment) -> Forest route -> Route route -> URL
 buildUrl rawRoute forest (route, params) =
   let  raws = unwrap <| composeRawUrl rawRoute forest route
   in buildRawUrl raws (route, params)
+
+mapParams : (route -> RawSegment) -> List route -> RouteParams -> List (Route route)
+mapParams rawRoute routes params = flip List.map routes <| \route ->
+    let p = getParams (rawRoute route)
+    in (route, Dict.filter (\k _ -> List.member k p) params)
