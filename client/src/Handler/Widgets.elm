@@ -1,7 +1,8 @@
 module Handler.Widgets where
 
 import Dict
-import Html exposing (Html)
+import Handler.Config exposing (..)
+import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes exposing (class, classList, hreflang)
 
@@ -11,13 +12,6 @@ import Handler.Actions exposing (..)
 import Lib.Types exposing (Router (..), RouteParams)
 import Handler.Locale as Locale exposing (Locale)
 
-homeLink : Router Route State -> RouteParams -> Locale -> Html
-homeLink =
-  lazy3 <| \(Router router) params locale ->
-    let
-      homeText = Locale.i18n locale "HOME" []
-    in Html.a (router.bindForward (Routes.Home, params) []) [Html.text homeText]
-
 loader : Bool -> Html
 loader = lazy <| \visible ->
   let attributes = classList [
@@ -25,6 +19,26 @@ loader = lazy <| \visible ->
       ("loader", True)
     ]
   in Html.div [attributes] []
+
+header : Router Route State -> Locale -> Html
+header = lazy2 <| \(Router router) locale ->
+  let
+    version = span [class "version"] [text <| Locale.i18n locale "alpha" []]
+    homeLink = Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text config.title]
+  in
+    Html.header [class "main"] [
+      Html.h1 [class "title"] [homeLink, version],
+      Html.h2 [class "subtitle"] [text <| Locale.i18n locale "Travel in photography" []]
+    ]
+
+{-| Links -}
+
+homeLink : Router Route State -> RouteParams -> Locale -> Html
+homeLink =
+  lazy3 <| \(Router router) params locale ->
+    let
+      homeText = Locale.i18n locale "HOME" []
+    in Html.a (router.bindForward (Routes.Home, params) []) [Html.text homeText]
 
 languageSelector :  Router Route State -> State -> Html
 languageSelector = \(Router router) state ->
@@ -48,7 +62,7 @@ categoryLink = lazy3 <| \ (Router router) (Category category) dict ->
       Just p -> case p of
         Left _ -> params
         Right (Category pc) ->  [("category", pc.name), ("subcategory", category.name)]
-  in Html.a (router.bindForward (Routes.Category, Dict.union dict params') []) [Html.text category.title]
+  in Html.a (router.bindForward (Routes.Category, Dict.union params' dict) []) [Html.text category.title]
 
 photoLink : Router Route State -> Photo -> RouteParams -> Html
 photoLink  = lazy3 <| \ (Router router) photo params ->

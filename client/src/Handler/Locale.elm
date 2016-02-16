@@ -38,7 +38,9 @@ lookup =
     createLookup
         [ withLanguage
             (Language <| toString Ru)
-            [ ( "HOME", "ДОМ" )
+            [ ( "Home", "Главная" )
+            , ( "alpha", "альфа")
+            , ( "Travel in photography", "Путешествия в фотографиях")
             , ( "I am {0} years old.", "J'ai {0} ans." )
             ]
         ]
@@ -47,11 +49,8 @@ i18n : Locale -> String -> List String -> String
 i18n locale = lookup (Language <| toString locale)
 
 -- {
---   "ALPHA": "alpha",
---   "DESCRIPTION": "Travel in photography",
 --   "META_DESCRIPTION": "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva.",
 --   "META_DESCRIPTION_PHOTO": "Author: {{author}}, Title: {{title}}",
---   "HOME": "Home",
 --   "GALLERIES": "Galleries",
 --   "COPY": "2015, Artem Puchenkin",
 --   "FOOTER": "{{home}}, alpha",
@@ -88,11 +87,8 @@ i18n locale = lookup (Language <| toString locale)
 -- }
 
 -- {
---   "ALPHA": "альфа",
---   "DESCRIPTION": "Путешествия в фотографиях",
 --   "META_DESCRIPTION": "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.",
 --   "META_DESCRIPTION_PHOTO": "Автор: {{author}}, Описание: {{title}}",
---   "HOME": "Главная",
 --   "GALLERIES": "Галереи",
 --   "COPY": "2015, Пученкин Артём",
 --   "FOOTER": "{{home}}, alpha",

@@ -26,6 +26,16 @@ config route = case route of
       constraints = Dict.empty,
       handler = notFoundHandler
     }
+  About -> {
+      segment = "/about",
+      constraints = Dict.empty,
+      handler = staticHandler
+    }
+  Contacts -> {
+      segment = "/contacts",
+      constraints = Dict.empty,
+      handler = staticHandler
+    }
   Home -> {
       segment = "[/]",
       constraints = Dict.empty,
