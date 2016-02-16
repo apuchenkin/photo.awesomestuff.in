@@ -71,7 +71,7 @@ type alias RouteConfig route state = {
 {-| Type extension for the model. -}
 type alias WithRouter route state = { state | router : RouterState route}
 
-type alias Transition route state = Maybe route -> route -> Action state
+type alias Transition route state = Maybe (Route route) -> Route route -> Action state
 
 type alias RouterResult state =
     { html  : Signal Html

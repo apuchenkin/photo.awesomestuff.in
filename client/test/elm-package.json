@@ -9,10 +9,9 @@
     ],
     "exposed-modules": [],
     "dependencies": {
-        "apuchenkin/elm-multiway-tree-extra": "1.0.0 <= v < 2.0.0",
-        "apuchenkin/elm-multiway-tree-extra": "1.0.0 <= v < 2.0.0",
         "Apanatshka/elm-signal-extra": "5.7.0 <= v < 6.0.0",
         "Bogdanp/elm-combine": "2.0.0 <= v < 3.0.0",
+        "apuchenkin/elm-multiway-tree-extra": "1.0.0 <= v < 2.0.0",
         "circuithub/elm-list-extra": "3.9.0 <= v < 4.0.0",
         "circuithub/elm-maybe-extra": "1.6.0 <= v < 2.0.0",
         "deadfoxygrandpa/elm-test": "3.0.1 <= v < 4.0.0",
@@ -23,6 +22,7 @@
         "evancz/elm-http": "3.0.0 <= v < 4.0.0",
         "imeckler/either": "1.0.1 <= v < 2.0.0",
         "laszlopandy/elm-console": "1.1.0 <= v < 2.0.0",
+        "lukewestby/elm-i18n": "1.0.0 <= v < 2.0.0",
         "tomjkidd/elm-multiway-tree-zipper": "1.1.0 <= v < 2.0.0"
     },
     "elm-version": "0.16.0 <= v < 0.17.0"
