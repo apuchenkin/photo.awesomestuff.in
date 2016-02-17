@@ -27,12 +27,8 @@ staticHandler : String -> Router Route State -> Handler State
 staticHandler page router =
   let
     (Router r) = router
-    body = text "static"
-    footer = text page
     view address state parsed = Just <| div [] [
-        innerHeader router state.locale page,
-        body,
-        footer
+        text page
       ]
   in
     {
@@ -47,21 +43,21 @@ homeHandler router =
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state.router.route
-        head = case state.router.route of
+        header = case state.router.route of
+          Just (Route.Static p) -> innerHeader router state.locale p
           Just (Route.Category) -> innerHeader router state.locale "category"
           Just (Route.Photo) -> innerHeader router state.locale "category"
-          _    -> header router state.locale
+          _    -> homeHeader router state.locale
         categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.router.params) <| Dict.toList c
         body = case parsed of
           Nothing   -> categories state.categories
           Just v    -> v
-        footer = div [class "footer"] []
       in Just <| div [] [
         loader state.isLoading,
         languageSelector router state,
-        head,
+        header,
         body,
-        footer
+        footer router state.locale
       ]
   in
     {

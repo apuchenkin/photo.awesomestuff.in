@@ -21,6 +21,11 @@ config route = case route of
       constraints = Dict.fromList [("locale", Enum ["ru", "en"])],
       handler = localeHandler
     }
+  Home -> {
+      segment = "",
+      constraints = Dict.empty,
+      handler = homeHandler
+    }
   NotFound -> {
       segment = "/404",
       constraints = Dict.empty,
@@ -30,11 +35,6 @@ config route = case route of
       segment = "/" ++ page,
       constraints = Dict.empty,
       handler = staticHandler page
-    }
-  Home -> {
-      segment = "",
-      constraints = Dict.empty,
-      handler = homeHandler
     }
   Category -> {
       segment = "/:category[/:subcategory]",

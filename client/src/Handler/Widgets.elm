@@ -1,6 +1,7 @@
 module Handler.Widgets where
 
 import Dict
+import String
 import Handler.Config exposing (..)
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
@@ -20,37 +21,51 @@ loader = lazy <| \visible ->
     ]
   in Html.div [attributes] []
 
-header : Router Route State -> Locale -> Html
-header = lazy2 <| \(Router router) locale ->
+homeHeader : Router Route State -> Locale -> Html
+homeHeader = lazy2 <| \router locale ->
   let
     version = span [class "version"] [text <| Locale.i18n locale "alpha" []]
-    homeLink = Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text config.title]
   in
     Html.header [class "main"] [
-      Html.h1 [class "title"] [homeLink, version],
+      Html.h1 [class "title"] [homeLink router locale config.title, version],
       Html.h2 [class "subtitle"] [text <| Locale.i18n locale "Travel in photography" []]
     ]
 
 innerHeader : Router Route State -> Locale -> String -> Html
-innerHeader = lazy3 <| \(Router router) locale title ->
+innerHeader = lazy3 <| \router locale title ->
   let
-    homeLink = Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) [])
-      [text <| Locale.i18n locale "Home" []]
-    title' = Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) [])
+    (Router r) = router
+    homeText = Locale.i18n locale "Home" []
+    title' = Html.a (r.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) [])
       [text title]
   in
     Html.header [class "main"] [
-      Html.h1 [class "title"] [homeLink, text "/", title']
+      Html.h1 [class "title"] [homeLink router locale homeText, text " / ", title']
     ]
+
+footer : Router Route State -> Locale -> Html
+footer router locale =
+  let
+    (Router r) = router
+    about    = Html.a (r.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "About" []]
+    contacts = Html.a (r.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "Contacts" []]
+    sep = text " | "
+  in Html.footer [] [
+    homeLink router locale (String.toLower config.title),
+    sep,
+    text <| Locale.i18n locale "© 2015, Artem Puchenkin" [],
+    sep,
+    about,
+    sep,
+    contacts
+  ]
 
 {-| Links -}
 
-homeLink : Router Route State -> RouteParams -> Locale -> Html
+homeLink : Router Route State -> Locale -> String -> Html
 homeLink =
-  lazy3 <| \(Router router) params locale ->
-    let
-      homeText = Locale.i18n locale "HOME" []
-    in Html.a (router.bindForward (Routes.Home, params) []) [Html.text homeText]
+  lazy3 <| \(Router router) locale title ->
+    Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text title]
 
 languageSelector :  Router Route State -> State -> Html
 languageSelector = \(Router router) state ->

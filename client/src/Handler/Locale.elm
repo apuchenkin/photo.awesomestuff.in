@@ -40,7 +40,10 @@ lookup =
             (Language <| toString Ru)
             [ ( "Home", "Главная" )
             , ( "alpha", "альфа")
+            , ( "About", "О сайте")
+            , ( "Contacts", "Контакты")
             , ( "Travel in photography", "Путешествия в фотографиях")
+            , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
             , ( "I am {0} years old.", "J'ai {0} ans." )
             ]
         ]
@@ -69,10 +72,6 @@ i18n locale = lookup (Language <| toString locale)
 --   "FORM": {
 --     "BUGREPORT": "http://goo.gl/forms/PytHUvBm48",
 --     "FEEDBACK": "http://goo.gl/forms/mD6GCLnzCT"
---   },
---   "STATIC": {
---     "ABOUT": "About",
---     "CONTACTS": "Contacts"
 --   },
 --   "TOOLS": {
 --     "FULLSCREEN" : "Full screen",
@@ -107,10 +106,6 @@ i18n locale = lookup (Language <| toString locale)
 --   "FORM": {
 --     "BUGREPORT": "http://goo.gl/forms/gjCXgnadYm",
 --     "FEEDBACK": "http://goo.gl/forms/jCZLgQfTx4"
---   },
---   "STATIC": {
---     "ABOUT": "О сайте",
---     "CONTACTS": "Контакты"
 --   },
 --   "TOOLS": {
 --     "FULLSCREEN" : "Увеличить",
