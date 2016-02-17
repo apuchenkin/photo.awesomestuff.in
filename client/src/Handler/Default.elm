@@ -43,12 +43,14 @@ homeHandler router =
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state.router.route
+        category = Dict.get "category" state.router.params &> flip Dict.get state.categories
         header = case state.router.route of
-          Just (Route.Static p) -> innerHeader router state.locale p
-          Just (Route.Category) -> innerHeader router state.locale "category"
-          Just (Route.Photo) -> innerHeader router state.locale "category"
-          _    -> homeHeader router state.locale
-        categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.router.params) <| Dict.toList c
+          Just (Route.Static p) -> innerHeader router state.locale (Html.text p)
+          _    -> case category of
+            Just c  -> innerHeader router state.locale (categoryLink router c state.locale)
+            Nothing -> homeHeader router state.locale
+
+        categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.locale) <| Dict.toList c
         body = case parsed of
           Nothing   -> categories state.categories
           Just v    -> v
@@ -74,13 +76,18 @@ categoryHandler router =
       let
         -- _ = Debug.log "categoryHandler" state
         category = getCategory state
-        -- photoParams = Dict.filter (\k _ -> List.member k ["locale", "category"]) state.router.params
+
         -- TODO: tuple is not equal by reference
-        categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.router.params) <| Dict.toList c
+        categories c = Html.nav [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.locale) <| Dict.toList c
         photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p state.router.params) l) photos) router state.router.params state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-      in Maybe.map (\c -> div [] [text <| toString c, categories state.categories, photos, parsed'] ) category
+        -- navigation = Maybe.map (\c -> Html.nav div [class "navigation"] [, ] ) category
+      in flip Maybe.map category <| \c -> div [] [
+        text <| toString c,
+        categories state.categories,
+        photos, parsed'
+      ]
   in
     {
       view = view,

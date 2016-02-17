@@ -9,8 +9,10 @@ import Task exposing (Task)
 import Lib.Types exposing (WithRouter, Action, Response (..), Router (..))
 import Handler.Routes as Routes exposing (Route)
 import Lib.Helpers exposing (noFx, chainAction)
-import Maybe.Extra exposing (join)
 import Handler.Locale as Locale exposing (Locale)
+
+(&>) : Maybe a -> (a -> Maybe b) -> Maybe b
+(&>) = Maybe.andThen
 
 type alias Promise value = Either (Task Http.Error value) value
 
@@ -68,7 +70,7 @@ getCategory state =
     param = case Dict.get "subcategory" state.router.params of
       Nothing -> Dict.get "category" state.router.params
       c -> c
-  in join <| Maybe.map (flip Dict.get state.categories) param
+  in param &> flip Dict.get state.categories
 
 decodeCategories : Json.Decoder (List Category)
 decodeCategories = Json.list <| Json.object4 category
