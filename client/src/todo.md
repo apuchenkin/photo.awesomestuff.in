@@ -38,3 +38,6 @@
 - (Improvement) greedy matcher config (matches first found route or latest one)
 - (Improvement) trailing slash route?
 - (Improvement) perfomance
+
+-- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
+-- raise bug about structure re-rendering when first node is changes

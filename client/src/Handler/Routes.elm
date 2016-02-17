@@ -2,14 +2,14 @@ module Handler.Routes where
 
 import MultiwayTree exposing (Tree (..), Forest)
 
-type Route = Locale | Home | NotFound | About | Contacts | Category | Photo
+type Route = Locale | Home | NotFound | Static String | Category | Photo
 
 routes : Forest Route
 routes = [
     Tree Locale [
       Tree NotFound [],
-      Tree About [],
-      Tree Contacts [],
+      Tree (Static "about") [],
+      Tree (Static "contacts") [],
       Tree Home [
         Tree Category [
           Tree Photo []

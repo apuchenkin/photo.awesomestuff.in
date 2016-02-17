@@ -26,23 +26,18 @@ config route = case route of
       constraints = Dict.empty,
       handler = notFoundHandler
     }
-  About -> {
-      segment = "/about",
+  Static page -> {
+      segment = "/" ++ page,
       constraints = Dict.empty,
-      handler = staticHandler
-    }
-  Contacts -> {
-      segment = "/contacts",
-      constraints = Dict.empty,
-      handler = staticHandler
+      handler = staticHandler page
     }
   Home -> {
-      segment = "[/]",
+      segment = "",
       constraints = Dict.empty,
       handler = homeHandler
     }
   Category -> {
-      segment = ":category[/:subcategory]",
+      segment = "/:category[/:subcategory]",
       constraints = Dict.empty,
       handler = categoryHandler
     }

@@ -31,6 +31,18 @@ header = lazy2 <| \(Router router) locale ->
       Html.h2 [class "subtitle"] [text <| Locale.i18n locale "Travel in photography" []]
     ]
 
+innerHeader : Router Route State -> Locale -> String -> Html
+innerHeader = lazy3 <| \(Router router) locale title ->
+  let
+    homeLink = Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) [])
+      [text <| Locale.i18n locale "Home" []]
+    title' = Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) [])
+      [text title]
+  in
+    Html.header [class "main"] [
+      Html.h1 [class "title"] [homeLink, text "/", title']
+    ]
+
 {-| Links -}
 
 homeLink : Router Route State -> RouteParams -> Locale -> Html
