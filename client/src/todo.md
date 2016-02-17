@@ -17,13 +17,13 @@
 >> Less magic -> better perfomance and caching (remove update router and whole state from router)
 >> bug route with params
 >> configs??
+>> refactor after bugfix
+>> config cache on/off
 
-- refactor after bugfix
 - move to separate repo
-- config cache on/off
 - drop unneeded deps on libs
 - complete/fix tests
-- general refactoring
+- general refactoring/simplification | private / public contexts
 
 --- app ---
 - static routes
@@ -41,3 +41,5 @@
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
+
+-- maybe Html -> dict Html + general layout

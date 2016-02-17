@@ -5,15 +5,15 @@ module Lib.Matcher
 
 import Regex
 import String
-import Dict           exposing (Dict)
-
-import MultiwayTreeUtil exposing (treeLookup, forestLookup, traverse)
-import MultiwayTree   exposing (Tree (..), Forest, datum, children)
 import List.Extra
+import Dict               exposing (Dict)
+import MultiwayTreeUtil   exposing (treeLookup, forestLookup, traverse)
+import MultiwayTree       exposing (Tree (..), Forest, datum, children)
+
 import Combine        exposing (Parser, many1, parse, many, while, between, end, rec, manyTill)
 import Combine.Char   exposing (char, noneOf, anyChar)
-import Combine.Num
 import Combine.Infix  exposing ((<$>), (*>), (<*), (<*>), (<|>))
+import Combine.Num
 
 import Lib.Types    exposing (RouteParams, Route, Constraint (..), RawURL, URL, RawSegment)
 import Lib.Helpers  exposing (singleton, combineParams)

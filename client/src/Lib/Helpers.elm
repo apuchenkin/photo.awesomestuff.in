@@ -4,7 +4,7 @@ import Effects
 import Dict
 import Lib.Types exposing (ActionEffects, Response (..), Action, RouteParams, Route)
 import MultiwayTree   exposing (Tree, Forest)
-import MultiwayTreeUtil exposing (lca, treeLookup, traverseFrom)
+import MultiwayTreeUtil exposing (lca, treeLookup, traverse)
 
 singleton : a -> List a
 singleton action = [ action ]
@@ -23,9 +23,7 @@ combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union params dict)
 
 -- path from node a to node b in the forest
-getPath : Maybe a -> a -> Forest a -> List a
-getPath from to forest = Maybe.withDefault []
-  <| flip Maybe.map (List.head <| List.filterMap (\tree -> treeLookup to tree) forest)
-  <| \zipper ->
-    let from' = from `Maybe.andThen` (\from' -> lca from' to forest)
-    in traverseFrom from' zipper
+getPath : a -> Forest a -> List a
+getPath route forest = Maybe.withDefault []
+  <| flip Maybe.map (List.head <| List.filterMap (\tree -> treeLookup route tree) forest)
+  <| \zipper -> traverse zipper

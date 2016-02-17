@@ -1,19 +1,19 @@
 module Lib.Router (router, runRouter, initialState) where
 
+import History
 import Dict
-import Task         exposing (Task)
-import Html         exposing (Html, text, div)
-import Html.Events  exposing (onWithOptions)
-import Effects      exposing (Effects, Never)
-import History      exposing (path)
-
 import List.Extra
-import Json.Decode as Json exposing ((:=))
-import Html.Attributes exposing (href)
-import Signal.Extra exposing (fairMerge, foldp')
+import Json.Decode as Json
 
-import Lib.Helpers  exposing (..)
+import Task             exposing (Task)
+import Html             exposing (Html)
+import Html.Events      exposing (onWithOptions)
+import Effects          exposing (Effects)
+import Html.Attributes  exposing (href)
+import Signal.Extra     exposing (fairMerge, foldp')
+
 import Lib.Matcher
+import Lib.Helpers  exposing (..)
 import Lib.Types    exposing (..)
 import MultiwayTreeUtil
 
@@ -24,7 +24,7 @@ initialState : RouterState route
 initialState = {
     route = Nothing
   , params = Dict.empty
-  , cache = {unwrap = Dict.empty, rawUrl = Dict.empty, routePath = Dict.empty}
+  , cache = {unwrap = Dict.empty, rawUrl = Dict.empty, traverse = Dict.empty}
   }
 
 mailbox : Signal.Mailbox (List (Action state))
@@ -63,9 +63,9 @@ prepareCache state config =
     unwraps = flip List.map (urls' ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
     rawUrl = Dict.fromList urls
     unwrap  = Dict.fromList unwraps
-    routePaths = List.foldl (\from acc -> acc ++ List.map (\to -> ((Maybe.withDefault "" <| Maybe.map toString from, toString to), getPath from to config.routes)) routes) [] (Nothing :: List.map Just routes)
-    routePath = Dict.fromList routePaths
-    cache = {rawUrl = rawUrl, unwrap = unwrap, routePath = routePath}
+    traverses = flip List.map routes (\route -> (toString route, getPath route config.routes))
+    traverse = Dict.fromList traverses
+    cache = {rawUrl = rawUrl, unwrap = unwrap, traverse = traverse}
   in {state | router = {router | cache = cache}}
 
 {-| @Private -}
@@ -77,7 +77,7 @@ render router state =
       handlers  = Maybe.withDefault [] <| Maybe.map (\to -> getHandlers router state.router Nothing (to, Dict.empty)) route
       views     = List.map .view handlers
       html      = List.foldr (\view parsed -> view address state parsed) Nothing views
-    in Maybe.withDefault (text "error") html
+    in Maybe.withDefault (Html.text "error") html
 
 {-| @Private -}
 setUrl : Router route (WithRouter route state) -> RouterState route -> String -> Action (WithRouter route state)
@@ -122,12 +122,12 @@ getHandlers router state from to =
 
     fromPath = Maybe.withDefault []
      <| flip Maybe.map fromRoute
-     <| \f -> case Dict.get ("", toString f) state.cache.routePath of
+     <| \f -> case Dict.get (toString f) state.cache.traverse of
       Just path -> path
-      Nothing   -> getPath Nothing f r.config.routes
-    toPath = case Dict.get ("", toString toRoute) state.cache.routePath of
+      Nothing   -> getPath f r.config.routes
+    toPath = case Dict.get (toString toRoute) state.cache.traverse of
      Just path -> path
-     Nothing   -> getPath Nothing toRoute r.config.routes
+     Nothing   -> getPath toRoute r.config.routes
     path = List.map2 (,) fromPath toPath
 
     fromPath' = Lib.Matcher.mapParams (.segment << r.config.config) fromPath fromParams
@@ -210,7 +210,7 @@ runRouter router =
     -- _ = Debug.log "initialState" initialState
     (Router r) = router
     initialState = r.config.init
-    init = (Signal.map (singleton << (,) True << setUrl router initialState.router) path)
+    init = (Signal.map (singleton << (,) True << setUrl router initialState.router) History.path)
 
     -- inputs : Signal (List (Bool, Action state))
     inputs =

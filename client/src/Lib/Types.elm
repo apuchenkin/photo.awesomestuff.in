@@ -82,7 +82,7 @@ type alias RouterResult state =
 type alias RouterCache route = {
   rawUrl:     Dict String RawURL,
   unwrap:     Dict String (List String),
-  routePath:  Dict (String, String) (List route)
+  traverse:   Dict String (List route)
 }
 
 type alias RouterState route = {
