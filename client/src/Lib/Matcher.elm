@@ -1,7 +1,4 @@
-module Lib.Matcher
- -- (match, buildUrl)
- (..) -- test
-  where
+module Lib.Matcher where
 
 import Regex
 import String
