@@ -6,10 +6,10 @@ import ElmTest exposing (consoleRunner)
 import Console exposing (IO, run)
 import Task
 
-import Test.Lib.Matcher
+import Test.Router
 
 console : IO ()
-console = consoleRunner Test.Lib.Matcher.testMatcher
+console = consoleRunner Test.Router.testSuite
 
 port runner : Signal (Task.Task x ())
 port runner = run console

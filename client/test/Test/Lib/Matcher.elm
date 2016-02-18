@@ -4,10 +4,11 @@ import Dict exposing (Dict)
 import MultiwayTree as Tree exposing (Tree (..), Forest)
 import ElmTest      exposing (..)
 import Lib.Matcher  exposing (..)
-import Lib.Types    exposing (Constraint)
+import Lib.Types    exposing (Constraint, RawURL)
 
 type Route = Home | Category | Photo | NotFound
 
+-- TODO: add tests with constraints
 routeMap : Route -> (RawURL, Dict String Constraint)
 routeMap route = case route of
   Home      -> ("/", Dict.empty)
@@ -25,8 +26,8 @@ routeTree = [
     ]
   ]
 
-testMatcher : Test
-testMatcher = suite "matcher" [
+testSuite : Test
+testSuite = suite "Mather" [
     testUnwrap,
     testParseUrlParams,
     testMatch,

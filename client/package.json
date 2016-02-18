@@ -4,7 +4,7 @@
   "description": "photo client",
   "private": true,
   "scripts": {
-    "test": "cd test && elm-test TestRunner.elm --compiler elm-make",
+    "test": "cd test && elm-test TestRunner.elm --compiler elm-make.cmd",
     "build": "webpack",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --port 3000"
