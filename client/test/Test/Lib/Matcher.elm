@@ -32,7 +32,9 @@ testSuite = suite "Mather" [
     testParseUrlParams,
     testMatch,
     testBuildUrl,
-    testReversible
+    testReversible,
+    testGetPath,
+    testMapParams
   ]
 
 {-| Private -}
@@ -100,4 +102,19 @@ testReversible = suite "reversible"
     test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2"))         <| Just "/param/param2",
     test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/photo/3"))        <| Just "/param/photo/3",
     test "match" <| flip assertEqual (Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2/photo/4")) <| Just "/param/param2/photo/4"
+  ]
+
+testGetPath : Test
+testGetPath = suite "getPath" [
+    test "mapParams" <| flip assertEqual (getPath Photo routeTree)      <| [Home, Category, Photo]
+  , test "mapParams" <| flip assertEqual (getPath Category routeTree)   <| [Home, Category]
+  , test "mapParams" <| flip assertEqual (getPath Home routeTree)       <| [Home]
+  ]
+
+testMapParams : Test
+testMapParams =
+  let params = Dict.fromList [("category","param"),("subcategory","param2"),("photo","4")]
+  in suite "mapParams" [
+    test "mapParams" <| flip assertEqual (mapParams (fst << routeMap) (getPath Photo routeTree) params)
+      <| [(Home, Dict.empty), (Category, Dict.fromList [("category","param"),("subcategory","param2")]), (Photo, Dict.fromList [("photo","4")])]
   ]

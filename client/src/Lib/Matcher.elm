@@ -15,7 +15,6 @@ import Combine.Num
 import Lib.Types    exposing (RouteParams, Route, Constraint (..), RawURL, URL, RawSegment)
 import Lib.Helpers  exposing (singleton, combineParams)
 
-
 paramChar : Char
 paramChar = ':'
 
@@ -134,6 +133,12 @@ buildUrl : (route -> RawSegment) -> Forest route -> Route route -> URL
 buildUrl rawRoute forest (route, params) =
   let  raws = unwrap <| composeRawUrl rawRoute forest route
   in buildRawUrl raws (route, params)
+
+-- path from node a to node b in the forest
+getPath : a -> Forest a -> List a
+getPath route forest = Maybe.withDefault []
+  <| flip Maybe.map (List.head <| List.filterMap (\tree -> treeLookup route tree) forest)
+  <| \zipper -> traverse zipper
 
 mapParams : (route -> RawSegment) -> List route -> RouteParams -> List (Route route)
 mapParams rawRoute routes params = flip List.map routes <| \route ->
