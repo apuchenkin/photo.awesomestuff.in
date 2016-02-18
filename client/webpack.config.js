@@ -1,8 +1,8 @@
 var webpack           = require( 'webpack' );
-// var HttpProxyAgent    = require('http-proxy-agent');
-//
-// var proxy = process.env.http_proxy || 'http://proxy02.merann.ru:8080';
-// console.log('using proxy server %j', proxy);
+var HttpProxyAgent    = require('http-proxy-agent');
+
+var proxy = process.env.http_proxy || 'http://proxy02.merann.ru:8080';
+console.log('using proxy server %j', proxy);
 
 
 module.exports = {
@@ -48,7 +48,7 @@ module.exports = {
     proxy: {
         '/api/v1*': {
             target: 'http://photo.awesomestuff.in',
-            // agent: new HttpProxyAgent(proxy),
+            agent: new HttpProxyAgent(proxy),
             changeOrigin: true,
             secure: false,
         },

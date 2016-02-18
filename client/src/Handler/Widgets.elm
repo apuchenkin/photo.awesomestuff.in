@@ -2,10 +2,11 @@ module Handler.Widgets where
 
 import Dict
 import String
+import Date
 import Handler.Config exposing (..)
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
-import Html.Attributes exposing (class, classList, hreflang)
+import Html.Attributes as Attr exposing (class, classList, hreflang)
 
 import Either exposing (Either (..))
 import Handler.Routes as Routes exposing (Route)
@@ -57,6 +58,37 @@ footer router locale =
     sep, contacts
   ]
 
+categoryWidget : Router Route State -> Category -> List Category -> Locale -> Html
+categoryWidget router category childs locale =
+  let
+    (Router r) = router
+    (Category c) = category
+    params = case c.parent of
+      Just (Right (Category pc)) -> [("category", pc.name), ("subcategory", c.name)]
+      _ -> [("category", c.name)]
+    params' = ("locale", Locale.toString locale) :: params
+
+    dateText date = Locale.i18n locale "{0}, {1}" [
+        Locale.i18n locale (toString <| Date.month date) [],
+        toString (Date.year date)
+      ]
+
+    cover = Html.a (r.bindForward (Routes.Category, Dict.fromList params') [class "cover"])
+      <| List.filterMap identity [
+        (flip Maybe.map c.image <| \image -> Html.img [Attr.src (config.staticEndpoint ++ image), Attr.alt c.title] []),
+        (flip Maybe.map c.date <| \date -> Html.span [class "sub"] [text <| dateText date])
+      ]
+    aside = Html.aside [] [
+        Html.h3 [] [categoryLink router category locale True],
+        Html.ul [] (List.map (\c -> Html.li [] [categoryLink router c locale False]) childs)
+      ]
+  in
+    Html.div [class "gallery"] [
+      cover,
+      aside
+    ]
+
+
 {-| Links -}
 
 homeLink : Router Route State -> Locale -> String -> Html
@@ -76,16 +108,19 @@ languageSelector = \(Router router) state ->
   in Html.div [class "language"]
   <| flip List.map Locale.locales
   <| \ locale -> Html.a (router.bindForward (route, params locale) (attributes locale)) [Html.text <| Locale.toString locale]
-
-categoryLink : Router Route State -> Category -> Locale -> Html
-categoryLink = lazy3 <| \ (Router router) (Category category) locale ->
+-- (Just c == category)
+categoryLink : Router Route State -> Category -> Locale -> Bool -> Html
+categoryLink (Router router) (Category category) locale isActive =
   let
     params = case category.parent of
       Just (Right (Category pc)) -> [("category", pc.name), ("subcategory", category.name)]
       _ -> [("category", category.name)]
     params' = ("locale", Locale.toString locale) :: params
+    attributes = [
+      classList [("active", isActive)]
+    ]
   in
-    Html.a (router.bindForward (Routes.Category, Dict.fromList params') [class "active"]) [Html.text category.title]
+    Html.a (router.bindForward (Routes.Category, Dict.fromList params') attributes) [Html.text category.title]
 
 photoLink : Router Route State -> Photo -> RouteParams -> Html
 photoLink  = lazy3 <| \ (Router router) photo params ->

@@ -22,6 +22,7 @@ html, body {
   background: #0b0b0b;
   opacity: 0.8;
   filter: alpha(opacity=80);
+  transition: all 0.2s ease-out;
 
   .accent {
     background: url("/preloader.gif") top center no-repeat;
@@ -116,5 +117,84 @@ footer {
   a {
     margin-right: @divisor / 2;
     font-size: medium;
+  }
+}
+
+.content {
+  padding: @divisor / 2 @divisor;
+  color: @light-grey;
+  width: 100%;
+  box-sizing: border-box;
+
+  //@media screen {
+  //  @media (min-width: 1000px) {
+  //    padding: @divisor / 2 @divisor;
+  //  }
+  //}
+
+  & > .static {
+    color: @light-grey;
+  }
+}
+
+.galleries {
+  clear: both;
+  padding-top: @divisor / 2;
+
+  h2 {
+    color: @light;
+    margin: 0 0 @divisor / 2 0;
+    font-weight: 400;
+  }
+
+  & > ul {
+    & > li {
+      overflow: hidden;
+      display: block;
+      padding: 0 @divisor @divisor 0;
+
+      .gallery {
+        overflow: hidden;
+        padding: 2px;
+      }
+
+      a.cover {
+        float: left;
+        display: block;
+        outline: 2px solid rgba(0, 0, 0, 0);
+        cursor: pointer;
+        transition: outline-color 0.2s ease-out;
+        position: relative;
+        margin-bottom: .5em;
+
+        span.sub {
+          width: 100%;
+          color: @light;
+          padding: @divisor / 4;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          background: fade(@grey, 60%);
+          box-sizing: border-box;
+        }
+        &:hover {
+          outline-color: @accent;
+        }
+      }
+
+      aside {
+        float: left;
+        padding: 0 @divisor / 2;
+        color: @light-grey;
+
+        h3 {
+          margin: 0 0 @divisor /4 0;
+        }
+
+        li a {
+          line-height: @divisor;
+        }
+      }
+    }
   }
 }

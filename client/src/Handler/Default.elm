@@ -10,6 +10,7 @@ import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
 import Handler.Routes as Route exposing (Route)
 import Handler.Widgets exposing (..)
+import Handler.Locale as Locale exposing (Locale)
 
 localeHandler : Router Route State -> Handler State
 localeHandler router =
@@ -37,6 +38,12 @@ staticHandler page router =
       actions = []
     }
 
+childs : Category -> List Category -> List Category
+childs category categories =
+  let (Category pc) = category
+  in flip List.filter categories <| \(Category c) ->
+  Maybe.withDefault False <| c.parent &> \p -> Just <| Either.elim ((==) pc.id) ((==) category) p
+
 homeHandler : Router Route State -> Handler State
 homeHandler router =
   let
@@ -45,16 +52,24 @@ homeHandler router =
       let
         -- _ = Debug.log "homeHandler" state.router.route
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
+
         header = case state.router.route of
           Just (Route.Static p) -> innerHeader router state.locale (Html.text p)
           _    -> case category of
-            Just c  -> innerHeader router state.locale (categoryLink router c state.locale)
+            Just c  -> innerHeader router state.locale (categoryLink router c state.locale True)
             Nothing -> homeHeader router state.locale
 
-        categories c = Html.div [class "categories"] <| List.map (\c -> categoryLink router (snd c) state.locale) <| Dict.toList c
-        body = case parsed of
-          Nothing   -> categories state.categories
-          Just v    -> v
+        renderCategories categories = Html.div [class "galleries"] [
+            Html.h2 [] [text <| Locale.i18n state.locale "Galleries" []],
+            Html.ul []
+                <| List.map (\c -> Html.li [] [categoryWidget router c (childs c categories) state.locale])
+                <| List.filter (\(Category c) -> c.parent == Nothing) categories
+              ]
+
+        body = Html.div [class "content"] [case parsed of
+            Nothing   -> renderCategories <| Dict.values state.categories
+            Just v    -> v
+          ]
       in Just <| div [] [
         loader state.isLoading,
         languageSelector router state,
@@ -76,26 +91,23 @@ categoryHandler router =
     view address state parsed =
       let
         -- _ = Debug.log "categoryHandler" state
-        -- category = getCategory state
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
         subcategory = Dict.get "subcategory" state.router.params &> flip Dict.get state.categories
 
-        -- TODO: tuple is not equal by reference
         navigation = Html.nav [class "categories"] [
           Html.ul []
-            <| List.map (\c -> Html.li [] [categoryLink router (snd c) state.locale])
-            <| List.filter (\(_, Category pc) -> Maybe.withDefault False <| pc.parent &> \ p -> flip Maybe.map category (\(Category c) -> Either.elim ((==) (c.id)) ((==) (Category c)) p) )
-            <| Dict.toList state.categories
+            <| List.map    (\c -> Html.li [] [categoryLink router c state.locale (Just c == subcategory)])
+            <| Maybe.withDefault []
+            <| flip Maybe.map category <| \c -> childs c (Dict.values state.categories)
         ]
 
         photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p state.router.params) l) photos) router state.router.params state.photos
         parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-        -- navigation = Maybe.map (\c -> Html.nav div [class "navigation"] [, ] ) category
       in flip Maybe.map category <| \c -> div [] [
-        -- text <| toString c,
         navigation,
-        photos, parsed'
+        photos,
+        parsed'
       ]
   in
     {

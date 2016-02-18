@@ -1,14 +1,17 @@
 module Handler.Actions where
 
 import Http
+import Date exposing (Date)
 import Either exposing (Either (..))
 import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
 import Lib.Types exposing (WithRouter, Action, Response (..), Router (..))
-import Handler.Routes as Routes exposing (Route)
 import Lib.Helpers exposing (noFx, chainAction)
+
+import Handler.Config exposing (config)
+import Handler.Routes as Routes exposing (Route)
 import Handler.Locale as Locale exposing (Locale)
 
 (&>) : Maybe a -> (a -> Maybe b) -> Maybe b
@@ -37,6 +40,8 @@ type Category = Category {
     id: Int,
     name: String,
     title: String,
+    image: Maybe String,
+    date: Maybe Date,
     parent: Maybe (Either Int Category)
   }
 
@@ -53,16 +58,23 @@ createLinks router state =
     (Router r) = router
     meta = state.meta
     default = flip Maybe.map state.router.route <| \ route ->
-      ("x-default", r.buildUrl (route, Dict.remove "locale" state.router.params))
+      ("x-default", config.hostname ++ r.buildUrl (route, Dict.remove "locale" state.router.params))
       :: (flip List.map Locale.locales
-      <| \locale -> (Locale.toString locale, r.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
+      <| \locale -> (Locale.toString locale, config.hostname ++ r.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
       )
 
   in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] default}}
 
 -- Category constuctor
-category : Int -> String -> String -> Maybe (Either Int Category) -> Category
-category id name title parent = Category {id = id, name = name, title = title, parent = parent}
+category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Category
+category id name title image date parent = Category {
+    id = id,
+    name = name,
+    title = title,
+    image = image,
+    date  = date &> \d -> Result.toMaybe (Date.fromString d),
+    parent = parent
+  }
 
 getCategory : State -> Maybe Category
 getCategory state =
@@ -73,10 +85,12 @@ getCategory state =
   in param &> flip Dict.get state.categories
 
 decodeCategories : Json.Decoder (List Category)
-decodeCategories = Json.list <| Json.object4 category
+decodeCategories = Json.list <| Json.object6 category
   ("id"     := Json.int)
   ("name"   := Json.string)
   ("title"  := Json.string)
+  (Json.maybe ("image"  := Json.string))
+  (Json.maybe ("date"  := Json.string))
   (Json.maybe ("parent" := Json.map Left Json.int))
 
 decodePhoto : Json.Decoder Photo
@@ -166,6 +180,7 @@ updateCategories categories state =
           Nothing -> p
           Just p' -> Right <| Category p'
       ) category.parent}) dict
+    -- _ = Debug.log "cs" categories
   in
     Response <| noFx {state | isLoading = False, categories = castegoris'}
 

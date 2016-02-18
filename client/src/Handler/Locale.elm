@@ -21,31 +21,56 @@ toString locale = case locale of
   Ru -> "ru"
   En -> "en"
 
--- english : Language
--- english =
---     Language "en-us"
---
--- french : Language
--- french =
---     Language "fr-fr"
---
--- german : Language
--- german =
---     Language "de-de"
+month_en : List (String, String)
+month_en =
+  [ ( "Jan", "January" )
+  , ( "Feb", "February")
+  , ( "Mar", "March")
+  , ( "Apr", "April")
+  , ( "May", "May")
+  , ( "Jun", "June")
+  , ( "Jul", "July" )
+  , ( "Aug", "August" )
+  , ( "Sep", "September" )
+  , ( "Oct", "October" )
+  , ( "Nov", "November" )
+  , ( "Dec", "December" )
+  ]
+
+month_ru : List (String, String)
+month_ru =
+  [ ( "Jan", "Январь" )
+  , ( "Feb", "Февраль")
+  , ( "Mar", "Март")
+  , ( "Apr", "Апрель")
+  , ( "May", "Май")
+  , ( "Jun", "Июнь")
+  , ( "Jul", "Июль" )
+  , ( "Aug", "Август" )
+  , ( "Sep", "Сентябрь" )
+  , ( "Oct", "Октябрь" )
+  , ( "Nov", "Ноябрь" )
+  , ( "Dec", "Декабрь" )
+  ]
 
 lookup : Language -> String -> List String -> String
 lookup =
     createLookup
         [ withLanguage
-            (Language <| toString Ru)
+            (Language <| toString Ru) <|
             [ ( "Home", "Главная" )
             , ( "alpha", "альфа")
             , ( "About", "О сайте")
             , ( "Contacts", "Контакты")
+            , ( "Galleries", "Галереи")
             , ( "Travel in photography", "Путешествия в фотографиях")
             , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
             , ( "I am {0} years old.", "J'ai {0} ans." )
             ]
+            ++ month_ru
+        , withLanguage
+            (Language <| toString En)
+            month_en
         ]
 
 i18n : Locale -> String -> List String -> String
@@ -54,7 +79,7 @@ i18n locale = lookup (Language <| toString locale)
 -- {
 --   "META_DESCRIPTION": "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva.",
 --   "META_DESCRIPTION_PHOTO": "Author: {{author}}, Title: {{title}}",
---   "GALLERIES": "Galleries",
+--   "GALLERIES": "",
 --   "COPY": "2015, Artem Puchenkin",
 --   "FOOTER": "{{home}}, alpha",
 --   "RU": "Ru",
@@ -88,7 +113,7 @@ i18n locale = lookup (Language <| toString locale)
 -- {
 --   "META_DESCRIPTION": "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.",
 --   "META_DESCRIPTION_PHOTO": "Автор: {{author}}, Описание: {{title}}",
---   "GALLERIES": "Галереи",
+--   "GALLERIES": "",
 --   "COPY": "2015, Пученкин Артём",
 --   "FOOTER": "{{home}}, alpha",
 --   "RU": "Ru",
