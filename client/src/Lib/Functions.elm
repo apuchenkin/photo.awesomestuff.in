@@ -3,6 +3,7 @@ module Lib.Functions where
 import Dict
 import List.Extra
 import MultiwayTreeUtil
+import MultiwayTree     exposing (Forest)
 import Effects          exposing (Effects)
 import Html             exposing (Html)
 
@@ -28,14 +29,14 @@ combineActions actions = \state -> Response <| List.foldl runAction (noFx state)
 {-| @Private
   Creates cache for a given router config
 -}
-prepareCache : RouterConfig route state -> RouterCache route
-prepareCache config =
+prepareCache : (route -> RawSegment) -> Forest route -> RouterCache route
+prepareCache getSegment forest =
   let
-    routes = List.concat <| List.map MultiwayTreeUtil.flatten config.routes
-    urls = flip List.map routes <| \r -> (toString r, Lib.Matcher.composeRawUrl (.segment << config.config) config.routes r)
-    segments = List.map (.segment << config.config) routes
+    routes = List.concat <| List.map MultiwayTreeUtil.flatten forest
+    urls = flip List.map routes <| \r -> (toString r, Lib.Matcher.composeRawUrl getSegment forest r)
+    segments = List.map getSegment routes
     unwraps = flip List.map (segments ++ List.map snd urls) <| \url -> (url, Lib.Matcher.unwrap url)
-    traverses = flip List.map routes (\route -> (toString route, Lib.Matcher.getPath route config.routes))
+    traverses = flip List.map routes (\route -> (toString route, Lib.Matcher.getPath route forest))
   in {
     rawUrl    = Dict.fromList urls
   , unwrap    = Dict.fromList unwraps

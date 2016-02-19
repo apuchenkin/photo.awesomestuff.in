@@ -1,5 +1,6 @@
 module Test.Lib.Functions where
 
+import Dict
 import ElmTest      exposing (..)
 import Lib.Types exposing (WithRouter, Action, Response (..), Router (..), Handler, RouteConfig)
 import Lib.Helpers exposing (noFx)
@@ -7,9 +8,16 @@ import Lib.Functions exposing (..)
 import Test.TestData exposing (..)
 
 testSuite : Test
-testSuite = suite "Functions" [
-    testRunAction,
-    testCombineActions
+testSuite = suite "Functions"
+  [ testRunAction
+  , testCombineActions
+  , testPrepareCache
+  , testRender
+  , testSetUrl
+  , testSetRoute
+  , testTransition
+  , testGetHandlers
+  , testMatchRoute
   ]
 
 testRunAction : Test
@@ -47,28 +55,43 @@ testCombineActions = suite "combineActions"
       in result.str == "AB" && result.sum == 2
   ]
 
--- prepareCache : RouterConfig route state -> RouterCache route
+-- prepareCache : (route -> RawSegment) -> Forest route -> RouterCache route
 testPrepareCache : Test
-testPrepareCache = suite "prepareCache"
+testPrepareCache =
+  let cache = prepareCache (fst << routeMap) routeTree
+  in suite "prepareCache"
   [
-    test "pre" <| assertEqual (noFx init) <| (runAction noAction (noFx init))
+    test "not empty" <| assertNotEqual Dict.empty cache.rawUrl
+  , test "not empty" <| assertNotEqual Dict.empty cache.unwrap
+  , test "not empty" <| assertNotEqual Dict.empty cache.traverse
   ]
 
 --
 -- render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 -- render router state =
---
+testRender : Test
+testRender = test "TODO: implement" pass
+
 -- setUrl : Router route (WithRouter route state) -> RouterState route -> String -> Action (WithRouter route state)
 -- setUrl router state url =
---
+testSetUrl : Test
+testSetUrl = test "TODO: implement" pass
+
 -- setRoute : Router route (WithRouter route state) -> Route route -> Action (WithRouter route state)
 -- setRoute router route state =
---
+testSetRoute : Test
+testSetRoute = test "TODO: implement" pass
+
 -- transition : Router route (WithRouter route state) -> Transition route (WithRouter route state)
 -- transition router from to state =
---
+testTransition : Test
+testTransition = test "TODO: implement" pass
+
 -- getHandlers : Router route state -> RouterState route -> Maybe (Route route) -> Route route -> List (Handler state)
 -- getHandlers router state from to =
---
--- matchRoute : RouterConfig route state -> RouterState route -> String -> Maybe (Route route)
--- matchRoute config state url =
+testGetHandlers : Test
+testGetHandlers = test "TODO: implement" pass
+
+{-| see `Test.Lib.Matcher` - `testMatch` for test resultst -}
+testMatchRoute : Test
+testMatchRoute = test "covered" pass

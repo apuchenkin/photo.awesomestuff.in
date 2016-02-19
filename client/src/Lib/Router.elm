@@ -62,7 +62,7 @@ forward config route state =
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
   let
-    cache = prepareCache config
+    cache = prepareCache (.segment << config.config) config.routes
     state = config.init
     state' = if config.useCache
       then let rs = state.router in {state | router = {rs | cache = cache}}
