@@ -52,7 +52,7 @@ render router fallback state =
       route     = state.router.route
       handlers  = Maybe.withDefault []
          <| flip Maybe.map route
-         <| \r -> getHandlers router state.router Nothing (r, Dict.empty)
+         <| \r -> getHandlers router state.router.cache Nothing (r, Dict.empty)
 
       views     = List.map .view handlers
       html      = List.foldr (\view parsed -> view address state parsed) Nothing views
@@ -89,15 +89,15 @@ transition : Router route (WithRouter route state) -> Transition route (WithRout
 transition router from to state =
   let
     -- _ = Debug.log "transition: from" (from, to)
-    handlers = getHandlers router state.router from to
+    handlers = getHandlers router state.router.cache from to
     actions  = List.map (combineActions << .actions) handlers
   in  Response <| List.foldl runAction (noFx state) actions
 
 {-| @Private
   Returns a set of handlers applicable to transtition between "from" and "to" routes.
 -}
-getHandlers : Router route state -> RouterState route -> Maybe (Route route) -> Route route -> List (Handler state)
-getHandlers router state from to =
+getHandlers : Router route state -> RouterCache route -> Maybe (Route route) -> Route route -> List (Handler state)
+getHandlers router cache from to =
   let
     (Router r) = router
     fromRoute = Maybe.map fst from
@@ -107,10 +107,10 @@ getHandlers router state from to =
 
     fromPath = Maybe.withDefault []
      <| flip Maybe.map fromRoute
-     <| \f -> case Dict.get (toString f) state.cache.traverse of
+     <| \f -> case Dict.get (toString f) cache.traverse of
       Just path -> path
       Nothing   -> Lib.Matcher.getPath f r.config.routes
-    toPath = case Dict.get (toString toRoute) state.cache.traverse of
+    toPath = case Dict.get (toString toRoute) cache.traverse of
      Just path -> path
      Nothing   -> Lib.Matcher.getPath toRoute r.config.routes
     path = List.map2 (,) fromPath toPath

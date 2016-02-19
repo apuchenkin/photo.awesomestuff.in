@@ -68,29 +68,25 @@ testPrepareCache =
 
 --
 -- render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
--- render router state =
 testRender : Test
-testRender = test "TODO: implement" pass
+testRender = test "untestable due to presence of router instance" pass
 
 -- setUrl : Router route (WithRouter route state) -> RouterState route -> String -> Action (WithRouter route state)
--- setUrl router state url =
 testSetUrl : Test
-testSetUrl = test "TODO: implement" pass
+testSetUrl = test "untestable due to presence of router instance" pass
 
 -- setRoute : Router route (WithRouter route state) -> Route route -> Action (WithRouter route state)
--- setRoute router route state =
 testSetRoute : Test
-testSetRoute = test "TODO: implement" pass
+testSetRoute = test "untestable due to presence of router instance" pass
 
 -- transition : Router route (WithRouter route state) -> Transition route (WithRouter route state)
 -- transition router from to state =
 testTransition : Test
-testTransition = test "TODO: implement" pass
+testTransition = test "untestable due to presence of router instance" pass
 
 -- getHandlers : Router route state -> RouterState route -> Maybe (Route route) -> Route route -> List (Handler state)
--- getHandlers router state from to =
 testGetHandlers : Test
-testGetHandlers = test "TODO: implement" pass
+testGetHandlers = test "untestable due to presence of router instance" pass
 
 {-| see `Test.Lib.Matcher` - `testMatch` for test resultst -}
 testMatchRoute : Test

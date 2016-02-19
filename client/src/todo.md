@@ -22,6 +22,7 @@
 >> general refactoring/simplification
 >> static routes
 
+- decompose router and History.path signal
 - move to separate repo
 - complete/fix tests
 - private / public contexts types
