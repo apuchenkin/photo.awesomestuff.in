@@ -22,8 +22,8 @@ runAction action (state, effects) =
 {-| @Private
   Folds actions for a handlers into a single action
 -}
-runActions : List (Action state) -> Action state
-runActions actions = \state -> Response <| List.foldl runAction (noFx state) actions
+combineActions : List (Action state) -> Action state
+combineActions actions = \state -> Response <| List.foldl runAction (noFx state) actions
 
 {-| @Private
   Creates cache for a given router config
@@ -89,7 +89,7 @@ transition router from to state =
   let
     -- _ = Debug.log "transition: from" (from, to)
     handlers = getHandlers router state.router from to
-    actions  = List.map (runActions << .actions) handlers
+    actions  = List.map (combineActions << .actions) handlers
   in  Response <| List.foldl runAction (noFx state) actions
 
 {-| @Private

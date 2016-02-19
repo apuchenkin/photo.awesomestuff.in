@@ -1,109 +1,59 @@
 module Test.Lib.Functions where
 
 import ElmTest      exposing (..)
-import Lib.Types exposing (WithRouter, Action, Response (..), Router (..), Handler)
-import MultiwayTree exposing (Tree (..), Forest)
+import Lib.Types exposing (WithRouter, Action, Response (..), Router (..), Handler, RouteConfig)
 import Lib.Helpers exposing (noFx)
 import Lib.Functions exposing (..)
-import Dict
-
-type Route = Locale | Home | NotFound | Static String | Category | Photo
-
-routes : Forest Route
-routes = [
-    Tree Locale [
-      Tree Home [
-        Tree NotFound [],
-        Tree (Static "about") [],
-        Tree (Static "contacts") [],
-        Tree Category [
-          Tree Photo []
-        ]
-      ]
-    ]
-  ]
-
-type alias State = WithRouter Route
-  {
-    str: String,
-    sum: Int
-  }
-
-init : State
-init = {
-    router = {
-      route = Nothing
-    , params = Dict.empty
-    , cache = {unwrap = Dict.empty, rawUrl = Dict.empty, traverse = Dict.empty}
-    },
-    str = "",
-    sum = 0
-  }
-
-actionA : Action State
-actionA state = Response <| noFx state
-
-actionB : Action State
-actionB state = Response <| noFx state
-
-handlerA : Handler State
-handlerA = {
-    view = \address state parsed -> Nothing,
-    actions = [
-      actionA
-    ]
-  }
-
-handlerB : Handler State
-handlerB = {
-    view = \address state parsed -> Nothing,
-    actions = [
-      actionB
-    ]
-  }
-
-handlerC : Handler State
-handlerC = {
-    view = \address state parsed -> Nothing,
-    actions = [
-      actionA,
-      actionB
-    ]
-  }
+import Test.TestData exposing (..)
 
 testSuite : Test
 testSuite = suite "Functions" [
-    testRunHandlers
+    testRunAction,
+    testCombineActions
   ]
 
-{-| Private -}
-testRunHandlers : Test
-testRunHandlers = suite "runHandlers"
-  [
-    test "lenth 2" <| flip assertEqual (List.length <| runHandlers [handlerA, handlerB]) 2
-  , test "lenth 3" <| flip assertEqual (List.length <| runHandlers [handlerA, handlerB, handlerC]) 3
-  ]
---
--- {-| Private -}
--- testChainAction : Test
--- testChainAction = suite "chainAction"
---   [
---     test "non-wrapped0" <| flip assertEqual (chainAction actionA actionB) (noFx init)
---   ]
-
-{-| Private -}
 testRunAction : Test
 testRunAction = suite "runAction"
   [
-    test "non-wrapped0" <| flip assertEqual (runAction actionA (noFx init)) (noFx init)
+    test "noAction"
+      <| assertEqual init
+      <| let (r,_) = runAction noAction (noFx init) in r
+  , test "succ"
+      <| assertEqual 1
+      <| let (r,_) = runAction succ (noFx init) in r.sum
+  , test "succ"
+      <| assertEqual "foo"
+      <| let (r,_) = runAction (append "foo") (noFx init) in r.str
   ]
 
---
--- chainAction : Action state -> Action state -> Action state
--- chainAction action1 action2 state =
---
--- prepareCache : (WithRouter route state) -> RouterConfig route (WithRouter route state) -> (WithRouter route state)
--- prepareCache state config =
+testCombineActions : Test
+testCombineActions = suite "combineActions"
+  [
+    test "noAction"
+      <| assertEqual init
+      <| let (Response (result,_)) = (combineActions [noAction, noAction, noAction]) init in result
+  , test "one succ"
+      <| assertEqual 1
+      <| let (Response (result,_)) = (combineActions [succ, noAction]) init in result.sum
+  , test "two succ"
+      <| assertEqual 2
+      <| let (Response (result,_)) = (combineActions [succ, succ]) init in result.sum
+  , test "append order"
+      <| assertEqual "ABC"
+      <| let (Response (result,_)) = (combineActions [append "A", append "B", append "C"]) init in result.str
+  , test "combined"
+      <| assert
+      <| let (Response (result,_)) = (combineActions [succ, append "A", succ, append "B"]) init
+      in result.str == "AB" && result.sum == 2
+  ]
+
+-- prepareCache : RouterConfig route state -> RouterCache route
+testPrepareCache : Test
+testPrepareCache = suite "prepareCache"
+  [
+    test "pre" <| assertEqual (noFx init) <| (runAction noAction (noFx init))
+  ]
+
 --
 -- render : Router route (WithRouter route state) -> (WithRouter route state) -> Html
 -- render router state =
