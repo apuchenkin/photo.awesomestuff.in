@@ -1,7 +1,6 @@
 module Test.Router where
 
 import Test.Lib.Matcher
-import Test.Lib.Helpers
 import Test.Lib.Functions
 
 import ElmTest      exposing (Test, suite)

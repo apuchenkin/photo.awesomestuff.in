@@ -12,3 +12,10 @@ noFx state = (state, Effects.none)
 
 combineParams : RouteParams -> Route route -> Route route
 combineParams dict (route, params) = (route, Dict.union params dict)
+
+chainAction : Action state -> Action state -> Action state
+chainAction action1 action2 state =
+  let
+    (Response (state', effects)) = action1 state
+    (Response (state'', effects')) = action2 state'
+  in Response (state'', Effects.batch [effects, effects'])

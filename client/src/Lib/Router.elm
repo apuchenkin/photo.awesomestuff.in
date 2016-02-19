@@ -2,9 +2,15 @@ module Lib.Router (router, runRouter, initialState) where
 
 import Dict
 import History
+import Html             exposing (Html)
 import Effects          exposing (Effects)
 import Signal.Extra     exposing (fairMerge, foldp')
+import Task             exposing (Task)
+import Html.Attributes  as Attr
+import Html.Events      exposing (onWithOptions)
+import Json.Decode      as Json
 
+import Lib.Matcher
 import Lib.Helpers      exposing (..)
 import Lib.Types        exposing (..)
 import Lib.Functions    exposing (..)
@@ -17,6 +23,40 @@ initialState = {
   , params = Dict.empty
   , cache = {unwrap = Dict.empty, rawUrl = Dict.empty, traverse = Dict.empty}
   }
+
+-- @public
+-- binds forward action to existing HTML attributes
+bindForward : RouterConfig route (WithRouter route state) -> RouterCache route -> Route route -> List Html.Attribute -> List Html.Attribute
+bindForward config cache route attrs =
+  let
+    options = {stopPropagation = True, preventDefault = True}
+    action _ = Signal.message address <| forward config route
+  in
+    Attr.href (buildUrl config cache route)
+    :: onWithOptions "click" options Json.value action
+    :: attrs
+
+-- decompose Route to string
+buildUrl : RouterConfig route (WithRouter route state) -> RouterCache route -> Route route -> String
+buildUrl config cache (route, params) =
+  let
+  raw =  case Dict.get (toString route) cache.rawUrl of
+    Just value -> value
+    Nothing -> Lib.Matcher.composeRawUrl (.segment << config.config) config.routes route
+
+  raws = case Dict.get raw cache.unwrap of
+    Just value -> value
+    Nothing -> Lib.Matcher.unwrap raw
+
+  in Lib.Matcher.buildRawUrl raws (route, params) -- Lib.Matcher.combineParams state.params
+
+forward : RouterConfig route (WithRouter route state) -> Route route -> Action (WithRouter route state)
+forward config route state =
+  let
+    _ = Debug.log "forward" route
+    url   = buildUrl config state.router.cache route
+    task  = History.setPath url |> Task.map (always (\s -> Response <| noFx s))
+  in Response (state, Effects.task task)
 
 {-| Router constructor -}
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
