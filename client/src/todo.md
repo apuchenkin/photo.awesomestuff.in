@@ -19,14 +19,15 @@
 >> configs??
 >> refactor after bugfix
 >> config cache on/off
+>> general refactoring/simplification
+>> static routes
 
 - move to separate repo
-- drop unneeded deps on libs
 - complete/fix tests
-- general refactoring/simplification | private / public contexts
+- private / public contexts types
+- drop unneeded deps on libs
 
 --- app ---
-- static routes
 - port logic
 - valid HTML
 - effects and post libs

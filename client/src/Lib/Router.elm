@@ -62,14 +62,16 @@ forward config route state =
 router : RouterConfig route (WithRouter route state) -> Router route (WithRouter route state)
 router config =
   let
-    state = if config.useCache
-      then prepareCache config.init config
-      else config.init
+    cache = prepareCache config
+    state = config.init
+    state' = if config.useCache
+      then let rs = state.router in {state | router = {rs | cache = cache}}
+      else state
 
   in Router {
-    config        = {config | init = state}
-  , bindForward   = bindForward   config state.router.cache
-  , buildUrl      = buildUrl      config state.router.cache
+    config        = {config | init = state'}
+  , bindForward   = bindForward   config state'.router.cache
+  , buildUrl      = buildUrl      config state'.router.cache
   , forward       = forward       config
   }
 
@@ -79,7 +81,7 @@ runRouter router =
     -- _ = Debug.log "initialState" initialState
     (Router r) = router
     initialState = r.config.init
-    init = (Signal.map (singleton << (,) True << setUrl router initialState.router) History.path)
+    init = (Signal.map (singleton << (,) True << setUrl router initialState.router.cache) History.path)
 
     -- inputs : Signal (List (Bool, Action state))
     inputs =
@@ -102,7 +104,7 @@ runRouter router =
     state = Signal.map fst result
   in
     {
-      html  = Signal.map (render router) state
+      html  = Signal.map (render router r.config.fallbackHtml) state
     , state = state
     , tasks = Signal.map (Effects.toTask mailbox.address << snd) result
     }

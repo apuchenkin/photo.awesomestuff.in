@@ -92,13 +92,14 @@ type alias RouterState route = {
   }
 
 type alias RouterConfig route state = {
-  init:       state,
-  useCache:   Bool,
-  fallback:   Route route,
-  config:     route -> RouteConfig route state,
-  routes:     Forest route,
-  inits:      List (Signal.Signal (Action state)),
-  inputs:     List (Signal.Signal (Action state))
+  init:         state,
+  useCache:     Bool,
+  fallback:     Route route,
+  fallbackHtml: Html,
+  config:       route -> RouteConfig route state,
+  routes:       Forest route,
+  inits:        List (Signal.Signal (Action state)),
+  inputs:       List (Signal.Signal (Action state))
 }
 
 type Router route state = Router {

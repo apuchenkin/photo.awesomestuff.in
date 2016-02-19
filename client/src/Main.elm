@@ -72,6 +72,7 @@ router = Lib.Router.router {
     init      = initialState,
     useCache  = True,
     fallback  = (NotFound, Dict.empty),
+    fallbackHtml  = Html.text "error",
     routes    = routes,
     config    = config,
     inits = [
