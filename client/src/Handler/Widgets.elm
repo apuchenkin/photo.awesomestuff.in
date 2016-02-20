@@ -7,11 +7,11 @@ import Handler.Config exposing (..)
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes as Attr exposing (class, classList, hreflang)
-
 import Either exposing (Either (..))
+import Router.Types exposing (Router (..), RouteParams)
+
 import Handler.Routes as Routes exposing (Route)
 import Handler.Actions exposing (..)
-import Lib.Types exposing (Router (..), RouteParams)
 import Handler.Locale as Locale exposing (Locale)
 
 loader : Bool -> Html

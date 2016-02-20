@@ -2,15 +2,15 @@ module Handler.Default where
 
 import Dict
 import Either
-import Lib.Helpers exposing (noFx, singleton)
-import Handler.Actions exposing (..)
-import Lib.Types exposing (Router (..), Handler, Response (..))
-
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
+import Router.Helpers exposing (noFx, singleton)
+import Router.Types exposing (Router (..), Handler, Response (..))
+
 import Handler.Routes as Route exposing (Route)
 import Handler.Widgets exposing (..)
 import Handler.Locale as Locale exposing (Locale)
+import Handler.Actions exposing (..)
 
 localeHandler : Router Route State -> Handler State
 localeHandler router =

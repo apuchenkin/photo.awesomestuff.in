@@ -7,10 +7,10 @@ import Handler.Locale as Locale exposing (Locale)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State, Meta)
 import Handler.Routes exposing (..)
-import Lib.Helpers exposing (..)
 
-import Lib.Router exposing (..)
-import Lib.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
+import Router
+import Router.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
+import Router.Helpers exposing (..)
 
 -- import Mouse
 
@@ -62,13 +62,13 @@ initialState = {
     photo       = Nothing,
     isLoading   = False,
     mouse       = (0,0),
-    router      = Lib.Router.initialState
+    router      = Router.initialState
   }
 
 port localePort : Signal String
 
 router : Router Route State
-router = Lib.Router.router {
+router = Router.router {
     init      = initialState,
     useCache  = True,
     fallback  = (NotFound, Dict.empty),
@@ -82,7 +82,7 @@ router = Lib.Router.router {
   }
 
 result : RouterResult State
-result = runRouter router
+result = Router.runRouter router
 
 main : Signal Html
 main = result.html

@@ -7,8 +7,8 @@ import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
-import Lib.Types exposing (WithRouter, Action, Response (..), Router (..))
-import Lib.Helpers exposing (noFx, chainAction)
+import Router.Types exposing (WithRouter, Action, Response (..), Router (..))
+import Router.Helpers exposing (noFx, chainAction)
 
 import Handler.Config exposing (config)
 import Handler.Routes as Routes exposing (Route)
@@ -114,7 +114,6 @@ getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSett
 loadCategories : Router Route State -> Action State
 loadCategories router state =
   let
-    -- _ = Debug.log "loadCategories" state
     fetch = Task.toMaybe <| getRequest decodeCategories "/api/v1/category" state
     task = fetch `Task.andThen` \mcategories ->
       let
@@ -123,7 +122,6 @@ loadCategories router state =
         categoryParam =  case Dict.get "subcategory" state.router.params of
             Nothing -> Dict.get "category" state.router.params
             c -> c
-        -- _ = Debug.log "categoryParam" state.router
         action = Maybe.withDefault update <| flip Maybe.map categoryParam <| \category ->
           update `chainAction` (loadPhotos router)
       in Task.succeed <| action --case state.router.route of

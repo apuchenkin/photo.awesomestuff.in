@@ -22,26 +22,11 @@
 >> general refactoring/simplification
 >> static routes
 
-- decompose router and History.path signal
-- move to separate repo
-- complete/fix tests
-- private / public contexts types
-- drop unneeded deps on libs
-
 --- app ---
 - port logic
 - valid HTML
 - effects and post libs
 - styles
 
---- post ---
-- inject parent to speed up??
-- (Bug) replacePath instead setPath on fallback (404)
-- (Improvement) greedy matcher config (matches first found route or latest one)
-- (Improvement) trailing slash route?
-- (Improvement) perfomance
-
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
-
--- maybe Html -> dict Html + general layout
