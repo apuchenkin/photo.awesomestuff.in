@@ -100,17 +100,17 @@ testMatch = suite "match"
       <| assertEqual (Just (Page, (Dict.fromList [("category","param"),("subcategory","param2")])))
       <| match routeMap routeTree "/param/param2"
   , test "match"
-      <| assertEqual (Just (Subpage,Dict.fromList [("category","param"),("photo","3")]))
-      <| match routeMap routeTree "/param/photo/3"
+      <| assertEqual (Just (Subpage,Dict.fromList [("category","param"),("item","3")]))
+      <| match routeMap routeTree "/param/item/3"
   , test "match"
-      <| assertEqual (Just (Subpage,Dict.fromList [("category","param"),("subcategory","param2"),("photo","4")]))
-      <| match routeMap routeTree "/param/param2/photo/4"
+      <| assertEqual (Just (Subpage,Dict.fromList [("category","param"),("subcategory","param2"),("item","4")]))
+      <| match routeMap routeTree "/param/param2/item/4"
   , test "no-match"
       <| assertEqual (Nothing)
       <| match routeMap routeTree "/param/param2/param3"
   , test "no-match"
       <| assertEqual (Nothing)
-      <| match routeMap routeTree "/param/param2/photo/4/4"
+      <| match routeMap routeTree "/param/param2/item/4/4"
   ]
 
 testBuildUrl : Test
@@ -128,9 +128,9 @@ testBuildUrl = suite "buildUrl"
   , test "subcategory"
       <| assertEqual "/param/param2"
       <| buildUrl (fst << routeMap) routeTree (Page, (Dict.fromList [("subcategory","param2"),("category","param")]))
-  , test "photo"
-      <| assertEqual "/param/photo/123"
-      <| buildUrl (fst << routeMap) routeTree (Subpage, (Dict.fromList [("category","param"),("photo","123")]))
+  , test "item"
+      <| assertEqual "/param/item/123"
+      <| buildUrl (fst << routeMap) routeTree (Subpage, (Dict.fromList [("category","param"),("item","123")]))
   ]
 
 testReversible : Test
@@ -149,11 +149,11 @@ testReversible = suite "reversible"
       <| assertEqual (Just "/param/param2")
       <| Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2")
   , test "match"
-      <| assertEqual (Just "/param/photo/3")
-      <| Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/photo/3")
+      <| assertEqual (Just "/param/item/3")
+      <| Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/item/3")
   , test "match"
-      <| assertEqual (Just "/param/param2/photo/4")
-      <| Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2/photo/4")
+      <| assertEqual (Just "/param/param2/item/4")
+      <| Maybe.map (buildUrl (fst << routeMap) routeTree) <| (match routeMap routeTree "/param/param2/item/4")
   ]
 
 testGetPath : Test
@@ -171,9 +171,9 @@ testGetPath = suite "getPath" [
 
 testMapParams : Test
 testMapParams =
-  let params = Dict.fromList [("category","param"),("subcategory","param2"),("photo","4")]
+  let params = Dict.fromList [("category","param"),("subcategory","param2"),("item","4")]
   in suite "mapParams" [
     test "mapParams"
-      <| assertEqual [(Home, Dict.empty), (Page, Dict.fromList [("category","param"),("subcategory","param2")]), (Subpage, Dict.fromList [("photo","4")])]
+      <| assertEqual [(Home, Dict.empty), (Page, Dict.fromList [("category","param"),("subcategory","param2")]), (Subpage, Dict.fromList [("item","4")])]
       <| mapParams (fst << routeMap) (getPath Subpage routeTree) params
   ]

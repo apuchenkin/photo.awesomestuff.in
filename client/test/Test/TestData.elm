@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Lib.Helpers exposing (noFx)
 import Lib.Types    exposing (Constraint, RawURL)
 import Lib.Types exposing (WithRouter, Action, Response (..), Router (..), Handler, RouteConfig, RouterConfig)
+import Test.Mock.Router exposing (..)
 import MultiwayTree exposing (Tree (..), Forest)
 
 type Route = Home | Page | Subpage | NotFound
@@ -40,12 +41,12 @@ config route = case route of
     Page        -> {
       segment = ":category[/:subcategory]"
     , constraints = Dict.empty
-    , handler = always handlerA
+    , handler = always handlerB
     }
     Subpage     -> {
-      segment = "/photo/:photo"
+      segment = "/item/:item"
     , constraints = Dict.empty
-    , handler = always handlerA
+    , handler = always handlerC
     }
 
 routeMap : Route -> (RawURL, Dict String Constraint)
@@ -53,11 +54,7 @@ routeMap route = (.segment <| config route, .constraints <| config route)
 
 init : State
 init = {
-    router = {
-      route = Nothing
-    , params = Dict.empty
-    , cache = {unwrap = Dict.empty, rawUrl = Dict.empty, traverse = Dict.empty}
-    },
+    router = initialState,
     str = "",
     sum = 0
   }
@@ -84,9 +81,12 @@ append : String -> Action State
 append string state = Response <| noFx {state | str = state.str ++ string}
 
 ------------ handlers ----------------------
+
+-- only text html can be tested due to bug (toString(null))
+
 handlerA : Handler State
 handlerA = {
-    view = \address state parsed -> Nothing,
+    view = \address state parsed -> Just <| Maybe.withDefault (Html.text "handlerA") parsed,
     actions = [
       noAction
     ]
@@ -94,7 +94,7 @@ handlerA = {
 
 handlerB : Handler State
 handlerB = {
-    view = \address state parsed -> Nothing,
+    view = \address state parsed -> Just <| Maybe.withDefault (Html.text <| toString state.sum) parsed,
     actions = [
       succ
     ]
@@ -102,9 +102,12 @@ handlerB = {
 
 handlerC : Handler State
 handlerC = {
-    view = \address state parsed -> Nothing,
+    view = \address state parsed -> Just <| Maybe.withDefault (Html.text state.str) parsed,
     actions = [
       succ,
-      succ
+      append "foo"
     ]
   }
+
+router : Router Route State
+router = routerMock routerConfig
