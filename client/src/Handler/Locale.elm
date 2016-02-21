@@ -66,11 +66,13 @@ lookup =
             , ( "Travel in photography", "Путешествия в фотографиях")
             , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
             , ( "I am {0} years old.", "J'ai {0} ans." )
+            , ( "404", "ф0ф" )
             ]
             ++ month_ru
         , withLanguage
             (Language <| toString En)
-            month_en
+            <| ( "404", "f0f" )
+            :: month_en
         ]
 
 i18n : Locale -> String -> List String -> String

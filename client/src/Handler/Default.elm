@@ -136,7 +136,7 @@ photoHandler router =
 notFoundHandler : Router Route State -> Handler State
 notFoundHandler _ =
   let
-    view address state _ = Just <| div [] [text <| "404"]
+    view address state _ = Just <| div [] [text <| Locale.i18n state.locale "404" []]
   in
     {
       view = view,

@@ -135,6 +135,7 @@ loadPhotos : Router Route State -> Action State
 loadPhotos (Router router) state =
   let
     -- _ = Debug.log "loadPhotos" state
+    stopLoading state = Response (noFx {state | isLoading = False})
     task = case Dict.isEmpty state.categories of
       True   -> Nothing
       False  ->
@@ -144,7 +145,7 @@ loadPhotos (Router router) state =
             let fetch = Task.toMaybe <| getRequest decodePhotos ("/api/v1/category/" ++ toString c.id ++ "/photo") state
             in fetch `Task.andThen` \photos -> Task.succeed <| updatePhotos <| Maybe.withDefault [] photos
 
-        in Just <| Maybe.withDefault (Task.succeed <| router.forward (Routes.NotFound, Dict.empty)) fetch
+        in Just <| Maybe.withDefault (Task.succeed <| stopLoading `chainAction` router.redirect (Routes.NotFound, Dict.empty)) fetch
 
   in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
 
@@ -189,7 +190,7 @@ setLocale (Router router) state =
     locale = Dict.get "locale" state.router.params
     route = Maybe.withDefault Routes.Home state.router.route
     act = case locale of
-      Nothing -> router.forward (route, Dict.fromList [("locale", Locale.toString state.locale)])
+      Nothing -> router.redirect (route, Dict.fromList [("locale", Locale.toString state.locale)])
       Just l  -> \state -> Response <| noFx {state | locale = Locale.fromString l}
 
-  in act state
+  in Response <| noFx state-- act state

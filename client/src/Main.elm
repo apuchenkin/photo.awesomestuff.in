@@ -17,27 +17,27 @@ import Router.Helpers exposing (..)
 config : Route -> RouteConfig Route State
 config route = case route of
   Locale -> {
-      segment = "/[:locale]",
+      segment = "[/:locale]",
       constraints = Dict.fromList [("locale", Enum ["ru", "en"])],
       handler = localeHandler
     }
   Home -> {
-      segment = "",
+      segment = "/",
       constraints = Dict.empty,
       handler = homeHandler
     }
   NotFound -> {
-      segment = "/404",
+      segment = "404",
       constraints = Dict.empty,
       handler = notFoundHandler
     }
   Static page -> {
-      segment = "/" ++ page,
+      segment = page,
       constraints = Dict.empty,
       handler = staticHandler page
     }
   Category -> {
-      segment = "/:category[/:subcategory]",
+      segment = ":category[/:subcategory]",
       constraints = Dict.empty,
       handler = categoryHandler
     }
