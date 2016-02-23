@@ -7,6 +7,7 @@ import Handler.Locale as Locale exposing (Locale)
 import Handler.Default exposing (..)
 import Handler.Actions exposing (State, Meta)
 import Handler.Routes exposing (..)
+import Handler.Layout exposing (layout)
 
 import Router
 import Router.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
@@ -71,8 +72,9 @@ router : Router Route State
 router = Router.router {
     init      = initialState,
     useCache  = True,
+    html5     = True,
     fallback  = (NotFound, Dict.empty),
-    fallbackHtml  = Html.text "error",
+    layout    = layout,
     routes    = routes,
     config    = config,
     inits = [

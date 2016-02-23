@@ -4,7 +4,7 @@ import Dict
 import Either
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
-import Router.Helpers exposing (noFx, singleton)
+-- import Router.Helpers exposing (noFx, singleton)
 import Router.Types exposing (Router (..), Handler, Response (..))
 
 import Handler.Routes as Route exposing (Route)
@@ -15,7 +15,7 @@ import Handler.Actions exposing (..)
 localeHandler : Router Route State -> Handler State
 localeHandler router =
   let
-    view address state parsed = parsed
+    view address state _ = Dict.empty
   in
     {
       view = view,
@@ -29,9 +29,10 @@ staticHandler : String -> Router Route State -> Handler State
 staticHandler page router =
   let
     (Router r) = router
-    view address state parsed = Just <| div [] [
-        text page
-      ]
+    body = div [] [text page]
+    view address state parsed = Dict.fromList [
+      ("body", body)
+    ]
   in
     {
       view = view,
@@ -65,17 +66,12 @@ homeHandler router =
                 <| List.map (\c -> Html.li [] [categoryWidget router c (childs c categories) state.locale])
                 <| List.filter (\(Category c) -> c.parent == Nothing) categories
               ]
+        body = Html.div [class "content"] [renderCategories <| Dict.values state.categories]
 
-        body = Html.div [class "content"] [case parsed of
-            Nothing   -> renderCategories <| Dict.values state.categories
-            Just v    -> v
-          ]
-      in Just <| div [] [
-        loader state.isLoading,
-        languageSelector router state,
-        header,
-        body,
-        footer router state.locale
+      in Dict.fromList [
+        ("header", header)
+      , ("body", body)
+      , ("footer", footer router state.locale)
       ]
   in
     {
@@ -102,13 +98,16 @@ categoryHandler router =
         ]
 
         photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p state.router.params) l) photos) router state.router.params state.photos
-        parsed' = div [] <| Maybe.withDefault [] <| Maybe.map singleton parsed
 
-      in flip Maybe.map category <| \c -> div [] [
-        navigation,
-        photos,
-        parsed'
+      in Dict.fromList [
+        ("navigation", navigation)
+      , ("body", photos)
       ]
+      -- flip Maybe.map category <| \c -> div [] [
+      --   navigation,
+      --   photos,
+      --   parsed'
+      -- ]
   in
     {
       view = view,
@@ -124,7 +123,10 @@ photoHandler router =
       let
         -- _ = Debug.log "photoHandler" state
         photo = Dict.get "photo" state.router.params
-      in Maybe.map (\p -> div [] [text <| toString p] ) photo
+        photo' = div [] <| Maybe.withDefault [] <| flip Maybe.map photo <| \p -> [text <| toString p]
+      in Dict.fromList [
+        ("photo", photo')
+      ]
   in
     {
       view = view,
@@ -136,7 +138,10 @@ photoHandler router =
 notFoundHandler : Router Route State -> Handler State
 notFoundHandler _ =
   let
-    view address state _ = Just <| div [] [text <| Locale.i18n state.locale "404" []]
+    body locale = div [] [text <| Locale.i18n locale "404" []]
+    view address state _ = Dict.fromList [
+      ("body", body state.locale)
+    ]
   in
     {
       view = view,

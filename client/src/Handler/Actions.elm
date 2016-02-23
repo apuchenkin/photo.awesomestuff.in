@@ -189,8 +189,7 @@ setLocale (Router router) state =
     _ = Debug.log "locale" locale
     locale = Dict.get "locale" state.router.params
     route = Maybe.withDefault Routes.Home state.router.route
-    act = case locale of
-      Nothing -> router.redirect (route, Dict.fromList [("locale", Locale.toString state.locale)])
-      Just l  -> \state -> Response <| noFx {state | locale = Locale.fromString l}
-
-  in Response <| noFx state-- act state
+    params = Dict.fromList [("locale", Locale.toString state.locale)]
+  in case locale of
+    Nothing -> router.redirect (route, Dict.union params state.router.params) state
+    Just l  -> Response <| noFx {state | locale = Locale.fromString l}
