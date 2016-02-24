@@ -10,7 +10,7 @@ import Handler.Routes exposing (..)
 import Handler.Layout exposing (layout)
 
 import Router
-import Router.Types  exposing (RouteConfig, Router, RouterResult, Response (..), Constraint (..))
+import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..))
 import Router.Helpers exposing (..)
 
 -- import Mouse
@@ -56,31 +56,31 @@ initialMeta = {
 
 initialState : State
 initialState = {
-    meta        = initialMeta,
-    locale      = Locale.fallbackLocale,
-    categories  = Dict.empty,
-    photos      = [],
-    photo       = Nothing,
-    isLoading   = False,
-    mouse       = (0,0),
-    router      = Router.initialState
+    meta        = initialMeta
+  , locale      = Locale.fallbackLocale
+  , categories  = Dict.empty
+  , photos      = []
+  , photo       = Nothing
+  , isLoading   = False
+  , mouse       = (0,0)
+  , router      = Router.initialState
   }
 
 port localePort : Signal String
 
 router : Router Route State
-router = Router.router {
-    init      = initialState,
-    useCache  = True,
-    html5     = True,
-    fallback  = (NotFound, Dict.empty),
-    layout    = layout,
-    routes    = routes,
-    config    = config,
-    inits = [
+router = Router.router <| RouterConfig {
+    init = initialState
+  , useCache = True
+  , html5 = True
+  , fallback = (NotFound, Dict.empty)
+  , layout = layout
+  , routes = routes
+  , routeConfig = config
+  , inits = [
       Signal.map (\locale state -> Response <| noFx {state | locale = Locale.fromString locale}) localePort
-    ],
-    inputs = []
+    ]
+  , inputs = []
   }
 
 result : RouterResult State

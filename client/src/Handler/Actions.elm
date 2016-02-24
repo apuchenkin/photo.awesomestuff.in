@@ -7,7 +7,7 @@ import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
-import Router.Types exposing (WithRouter, Action, Response (..), Router (..))
+import Router.Types exposing (WithRouter, Action, Response (..), Router)
 import Router.Helpers exposing (noFx, chainAction)
 
 import Handler.Config exposing (config)
@@ -55,12 +55,11 @@ type alias Photo = {
 createLinks : Router Route State -> Action State
 createLinks router state =
   let
-    (Router r) = router
     meta = state.meta
     default = flip Maybe.map state.router.route <| \ route ->
-      ("x-default", config.hostname ++ r.buildUrl (route, Dict.remove "locale" state.router.params))
+      ("x-default", config.hostname ++ router.buildUrl (route, Dict.remove "locale" state.router.params))
       :: (flip List.map Locale.locales
-      <| \locale -> (Locale.toString locale, config.hostname ++ r.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
+      <| \locale -> (Locale.toString locale, config.hostname ++ router.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
       )
 
   in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] default}}
@@ -132,7 +131,7 @@ loadCategories router state =
   in Response ({state | isLoading = True}, Effects.task task)
 
 loadPhotos : Router Route State -> Action State
-loadPhotos (Router router) state =
+loadPhotos router state =
   let
     -- _ = Debug.log "loadPhotos" state
     stopLoading state = Response (noFx {state | isLoading = False})
@@ -184,7 +183,7 @@ updateCategories categories state =
     Response <| noFx {state | isLoading = False, categories = castegoris'}
 
 setLocale : Router Route State -> Action State
-setLocale (Router router) state =
+setLocale router state =
   let
     _ = Debug.log "locale" locale
     locale = Dict.get "locale" state.router.params

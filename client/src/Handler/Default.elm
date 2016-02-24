@@ -5,7 +5,7 @@ import Either
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
 -- import Router.Helpers exposing (noFx, singleton)
-import Router.Types exposing (Router (..), Handler, Response (..))
+import Router.Types exposing (Router, Handler, Response (..))
 
 import Handler.Routes as Route exposing (Route)
 import Handler.Widgets exposing (..)
@@ -28,7 +28,6 @@ localeHandler router =
 staticHandler : String -> Router Route State -> Handler State
 staticHandler page router =
   let
-    (Router r) = router
     body = div [] [text page]
     view address state parsed = Dict.fromList [
       ("body", body)
@@ -48,7 +47,6 @@ childs category categories =
 homeHandler : Router Route State -> Handler State
 homeHandler router =
   let
-    (Router r) = router
     view address state parsed =
       let
         -- _ = Debug.log "homeHandler" state.router.route

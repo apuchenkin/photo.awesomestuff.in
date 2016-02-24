@@ -8,7 +8,7 @@ import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes as Attr exposing (class, classList, hreflang)
 import Either exposing (Either (..))
-import Router.Types exposing (Router (..), RouteParams)
+import Router.Types exposing (Router, RouteParams)
 
 import Handler.Routes as Routes exposing (Route)
 import Handler.Actions exposing (..)
@@ -35,7 +35,6 @@ homeHeader = lazy2 <| \router locale ->
 innerHeader : Router Route State -> Locale -> Html -> Html
 innerHeader = lazy3 <| \router locale title ->
   let
-    (Router r) = router
     homeText = Locale.i18n locale "Home" []
     -- title' = Html.a (r.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) [])
     --   [text title]
@@ -47,9 +46,8 @@ innerHeader = lazy3 <| \router locale title ->
 footer : Router Route State -> Locale -> Html
 footer router locale =
   let
-    (Router r) = router
-    about    = Html.a (r.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "About" []]
-    contacts = Html.a (r.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "Contacts" []]
+    about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "About" []]
+    contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "Contacts" []]
     sep = text " | "
   in Html.footer [] [
     homeLink router locale (String.toLower config.title),
@@ -61,7 +59,6 @@ footer router locale =
 categoryWidget : Router Route State -> Category -> List Category -> Locale -> Html
 categoryWidget router category childs locale =
   let
-    (Router r) = router
     (Category c) = category
     params = case c.parent of
       Just (Right (Category pc)) -> [("category", pc.name), ("subcategory", c.name)]
@@ -73,7 +70,7 @@ categoryWidget router category childs locale =
         toString (Date.year date)
       ]
 
-    cover = Html.a (r.bindForward (Routes.Category, Dict.fromList params') [class "cover"])
+    cover = Html.a (router.bindForward (Routes.Category, Dict.fromList params') [class "cover"])
       <| List.filterMap identity [
         (flip Maybe.map c.image <| \image -> Html.img [Attr.src (config.staticEndpoint ++ image), Attr.alt c.title] []),
         (flip Maybe.map c.date <| \date -> Html.span [class "sub"] [text <| dateText date])
@@ -93,11 +90,11 @@ categoryWidget router category childs locale =
 
 homeLink : Router Route State -> Locale -> String -> Html
 homeLink =
-  lazy3 <| \(Router router) locale title ->
+  lazy3 <| \router locale title ->
     Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text title]
 
 languageSelector :  Router Route State -> State -> Html
-languageSelector = \(Router router) state ->
+languageSelector = \router state ->
   let
     route = Maybe.withDefault Routes.Home state.router.route
     params locale = flip Dict.union state.router.params <| Dict.fromList [("locale", Locale.toString locale)]
@@ -110,7 +107,7 @@ languageSelector = \(Router router) state ->
   <| \ locale -> Html.a (router.bindForward (route, params locale) (attributes locale)) [Html.text <| Locale.toString locale]
 -- (Just c == category)
 categoryLink : Router Route State -> Category -> Locale -> Bool -> Html
-categoryLink (Router router) (Category category) locale isActive =
+categoryLink router (Category category) locale isActive =
   let
     params = case category.parent of
       Just (Right (Category pc)) -> [("category", pc.name), ("subcategory", category.name)]
@@ -123,5 +120,5 @@ categoryLink (Router router) (Category category) locale isActive =
     Html.a (router.bindForward (Routes.Category, Dict.fromList params') attributes) [Html.text category.title]
 
 photoLink : Router Route State -> Photo -> RouteParams -> Html
-photoLink  = lazy3 <| \ (Router router) photo params ->
+photoLink  = lazy3 <| \ router photo params ->
     Html.a (router.bindForward (Routes.Photo, Dict.insert "photo" (toString photo.id) params) []) [Html.text photo.src]
