@@ -42,7 +42,10 @@ module.exports = {
     historyApiFallback: true,
     proxy: {
         '/api/v1*': {
-            target: 'http://photo.awesomestuff.in',
+            target: 'http://localhost:3000',
+            rewrite: function(req) {
+              req.url = req.url.replace(/^\/api\/v1/, '');
+            },
             changeOrigin: true,
             secure: false,
         },

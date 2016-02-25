@@ -49,8 +49,12 @@ type alias Photo = {
   id: Int,
   src: String,
   width: Int,
-  height: Int
+  height: Int,
+  views: Int
 }
+
+transition : Router Route State -> from -> to -> Action State
+transition router _ _ = createLinks router
 
 createLinks : Router Route State -> Action State
 createLinks router state =
@@ -93,11 +97,12 @@ decodeCategories = Json.list <| Json.object6 category
   (Json.maybe ("parent" := Json.map Left Json.int))
 
 decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object4 Photo
+decodePhoto = Json.object5 Photo
   ("id"     := Json.int)
   ("src"    := Json.string)
   ("width"  := Json.int)
   ("height" := Json.int)
+  ("views"  := Json.int)
 
 decodePhotos : Json.Decoder (List Photo)
 decodePhotos = Json.list decodePhoto
@@ -105,7 +110,7 @@ decodePhotos = Json.list decodePhoto
 getRequest: Json.Decoder value -> String -> State -> Task Http.Error value
 getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSettings
   { verb = "GET"
-  , headers = [("Accept-languadge", Locale.toString state.locale)]
+  , headers = [("Accept-language", Locale.toString state.locale)]
   , url = url
   , body = Http.empty
   })
@@ -113,7 +118,7 @@ getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSett
 loadCategories : Router Route State -> Action State
 loadCategories router state =
   let
-    fetch = Task.toMaybe <| getRequest decodeCategories "/api/v1/category" state
+    fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state
     task = fetch `Task.andThen` \mcategories ->
       let
         categories = Maybe.withDefault [] mcategories
@@ -141,7 +146,7 @@ loadPhotos router state =
         let
           category = getCategory state
           fetch = flip Maybe.map category <| \(Category c) ->
-            let fetch = Task.toMaybe <| getRequest decodePhotos ("/api/v1/category/" ++ toString c.id ++ "/photo") state
+            let fetch = Task.toMaybe <| getRequest decodePhotos (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
             in fetch `Task.andThen` \photos -> Task.succeed <| updatePhotos <| Maybe.withDefault [] photos
 
         in Just <| Maybe.withDefault (Task.succeed <| stopLoading `chainAction` router.redirect (Routes.NotFound, Dict.empty)) fetch
@@ -153,7 +158,7 @@ loadPhoto state =
   let
     photoId = Dict.get "photo" state.router.params
     task = flip Maybe.map photoId <| \pid ->
-      let fetch = Task.toMaybe <| getRequest decodePhoto ("/api/v1/photo/" ++ pid) state
+      let fetch = Task.toMaybe <| getRequest decodePhoto (config.apiEndpoint ++ "/photo/" ++ pid) state
       in fetch `Task.andThen` \photo -> Task.succeed <| updatePhoto photo
 
   in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
@@ -167,7 +172,6 @@ updatePhoto photo state = Response <| noFx {state | isLoading = False, photo = p
 updateCategories : List Category -> Action State
 updateCategories categories state =
   let
-    -- _ = Debug.log "updateCategories" state
     dict  = Dict.fromList   <| List.map (\(Category c) -> (c.name, c)) categories
     dict' = Dict.fromList   <| List.map (\(Category c) -> (c.id, c))   categories
 

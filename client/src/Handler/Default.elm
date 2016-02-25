@@ -95,11 +95,9 @@ categoryHandler router =
             <| flip Maybe.map category <| \c -> childs c (Dict.values state.categories)
         ]
 
-        photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoWidget r p state.router.params) l) photos) router state.router.params state.photos
-
       in Dict.fromList [
         ("navigation", navigation)
-      , ("body", photos)
+      , ("body", gallery router state.router.params state.photos)
       ]
       -- flip Maybe.map category <| \c -> div [] [
       --   navigation,

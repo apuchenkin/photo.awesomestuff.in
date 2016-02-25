@@ -5,11 +5,14 @@
   "private": true,
   "scripts": {
     "test": "cd test && elm-test TestRunner.elm --compiler elm-make.cmd",
-    "build": "webpack",
+    "build": "webpack -p --optimize-occurence-order",
     "watch": "webpack --watch",
-    "dev": "webpack-dev-server --port 3000"
+    "dev": "webpack-dev-server"
   },
   "dependencies": {
+    "packery": "^2.0.0"
+  },
+  "devDependencies": {
     "css-loader": "^0.23.1",
     "elm-webpack-loader": "^2.0.0",
     "file-loader": "^0.8.5",

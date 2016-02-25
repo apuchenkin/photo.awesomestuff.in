@@ -4,11 +4,12 @@ import Dict
 import String
 import Date
 
+import Random
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes as Attr exposing (class, classList, hreflang)
 import Either exposing (Either (..))
-
+import List.Extra as List'
 import Router.Types exposing (Router, RouteParams)
 
 import App.Config exposing (..)
@@ -100,10 +101,46 @@ categoryWidget router category childs locale =
       aside
     ]
 
-photoWidget : Router Route State -> Photo -> RouteParams -> Html
-photoWidget = -- lazy3 <|
-  \ router photo params ->
-    let content = Html.img [Attr.src (config.staticEndpoint ++ photo.src)] []
+gallery : Router Route State -> RouteParams -> List Photo -> Html
+gallery router params photos =
+  let
+    views = List.map .views photos
+    avg = (toFloat <| List.sum views) / (toFloat <| List.length views)
+    max = Maybe.withDefault 0 <| List.maximum views
+    g = config.gutter
+    w = config.brickWidth
+
+    s = w
+    s2 = (s * 2) + g
+    s3 = (s * 3) + (g * 2)
+    s4 = (s * 4) + (g * 3)
+
+    dsmap mode ratio isHorisontal = case mode of
+      1 -> if isHorisontal then (if ratio >= 3 then s3 else s2, s) else (s, s2)
+      2 -> if ratio >= 4 then (s4, s) else (if ratio >= 2 then s3 else s2, s2)
+      3 -> if isHorisontal then (if ratio >= 2 then s4 else s3, s2) else (s2, s3)
+      _ -> (if ratio >= 2 then s2 else s, s)
+
+  in Html.div [Attr.class "gallery"] <| flip List.map photos
+  <| \photo ->
+    let
+      v = toFloat photo.views
+      std = (v - avg) ^ 2
+      pow = (toFloat max) / sqrt (std * v)
+      norm  = List.map ((*) max) [8,4,2,1]
+      norm' = List.map (\r -> floor <| r * pow ^ 2) [1,2,3,4]
+      prob = List.map2 (+) norm norm'
+      prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
+      probList = List.concat <| List.map2 (\m p -> List.repeat p m) [1,2,3,4] prob'
+      gen = Random.int 0 (List.length probList - 1)
+      mode = Maybe.withDefault 1 <| List'.getAt probList (fst <| Random.generate gen (Random.initialSeed 0))
+      dims = dsmap mode 1.6 True
+
+    in photoWidget router photo params dims
+
+photoWidget : Router Route State -> Photo -> RouteParams -> (Int, Int) -> Html
+photoWidget router photo params (w, h) =
+    let content = Html.img [Attr.src (config.apiEndpoint ++ "hs/photo/" ++ toString photo.id ++ "/" ++ toString w ++ "/" ++ toString h ++ "/static")] []
     in photoLink router photo params content
 
 {-| Links -}

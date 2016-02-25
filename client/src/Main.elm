@@ -4,7 +4,7 @@ import Effects  exposing (Never)
 import Dict     exposing (Dict)
 
 import App.Locale as Locale exposing (Locale)
-import App.Actions exposing (State, Meta)
+import App.Actions exposing (State, Meta, transition)
 import App.Routes exposing (..)
 import App.Layout exposing (layout)
 import Handler.Default exposing (..)
@@ -75,6 +75,7 @@ router = Router.router <| RouterConfig {
   , html5 = True
   , fallback = (NotFound, Dict.empty)
   , layout = layout
+  , onTransition = transition
   , routes = routes
   , routeConfig = config
   , inits = [
