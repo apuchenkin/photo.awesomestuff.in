@@ -25,11 +25,11 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 #   poolsize: "_env:MYSQL_POOLSIZE:10"
 
 database:
-  user:     "_env:PGUSER:yesod-postgres_LOWER"
-  password: "_env:PGPASS:yesod-postgres"
+  user:     "_env:PGUSER:photo"
+  password: "_env:PGPASS:photo"
   host:     "_env:PGHOST:localhost"
   port:     "_env:PGPORT:5432"
-  database: "_env:PGDATABASE:yesod-postgres_LOWER"
+  database: "_env:PGDATABASE:photo"
   poolsize: "_env:PGPOOLSIZE:10"
 
 secret:     "secret"

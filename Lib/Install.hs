@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Handler.Home where
+module Lib.Install where
 
 import           Data.Aeson           (Object, eitherDecode, encode, withObject, (.:?))
 import           Data.Aeson.Types     (parseMaybe)
@@ -8,16 +8,7 @@ import qualified Data.Text            as T (replace)
 import           Data.Time.Format     (readTime)
 import           Database.Persist.Sql (fromSqlKey)
 import           Import
-
--- This is a handler function for the GET request method on the HomeR
--- resource pattern. All of your resource patterns are defined in
--- config/routes
---
--- The majority of the code you will write in Yesod lives in these handler
--- functions. You can spread them across multiple files if you are so
--- inclined, or create a single monolithic file.
-getHomeR :: Handler Value
-getHomeR = returnJson ()
+import Model
 
 data ExifData = ExifData {
     categories  :: [Text],
@@ -47,6 +38,7 @@ instance FromJSON ExifData where
 
 doInstall :: SqlPersistT IO ()
 doInstall = do
+    print $ "read: exif.json"
     exifFile <- liftIO $ readFile "exif.json"
     let eresult = eitherDecode exifFile :: Either String [Value]
     case eresult of

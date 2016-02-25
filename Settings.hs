@@ -1,4 +1,6 @@
 {-# Language CPP #-}
+{-# Language TemplateHaskell #-}
+{-# Language RecordWildCards #-}
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod

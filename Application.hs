@@ -10,11 +10,10 @@ module Application
     -- * for GHCI
     , handler
     , db
+    , getAppSettings
     ) where
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
--- import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
---                                              myPoolSize, runSqlPool)
 import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
                                             pgPoolSize, runSqlPool)
 import Import
@@ -35,7 +34,6 @@ import qualified Data.List                   as L (elem)
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Common
-import Handler.Home
 import Handler.Photo
 import Handler.Category
 import Handler.Static
@@ -51,8 +49,8 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and return a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: AppSettings -> [Text] -> IO App
-makeFoundation appSettings args = do
+makeFoundation :: AppSettings -> IO App
+makeFoundation appSettings = do
     -- Some basic initializations: HTTP connection manager, logger, and static
     -- subsite.
     appHttpManager <- newManager
@@ -77,11 +75,6 @@ makeFoundation appSettings args = do
 
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
-
-    -- Performs installation
-    case (L.elem "install" args) of
-        True  -> runSqlPool doInstall pool
-        False -> return ()
 
     -- Return the foundation
     return $ mkFoundation pool
@@ -124,7 +117,7 @@ warpSettings foundation =
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
     settings <- getAppSettings
-    foundation <- makeFoundation settings [] --["install"]
+    foundation <- makeFoundation settings
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
     let corsResourcePolicy = CorsResourcePolicy
@@ -156,7 +149,7 @@ appMain = do
     args <- getArgs
 
     -- Generate the foundation from the settings
-    foundation <- makeFoundation settings args
+    foundation <- makeFoundation settings
 
     -- Generate a WAI Application from the foundation
     app <- makeApplication foundation
@@ -171,8 +164,7 @@ appMain = do
 getApplicationRepl :: IO (Int, App, Application)
 getApplicationRepl = do
     settings <- getAppSettings
-    args <- getArgs
-    foundation <- makeFoundation settings args
+    foundation <- makeFoundation settings
     wsettings <- getDevSettings $ warpSettings foundation
     app1 <- makeApplication foundation
     return (getPort wsettings, foundation, app1)
@@ -189,8 +181,7 @@ shutdownApp _ = return ()
 handler :: Handler a -> IO a
 handler h = do
     settings <- getAppSettings
-    args <- getArgs
-    foundation <- makeFoundation settings args
+    foundation <- makeFoundation settings
     unsafeHandler foundation h
 
 -- | Run DB queries
