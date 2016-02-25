@@ -3,8 +3,8 @@ import Application (getAppSettings)
 
 import Import
 import Control.Monad.Logger (runStdoutLoggingT)
-import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
-                                            pgPoolSize, runSqlPool)
+import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
+                                             myPoolSize, runSqlPool)
 
 import Lib.Install
 
@@ -13,9 +13,9 @@ main = do
   args <- getArgs
   settings <- getAppSettings
   -- Create the database connection pool
-  pool <- runStdoutLoggingT $ createPostgresqlPool
-      (pgConnStr  $ appDatabaseConf settings)
-      (pgPoolSize $ appDatabaseConf settings)
+  pool <- runStdoutLoggingT $ createMySQLPool
+    (myConnInfo $ appDatabaseConf settings)
+    (myPoolSize $ appDatabaseConf settings)
 
   -- Perform database migration using our application's logging settings.
   runSqlPool (runMigration migrateAll) pool

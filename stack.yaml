@@ -35,8 +35,8 @@ extra-package-dbs: []
 # arch: x86_64
 
 # Extra directories used by stack for building
-extra-include-dirs:
-- C:\opencv\build\include
-extra-lib-dirs:
-- C:\opencv\build\x64\vc10\bin
+#extra-include-dirs:
+#- C:\opencv\build\include
+#extra-lib-dirs:
+#- C:\opencv\build\x64\vc10\bin
 # - C:\opencv\build\x64\vc10\lib
