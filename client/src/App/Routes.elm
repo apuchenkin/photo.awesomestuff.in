@@ -1,4 +1,4 @@
-module Handler.Routes where
+module App.Routes where
 
 import MultiwayTree exposing (Tree (..), Forest)
 

@@ -1,4 +1,4 @@
-module Handler.Locale where
+module App.Locale where
 
 import I18n exposing (withLanguage, createLookup, Language(Language))
 

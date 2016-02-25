@@ -3,11 +3,11 @@ import Html     exposing (Html)
 import Effects  exposing (Never)
 import Dict     exposing (Dict)
 
-import Handler.Locale as Locale exposing (Locale)
+import App.Locale as Locale exposing (Locale)
+import App.Actions exposing (State, Meta)
+import App.Routes exposing (..)
+import App.Layout exposing (layout)
 import Handler.Default exposing (..)
-import Handler.Actions exposing (State, Meta)
-import Handler.Routes exposing (..)
-import Handler.Layout exposing (layout)
 
 import Router
 import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..))

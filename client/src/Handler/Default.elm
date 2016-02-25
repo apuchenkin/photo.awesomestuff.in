@@ -4,13 +4,13 @@ import Dict
 import Either
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
--- import Router.Helpers exposing (noFx, singleton)
+
 import Router.Types exposing (Router, Handler, Response (..))
 
-import Handler.Routes as Route exposing (Route)
+import App.Routes as Route exposing (Route)
+import App.Locale as Locale exposing (Locale)
+import App.Actions exposing (..)
 import Handler.Widgets exposing (..)
-import Handler.Locale as Locale exposing (Locale)
-import Handler.Actions exposing (..)
 
 localeHandler : Router Route State -> Handler State
 localeHandler router =
@@ -95,7 +95,7 @@ categoryHandler router =
             <| flip Maybe.map category <| \c -> childs c (Dict.values state.categories)
         ]
 
-        photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoLink r p state.router.params) l) photos) router state.router.params state.photos
+        photos =  (\r params photos -> (\l -> div [] <| List.map (\p -> photoWidget r p state.router.params) l) photos) router state.router.params state.photos
 
       in Dict.fromList [
         ("navigation", navigation)

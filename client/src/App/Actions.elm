@@ -1,4 +1,4 @@
-module Handler.Actions where
+module App.Actions where
 
 import Http
 import Date exposing (Date)
@@ -10,9 +10,9 @@ import Task exposing (Task)
 import Router.Types exposing (WithRouter, Action, Response (..), Router)
 import Router.Helpers exposing (noFx, chainAction)
 
-import Handler.Config exposing (config)
-import Handler.Routes as Routes exposing (Route)
-import Handler.Locale as Locale exposing (Locale)
+import App.Config exposing (config)
+import App.Routes as Routes exposing (Route)
+import App.Locale as Locale exposing (Locale)
 
 (&>) : Maybe a -> (a -> Maybe b) -> Maybe b
 (&>) = Maybe.andThen

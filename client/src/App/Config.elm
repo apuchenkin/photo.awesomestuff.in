@@ -1,4 +1,4 @@
-module Handler.Config where
+module App.Config where
 
 type alias Config = {
     staticEndpoint : String

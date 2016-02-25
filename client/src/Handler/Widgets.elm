@@ -3,16 +3,18 @@ module Handler.Widgets where
 import Dict
 import String
 import Date
-import Handler.Config exposing (..)
+
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes as Attr exposing (class, classList, hreflang)
 import Either exposing (Either (..))
+
 import Router.Types exposing (Router, RouteParams)
 
-import Handler.Routes as Routes exposing (Route)
-import Handler.Actions exposing (..)
-import Handler.Locale as Locale exposing (Locale)
+import App.Config exposing (..)
+import App.Routes as Routes exposing (Route)
+import App.Actions exposing (..)
+import App.Locale as Locale exposing (Locale)
 
 loader : Bool -> Html
 loader = lazy <| \visible ->
@@ -21,6 +23,19 @@ loader = lazy <| \visible ->
       ("loader", True)
     ]
   in Html.div [attributes] []
+
+languageSelector :  Router Route State -> State -> Html
+languageSelector = \router state ->
+  let
+    route = Maybe.withDefault Routes.Home state.router.route
+    params locale = flip Dict.union state.router.params <| Dict.fromList [("locale", Locale.toString locale)]
+    attributes locale = [
+      classList [("active", locale == state.locale)],
+      hreflang (Locale.toString locale)
+    ]
+  in Html.div [class "language"]
+  <| flip List.map Locale.locales
+  <| \ locale -> Html.a (router.bindForward (route, params locale) (attributes locale)) [Html.text <| Locale.toString locale]
 
 homeHeader : Router Route State -> Locale -> Html
 homeHeader = lazy2 <| \router locale ->
@@ -85,6 +100,11 @@ categoryWidget router category childs locale =
       aside
     ]
 
+photoWidget : Router Route State -> Photo -> RouteParams -> Html
+photoWidget = -- lazy3 <|
+  \ router photo params ->
+    let content = Html.img [Attr.src (config.staticEndpoint ++ photo.src)] []
+    in photoLink router photo params content
 
 {-| Links -}
 
@@ -93,19 +113,11 @@ homeLink =
   lazy3 <| \router locale title ->
     Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text title]
 
-languageSelector :  Router Route State -> State -> Html
-languageSelector = \router state ->
-  let
-    route = Maybe.withDefault Routes.Home state.router.route
-    params locale = flip Dict.union state.router.params <| Dict.fromList [("locale", Locale.toString locale)]
-    attributes locale = [
-      classList [("active", locale == state.locale)],
-      hreflang (Locale.toString locale)
-    ]
-  in Html.div [class "language"]
-  <| flip List.map Locale.locales
-  <| \ locale -> Html.a (router.bindForward (route, params locale) (attributes locale)) [Html.text <| Locale.toString locale]
--- (Just c == category)
+photoLink : Router Route State -> Photo -> RouteParams -> Html -> Html
+photoLink = -- lazy3 <| \
+  \ router photo params content ->
+    Html.a (router.bindForward (Routes.Photo, Dict.insert "photo" (toString photo.id) params) []) [content]
+
 categoryLink : Router Route State -> Category -> Locale -> Bool -> Html
 categoryLink router (Category category) locale isActive =
   let
@@ -118,7 +130,3 @@ categoryLink router (Category category) locale isActive =
     ]
   in
     Html.a (router.bindForward (Routes.Category, Dict.fromList params') attributes) [Html.text category.title]
-
-photoLink : Router Route State -> Photo -> RouteParams -> Html
-photoLink  = lazy3 <| \ router photo params ->
-    Html.a (router.bindForward (Routes.Photo, Dict.insert "photo" (toString photo.id) params) []) [Html.text photo.src]
