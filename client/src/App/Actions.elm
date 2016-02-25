@@ -56,13 +56,13 @@ createLinks : Router Route State -> Action State
 createLinks router state =
   let
     meta = state.meta
-    default = flip Maybe.map state.router.route <| \ route ->
+    links = flip Maybe.map state.router.route <| \ route ->
       ("x-default", config.hostname ++ router.buildUrl (route, Dict.remove "locale" state.router.params))
       :: (flip List.map Locale.locales
       <| \locale -> (Locale.toString locale, config.hostname ++ router.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
       )
 
-  in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] default}}
+  in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] links}}
 
 -- Category constuctor
 category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Category
