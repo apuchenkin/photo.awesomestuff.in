@@ -19,13 +19,17 @@ function metaUpdate(meta) {
     link.hreflang = data[0];
     links[data[0]] = link;
   })
+
+  // pckry.reloadItems();
+  // pckry.layout();
 }
 
 // vanilla JS
-var grid = document.querySelector('.gallery');
+var grid = document.querySelector('#gallery');
+// debugger;
 // initialize with element
 var pckry = new Packery( grid, {
   columnWidth: 100,
-  itemSelector: 'a',
+  itemSelector: 'img',
   gutter: 10
 });

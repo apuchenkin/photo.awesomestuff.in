@@ -1,0 +1,21 @@
+#gallery {
+  .brick {
+    display: block;
+    outline: 2px solid rgba(0, 0, 0, 0);
+    cursor: pointer;
+    transition: outline-color 0.2s ease-out;
+    background-position: center;
+    background-size: cover;
+    display: block;
+    float: left;
+
+    // & > a {
+    //   overflow: hidden;
+    //   display: block;
+    // }
+
+    &:hover {
+      outline-color: @accent;
+    }
+  }
+}
