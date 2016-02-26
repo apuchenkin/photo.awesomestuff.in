@@ -3,8 +3,11 @@
 require('./index.html');
 var Elm = require('./Main');
 var css = require("../assets/styles/main.less");
+var Ps = require('perfect-scrollbar');
+var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
-var Main = Elm.embed(Elm.Main, document.getElementById('main'), {
+var main = document.getElementById('main');
+var Main = Elm.embed(Elm.Main, main, {
   localePort: navigator.language,
   timePort: Date.now()
 });
@@ -31,15 +34,22 @@ var observer = new MutationObserver(function(mutations) {
 
 Main.ports.rs.subscribe(onTransition);
 
+Ps.initialize(document.querySelector('.content'));
+
 var pckry = null;
 var config = { attributes: true, childList: true, characterData: true };
 
 function onTransition(args) {
+  var mHeight = main.querySelector('header').offsetHeight;
+  main.setAttribute("style", "padding-top: " + mHeight + "px;");
   var grid = document.querySelector('#gallery');
   // configuration of the observer:
   if (grid) {
     require.ensure([], function() {
+
       var Packery = require('packery');
+
+
       pckry = pckry || new Packery(grid, {
         columnWidth: 100,
         itemSelector: '.brick',

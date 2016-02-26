@@ -89,7 +89,7 @@ categoryWidget router category childs locale =
 
     cover = Html.a (router.bindForward (Routes.Category, Dict.fromList params') [class "cover"])
       <| List.filterMap identity [
-        (flip Maybe.map c.image <| \image -> Html.img [Attr.src (config.staticEndpoint ++ image), Attr.alt c.title] []),
+        (flip Maybe.map c.image <| \image -> Html.img [Attr.width 300, Attr.src (config.staticEndpoint ++ image), Attr.alt c.title] []),
         (flip Maybe.map c.date <| \date -> Html.span [class "sub"] [text <| dateText date])
       ]
     aside = Html.aside [] [

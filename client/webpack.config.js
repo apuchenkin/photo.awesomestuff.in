@@ -6,7 +6,7 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 module.exports = {
   entry: {
     app: './src/index.js',
-    packery: ['packery']
+    vendor: ['packery', 'perfect-scrollbar']
   },
 
   output: {
@@ -32,7 +32,10 @@ module.exports = {
         exclude: [/elm-stuff/, /node_modules/],
         loader: 'elm-webpack'
       },
-      // LESS
+      {
+        test: /\.css$/,
+        loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader")
+      },
       {
         test: /\.less$/,
         loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader!less-loader")

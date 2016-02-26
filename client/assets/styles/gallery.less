@@ -1,4 +1,5 @@
 #gallery {
+  padding-top: 2 * @divisor + @divisor / 4;
   .brick {
     display: block;
     outline: 2px solid rgba(0, 0, 0, 0);
@@ -8,6 +9,7 @@
     background-size: cover;
     display: block;
     float: left;
+    height: 100%;
 
     // & > a {
     //   overflow: hidden;
@@ -16,6 +18,15 @@
 
     &:hover {
       outline-color: @accent;
+    }
+  }
+}
+
+.ps-container {
+  .ps-scrollbar-y-rail {
+    border-radius: 0 !important;
+    .ps-scrollbar-y {
+      border-radius: 0 !important;
     }
   }
 }
