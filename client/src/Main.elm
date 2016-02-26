@@ -2,6 +2,7 @@ import Task     exposing (Task)
 import Html     exposing (Html)
 import Effects  exposing (Never)
 import Dict     exposing (Dict)
+import Time     exposing (Time)
 
 import App.Locale as Locale exposing (Locale)
 import App.Actions exposing (State, Meta, transition)
@@ -10,7 +11,7 @@ import App.Layout exposing (layout)
 import Handler.Default exposing (..)
 
 import Router
-import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..))
+import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..), RouteParams)
 import Router.Helpers exposing (..)
 
 -- import Mouse
@@ -62,11 +63,10 @@ initialState = {
   , photos      = []
   , photo       = Nothing
   , isLoading   = False
-  , mouse       = (0,0)
+  , time        = 0
   , router      = Router.initialState
   }
 
-port localePort : Signal String
 
 router : Router Route State
 router = Router.router <| RouterConfig {
@@ -81,7 +81,9 @@ router = Router.router <| RouterConfig {
   , inits = [
       Signal.map (\locale state -> Response <| noFx {state | locale = Locale.fromString locale}) localePort
     ]
-  , inputs = []
+  , inputs = [
+      Signal.map (\time state -> Response <| noFx {state | time = time}) timePort
+    ]
   }
 
 result : RouterResult State
@@ -90,8 +92,14 @@ result = Router.runRouter router
 main : Signal Html
 main = result.html
 
+port localePort : Signal String
+port timePort: Signal Time
+
 port tasks : Signal (Task Never ())
 port tasks = result.tasks -- Signal.map (\_ -> ) main
 
 port meta : Signal Meta
 port meta = Signal.map .meta result.state
+
+port rs : Signal (String, List (String, String))
+port rs = Signal.map (\s -> (toString s.router.route, Dict.toList s.router.params)) result.state

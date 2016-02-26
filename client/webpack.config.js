@@ -1,18 +1,20 @@
 var webpack = require( 'webpack' )
 
 module.exports = {
-  entry: './src/index.js',
+  entry: {
+    app: './src/index.js',
+    packery: ['packery']
+  },
 
   output: {
     path: './dist',
-    filename: 'index.js'
+    filename: '[name].js'
   },
 
   resolve: {
     modulesDirectories: ['node_modules'],
     extensions: ['', '.js', '.elm']
   },
-
 
   module: {
     loaders: [
@@ -52,6 +54,9 @@ module.exports = {
     },
   },
 
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin('common.js')
+  ]
   // plugins: [
   //     // extract CSS into a separate file
   //     // new ExtractTextPlugin( './css/stylesheet.css', { allChunks: true } ),

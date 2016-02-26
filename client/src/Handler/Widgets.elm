@@ -3,8 +3,8 @@ module Handler.Widgets where
 import Dict
 import String
 import Date
-
 import Random
+import Time exposing (Time)
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes as Attr exposing (class, classList, hreflang)
@@ -102,9 +102,10 @@ categoryWidget router category childs locale =
       aside
     ]
 
-gallery : Router Route State -> RouteParams -> List Photo -> Html
-gallery router params photos =
+gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
+gallery router params photos time =
   let
+    seed = Random.initialSeed <| floor <| Time.inSeconds time
     views = List.map .views photos
     avg = (toFloat <| List.sum views) / (toFloat <| List.length views)
     top = Maybe.withDefault 0 <| List.maximum views
@@ -135,23 +136,25 @@ gallery router params photos =
       prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
       probList = List.concat <| List.map2 (\m p -> List.repeat p m) [1,2,3,4] prob'
       gen = Random.int 0 (List.length probList - 1)
-      mode = Maybe.withDefault 1 <| List'.getAt probList (fst <| Random.generate gen (Random.initialSeed 0))
+      mode = Maybe.withDefault 1 <| List'.getAt probList (fst <| Random.generate gen seed)
       isHorisontal = (photo.width > photo.height)
       ratio = toFloat photo.width / toFloat photo.height
       inc = if ratio >= 1 then ratio else 1 / ratio
-      (w,h) = dsmap mode ratio isHorisontal
-      (m1,m2) = if w < h then (ceiling <| toFloat w * inc,h) else (ceiling <| toFloat h * inc,w)
-      siz = max m1 m2
-
+      wh = dsmap mode ratio isHorisontal
     in
-      Html.li [Attr.class "brick"]
-      [photoWidget router photo params siz]
+      Html.li []
+      [photoWidget router photo params wh]
 
-photoWidget : Router Route State -> Photo -> RouteParams -> Int -> Html
-photoWidget router photo params s =
+photoWidget : Router Route State -> Photo -> RouteParams -> (Int, Int) -> Html
+photoWidget router photo params (w,h) =
     let
+      ratio = toFloat photo.width / toFloat photo.height
+      inc = if ratio >= 1 then ratio else 1 / ratio
+      (m1,m2) = if w < h then (ceiling <| toFloat w * inc,h) else (ceiling <| toFloat h * inc,w)
+      s = max m1 m2
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
-      content = Html.img [Attr.src (config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString s ++ "/" ++ toString s ++ "/" ++ filename)] []
+      src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString s ++ "/" ++ toString s ++ "/" ++ filename
+      content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
     in photoLink router photo params content
 
 {-| Links -}

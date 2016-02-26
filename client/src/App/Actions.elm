@@ -2,6 +2,7 @@ module App.Actions where
 
 import Http
 import Date exposing (Date)
+import Time exposing (Time)
 import Either exposing (Either (..))
 import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
@@ -32,7 +33,7 @@ type alias State = WithRouter Route
     photos: List Photo,
     photo: Maybe Photo,
     isLoading: Bool,
-    mouse: (Int, Int)
+    time: Time
   }
 
 -- type ParentCategory =

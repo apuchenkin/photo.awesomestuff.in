@@ -97,13 +97,8 @@ categoryHandler router =
 
       in Dict.fromList [
         ("navigation", navigation)
-      , ("body", gallery router state.router.params state.photos)
+      , ("body", gallery router state.router.params state.photos state.time)
       ]
-      -- flip Maybe.map category <| \c -> div [] [
-      --   navigation,
-      --   photos,
-      --   parsed'
-      -- ]
   in
     {
       view = view,
