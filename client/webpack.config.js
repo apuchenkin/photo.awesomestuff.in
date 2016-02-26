@@ -1,4 +1,7 @@
 var webpack = require( 'webpack' )
+var autoprefixer = require('autoprefixer');
+var precss = require('precss');
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
   entry: {
@@ -8,7 +11,8 @@ module.exports = {
 
   output: {
     path: './dist',
-    filename: '[name].js'
+    filename: '[name].js',
+    chunkFilename: "[id].js"
   },
 
   resolve: {
@@ -31,11 +35,15 @@ module.exports = {
       // LESS
       {
         test: /\.less$/,
-        loader: 'style!css!less'
+        loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader!less-loader")
       },
     ],
 
     noParse: /\.elm$/
+  },
+
+  postcss: function () {
+    return [autoprefixer, precss];
   },
 
   devServer: {
@@ -55,6 +63,7 @@ module.exports = {
   },
 
   plugins: [
+    new ExtractTextPlugin("[name].css"),
     new webpack.optimize.CommonsChunkPlugin('common.js')
   ]
   // plugins: [
