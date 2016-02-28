@@ -15,12 +15,14 @@ layout router state views =
     defaultHeader = Html.header [] [Html.text "Default header"]
     defaultFooter = Html.footer [] [Html.text "Default footer"]
     defaultBody = Html.div [Attr.class "body"] []
-  in Html.div [Attr.class "content"] <| List.filterMap identity [
-    Just <| Maybe.withDefault defaultHeader <| Dict.get "header" views
-  , Dict.get "navigation" views
-  , Just <| Maybe.withDefault defaultBody   <| Dict.get "body" views
-  , Dict.get "photo" views
-  , Just <| Maybe.withDefault defaultFooter <| Dict.get "footer" views
-  , Just <| loader state.isLoading
-  , Just <| languageSelector router state
+  in Html.div [Attr.class "main"] <| List.filterMap identity [
+     Just <| loader state.isLoading
+  ,  Dict.get "photo" views
+  ,  Just <| Html.div [Attr.class "content"] <| List.filterMap identity [
+        Just <| Maybe.withDefault defaultHeader <| Dict.get "header" views
+      , Dict.get "navigation" views
+      , Just <| Maybe.withDefault defaultBody   <| Dict.get "body" views
+      , Just <| Maybe.withDefault defaultFooter <| Dict.get "footer" views
+      , Just <| languageSelector router state
+      ]
   ]

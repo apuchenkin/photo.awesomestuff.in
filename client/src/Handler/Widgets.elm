@@ -143,10 +143,10 @@ gallery router params photos time =
       wh = dsmap mode ratio isHorisontal
     in
       Html.li []
-      [photoWidget router photo params wh]
+      [brickWidget router params photo wh]
 
-photoWidget : Router Route State -> Photo -> RouteParams -> (Int, Int) -> Html
-photoWidget router photo params (w,h) =
+brickWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> Html
+brickWidget router params photo (w,h) =
     let
       ratio = toFloat photo.width / toFloat photo.height
       inc = if ratio >= 1 then ratio else 1 / ratio
@@ -157,6 +157,15 @@ photoWidget router photo params (w,h) =
       content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
     in photoLink router photo params content
 
+photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> Html
+photoWidget router params photo (prev, next) =
+    let
+      (w,h) = (1024,768)
+      filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
+      src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w ++ "/" ++ toString h ++ "/" ++ filename
+      image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src]) []
+    in Html.div [Attr.class "content"] [image]
+    --
 {-| Links -}
 
 homeLink : Router Route State -> Locale -> String -> Html

@@ -6,8 +6,8 @@ var css = require("../assets/styles/main.less");
 var Ps = require('perfect-scrollbar');
 var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
-var main = document.getElementById('main');
-var Main = Elm.embed(Elm.Main, main, {
+var main = document.body;
+var Main = Elm.fullscreen(Elm.Main, {
   localePort: navigator.language,
   timePort: Date.now()
 });
@@ -46,10 +46,7 @@ function onTransition(args) {
   // configuration of the observer:
   if (grid) {
     require.ensure([], function() {
-
       var Packery = require('packery');
-
-
       pckry = pckry || new Packery(grid, {
         columnWidth: 100,
         itemSelector: '.brick',

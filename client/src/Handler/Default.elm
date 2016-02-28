@@ -1,10 +1,12 @@
 module Handler.Default where
 
+import String
 import Dict
 import Either
+import Maybe.Extra
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
-
+import List.Extra as List'
 import Router.Types exposing (Router, Handler, Response (..))
 
 import App.Routes as Route exposing (Route)
@@ -97,7 +99,7 @@ categoryHandler router =
 
       in Dict.fromList [
         ("navigation", navigation)
-      , ("body", gallery router state.router.params state.photos state.time)
+      , ("body", gallery router state.router.params (Dict.values state.photos) state.time)
       ]
   in
     {
@@ -112,11 +114,24 @@ photoHandler router =
   let
     view address state _ =
       let
-        -- _ = Debug.log "photoHandler" state
-        photo = Dict.get "photo" state.router.params
-        photo' = div [] <| Maybe.withDefault [] <| flip Maybe.map photo <| \p -> [text <| toString p]
-      in Dict.fromList [
-        ("photo", photo')
+        pid = Maybe.map ((Result.withDefault 0) << String.toInt) <| Dict.get "photo" state.router.params
+        params = Maybe.andThen pid <| \p ->
+          let
+            photo = Dict.get p state.photos
+            keys = Dict.keys state.photos
+            neghbors = List'.elemIndex p keys
+              &> \idx ->
+                let
+                  last = List'.last keys
+                  first = List.head keys
+                  l = Maybe.withDefault last <| Maybe.map Just <| List'.getAt keys (idx - 1)
+                  r = Maybe.withDefault first <| Maybe.map Just <| List'.getAt keys (idx + 1)
+                in Maybe.map2 (,) l r
+          in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
+
+        photo' = flip Maybe.map params <| \p -> div (router.bindForward (Route.Category, state.router.params) [class "photoWidget"]) [photoWidget router state.router.params p.photo p.neighbors]
+      in Dict.fromList <| List.filterMap identity [
+        flip Maybe.map photo' <| \p -> ("photo", p)
       ]
   in
     {
