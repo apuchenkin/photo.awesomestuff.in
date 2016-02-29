@@ -3,7 +3,6 @@ module Handler.Default where
 import String
 import Dict
 import Either
-import Maybe.Extra
 import Html exposing (div, text, Html, button)
 import Html.Attributes exposing (href,class)
 import List.Extra as List'
@@ -129,7 +128,7 @@ photoHandler router =
                 in Maybe.map2 (,) l r
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
-        photo' = flip Maybe.map params <| \p -> div (router.bindForward (Route.Category, state.router.params) [class "photoWidget"]) [photoWidget router state.router.params p.photo p.neighbors]
+        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors
       in Dict.fromList <| List.filterMap identity [
         flip Maybe.map photo' <| \p -> ("photo", p)
       ]

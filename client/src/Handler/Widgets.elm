@@ -164,7 +164,15 @@ photoWidget router params photo (prev, next) =
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w ++ "/" ++ toString h ++ "/" ++ filename
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src]) []
-    in Html.div [Attr.class "content"] [image]
+    in Html.div (router.bindForward (Routes.Category, params) [class "photoWidget"]) [
+      Html.div [Attr.class "tools"] []
+    , Html.figure [Attr.class "content"] [
+        image,
+        Html.figcaption [Attr.class "description"] [Html.text "text"]
+      ]
+    , Html.div [classList [("nav", True), ("prev", True)]] [Html.text "prev"]
+    , Html.div [classList [("nav", True), ("next", True)]] [Html.text "next"]
+    ]
     --
 {-| Links -}
 
