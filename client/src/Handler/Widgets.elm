@@ -164,14 +164,17 @@ photoWidget router params photo (prev, next) =
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w ++ "/" ++ toString h ++ "/" ++ filename
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src]) []
+      description = Html.text "text"
     in Html.div (router.bindForward (Routes.Category, params) [class "photoWidget"]) [
-      Html.div [Attr.class "tools"] []
-    , Html.figure [Attr.class "content"] [
-        image,
-        Html.figcaption [Attr.class "description"] [Html.text "text"]
+      Html.figure [Attr.class "content"] [
+        Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text "close", Html.i [Attr.class "icon-cancel"] []]]
+      , image
+      , Html.figcaption [Attr.class "description"] [description]
       ]
-    , Html.div [classList [("nav", True), ("prev", True)]] [Html.text "prev"]
-    , Html.div [classList [("nav", True), ("next", True)]] [Html.text "next"]
+    , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)]])
+        <| [Html.i [Attr.class "icon-left-open"] []]
+    , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)]])
+        <| [Html.i [Attr.class "icon-right-open"] []]
     ]
     --
 {-| Links -}

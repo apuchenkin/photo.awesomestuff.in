@@ -3,8 +3,10 @@
 require('./index.html');
 var Elm = require('./Main');
 var css = require("../assets/styles/main.less");
+var fontello = require('../assets/fontello/css/fontello.css');
 var Ps = require('perfect-scrollbar');
 var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
+
 
 var main = document.body;
 var Main = Elm.fullscreen(Elm.Main, {

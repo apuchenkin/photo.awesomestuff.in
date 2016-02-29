@@ -121,11 +121,12 @@ photoHandler router =
             neghbors = List'.elemIndex p keys
               &> \idx ->
                 let
+                  l = List.length keys - 1
                   last = List'.last keys
                   first = List.head keys
-                  l = Maybe.withDefault last <| Maybe.map Just <| List'.getAt keys (idx - 1)
-                  r = Maybe.withDefault first <| Maybe.map Just <| List'.getAt keys (idx + 1)
-                in Maybe.map2 (,) l r
+                  prev = if idx == 0 then last else List'.getAt keys (idx - 1)
+                  next = if idx == l then first else List'.getAt keys (idx + 1)
+                in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
         photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors

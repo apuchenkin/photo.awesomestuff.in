@@ -39,7 +39,10 @@ module.exports = {
       {
         test: /\.less$/,
         loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader!less-loader")
-      },
+      }, {
+        test: /\.(eot|woff|woff2|ttf|svg|png|jpg)/,
+        loader: 'url-loader?limit=30000'
+      }
     ],
 
     noParse: /\.elm$/
