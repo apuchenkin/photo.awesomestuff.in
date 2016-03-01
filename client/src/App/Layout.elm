@@ -15,7 +15,7 @@ layout router state views =
     defaultHeader = Html.header [] [Html.text "Default header"]
     defaultFooter = Html.footer [] [Html.text "Default footer"]
     defaultBody = Html.div [Attr.class "body"] []
-  in Html.div [Attr.class "main"] <| List.filterMap identity [
+  in Html.div [Attr.id "main"] <| List.filterMap identity [
      Just <| loader state.isLoading
   ,  Just <| Html.div [Attr.class "content"] [
         Maybe.withDefault defaultHeader <| Dict.get "header" views

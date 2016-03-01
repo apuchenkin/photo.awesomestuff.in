@@ -124,7 +124,7 @@ gallery router params photos time =
       1 -> if isHorisontal then (if ratio >= 3 then s3 else s2, s) else (s, s2)
       _ -> (if ratio >= 2 then s2 else s, s)
 
-  in Html.div [Attr.id "gallery"]
+  in Html.div [Attr.class "gallery"]
   <| singleton <| Html.ul [] <| flip List.map photos
   <| \photo ->
     let

@@ -30,3 +30,6 @@
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
+
+-- problem with trailing slash
+-- add cached router views

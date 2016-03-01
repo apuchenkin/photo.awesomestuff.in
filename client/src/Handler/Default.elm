@@ -65,11 +65,10 @@ homeHandler router =
                 <| List.map (\c -> Html.li [] [categoryWidget router c (childs c categories) state.locale])
                 <| List.filter (\(Category c) -> c.parent == Nothing) categories
               ]
-        body = Html.div [class "content"] [renderCategories <| Dict.values state.categories]
 
       in Dict.fromList [
         ("header", header)
-      , ("body", body)
+      , ("body", renderCategories <| Dict.values state.categories)
       , ("footer", footer router state.locale)
       ]
   in

@@ -7,14 +7,15 @@ var fontello = require('../assets/fontello/css/fontello.css');
 var Ps = require('perfect-scrollbar');
 var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
-
-var main = document.body;
 var Main = Elm.fullscreen(Elm.Main, {
   localePort: navigator.language,
   timePort: Date.now()
 });
 
 Main.ports.meta.subscribe(metaUpdate);
+Main.ports.rs.subscribe(onTransition);
+
+var main = document.body.querySelector('#main');
 var links = {};
 
 function metaUpdate(meta) {
@@ -28,40 +29,38 @@ function metaUpdate(meta) {
   })
 }
 
-// create an observer instance
-var observer = new MutationObserver(function(mutations) {
-  pckry.reloadItems();
-  pckry.layout();
+Ps.initialize(main.querySelector('.content'));
+
+var headerElm = main.querySelector('header');
+var headerObserver = new MutationObserver(function(mutations) {
+  main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
 });
+main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
+headerObserver.observe(headerElm, {childList: true});
 
-Main.ports.rs.subscribe(onTransition);
-
-Ps.initialize(document.querySelector('.content'));
-
-var pckry = null;
-var config = { attributes: true, childList: true, characterData: true };
+var packery = null;
 
 function onTransition(args) {
-  var mHeight = main.querySelector('header').offsetHeight;
-  main.setAttribute("style", "padding-top: " + mHeight + "px;");
-  var grid = document.querySelector('#gallery');
   // configuration of the observer:
-  if (grid) {
+  var grid = main.querySelector('.gallery');
+  if (!packery && grid) {
     require.ensure([], function() {
       var Packery = require('packery');
-      pckry = pckry || new Packery(grid, {
+      packery = new Packery(grid, {
         columnWidth: 100,
         itemSelector: '.brick',
         gutter: 10
       });
-
-      observer.observe(grid.querySelector('ul'), config);
+      grid.observer = new MutationObserver(function(mutations) {
+          packery.reloadItems();
+          packery.layout();
+      });
+      grid.observer.observe(grid.querySelector('ul'), { childList: true });
     });
-  } else {
-    if (pckry) {
-      pckry.destroy();
-    }
-    observer.disconnect();
-    pckry = null;
+  }
+
+  if (!grid && packery) {
+    packery.destroy();
+    packery = null;
   }
 }
