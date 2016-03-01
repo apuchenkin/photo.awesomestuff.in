@@ -8,6 +8,19 @@
   position: fixed;
   background: rgba(0,0,0,0.8);
 
+  & > .nav {
+    position: absolute;
+    font-size: 24px;
+
+    &.prev {
+      left: @divisor / 2;
+    }
+
+    &.next {
+      right: @divisor / 2;
+    }
+  }
+
   & > .content {
     text-align: center;
     position: absolute;
@@ -15,5 +28,13 @@
     height: 100%;
     left: 0;
     top: 0;
+
+    .tools {
+      height: @divisor * 2;
+    }
+
+    figcaption {
+      color: @light-grey;
+    }
   }
 }

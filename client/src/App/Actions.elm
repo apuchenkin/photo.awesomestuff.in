@@ -25,33 +25,34 @@ type alias Meta = {
     links: List (String, String)
   }
 
-type alias State = WithRouter Route
-  {
-    meta: Meta,
-    locale: Locale,
-    categories: Dict String Category,
-    photos: Dict Int Photo,
-    isLoading: Bool,
-    time: Time
+type alias State = WithRouter Route {
+    meta: Meta
+  , locale: Locale
+  , categories: Dict String Category
+  , photos: Dict Int Photo
+  , isLoading: Bool
+  , time: Time
+  , window: (Int, Int)
   }
 
 -- type ParentCategory =
 type Category = Category {
-    id: Int,
-    name: String,
-    title: String,
-    image: Maybe String,
-    date: Maybe Date,
-    parent: Maybe (Either Int Category)
+    id: Int
+  , name: String
+  , title: String
+  , image: Maybe String
+  , date: Maybe Date
+  , parent: Maybe (Either Int Category)
   }
 
 type alias Photo = {
-  id: Int,
-  src: String,
-  width: Int,
-  height: Int,
-  views: Int
-}
+    id: Int
+  , src: String
+  , width: Int
+  , height: Int
+  , views: Int
+  , caption: Maybe String
+  }
 
 transition : Router Route State -> from -> to -> Action State
 transition router _ _ = createLinks router
@@ -97,12 +98,13 @@ decodeCategories = Json.list <| Json.object6 category
   (Json.maybe ("parent" := Json.map Left Json.int))
 
 decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object5 Photo
+decodePhoto = Json.object6 Photo
   ("id"     := Json.int)
   ("src"    := Json.string)
   ("width"  := Json.int)
   ("height" := Json.int)
   ("views"  := Json.int)
+  (Json.maybe ("caption"  := Json.string))
 
 decodePhotos : Json.Decoder (List Photo)
 decodePhotos = Json.list decodePhoto

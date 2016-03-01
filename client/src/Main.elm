@@ -3,6 +3,7 @@ import Html     exposing (Html)
 import Effects  exposing (Never)
 import Dict     exposing (Dict)
 import Time     exposing (Time)
+import Window
 
 import App.Locale as Locale exposing (Locale)
 import App.Actions exposing (State, Meta, transition)
@@ -19,35 +20,35 @@ import Router.Helpers exposing (..)
 config : Route -> RouteConfig Route State
 config route = case route of
   Locale -> {
-      segment = "[/:locale]",
-      constraints = Dict.fromList [("locale", Enum ["ru", "en"])],
-      handler = localeHandler
-    }
+    segment = "[/:locale]"
+  , constraints = Dict.fromList [("locale", Enum ["ru", "en"])]
+  , handler = localeHandler
+  }
   Home -> {
-      segment = "/",
-      constraints = Dict.empty,
-      handler = homeHandler
-    }
+    segment = "/"
+  , constraints = Dict.empty
+  , handler = homeHandler
+  }
   NotFound -> {
-      segment = "404",
-      constraints = Dict.empty,
-      handler = notFoundHandler
-    }
+    segment = "404"
+  , constraints = Dict.empty
+  , handler = notFoundHandler
+  }
   Static page -> {
-      segment = page,
-      constraints = Dict.empty,
-      handler = staticHandler page
-    }
+    segment = page
+  , constraints = Dict.empty
+  , handler = staticHandler page
+  }
   Category -> {
-      segment = ":category[/:subcategory]",
-      constraints = Dict.empty,
-      handler = categoryHandler
-    }
+    segment = ":category[/:subcategory]"
+  , constraints = Dict.empty
+  , handler = categoryHandler
+  }
   Photo -> {
-      segment = "/photo/:photo",
-      constraints = Dict.fromList [("photo", Int)],
-      handler = photoHandler
-    }
+    segment = "/photo/:photo"
+  , constraints = Dict.fromList [("photo", Int)]
+  , handler = photoHandler
+  }
 
 initialMeta : Meta
 initialMeta = {
@@ -57,13 +58,14 @@ initialMeta = {
 
 initialState : State
 initialState = {
-    meta        = initialMeta
-  , locale      = Locale.fallbackLocale
-  , categories  = Dict.empty
-  , photos      = Dict.empty
-  , isLoading   = False
-  , time        = 0
-  , router      = Router.initialState
+    router = Router.initialState
+  , meta = initialMeta
+  , locale = Locale.fallbackLocale
+  , categories = Dict.empty
+  , photos = Dict.empty
+  , isLoading = False
+  , time = 0
+  , window = (0,0)
   }
 
 
@@ -79,10 +81,10 @@ router = Router.router <| RouterConfig {
   , routeConfig = config
   , inits = [
       Signal.map (\locale state -> Response <| noFx {state | locale = Locale.fromString locale}) localePort
+    , Signal.map (\time state -> Response <| noFx {state | time = time}) timePort
+    , Signal.map (\dims state -> Response <| noFx {state | window = dims}) Window.dimensions
     ]
-  , inputs = [
-      Signal.map (\time state -> Response <| noFx {state | time = time}) timePort
-    ]
+  , inputs = []
   }
 
 result : RouterResult State

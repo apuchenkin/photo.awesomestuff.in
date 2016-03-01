@@ -157,19 +157,19 @@ brickWidget router params photo (w,h) =
       content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
     in photoLink router photo params content
 
-photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> Html
-photoWidget router params photo (prev, next) =
+photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Locale -> Html
+photoWidget router params photo (prev, next) (w,h) locale =
     let
-      (w,h) = (1024,768)
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w ++ "/" ++ toString h ++ "/" ++ filename
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src]) []
-      description = Html.text "text"
+      caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
+      author = Just <| Html.text <| Locale.i18n locale "Author {0}" ["TODO: Author"]
     in Html.div (router.bindForward (Routes.Category, params) [class "photoWidget"]) [
       Html.figure [Attr.class "content"] [
-        Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text "close", Html.i [Attr.class "icon-cancel"] []]]
+        Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "Close" [], Html.i [Attr.class "icon-cancel"] []]]
       , image
-      , Html.figcaption [Attr.class "description"] [description]
+      , Html.figcaption [Attr.class "description"] <| List.filterMap identity [caption, author]
       ]
     , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)]])
         <| [Html.i [Attr.class "icon-left-open"] []]
