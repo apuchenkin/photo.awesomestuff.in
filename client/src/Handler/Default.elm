@@ -116,7 +116,7 @@ photoHandler router =
         pid = Maybe.map ((Result.withDefault 0) << String.toInt) <| Dict.get "photo" state.router.params
         params = Maybe.andThen pid <| \p ->
           let
-            photo = Dict.get p state.photos
+            photo = state.photo
             keys = Dict.keys state.photos
             neghbors = List'.elemIndex p keys
               &> \idx ->

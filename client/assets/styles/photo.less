@@ -1,40 +1,80 @@
+figure, img {
+    border: none;
+    outline: 0;
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+
 .photoWidget {
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1042;
+  z-index: 100;
   overflow: hidden;
   position: fixed;
   background: rgba(0,0,0,0.8);
+  padding: 0 @divisor;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 100%;
+
+  &:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    margin-right: -0.25em; /* Adjusts for spacing */
+  }
 
   & > .nav {
     position: absolute;
     font-size: 24px;
+    top: 50%;
+    margin-top: -@divisor;
+    padding: @divisor;
+    display: block;
 
-    &.prev {
-      left: @divisor / 2;
+    &:hover {
+      background: black;
     }
-
+    &.prev {
+      left: 0;
+    }
     &.next {
-      right: @divisor / 2;
+      right: 0;
     }
   }
 
   & > .content {
-    text-align: center;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    cursor: auto;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    text-align: left;
 
     .tools {
+      font-size: 14px;
+      text-align: right;
+      line-height: @divisor * 2;
       height: @divisor * 2;
     }
 
     figcaption {
       color: @light-grey;
+
+      & > .caption {
+        font-size: 1.2em;
+        line-height: 1.2em;
+        display: block;
+        float: none;
+        color: #fff;
+        margin-bottom: .2em;
+      }
     }
   }
 }

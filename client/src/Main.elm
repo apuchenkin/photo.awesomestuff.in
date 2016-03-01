@@ -63,6 +63,7 @@ initialState = {
   , locale = Locale.fallbackLocale
   , categories = Dict.empty
   , photos = Dict.empty
+  , photo = Nothing
   , isLoading = False
   , time = 0
   , window = (0,0)

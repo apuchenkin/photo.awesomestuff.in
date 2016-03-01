@@ -30,6 +30,7 @@ type alias State = WithRouter Route {
   , locale: Locale
   , categories: Dict String Category
   , photos: Dict Int Photo
+  , photo: Maybe Photo
   , isLoading: Bool
   , time: Time
   , window: (Int, Int)
@@ -171,9 +172,7 @@ updatePhotos photos state =
   in Response <| noFx {state | isLoading = False, photos = dict}
 
 updatePhoto : Maybe Photo -> Action State
-updatePhoto photo state =
-  let dict = Maybe.withDefault state.photos <| flip Maybe.map photo <| \p -> Dict.insert p.id p state.photos
-  in Response <| noFx {state | isLoading = False, photos = dict}
+updatePhoto photo state = Response <| noFx {state | isLoading = False, photo = photo}
 
 updateCategories : List Category -> Action State
 updateCategories categories state =

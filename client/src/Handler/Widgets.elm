@@ -17,6 +17,7 @@ import App.Config exposing (..)
 import App.Routes as Routes exposing (Route)
 import App.Actions exposing (..)
 import App.Locale as Locale exposing (Locale)
+import App.Resolutions exposing (adjust)
 
 loader : Bool -> Html
 loader = lazy <| \visible ->
@@ -160,22 +161,24 @@ brickWidget router params photo (w,h) =
 photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Locale -> Html
 photoWidget router params photo (prev, next) (w,h) locale =
     let
+      (w', h') = adjust (w - 40, h - 40)
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
-      src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w ++ "/" ++ toString h ++ "/" ++ filename
+      src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w' ++ "/" ++ toString h' ++ "/" ++ filename
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src]) []
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
       author = Just <| Html.text <| Locale.i18n locale "Author {0}" ["TODO: Author"]
-    in Html.div (router.bindForward (Routes.Category, params) [class "photoWidget"]) [
-      Html.figure [Attr.class "content"] [
-        Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "Close" [], Html.i [Attr.class "icon-cancel"] []]]
-      , image
-      , Html.figcaption [Attr.class "description"] <| List.filterMap identity [caption, author]
+    in
+      Html.div (router.bindForward (Routes.Category, params) [class "photoWidget"]) [
+        Html.figure [Attr.class "content"] [
+          Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "Close " [], Html.i [Attr.class "icon-cancel"] []]]
+        , image
+        , Html.figcaption [Attr.class "description"] <| List.filterMap identity [caption, author]
+        ]
+      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)]])
+          <| [Html.i [Attr.class "icon-left-open"] []]
+      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)]])
+          <| [Html.i [Attr.class "icon-right-open"] []]
       ]
-    , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)]])
-        <| [Html.i [Attr.class "icon-left-open"] []]
-    , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)]])
-        <| [Html.i [Attr.class "icon-right-open"] []]
-    ]
     --
 {-| Links -}
 
