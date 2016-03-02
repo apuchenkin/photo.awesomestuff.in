@@ -7,7 +7,8 @@ var fontello = require('../assets/fontello/css/fontello.css');
 var Ps = require('perfect-scrollbar');
 var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
-var Main = Elm.fullscreen(Elm.Main, {
+var wrapper = document.body.querySelector('.wrapper');
+var Main = Elm.embed(Elm.Main, wrapper, {
   localePort: navigator.language,
   timePort: Date.now()
 });
@@ -15,7 +16,7 @@ var Main = Elm.fullscreen(Elm.Main, {
 Main.ports.meta.subscribe(metaUpdate);
 Main.ports.rs.subscribe(onTransition);
 
-var main = document.body.querySelector('#main');
+var main = wrapper.querySelector(':scope > #main');
 var links = {};
 
 function metaUpdate(meta) {
@@ -29,9 +30,10 @@ function metaUpdate(meta) {
   })
 }
 
-Ps.initialize(main.querySelector('.content'));
+var content = main.querySelector(':scope > .content');
+Ps.initialize(content);
 
-var headerElm = main.querySelector('header');
+var headerElm = content.querySelector(':scope > header');
 var headerObserver = new MutationObserver(function(mutations) {
   main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
 });
@@ -42,7 +44,10 @@ var packery = null;
 
 function onTransition(args) {
   // configuration of the observer:
-  var grid = main.querySelector('.gallery');
+  content.scrollTop = 0;
+  Ps.update(content);
+
+  var grid = content.querySelector(':scope > .gallery');
   if (!packery && grid) {
     require.ensure([], function() {
       var Packery = require('packery');
@@ -60,6 +65,7 @@ function onTransition(args) {
   }
 
   if (!grid && packery) {
+    packery.element.removeAttribute("style");
     packery.destroy();
     packery = null;
   }
