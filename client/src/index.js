@@ -41,16 +41,15 @@ main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
 headerObserver.observe(headerElm, {childList: true});
 
 var packery;
-var photo;
+var photoWidget;
 
-function onTransition(args) {
+function onTransition() {
   // configuration of the observer:
   // debugger;
   content.scrollTop = 0;
   Ps.update(content);
 
   var grid = content.querySelector(':scope > .gallery');
-  var photoWidget = main.querySelector(':scope > .photo-widget');
   if (!packery && grid) {
     require.ensure([], function() {
       var Packery = require('packery');
@@ -59,17 +58,21 @@ function onTransition(args) {
         itemSelector: '.brick',
         gutter: 10
       });
-      grid.observer = new MutationObserver(function(mutations) {
+      packery.observer = new MutationObserver(function(mutations) {
           packery.reloadItems();
           packery.layout();
       });
-      grid.observer.observe(grid.querySelector('ul'), { childList: true });
+      packery.observer.observe(grid.querySelector('ul'), { childList: true });
     });
   }
 
   if (!grid && packery) {
+    packery.observer.disconnect();
     packery.element.removeAttribute("style");
     packery.destroy();
     packery = null;
   }
+  // debugger;
+  //
+  // photoWidget = photoWidget || main.querySelector(':scope > .photo-widget');
 }

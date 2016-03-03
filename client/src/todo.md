@@ -30,20 +30,24 @@ gallery:
 - bug with fast switching
 - photo groups functionality
 - refactor bricks, and improve algorithm
+- bug swithcin to ru on non-existent ru gallery
 photo:
-- author
+- bug with early loader hide
 - styling
 - transition effects
 - arrows styles and effects
+- photo positioning is wrong
 static:
 - valid HTML
 404:
 - valid HTML
 
+- check all smart forwards/redirects on 404s
+- optimization
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
 
 -- problem with trailing slash "/ru"
 -- add cached router views "do not re-render rendered handlers"
--- append address in router ""
+-- expose address through router insted of export

@@ -103,5 +103,5 @@ port tasks = result.tasks -- Signal.map (\_ -> ) main
 port meta : Signal Meta
 port meta = Signal.map .meta result.state
 
-port rs : Signal (String, List (String, String))
-port rs = Signal.map (\s -> (toString s.router.route, Dict.toList s.router.params)) result.state
+port rs : Signal ()
+port rs = Signal.map (always ()) result.state

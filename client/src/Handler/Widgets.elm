@@ -166,12 +166,11 @@ photoWidget router address params photo (prev, next) (w,h) isLoading locale =
     let
       (w', h') = adjust (w - 40, h - 40)
       onLoad = Events.on "load" Json.value <| always <| Signal.message address stopLoading
-      onUnload = Events.on "abort" Json.value <| always <| Signal.message address startLoading
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
-      src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w' ++ "/" ++ toString h' ++ "/" ++ filename
-      image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src, onLoad, onUnload]) []
+      src = config.apiEndpoint ++ String.join "/" ["", "hs", "photo", toString photo.id, toString w', toString h', filename]
+      image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src, onLoad]) []
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
-      author = Just <| Html.text <| Locale.i18n locale "Author {0}" ["TODO: Author"]
+      author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale "author " [], Html.span [Attr.class "author"] [Html.text author.name]]
     in
       Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True), ("hidden", isLoading)]]) [
         Html.figure [Attr.class "content"] [

@@ -53,6 +53,11 @@ type alias Photo = {
   , height: Int
   , views: Int
   , caption: Maybe String
+  , author: Maybe Author
+  }
+
+type alias Author = {
+    name: String
   }
 
 transition : Router Route State -> from -> to -> Action State
@@ -109,13 +114,14 @@ decodeCategories = Json.list <| Json.object6 category
   (Json.maybe ("parent" := Json.map Left Json.int))
 
 decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object6 Photo
+decodePhoto = Json.object7 Photo
   ("id"     := Json.int)
   ("src"    := Json.string)
   ("width"  := Json.int)
   ("height" := Json.int)
   ("views"  := Json.int)
-  (Json.maybe ("caption"  := Json.string))
+  (Json.maybe ("caption" := Json.string))
+  (Json.maybe ("author"  := Json.object1 Author ("name" := Json.string)))
 
 decodePhotos : Json.Decoder (List Photo)
 decodePhotos = Json.list decodePhoto
