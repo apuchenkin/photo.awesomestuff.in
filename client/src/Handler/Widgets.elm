@@ -28,7 +28,7 @@ loader = lazy <| \visible ->
       ("hidden", not visible),
       ("loader", True)
     ]
-  in Html.div [attributes] []
+  in Html.div [attributes] [Html.div [Attr.class "accent"] []]
 
 languageSelector :  Router Route State -> State -> Html
 languageSelector = \router state ->

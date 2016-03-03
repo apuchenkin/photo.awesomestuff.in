@@ -170,7 +170,7 @@ loadPhoto state =
       let fetch = Task.toMaybe <| getRequest decodePhoto (config.apiEndpoint ++ "/photo/" ++ pid) state
       in fetch `Task.andThen` \photo -> Task.succeed <| updatePhoto photo
 
-  in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
+  in Response ({state | isLoading = True, photo = Nothing}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
 
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =

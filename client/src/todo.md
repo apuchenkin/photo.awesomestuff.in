@@ -22,15 +22,28 @@
 >> general refactoring/simplification
 >> static routes
 
---- app ---
-- port logic
+- loader effects
+home:
+- galley image
+- gallery style catch
+gallery:
+- bug with fast switching
+- photo groups functionality
+- refactor bricks, and improve algorithm
+photo:
+- author
+- styling
+- transition effects
+- arrows styles and effects
+static:
 - valid HTML
-- effects and post libs
-- styles
+404:
+- valid HTML
+
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
 
--- problem with trailing slash
--- add cached router views
--- append address in router
+-- problem with trailing slash "/ru"
+-- add cached router views "do not re-render rendered handlers"
+-- append address in router ""

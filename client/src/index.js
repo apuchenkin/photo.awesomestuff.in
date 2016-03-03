@@ -40,7 +40,8 @@ var headerObserver = new MutationObserver(function(mutations) {
 main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
 headerObserver.observe(headerElm, {childList: true});
 
-var packery = null;
+var packery;
+var photo;
 
 function onTransition(args) {
   // configuration of the observer:
@@ -70,15 +71,5 @@ function onTransition(args) {
     packery.element.removeAttribute("style");
     packery.destroy();
     packery = null;
-  }
-
-  if (photoWidget) {
-    var photo = photoWidget.querySelector('img.photo');
-    // photo.observer = new MutationObserver(function(mutations) {
-      // console.log(mutations);
-    // photo.onabort();
-        // debugger;
-    // });
-    // photo.observer.observe(photo, {attributes: true});
   }
 }
