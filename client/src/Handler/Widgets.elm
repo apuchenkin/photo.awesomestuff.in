@@ -8,12 +8,15 @@ import Time exposing (Time)
 import Html exposing (Html, text, span)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Html.Attributes as Attr exposing (class, classList, hreflang)
+import Html.Events as Events
 import Either exposing (Either (..))
+import Json.Decode  as Json
 import List.Extra as List'
-import Router.Helpers exposing (singleton)
-import Router.Types exposing (Router, RouteParams)
+import Router.Helpers exposing (singleton, noFx)
+import Router.Types exposing (Router, RouteParams, Response (..), Action)
 
 import App.Config exposing (..)
+import App.Actions exposing (stopLoading)
 import App.Routes as Routes exposing (Route)
 import App.Actions exposing (..)
 import App.Locale as Locale exposing (Locale)
@@ -158,17 +161,19 @@ brickWidget router params photo (w,h) =
       content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
     in photoLink router photo params content
 
-photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Locale -> Html
-photoWidget router params photo (prev, next) (w,h) locale =
+photoWidget : Router Route State -> Signal.Address (Action State) -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Bool -> Locale -> Html
+photoWidget router address params photo (prev, next) (w,h) isLoading locale =
     let
       (w', h') = adjust (w - 40, h - 40)
+      onLoad = Events.on "load" Json.value <| always <| Signal.message address stopLoading
+      onUnload = Events.on "abort" Json.value <| always <| Signal.message address startLoading
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString w' ++ "/" ++ toString h' ++ "/" ++ filename
-      image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src]) []
+      image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src, onLoad, onUnload]) []
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
       author = Just <| Html.text <| Locale.i18n locale "Author {0}" ["TODO: Author"]
     in
-      Html.div (router.bindForward (Routes.Category, params) [class "photoWidget"]) [
+      Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True), ("hidden", isLoading)]]) [
         Html.figure [Attr.class "content"] [
           Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "Close " [], Html.i [Attr.class "icon-cancel"] []]]
         , image

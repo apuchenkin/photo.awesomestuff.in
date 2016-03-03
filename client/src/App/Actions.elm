@@ -58,6 +58,16 @@ type alias Photo = {
 transition : Router Route State -> from -> to -> Action State
 transition router _ _ = createLinks router
 
+startLoading : Action State
+startLoading state =
+  let _ = Debug.log "startLoading" "True"
+  in Response <| noFx { state | isLoading = True}
+
+stopLoading : Action State
+stopLoading state =
+  let _ = Debug.log "stopLoading" "True"
+  in Response <| noFx { state | isLoading = False}
+
 createLinks : Router Route State -> Action State
 createLinks router state =
   let
@@ -125,16 +135,13 @@ loadCategories router state =
     task = fetch `Task.andThen` \mcategories ->
       let
         categories = Maybe.withDefault [] mcategories
-        update = updateCategories categories
+        update = stopLoading `chainAction` updateCategories categories
         categoryParam =  case Dict.get "subcategory" state.router.params of
             Nothing -> Dict.get "category" state.router.params
             c -> c
         action = Maybe.withDefault update <| flip Maybe.map categoryParam <| \category ->
           update `chainAction` (loadPhotos router)
-      in Task.succeed <| action --case state.router.route of
-        -- Just (Routes.Category) ->
-        -- Just (Routes.Photo)    -> update `chainAction` loadPhotos
-        -- _ -> update
+      in Task.succeed <| action
 
   in Response ({state | isLoading = True}, Effects.task task)
 
@@ -142,7 +149,6 @@ loadPhotos : Router Route State -> Action State
 loadPhotos router state =
   let
     -- _ = Debug.log "loadPhotos" state
-    stopLoading state = Response (noFx {state | isLoading = False})
     task = case Dict.isEmpty state.categories of
       True   -> Nothing
       False  ->
@@ -150,7 +156,7 @@ loadPhotos router state =
           category = getCategory state
           fetch = flip Maybe.map category <| \(Category c) ->
             let fetch = Task.toMaybe <| getRequest decodePhotos (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
-            in fetch `Task.andThen` \photos -> Task.succeed <| updatePhotos <| Maybe.withDefault [] photos
+            in fetch `Task.andThen` \photos -> Task.succeed <| stopLoading `chainAction` (updatePhotos <| Maybe.withDefault [] photos)
 
         in Just <| Maybe.withDefault (Task.succeed <| stopLoading `chainAction` router.redirect (Routes.NotFound, Dict.empty)) fetch
 
@@ -169,10 +175,10 @@ loadPhoto state =
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =
   let dict = Dict.fromList <| List.map (\p -> (p.id, p)) photos
-  in Response <| noFx {state | isLoading = False, photos = dict}
+  in Response <| noFx {state | photos = dict}
 
 updatePhoto : Maybe Photo -> Action State
-updatePhoto photo state = Response <| noFx {state | isLoading = False, photo = photo}
+updatePhoto photo state = Response <| noFx {state | photo = photo}
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
@@ -189,7 +195,7 @@ updateCategories categories state =
       ) category.parent}) dict
     -- _ = Debug.log "cs" categories
   in
-    Response <| noFx {state | isLoading = False, categories = castegoris'}
+    Response <| noFx {state | categories = castegoris'}
 
 setLocale : Router Route State -> Action State
 setLocale router state =

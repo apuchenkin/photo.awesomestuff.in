@@ -44,10 +44,12 @@ var packery = null;
 
 function onTransition(args) {
   // configuration of the observer:
+  // debugger;
   content.scrollTop = 0;
   Ps.update(content);
 
   var grid = content.querySelector(':scope > .gallery');
+  var photoWidget = main.querySelector(':scope > .photo-widget');
   if (!packery && grid) {
     require.ensure([], function() {
       var Packery = require('packery');
@@ -68,5 +70,15 @@ function onTransition(args) {
     packery.element.removeAttribute("style");
     packery.destroy();
     packery = null;
+  }
+
+  if (photoWidget) {
+    var photo = photoWidget.querySelector('img.photo');
+    // photo.observer = new MutationObserver(function(mutations) {
+      // console.log(mutations);
+    // photo.onabort();
+        // debugger;
+    // });
+    // photo.observer.observe(photo, {attributes: true});
   }
 }

@@ -30,7 +30,7 @@ staticHandler : String -> Router Route State -> Handler State
 staticHandler page router =
   let
     body = div [] [text page]
-    view address state parsed = Dict.fromList [
+    view address state _ = Dict.fromList [
       ("body", body)
     ]
   in
@@ -48,7 +48,7 @@ childs category categories =
 homeHandler : Router Route State -> Handler State
 homeHandler router =
   let
-    view address state parsed =
+    view address state _ =
       let
         -- _ = Debug.log "homeHandler" state.router.route
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
@@ -82,7 +82,7 @@ homeHandler router =
 categoryHandler : Router Route State -> Handler State
 categoryHandler router =
   let
-    view address state parsed =
+    view address state _ =
       let
         -- _ = Debug.log "categoryHandler" state
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
@@ -128,7 +128,7 @@ photoHandler router =
                 in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
-        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window state.locale
+        photo' = flip Maybe.map params <| \p -> photoWidget router address state.router.params p.photo p.neighbors state.window state.isLoading state.locale
       in Dict.fromList <| List.filterMap identity [
         flip Maybe.map photo' <| \p -> ("photo", p)
       ]

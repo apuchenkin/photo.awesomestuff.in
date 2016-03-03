@@ -33,3 +33,4 @@
 
 -- problem with trailing slash
 -- add cached router views
+-- append address in router
