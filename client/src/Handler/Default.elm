@@ -4,7 +4,7 @@ import String
 import Dict
 import Either
 import Html exposing (div, text, Html, button)
-import Html.Attributes exposing (href,class)
+import Html.Attributes as Attr exposing (href,class)
 import List.Extra as List'
 import Router.Types exposing (Router, Handler, Response (..))
 
@@ -21,7 +21,7 @@ localeHandler router =
     {
       view = view,
       actions = [
-        setLocale router,
+        resolveLocale router,
         createLinks router
       ]
     }

@@ -41,38 +41,30 @@ main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
 headerObserver.observe(headerElm, {childList: true});
 
 var packery;
-var photoWidget;
 
 function onTransition() {
-  // configuration of the observer:
-  // debugger;
-  content.scrollTop = 0;
-  Ps.update(content);
+    content.scrollTop = 0;
+    Ps.update(content);
 
-  var grid = content.querySelector(':scope > .gallery');
-  if (!packery && grid) {
-    require.ensure([], function() {
-      var Packery = require('packery');
-      packery = new Packery(grid, {
-        columnWidth: 100,
-        itemSelector: '.brick',
-        gutter: 10
-      });
-      packery.observer = new MutationObserver(function(mutations) {
-          packery.reloadItems();
-          packery.layout();
-      });
-      packery.observer.observe(grid.querySelector('ul'), { childList: true });
-    });
-  }
+    var gallery = content.querySelector(':scope > .gallery > ul');
 
-  if (!grid && packery) {
-    packery.observer.disconnect();
-    packery.element.removeAttribute("style");
-    packery.destroy();
-    packery = null;
-  }
-  // debugger;
-  //
-  // photoWidget = photoWidget || main.querySelector(':scope > .photo-widget');
+    if (gallery && !packery) {
+      require.ensure([], function() {
+        var Packery = require('packery');
+        packery = new Packery(gallery, {
+          columnWidth: 100,
+          itemSelector: 'li',
+          gutter: 10
+        });
+        packery.observer = new MutationObserver(function(mutations) {
+            packery.reloadItems();
+            packery.layout();
+        });
+        packery.observer.observe(gallery, { childList: true });
+      });
+    } else if (!gallery && packery) {
+        packery.observer.disconnect();
+        packery.destroy();
+        packery = null;
+    }
 }

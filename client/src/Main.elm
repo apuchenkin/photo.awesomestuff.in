@@ -6,45 +6,44 @@ import Time     exposing (Time)
 import Window
 
 import App.Locale as Locale exposing (Locale)
-import App.Actions exposing (State, Meta, transition)
-import App.Routes exposing (..)
+import App.Actions exposing (..)
+import App.Routes as Route exposing (Route, routes)
 import App.Layout exposing (layout)
 import Handler.Default exposing (..)
 
 import Router
 import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..), RouteParams)
-import Router.Helpers exposing (..)
 
 -- import Mouse
 
 config : Route -> RouteConfig Route State
 config route = case route of
-  Locale -> {
+  Route.Locale -> {
     segment = "[/:locale]"
   , constraints = Dict.fromList [("locale", Enum ["ru", "en"])]
   , handler = localeHandler
   }
-  Home -> {
+  Route.Home -> {
     segment = "/"
   , constraints = Dict.empty
   , handler = homeHandler
   }
-  NotFound -> {
+  Route.NotFound -> {
     segment = "404"
   , constraints = Dict.empty
   , handler = notFoundHandler
   }
-  Static page -> {
+  Route.Static page -> {
     segment = page
   , constraints = Dict.empty
   , handler = staticHandler page
   }
-  Category -> {
+  Route.Category -> {
     segment = ":category[/:subcategory]"
   , constraints = Dict.empty
   , handler = categoryHandler
   }
-  Photo -> {
+  Route.Photo -> {
     segment = "/photo/:photo"
   , constraints = Dict.fromList [("photo", Int)]
   , handler = photoHandler
@@ -75,15 +74,15 @@ router = Router.router <| RouterConfig {
     init = initialState
   , useCache = True
   , html5 = True
-  , fallback = (NotFound, Dict.empty)
+  , fallback = (Route.NotFound, Dict.empty)
   , layout = layout
   , onTransition = transition
   , routes = routes
   , routeConfig = config
   , inits = [
-      Signal.map (\locale state -> Response <| noFx {state | locale = Locale.fromString locale}) localePort
-    , Signal.map (\time state -> Response <| noFx {state | time = time}) timePort
-    , Signal.map (\dims state -> Response <| noFx {state | window = dims}) Window.dimensions
+      Signal.map (setLocale << Locale.fromString) localePort
+    , Signal.map setTime timePort
+    , Signal.map setDims Window.dimensions
     ]
   , inputs = []
   }

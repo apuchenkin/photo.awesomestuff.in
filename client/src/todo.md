@@ -21,16 +21,16 @@
 >> config cache on/off
 >> general refactoring/simplification
 >> static routes
+>> bug swithcin to ru on non-existent ru gallery
+>> gallery style catch
+>> bug with fast switching
 
-- loader effects
+
 home:
-- galley image
-- gallery style catch
+- galley image fetch exact size
 gallery:
-- bug with fast switching
 - photo groups functionality
 - refactor bricks, and improve algorithm
-- bug swithcin to ru on non-existent ru gallery
 photo:
 - bug with early loader hide
 - styling
@@ -43,7 +43,7 @@ static:
 - valid HTML
 
 - check all smart forwards/redirects on 404s
-- optimization
+- final optimization
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
@@ -51,3 +51,6 @@ static:
 -- problem with trailing slash "/ru"
 -- add cached router views "do not re-render rendered handlers"
 -- expose address through router insted of export
+
+===== post ====
+- loader effects
