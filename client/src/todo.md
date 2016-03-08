@@ -24,7 +24,7 @@
 >> bug swithcin to ru on non-existent ru gallery
 >> gallery style catch
 >> bug with fast switching
-
+>> bug with early loader hide
 
 home:
 - galley image fetch exact size
@@ -32,16 +32,15 @@ gallery:
 - photo groups functionality
 - refactor bricks, and improve algorithm
 photo:
-- bug with early loader hide
 - styling
-- transition effects
-- arrows styles and effects
+- arrows styles and hover/click effects
 - photo positioning is wrong
 static:
 - valid HTML
 404:
 - valid HTML
 
+- transition effects
 - check all smart forwards/redirects on 404s
 - final optimization
 

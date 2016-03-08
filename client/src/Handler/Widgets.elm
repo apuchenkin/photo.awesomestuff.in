@@ -172,8 +172,8 @@ photoWidget router address params photo (prev, next) (w,h) isLoading locale =
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
       author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale "author " [], Html.span [Attr.class "author"] [Html.text author.name]]
     in
-      Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True), ("hidden", isLoading)]]) [
-        Html.figure [Attr.class "content"] [
+      Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True)]]) [
+        Html.figure [classList [("content", True), ("hidden", isLoading)]] [
           Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "Close " [], Html.i [Attr.class "icon-cancel"] []]]
         , image
         , Html.figcaption [Attr.class "description"] <| List.filterMap identity [caption, author]

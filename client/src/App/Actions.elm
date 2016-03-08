@@ -18,6 +18,15 @@ import App.Locale as Locale exposing (Locale)
 (&>) : Maybe a -> (a -> Maybe b) -> Maybe b
 (&>) = Maybe.andThen
 
+mapDefault : Maybe a -> b -> (a -> b) -> b
+mapDefault maybe default map = Maybe.withDefault default <| Maybe.map map maybe
+
+succ : number -> number
+succ a = a + 1
+
+pred : number -> number
+pred a = a - 1
+
 type alias Promise value = Either (Task Http.Error value) value
 
 type alias Meta = {
@@ -31,7 +40,7 @@ type alias State = WithRouter Route {
   , categories: Dict String Category
   , photos: Dict Int Photo
   , photo: Maybe Photo
-  , isLoading: Bool
+  , isLoading: Int
   , time: Time
   , window: (Int, Int)
   }
@@ -61,18 +70,25 @@ type alias Author = {
   }
 
 transition : Router Route State -> from -> to -> Action State
-transition router _ _ = createLinks router
+transition router _ _ = resetLoading `chainAction` createLinks router
+
+isLoading : State -> Bool
+isLoading state = state.isLoading /= 0
+
+resetLoading : Action State
+resetLoading state =
+  let _ = Debug.log "resetLoading" ()
+  in Response <| noFx { state | isLoading = 0}
 
 startLoading : Action State
 startLoading state =
   let _ = Debug.log "startLoading" ()
-  in Response <| noFx { state | isLoading = True}
+  in Response <| noFx { state | isLoading = succ state.isLoading}
 
 stopLoading : Action State
 stopLoading state =
   let _ = Debug.log "stopLoading" ()
-  in Response <| noFx { state | isLoading = False}
-
+  in Response <| noFx { state | isLoading = if state.isLoading > 0 then pred state.isLoading else 0}
 
 setTime : Time -> Action State
 setTime time state =
@@ -156,10 +172,10 @@ loadCategories router state =
   let
     _ = Debug.log "loadCategories" ()
     fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state
-    task = fetch `Task.andThen` \mcategories ->
+    task = Task.map (\f -> startLoading `chainAction` f) <| fetch `Task.andThen` \mcategories ->
       let
         categories = Maybe.withDefault [] mcategories
-        update = stopLoading `chainAction` updateCategories categories
+        update = updateCategories categories `chainAction` stopLoading
         categoryParam =  case Dict.get "subcategory" state.router.params of
             Nothing -> Dict.get "category" state.router.params
             c -> c
@@ -170,7 +186,7 @@ loadCategories router state =
 
       in Task.succeed <| action
 
-  in Response ({state | isLoading = True, categories = Dict.empty}, Effects.task task)
+  in Response ({state | categories = Dict.empty}, Effects.task task)
 
 checkCategory : Router Route State -> String -> Action State
 checkCategory router category state =
@@ -191,11 +207,12 @@ loadPhotos router state =
           updateTask photos = Task.succeed <| stopLoading `chainAction` (updatePhotos <| Maybe.withDefault [] photos)
           fetchTask (Category c) = Task.toMaybe <| getRequest decodePhotos (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
           task = flip Maybe.map category
-            <| \c -> fetchTask c `Task.andThen` updateTask
+            <| \c ->  fetchTask c `Task.andThen` updateTask
 
         in Just <| Maybe.withDefault default task
+    (Response (state', _)) = startLoading state
 
-  in Response ({ state | isLoading = Maybe.withDefault False <| Maybe.map (always True) task}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
+  in Response (mapDefault task state (always state'), mapDefault task Effects.none Effects.task)
 
 loadPhoto : Action State
 loadPhoto state =
@@ -205,8 +222,10 @@ loadPhoto state =
     task = flip Maybe.map photoId <| \pid ->
       let fetch = Task.toMaybe <| getRequest decodePhoto (config.apiEndpoint ++ "/photo/" ++ pid) state
       in fetch `Task.andThen` \photo -> Task.succeed <| updatePhoto photo
+    (Response (state', _)) = resetLoading `chainAction` startLoading <| state
+    state'' = mapDefault task state (always state')
 
-  in Response ({state | isLoading = True, photo = Nothing}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
+  in Response ({state'' | photo = Nothing}, mapDefault task Effects.none Effects.task)
 
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =

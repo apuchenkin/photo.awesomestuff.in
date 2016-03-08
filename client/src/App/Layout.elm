@@ -5,7 +5,7 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Router.Types exposing (Router)
 
-import App.Actions exposing (State)
+import App.Actions exposing (State, isLoading)
 import App.Routes exposing (Route)
 import Handler.Widgets exposing (..)
 
@@ -15,14 +15,14 @@ layout router state views =
     defaultHeader = Html.header [] [Html.text "Default header"]
     defaultFooter = Html.footer [] [Html.text "Default footer"]
     defaultBody = Html.div [Attr.class "body"] []
-  in Html.div [Attr.id "main"] <| List.filterMap identity [
-    Just <| loader state.isLoading
-  , Just <| Html.div [Attr.class "content"] [
+  in Html.div [Attr.id "main"] [
+    loader (isLoading state)
+  , Maybe.withDefault (Html.div [] []) <| Dict.get "photo" views
+  , Html.div [Attr.class "content"] [
         Maybe.withDefault defaultHeader <| Dict.get "header" views
       , Maybe.withDefault (Html.div [] []) <| Dict.get "navigation" views
       , Maybe.withDefault defaultBody   <| Dict.get "body" views
       , Maybe.withDefault defaultFooter <| Dict.get "footer" views
       , languageSelector router state
       ]
-  , Dict.get "photo" views
   ]
