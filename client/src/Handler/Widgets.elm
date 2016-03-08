@@ -110,6 +110,7 @@ gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
 gallery router params photos time =
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds time
+    _ = Debug.log "seed" seed
     views = List.map .views photos
     avg = (toFloat <| List.sum views) / (toFloat <| List.length views)
     top = Maybe.withDefault 0 <| List.maximum views
@@ -122,25 +123,17 @@ gallery router params photos time =
     s4 = (s * 4) + (g * 3)
 
     dsmap mode ratio isHorisontal = case mode of
-      3 -> if isHorisontal then (if ratio >= 2 then s4 else s3, s2) else (s2, s3)
-      2 -> if ratio >= 4 then (s4, s) else (if ratio >= 2 then s3 else s2, s2)
-      1 -> if isHorisontal then (if ratio >= 3 then s3 else s2, s) else (s, s2)
+      4 -> if isHorisontal then (if ratio >= 2 then s4 else s3, s2) else (s2, s3)
+      3 -> if ratio >= 4 then (s4, s) else (if ratio >= 2 then s3 else s2, s2)
+      2 -> if isHorisontal then (if ratio >= 3 then s3 else s2, s) else (s, s2)
       _ -> (if ratio >= 2 then s2 else s, s)
 
+    modes = List.reverse <| fst <| List.foldl (\p (acc, s) -> let (mode, s') = photoMode avg p s in (mode :: acc, s')) ([], seed) photos
+
   in Html.div [Attr.class "gallery"]
-  <| singleton <| Html.ul [] <| flip List.map photos
-  <| \photo ->
+  <| singleton <| Html.ul [] <| flip List.map (List.map2 (,) photos modes)
+  <| \(photo, mode) ->
     let
-      v = toFloat photo.views
-      std = (v - avg) ^ 2
-      pow = (toFloat top) / sqrt (std * v)
-      norm  = List.map ((*) top) [8,4,2,1]
-      norm' = List.map (\r -> floor <| r * pow ^ 2) [1,2,3,4]
-      prob = List.map2 (+) norm norm'
-      prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
-      probList = List.concat <| List.map2 (\m p -> List.repeat p m) [1,2,3,4] prob'
-      gen = Random.int 0 (List.length probList - 1)
-      mode = Maybe.withDefault 1 <| List'.getAt probList (fst <| Random.generate gen seed)
       isHorisontal = (photo.width > photo.height)
       ratio = toFloat photo.width / toFloat photo.height
       inc = if ratio >= 1 then ratio else 1 / ratio
@@ -148,6 +141,22 @@ gallery router params photos time =
     in
       Html.li []
       [brickWidget router params photo wh]
+
+photoMode : Float -> Photo -> Random.Seed -> (Int, Random.Seed )
+photoMode avg photo seed =
+  let
+    v = toFloat photo.views
+    std = sqrt <| (v - avg) ^ 2
+    norm  = List.map ((*) (floor avg)) [32,16,4,1]
+    norm' = List.map (\r -> floor <| r * (std * v) / avg) [1,2,3,4]
+    prob = List.map2 (+) norm norm'
+    prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
+    probList = List.concat <| List.map2 (\m p -> List.repeat p m) [1,2,3,4] prob'
+    gen = Random.int 0 (List.length probList - 1)
+    (r, seed') = Random.generate gen seed
+
+    mode = Maybe.withDefault 1 <| List'.getAt probList r
+  in (mode, seed')
 
 brickWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> Html
 brickWidget router params photo (w,h) =

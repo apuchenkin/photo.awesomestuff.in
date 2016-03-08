@@ -26,12 +26,13 @@
 >> bug with fast switching
 >> bug with early loader hide
 >> photo positioning is wrong
+>> improve algorithm
 
 home:
 - galley image fetch exact size
 gallery:
 - photo groups functionality
-- refactor bricks, and improve algorithm
+- refactor bricks
 photo:
 - styling
 - arrows styles and hover/click effects
