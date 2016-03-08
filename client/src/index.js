@@ -67,4 +67,16 @@ function onTransition() {
         packery.destroy();
         packery = null;
     }
+
+    var photoWidget = main.querySelector(':scope > .photo-widget');
+    if (photoWidget) {
+      var widgetContent = photoWidget.querySelector(':scope > .content');
+      photoWidget.observer = new MutationObserver(function(mutations) {
+          var photo = widgetContent.querySelector(':scope > .photo');
+          var offset = widgetContent.offsetHeight - photo.offsetHeight;
+          photo.style.maxHeight = (document.body.offsetHeight - offset) + 'px';
+          photoWidget.observer.disconnect();
+      });
+      photoWidget.observer.observe(widgetContent, { attributes: true });
+    }
 }

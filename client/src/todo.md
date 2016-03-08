@@ -25,6 +25,7 @@
 >> gallery style catch
 >> bug with fast switching
 >> bug with early loader hide
+>> photo positioning is wrong
 
 home:
 - galley image fetch exact size
@@ -34,7 +35,6 @@ gallery:
 photo:
 - styling
 - arrows styles and hover/click effects
-- photo positioning is wrong
 static:
 - valid HTML
 404:
