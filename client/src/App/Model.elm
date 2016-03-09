@@ -60,14 +60,31 @@ type alias Photo = {
   , src: String
   , width: Int
   , height: Int
+  , ratio: Float
   , views: Int
   , group: Maybe Int
   , caption: Maybe String
   , author: Maybe Author
   }
 
+-- Category constuctor
+photo : Int -> String -> Int -> Int -> Int -> Maybe Int -> Maybe String -> Maybe Author -> Photo
+photo id src width height views group caption author =
+  let ratio = (toFloat width) / (toFloat height)
+  in {
+    id = id
+  , src = src
+  , width = width
+  , height = height
+  , ratio = ratio
+  , views = views
+  , group = group
+  , caption = caption
+  , author = author
+  }
+
 decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object8 Photo
+decodePhoto = Json.object8 photo
   ("id"     := Json.int)
   ("src"    := Json.string)
   ("width"  := Json.int)

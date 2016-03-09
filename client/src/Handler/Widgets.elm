@@ -121,7 +121,7 @@ brickWidget : Router Route State -> RouteParams -> Photo -> Html
 brickWidget router params photo =
     let
       (w,h) = (photo.width, photo.height)
-      ratio = toFloat w / toFloat h
+      ratio = photo.ratio
       inc = if ratio >= 1 then ratio else 1 / ratio
       (m1,m2) = if w < h then (ceiling <| toFloat w * inc, h) else (ceiling <| toFloat h * inc, w)
       s = max m1 m2

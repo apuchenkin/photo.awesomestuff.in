@@ -46,7 +46,7 @@ remapPhoto seed avg photo =
     (r, seed') = Random.generate gen seed
     mode = Maybe.withDefault A <| probList !! r
     isHorisontal = (photo.width > photo.height)
-    ratio = toFloat photo.width / toFloat photo.height
+    ratio = photo.ratio
     inc = if ratio >= 1 then ratio else 1 / ratio
     (w,h) = dsmap mode ratio isHorisontal
   in ({ photo | width = w, height = h}, seed')
