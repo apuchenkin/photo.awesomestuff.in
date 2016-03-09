@@ -95,7 +95,7 @@ categoryWidget router category childs locale =
 
     cover = Html.a (router.bindForward (Routes.Category, Dict.fromList params') [class "cover"])
       <| List.filterMap identity [
-        (flip Maybe.map c.image <| \image -> Html.img [Attr.width 300, Attr.src (config.staticEndpoint ++ image), Attr.alt c.title] []),
+        (flip Maybe.map c.image <| \image -> Html.img [Attr.width config.gallery.width, Attr.src (config.staticEndpoint ++ image), Attr.alt c.title] []),
         (flip Maybe.map c.date <| \date -> Html.span [class "sub"] [text <| dateText date])
       ]
     aside = Html.aside [] [
@@ -112,44 +112,18 @@ gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
 gallery router params photos time =
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds time
-    _ = Debug.log "seed" seed
-    views = List.map .views photos
-    avg = (toFloat <| List.sum views) / (toFloat <| List.length views)
-    top = Maybe.withDefault 0 <| List.maximum views
-    g = config.gutter
-    w = config.brickWidth
-
-    s = w
-    s2 = (s * 2) + g
-    s3 = (s * 3) + (g * 2)
-    s4 = (s * 4) + (g * 3)
-
-    dsmap mode ratio isHorisontal = case mode of
-      4 -> if isHorisontal then (if ratio >= 2 then s4 else s3, s2) else (s2, s3)
-      3 -> if ratio >= 4 then (s4, s) else (if ratio >= 2 then s3 else s2, s2)
-      2 -> if isHorisontal then (if ratio >= 3 then s3 else s2, s) else (s, s2)
-      _ -> (if ratio >= 2 then s2 else s, s)
-
-    modes = List.reverse <| fst <| List.foldl (\p (acc, s) -> let (mode, s') = photoMode avg p s in (mode :: acc, s')) ([], seed) photos
-
+    photos' = remapPhotos seed photos
   in Html.div [Attr.class "gallery"]
-  <| singleton <| Html.ul [] <| flip List.map (List.map2 (,) photos modes)
-  <| \(photo, mode) ->
-    let
-      isHorisontal = (photo.width > photo.height)
-      ratio = toFloat photo.width / toFloat photo.height
-      inc = if ratio >= 1 then ratio else 1 / ratio
-      wh = dsmap mode ratio isHorisontal
-    in
-      Html.li []
-      [brickWidget router params photo wh]
+  <| singleton <| Html.ul [] <| flip List.map photos'
+  <| \photo -> Html.li [] [brickWidget router params photo]
 
-brickWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> Html
-brickWidget router params photo (w,h) =
+brickWidget : Router Route State -> RouteParams -> Photo -> Html
+brickWidget router params photo =
     let
-      ratio = toFloat photo.width / toFloat photo.height
+      (w,h) = (photo.width, photo.height)
+      ratio = toFloat w / toFloat h
       inc = if ratio >= 1 then ratio else 1 / ratio
-      (m1,m2) = if w < h then (ceiling <| toFloat w * inc,h) else (ceiling <| toFloat h * inc,w)
+      (m1,m2) = if w < h then (ceiling <| toFloat w * inc, h) else (ceiling <| toFloat h * inc, w)
       s = max m1 m2
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString s ++ "/" ++ toString s ++ "/" ++ filename

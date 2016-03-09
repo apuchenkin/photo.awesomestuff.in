@@ -28,11 +28,9 @@
 >> photo positioning is wrong
 >> improve algorithm
 >> photo groups functionality
+>> galley image fetch exact size
+>> refactor bricks
 
-home:
-- galley image fetch exact size
-gallery:
-- refactor bricks
 photo:
 - styling
 - arrows styles and hover/click effects
@@ -53,4 +51,5 @@ static:
 -- expose address through router insted of export
 
 ===== post ====
+- replace cover with exact size image on server/database
 - loader effects
