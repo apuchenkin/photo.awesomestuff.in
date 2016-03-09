@@ -11,6 +11,7 @@ import Router.Types exposing (Router, Handler, Response (..))
 import App.Routes as Route exposing (Route)
 import App.Locale as Locale exposing (Locale)
 import App.Actions exposing (..)
+import App.Model exposing (..)
 import Handler.Widgets exposing (..)
 
 localeHandler : Router Route State -> Handler State
@@ -97,7 +98,7 @@ categoryHandler router =
 
       in Dict.fromList [
         ("navigation", navigation)
-      , ("body", gallery router state.router.params (Dict.values state.photos) state.time)
+      , ("body", gallery router state.router.params state.photos state.time)
       ]
   in
     {
@@ -116,7 +117,7 @@ photoHandler router =
         params = Maybe.andThen pid <| \p ->
           let
             photo = state.photo
-            keys = Dict.keys state.photos
+            keys = List.map .id state.photos
             neghbors = List'.elemIndex p keys
               &> \idx ->
                 let

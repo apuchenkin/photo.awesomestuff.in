@@ -5,7 +5,8 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Router.Types exposing (Router)
 
-import App.Actions exposing (State, isLoading)
+import App.Model exposing (State)
+import App.Actions exposing (isLoading)
 import App.Routes exposing (Route)
 import Handler.Widgets exposing (..)
 

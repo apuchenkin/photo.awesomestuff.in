@@ -18,9 +18,11 @@ import Router.Types exposing (Router, RouteParams, Response (..), Action)
 import App.Config exposing (..)
 import App.Actions exposing (stopLoading)
 import App.Routes as Routes exposing (Route)
+import App.Model exposing (..)
 import App.Actions exposing (..)
 import App.Locale as Locale exposing (Locale)
 import App.Resolutions exposing (adjust)
+import Service.Photo exposing (..)
 
 loader : Bool -> Html
 loader = lazy <| \visible ->
@@ -141,22 +143,6 @@ gallery router params photos time =
     in
       Html.li []
       [brickWidget router params photo wh]
-
-photoMode : Float -> Photo -> Random.Seed -> (Int, Random.Seed )
-photoMode avg photo seed =
-  let
-    v = toFloat photo.views
-    std = sqrt <| (v - avg) ^ 2
-    norm  = List.map ((*) (floor avg)) [32,16,4,1]
-    norm' = List.map (\r -> floor <| r * (std * v) / avg) [1,2,3,4]
-    prob = List.map2 (+) norm norm'
-    prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
-    probList = List.concat <| List.map2 (\m p -> List.repeat p m) [1,2,3,4] prob'
-    gen = Random.int 0 (List.length probList - 1)
-    (r, seed') = Random.generate gen seed
-
-    mode = Maybe.withDefault 1 <| List'.getAt probList r
-  in (mode, seed')
 
 brickWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> Html
 brickWidget router params photo (w,h) =

@@ -1,7 +1,7 @@
 module App.Actions where
 
 import Http
-import Date exposing (Date)
+import Random
 import Time exposing (Time)
 import Either exposing (Either (..))
 import Dict exposing (Dict)
@@ -11,9 +11,11 @@ import Task exposing (Task)
 import Router.Types exposing (WithRouter, Action, Response (..), Router)
 import Router.Helpers exposing (noFx, chainAction, doNothing)
 
+import App.Model exposing (..)
 import App.Config exposing (config)
 import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
+import Service.Photo exposing (refinePhotos)
 
 (&>) : Maybe a -> (a -> Maybe b) -> Maybe b
 (&>) = Maybe.andThen
@@ -26,48 +28,6 @@ succ a = a + 1
 
 pred : number -> number
 pred a = a - 1
-
-type alias Promise value = Either (Task Http.Error value) value
-
-type alias Meta = {
-    title: String,
-    links: List (String, String)
-  }
-
-type alias State = WithRouter Route {
-    meta: Meta
-  , locale: Locale
-  , categories: Dict String Category
-  , photos: Dict Int Photo
-  , photo: Maybe Photo
-  , isLoading: Int
-  , time: Time
-  , window: (Int, Int)
-  }
-
--- type ParentCategory =
-type Category = Category {
-    id: Int
-  , name: String
-  , title: String
-  , image: Maybe String
-  , date: Maybe Date
-  , parent: Maybe (Either Int Category)
-  }
-
-type alias Photo = {
-    id: Int
-  , src: String
-  , width: Int
-  , height: Int
-  , views: Int
-  , caption: Maybe String
-  , author: Maybe Author
-  }
-
-type alias Author = {
-    name: String
-  }
 
 transition : Router Route State -> from -> to -> Action State
 transition router _ _ = resetLoading `chainAction` createLinks router
@@ -118,17 +78,6 @@ createLinks router state =
 
   in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] links}}
 
--- Category constuctor
-category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Category
-category id name title image date parent = Category {
-    id = id,
-    name = name,
-    title = title,
-    image = image,
-    date  = date &> \d -> Result.toMaybe (Date.fromString d),
-    parent = parent
-  }
-
 getCategory : State -> Maybe Category
 getCategory state =
   let
@@ -136,28 +85,6 @@ getCategory state =
       Nothing -> Dict.get "category" state.router.params
       c -> c
   in param &> flip Dict.get state.categories
-
-decodeCategories : Json.Decoder (List Category)
-decodeCategories = Json.list <| Json.object6 category
-  ("id"     := Json.int)
-  ("name"   := Json.string)
-  ("title"  := Json.string)
-  (Json.maybe ("image"  := Json.string))
-  (Json.maybe ("date"  := Json.string))
-  (Json.maybe ("parent" := Json.map Left Json.int))
-
-decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object7 Photo
-  ("id"     := Json.int)
-  ("src"    := Json.string)
-  ("width"  := Json.int)
-  ("height" := Json.int)
-  ("views"  := Json.int)
-  (Json.maybe ("caption" := Json.string))
-  (Json.maybe ("author"  := Json.object1 Author ("name" := Json.string)))
-
-decodePhotos : Json.Decoder (List Photo)
-decodePhotos = Json.list decodePhoto
 
 getRequest: Json.Decoder value -> String -> State -> Task Http.Error value
 getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSettings
@@ -231,8 +158,10 @@ updatePhotos : List Photo -> Action State
 updatePhotos photos state =
   let
     _ = Debug.log "updatePhotos" ()
-    dict = Dict.fromList <| List.map (\p -> (p.id, p)) photos
-  in Response <| noFx {state | photos = dict}
+    seed = Random.initialSeed <| floor <| Time.inSeconds state.time
+    photos' = refinePhotos seed photos
+    -- dict = Dict.fromList <| List.map (\p -> (p.id, p)) photos'
+  in Response <| noFx {state | photos = photos'}
 
 updatePhoto : Maybe Photo -> Action State
 updatePhoto photo state = Response <| noFx {state | photo = photo}

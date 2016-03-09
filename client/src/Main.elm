@@ -6,6 +6,7 @@ import Time     exposing (Time)
 import Window
 
 import App.Locale as Locale exposing (Locale)
+import App.Model exposing (..)
 import App.Actions exposing (..)
 import App.Routes as Route exposing (Route, routes)
 import App.Layout exposing (layout)
@@ -61,7 +62,7 @@ initialState = {
   , meta = initialMeta
   , locale = Locale.fallbackLocale
   , categories = Dict.empty
-  , photos = Dict.empty
+  , photos = []
   , photo = Nothing
   , isLoading = 0
   , time = 0
