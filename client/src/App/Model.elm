@@ -10,6 +10,9 @@ import Router.Types exposing (WithRouter, Action, Response (..), Router)
 import App.Locale as Locale exposing (Locale)
 import App.Routes as Routes exposing (Route)
 
+(&>) : Maybe a -> (a -> Maybe b) -> Maybe b
+(&>) = Maybe.andThen
+
 type alias Meta = {
     title: String,
     links: List (String, String)
@@ -54,6 +57,13 @@ decodeCategories = Json.list <| Json.object6 category
   (Json.maybe ("image"  := Json.string))
   (Json.maybe ("date"  := Json.string))
   (Json.maybe ("parent" := Json.map Left Json.int))
+
+-- todo: persist child in categories
+childs : Category -> List Category -> List Category
+childs category categories =
+  let (Category pc) = category
+  in flip List.filter categories <| \(Category c) ->
+  Maybe.withDefault False <| c.parent &> \p -> Just <| Either.elim ((==) pc.id) ((==) category) p
 
 type alias Photo = {
     id: Int

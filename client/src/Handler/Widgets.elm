@@ -79,6 +79,14 @@ footer router locale =
     sep, contacts
   ]
 
+galleriesWidget : Router Route State -> List Category -> Locale -> Html
+galleriesWidget router categories locale = Html.div [class "galleries"] [
+  Html.h2 [] [text <| Locale.i18n locale "Galleries" []],
+  Html.ul []
+      <| List.map (\c -> Html.li [] [categoryWidget router c (childs c categories) locale])
+      <| List.filter (\(Category c) -> c.parent == Nothing) categories
+    ]
+
 categoryWidget : Router Route State -> Category -> List Category -> Locale -> Html
 categoryWidget router category childs locale =
   let

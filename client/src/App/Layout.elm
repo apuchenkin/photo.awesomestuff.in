@@ -13,8 +13,8 @@ import Handler.Widgets exposing (..)
 layout : Router Route State -> State -> Dict String Html -> Html
 layout router state views =
   let
-    defaultHeader = Html.header [] [Html.text "Default header"]
-    defaultFooter = Html.footer [] [Html.text "Default footer"]
+    defaultHeader = homeHeader router state.locale
+    defaultFooter = footer router state.locale
     defaultBody = Html.div [Attr.class "body"] []
   in Html.div [Attr.id "main"] [
     loader (isLoading state)

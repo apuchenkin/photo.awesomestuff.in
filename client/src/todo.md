@@ -30,21 +30,17 @@
 >> photo groups functionality
 >> galley image fetch exact size
 >> refactor bricks
+>> valid HTML statics
+>> valid HTML 404
 
 photo:
 - styling
 - arrows styles and hover/click effects
-static:
-- valid HTML
-404:
-- valid HTML
 
+common:
 - transition effects
 - check all smart forwards/redirects on 404s
 - final optimization
-
--- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
--- raise bug about structure re-rendering when first node is changes
 
 -- problem with trailing slash "/ru"
 -- add cached router views "do not re-render rendered handlers"
@@ -53,3 +49,6 @@ static:
 ===== post ====
 - replace cover with exact size image on server/database
 - loader effects
+
+-- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
+-- raise bug about structure re-rendering when first node is changes

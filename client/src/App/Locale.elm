@@ -60,19 +60,58 @@ lookup =
             (Language <| toString Ru) <|
             [ ( "Home", "Главная" )
             , ( "alpha", "альфа")
-            , ( "About", "О сайте")
-            , ( "Contacts", "Контакты")
+            , ( "about", "О сайте")
+            , ( "contacts", "Контакты")
             , ( "Galleries", "Галереи")
             , ( "Travel in photography", "Путешествия в фотографиях")
             , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
             , ( "I am {0} years old.", "J'ai {0} ans." )
             , ( "404", "ф0ф" )
-            ]
-            ++ month_ru
+            , ("FORM.BUGREPORT", "http://goo.gl/forms/gjCXgnadYm")
+            , ("FORM.FEEDBACK", "http://goo.gl/forms/jCZLgQfTx4")
+            , ("ABOUT.TEXT1", "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):")
+            , ("ABOUT.TEXT2", "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:")
+            , ("ABOUT.TEXT3", "Спасибо за внимание!")
+            , ("CONTACTS.AUTHORS", "Авторы:")
+            , ("CONTACTS.AUTHOR1", "Артём Пученкин")
+            , ("CONTACTS.AUTHOR2", "Татьяна Кузмичева")
+            , ("CONTACTS.EMAIL", "email: {0}")
+            , ("CONTACTS.SKYPE", "skype: {0}")
+            , ("CONTACTS.QUESTIONS", "По вопросам о работе веб-сайта: {0}")
+            , ("ERROR", "Ошибка {0}")
+            , ("ERROR.NOT_FOUND", "Cтраница не существует")
+            , ("ERROR.THIS_MIGHT_BE", "Это могло случиться по следующим причинам:")
+            , ("ERROR.REASON1", "Страница ещё не была создана")
+            , ("ERROR.REASON2", "Страница была удалена")
+            , ("ERROR.CONSEQUENCE", "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in")
+            , ("ERROR.URL.BACK", "Назад")
+            , ("ERROR.URL.HOME", "На главную")
+            ] ++ month_ru
         , withLanguage
-            (Language <| toString En)
-            <| ( "404", "f0f" )
-            :: month_en
+            (Language <| toString En) <|
+            [ ( "404", "f0f" )
+            , ( "about", "About")
+            , ( "contacts", "Contacts")
+            , ("FORM.BUGREPORT", "http://goo.gl/forms/PytHUvBm48")
+            , ("FORM.FEEDBACK", "http://goo.gl/forms/mD6GCLnzCT")
+            , ("ABOUT.TEXT1", "This is alpha release of photo gallery. If you found any bugs, please, complete the following form (will open in a new page):")
+            , ("ABOUT.TEXT2", "If you want to left feedback or have any improvement ideas, submit following:")
+            , ("ABOUT.TEXT3", "Thanks for your attention!")
+            , ("CONTACTS.AUTHORS", "Authors:")
+            , ("CONTACTS.AUTHOR1", "Artem Puchenkin")
+            , ("CONTACTS.AUTHOR2", "Tatiana Kuzmicheva")
+            , ("CONTACTS.EMAIL", "email: {0}")
+            , ("CONTACTS.SKYPE", "skype: {0}")
+            , ("CONTACTS.QUESTIONS", "Questions related to web-site: {0}")
+            , ("ERROR", "Error {0}")
+            , ("ERROR.NOT_FOUND", "This page does not exists")
+            , ("ERROR.THIS_MIGHT_BE", "This might be because of:")
+            , ("ERROR.REASON1", "Page has not been created yet")
+            , ("ERROR.REASON2", "Page has been deleted for some reason")
+            , ("ERROR.CONSEQUENCE", "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in")
+            , ("ERROR.URL.BACK", "Go back")
+            , ("ERROR.URL.HOME", "Return home")
+            ] ++ month_en
         ]
 
 i18n : Locale -> String -> List String -> String
@@ -86,20 +125,6 @@ i18n locale = lookup (Language <| toString locale)
 --   "FOOTER": "{{home}}, alpha",
 --   "RU": "Ru",
 --   "EN": "En",
---   "ERROR": {
---     "404": "Error 404",
---     "NOT_EXISTS": "This page does not exists",
---     "THIS_MIGHT_BE": "This might be because of:",
---     "REASON1": "It have not been created yet",
---     "REASON2": "It have been deleted for some reason",
---     "CONSEQUENCE": "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in",
---     "BACK": "Go back",
---     "HOME": "Return home"
---   },
---   "FORM": {
---     "BUGREPORT": "http://goo.gl/forms/PytHUvBm48",
---     "FEEDBACK": "http://goo.gl/forms/mD6GCLnzCT"
---   },
 --   "TOOLS": {
 --     "FULLSCREEN" : "Full screen",
 --     "CLOSE": "Close"
@@ -120,20 +145,6 @@ i18n locale = lookup (Language <| toString locale)
 --   "FOOTER": "{{home}}, alpha",
 --   "RU": "Ru",
 --   "EN": "En",
---   "ERROR": {
---     "404": "Ошибка 404",
---     "NOT_EXISTS": "Эта страница не существует",
---     "THIS_MIGHT_BE": "Это могло случиться по следующим причинам:",
---     "REASON1": "Страница ещё не была создана",
---     "REASON2": "Страница была удалена",
---     "CONSEQUENCE": "Если эта страница необходима, пожалйста, напишите на: info 'at' photo.awesomestuff.in",
---     "BACK": "Назад",
---     "HOME": "На главную"
---   },
---   "FORM": {
---     "BUGREPORT": "http://goo.gl/forms/gjCXgnadYm",
---     "FEEDBACK": "http://goo.gl/forms/jCZLgQfTx4"
---   },
 --   "TOOLS": {
 --     "FULLSCREEN" : "Увеличить",
 --     "CLOSE": "Закрыть"

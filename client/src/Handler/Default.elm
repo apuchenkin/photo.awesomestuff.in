@@ -2,7 +2,6 @@ module Handler.Default where
 
 import String
 import Dict
-import Either
 import Html exposing (div, text, Html, button)
 import Html.Attributes as Attr exposing (href,class)
 import List.Extra as List'
@@ -13,6 +12,7 @@ import App.Locale as Locale exposing (Locale)
 import App.Actions exposing (..)
 import App.Model exposing (..)
 import Handler.Widgets exposing (..)
+import Handler.Static exposing (..)
 
 localeHandler : Router Route State -> Handler State
 localeHandler router =
@@ -27,12 +27,11 @@ localeHandler router =
       ]
     }
 
-staticHandler : String -> Router Route State -> Handler State
-staticHandler page router =
+notFoundHandler : Router Route State -> Handler State
+notFoundHandler router =
   let
-    body = div [] [text page]
     view address state _ = Dict.fromList [
-      ("body", body)
+      ("body", notFoundWidget router state.locale)
     ]
   in
     {
@@ -40,37 +39,29 @@ staticHandler page router =
       actions = []
     }
 
-childs : Category -> List Category -> List Category
-childs category categories =
-  let (Category pc) = category
-  in flip List.filter categories <| \(Category c) ->
-  Maybe.withDefault False <| c.parent &> \p -> Just <| Either.elim ((==) pc.id) ((==) category) p
+staticHandler : String -> Router Route State -> Handler State
+staticHandler page router =
+  let
+    body locale = case page of
+      "about" -> aboutWidget locale
+      "contacts" -> contactsWidget locale
+      _ -> Html.div [] []
+    title locale = Html.text <| Locale.i18n locale page []
+    view address state _ = Dict.fromList [
+      ("header", innerHeader router state.locale (title state.locale))
+    , ("body", body state.locale)
+    ]
+  in
+    {
+      view = view,
+      actions = []
+    }
 
 homeHandler : Router Route State -> Handler State
 homeHandler router =
   let
-    view address state _ =
-      let
-        -- _ = Debug.log "homeHandler" state.router.route
-        category = Dict.get "category" state.router.params &> flip Dict.get state.categories
-
-        header = case state.router.route of
-          Just (Route.Static p) -> innerHeader router state.locale (Html.text p)
-          _    -> case category of
-            Just c  -> innerHeader router state.locale (categoryLink router c state.locale True)
-            Nothing -> homeHeader router state.locale
-
-        renderCategories categories = Html.div [class "galleries"] [
-            Html.h2 [] [text <| Locale.i18n state.locale "Galleries" []],
-            Html.ul []
-                <| List.map (\c -> Html.li [] [categoryWidget router c (childs c categories) state.locale])
-                <| List.filter (\(Category c) -> c.parent == Nothing) categories
-              ]
-
-      in Dict.fromList [
-        ("header", header)
-      , ("body", renderCategories <| Dict.values state.categories)
-      , ("footer", footer router state.locale)
+    view address state _ = Dict.fromList [
+        ("body", galleriesWidget router (Dict.values state.categories) state.locale)
       ]
   in
     {
@@ -88,6 +79,7 @@ categoryHandler router =
         -- _ = Debug.log "categoryHandler" state
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
         subcategory = Dict.get "subcategory" state.router.params &> flip Dict.get state.categories
+        header = flip Maybe.map category <| \c -> innerHeader router state.locale (categoryLink router c state.locale True)
 
         navigation = Html.nav [class "categories"] [
           Html.ul []
@@ -96,9 +88,10 @@ categoryHandler router =
             <| flip Maybe.map category <| \c -> childs c (Dict.values state.categories)
         ]
 
-      in Dict.fromList [
-        ("navigation", navigation)
-      , ("body", gallery router state.router.params state.photos state.time)
+      in Dict.fromList <| List.filterMap identity [
+        Maybe.map (\h -> ("header", h)) header
+      , Just <| ("navigation", navigation)
+      , Just <| ("body", gallery router state.router.params state.photos state.time)
       ]
   in
     {
@@ -139,17 +132,4 @@ photoHandler router =
       actions = [
         loadPhoto
       ]
-    }
-
-notFoundHandler : Router Route State -> Handler State
-notFoundHandler _ =
-  let
-    body locale = div [] [text <| Locale.i18n locale "404" []]
-    view address state _ = Dict.fromList [
-      ("body", body state.locale)
-    ]
-  in
-    {
-      view = view,
-      actions = []
     }

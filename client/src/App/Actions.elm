@@ -17,9 +17,6 @@ import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
 import Service.Photo exposing (refinePhotos)
 
-(&>) : Maybe a -> (a -> Maybe b) -> Maybe b
-(&>) = Maybe.andThen
-
 mapDefault : Maybe a -> b -> (a -> b) -> b
 mapDefault maybe default map = Maybe.withDefault default <| Maybe.map map maybe
 
