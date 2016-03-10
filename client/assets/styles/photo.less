@@ -33,11 +33,13 @@ figure, img {
     font-size: 24px;
     top: 50%;
     margin-top: -@divisor;
-    padding: @divisor;
+    padding: @divisor * 1.5 @divisor;
     display: block;
-
+    background: transparent;
+    transition: background 0.2s ease-out;
+    text-shadow: 0 0 8px black;
     &:hover {
-      background: black;
+      background: fade(black, 70%);
     }
     &.prev {
       left: 0;

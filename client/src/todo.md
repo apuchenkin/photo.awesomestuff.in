@@ -32,14 +32,13 @@
 >> refactor bricks
 >> valid HTML statics
 >> valid HTML 404
+>> styling
+>> arrows styles and hover/click effects
 
-photo:
-- styling
-- arrows styles and hover/click effects
-
-common:
-- transition effects
-- check all smart forwards/redirects on 404s
+- footer css
+- meta
+- category childs
+- final refactoring
 - final optimization
 
 -- problem with trailing slash "/ru"
@@ -49,6 +48,7 @@ common:
 ===== post ====
 - replace cover with exact size image on server/database
 - loader effects
+- transition effects
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes

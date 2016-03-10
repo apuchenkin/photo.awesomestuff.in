@@ -151,13 +151,13 @@ photoWidget router address params photo (prev, next) (w,h) isLoading locale =
     in
       Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True)]]) [
         Html.figure [classList [("content", True), ("hidden", isLoading)]] [
-          Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "Close " [], Html.i [Attr.class "icon-cancel"] []]]
+          Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "CLOSE" [], Html.text " ", Html.i [Attr.class "icon-cancel"] []]]
         , image
         , Html.figcaption [Attr.class "description"] <| List.filterMap identity [caption, author]
         ]
-      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)]])
+      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)], Attr.title <| Locale.i18n locale "PREV" []])
           <| [Html.i [Attr.class "icon-left-open"] []]
-      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)]])
+      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)], Attr.title <| Locale.i18n locale "NEXT" []])
           <| [Html.i [Attr.class "icon-right-open"] []]
       ]
     --
