@@ -100,10 +100,13 @@ header.main {
   }
 }
 
+@footer-size: 2.5 * @divisor;
+
 footer {
-  padding-top: @divisor;
   text-align: center;
   color: @light-grey;
+  padding: @divisor / 2 @divisor;
+  position: relative;
 
   a {
     color: @white;
@@ -133,8 +136,17 @@ footer {
   width: 100%;
   height: 100%;
 
+  &.not-found {
+    footer {
+      position: absolute;
+      bottom: @divisor / 2;
+      left: 0;
+      right: 0;
+    }
+  }
+
   & > .content {
-    padding: @divisor / 2 @divisor;
+    padding: @divisor / 2 @divisor 0 @divisor;
     color: @light-grey;
     width: 100%;
     height: 100%;
@@ -145,6 +157,18 @@ footer {
     // padding-top: 80px;
     position: relative;
 
+    & > .gallery, .galleries, .about, .contacts {
+      min-height: 100%;
+      box-sizing: border-box;
+      margin-bottom: -@footer-size;
+      overflow: hidden;
+
+      &:after {
+        content: "";
+        height: @footer-size;
+        display: block;
+      }
+    }
 
 
     //@media screen {

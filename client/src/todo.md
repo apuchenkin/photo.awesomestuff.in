@@ -34,14 +34,14 @@
 >> valid HTML 404
 >> styling
 >> arrows styles and hover/click effects
+>> footer css
 
-- footer css
 - meta
-- category childs
+- category childs?
 - final refactoring
+- problem with trailing slash "/ru"
 - final optimization
 
--- problem with trailing slash "/ru"
 -- add cached router views "do not re-render rendered handlers"
 -- expose address through router insted of export
 

@@ -18,6 +18,17 @@ Main.ports.rs.subscribe(onTransition);
 
 var main = wrapper.querySelector(':scope > #main');
 var links = {};
+var packery;
+var content = main.querySelector(':scope > .content');
+Ps.initialize(content);
+
+var headerElm = content.querySelector(':scope > header');
+var headerObserver = new MutationObserver(function(mutations) {
+  main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
+  Ps.update(content);
+});
+main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
+headerObserver.observe(headerElm, {childList: true});
 
 function metaUpdate(meta) {
   document.title = meta.title;
@@ -29,18 +40,6 @@ function metaUpdate(meta) {
     links[data[0]] = link;
   })
 }
-
-var content = main.querySelector(':scope > .content');
-Ps.initialize(content);
-
-var headerElm = content.querySelector(':scope > header');
-var headerObserver = new MutationObserver(function(mutations) {
-  main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
-});
-main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
-headerObserver.observe(headerElm, {childList: true});
-
-var packery;
 
 function onTransition() {
     content.scrollTop = 0;
