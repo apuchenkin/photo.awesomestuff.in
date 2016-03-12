@@ -2,9 +2,8 @@ module Handler.Default where
 
 import String
 import Dict
-import Html exposing (div, text, Html, button)
-import Html.Attributes as Attr exposing (href,class)
-import List.Extra as List'
+import Html exposing (Html)
+import List.Extra exposing ((!!))
 import Router.Types exposing (Router, Handler, Response (..))
 import Router.Helpers exposing (doNothing)
 
@@ -19,14 +18,14 @@ localeHandler : Router Route State -> Handler State
 localeHandler router =
   let
     view address state _ = Dict.empty
-  in
-    {
-      view = view,
-      actions = [
-        resolveLocale router,
-        createLinks router
-      ]
-    }
+  in {
+    view = view,
+    actions = [
+      resolveLocale router,
+      createLinks router,
+      resetMeta
+    ]
+  }
 
 notFoundHandler : Router Route State -> Handler State
 notFoundHandler router =
@@ -34,13 +33,12 @@ notFoundHandler router =
     view address state _ = Dict.fromList [
       ("body", notFoundWidget router state.locale)
     ]
-  in
-    {
-      view = view,
-      actions = [
-        \state -> setTitle (Just <| Locale.i18n state.locale "ERROR" ["404"]) state
-      ]
-    }
+  in {
+    view = view,
+    actions = [
+      \state -> setTitle (Just <| Locale.i18n state.locale "ERROR" ["404"]) state
+    ]
+  }
 
 staticHandler : String -> Router Route State -> Handler State
 staticHandler page router =
@@ -54,13 +52,12 @@ staticHandler page router =
       ("header", innerHeader router state.locale (Html.text <| title state.locale))
     , ("body", body state.locale)
     ]
-  in
-    {
-      view = view,
-      actions = [
-        \state -> setTitle (Just <| title state.locale) state
-      ]
-    }
+  in {
+    view = view,
+    actions = [
+      \state -> setTitle (Just <| title state.locale) state
+    ]
+  }
 
 homeHandler : Router Route State -> Handler State
 homeHandler router =
@@ -68,17 +65,17 @@ homeHandler router =
     view address state _ = Dict.fromList [
         ("body", galleriesWidget router (Dict.values state.categories) state.locale)
       ]
-  in
-    {
-      view = view,
-      actions = [
-        loadCategories router
-      ]
-    }
+  in {
+    view = view,
+    actions = [
+      loadCategories router
+    ]
+  }
 
 categoryHandler : Router Route State -> Handler State
 categoryHandler router =
   let
+    gallery' = gallery router
     view address state _ =
       let
         -- _ = Debug.log "categoryHandler" state
@@ -86,26 +83,18 @@ categoryHandler router =
         subcategory = Dict.get "subcategory" state.router.params &> flip Dict.get state.categories
         header = flip Maybe.map category <| \c -> innerHeader router state.locale (categoryLink router c state.locale True)
 
-        navigation = Html.nav [class "categories"] [
-          Html.ul []
-            <| List.map    (\c -> Html.li [] [categoryLink router c state.locale (Just c == subcategory)])
-            <| Maybe.withDefault []
-            <| flip Maybe.map category <| \(Category c) -> c.childs
-        ]
-
       in Dict.fromList <| List.filterMap identity [
         Maybe.map (\h -> ("header", h)) header
-      , Just <| ("navigation", navigation)
-      , Just <| ("body", gallery router state.router.params state.photos state.time)
+      , Just <| ("navigation", navigation router state.locale category subcategory)
+      , Just <| ("body", gallery' state.router.params state.photos state.time)
       ]
-  in
-    {
-      view = view,
-      actions = [
-        loadPhotos router
-      , (\state -> mapDefault (getCategory state) (doNothing state) (\c -> setMetaFromCategory c state))
-      ]
-    }
+  in {
+    view = view,
+    actions = [
+      loadPhotos router
+    , (\state -> mapDefault (getCategory state) (doNothing state) (\c -> setMetaFromCategory c state))
+    ]
+  }
 
 photoHandler : Router Route State -> Handler State
 photoHandler router =
@@ -117,25 +106,20 @@ photoHandler router =
           let
             photo = state.photo
             keys = List.map .id state.photos
-            neghbors = List'.elemIndex p keys
+            neghbors = List.Extra.elemIndex p keys
               &> \idx ->
                 let
                   l = List.length keys - 1
-                  last = List'.last keys
-                  first = List.head keys
-                  prev = if idx == 0 then last else List'.getAt keys (idx - 1)
-                  next = if idx == l then first else List'.getAt keys (idx + 1)
+                  prev = if idx == 0 then List.Extra.last keys else keys !! (idx - 1)
+                  next = if idx == l then List.head keys else keys !! (idx + 1)
                 in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
         photo' = flip Maybe.map params <| \p -> photoWidget router address state.router.params p.photo p.neighbors state.window (isLoading state) state.locale
-      in Dict.fromList <| List.filterMap identity [
-        flip Maybe.map photo' <| \p -> ("photo", p)
-      ]
-  in
-    {
-      view = view,
-      actions = [
-        loadPhoto
-      ]
-    }
+      in Dict.fromList <| mapDefault photo' [] <| \p -> [("photo", p)]
+  in {
+    view = view,
+    actions = [
+      loadPhoto
+    ]
+  }

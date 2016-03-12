@@ -37,12 +37,11 @@
 >> footer css
 >> category childs?
 >> meta
+>> final refactoring
 
-- final refactoring
 - final optimization
-
 -- add cached router views "do not re-render rendered handlers"
--- expose address through router insted of export
+-- expose address through router instead of export
 -- router remove trailing slash
 
 ===== post ====
@@ -53,3 +52,4 @@
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes
+-- 404 forwarded page and backUrl

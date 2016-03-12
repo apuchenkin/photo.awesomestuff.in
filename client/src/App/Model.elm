@@ -42,6 +42,22 @@ type Category = Category {
   , childs: List Category
   }
 
+type alias Author = {
+    name: String
+  }
+
+type alias Photo = {
+    id: Int
+  , src: String
+  , width: Int
+  , height: Int
+  , ratio: Float
+  , views: Int
+  , group: Maybe Int
+  , caption: Maybe String
+  , author: Maybe Author
+  }
+
 -- Category constuctor
 category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Maybe String -> Maybe String -> Category
 category id name title image date parent desc shortDesc = Category {
@@ -54,36 +70,6 @@ category id name title image date parent desc shortDesc = Category {
   , description = desc
   , shortDescription = shortDesc
   , childs = []
-  }
-
-decodeCategories : Json.Decoder (List Category)
-decodeCategories = Json.list <| Json.object8 category
-  ("id"     := Json.int)
-  ("name"   := Json.string)
-  ("title"  := Json.string)
-  (Json.maybe ("image" := Json.string))
-  (Json.maybe ("date" := Json.string))
-  (Json.maybe ("parent" := Json.map Left Json.int))
-  (Json.maybe ("description" := Json.string))
-  (Json.maybe ("short_description" := Json.string))
-
--- todo: persist child in categories
-childs : Category -> List Category -> List Category
-childs category categories =
-  let (Category pc) = category
-  in flip List.filter categories <| \(Category c) ->
-  Maybe.withDefault False <| c.parent &> \p -> Just <| Either.elim ((==) pc.id) ((==) category) p
-
-type alias Photo = {
-    id: Int
-  , src: String
-  , width: Int
-  , height: Int
-  , ratio: Float
-  , views: Int
-  , group: Maybe Int
-  , caption: Maybe String
-  , author: Maybe Author
   }
 
 -- Category constuctor
@@ -102,6 +88,17 @@ photo id src width height views group caption author =
   , author = author
   }
 
+decodeCategories : Json.Decoder (List Category)
+decodeCategories = Json.list <| Json.object8 category
+  ("id"     := Json.int)
+  ("name"   := Json.string)
+  ("title"  := Json.string)
+  (Json.maybe ("image" := Json.string))
+  (Json.maybe ("date" := Json.string))
+  (Json.maybe ("parent" := Json.map Left Json.int))
+  (Json.maybe ("description" := Json.string))
+  (Json.maybe ("short_description" := Json.string))
+
 decodePhoto : Json.Decoder Photo
 decodePhoto = Json.object8 photo
   ("id"     := Json.int)
@@ -116,6 +113,16 @@ decodePhoto = Json.object8 photo
 decodePhotos : Json.Decoder (List Photo)
 decodePhotos = Json.list decodePhoto
 
-type alias Author = {
-    name: String
-  }
+getCategory : State -> Maybe Category
+getCategory state =
+  let
+    param = case Dict.get "subcategory" state.router.params of
+      Nothing -> Dict.get "category" state.router.params
+      c -> c
+  in param &> flip Dict.get state.categories
+
+childs : Category -> List Category -> List Category
+childs category categories =
+  let (Category pc) = category
+  in flip List.filter categories <| \(Category c) ->
+  Maybe.withDefault False <| c.parent &> \p -> Just <| Either.elim ((==) pc.id) ((==) category) p

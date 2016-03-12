@@ -106,14 +106,6 @@ createLinks router state =
 
   in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] links}}
 
-getCategory : State -> Maybe Category
-getCategory state =
-  let
-    param = case Dict.get "subcategory" state.router.params of
-      Nothing -> Dict.get "category" state.router.params
-      c -> c
-  in param &> flip Dict.get state.categories
-
 getRequest: Json.Decoder value -> String -> State -> Task Http.Error value
 getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSettings
   { verb = "GET"
@@ -189,7 +181,6 @@ updatePhotos photos state =
     _ = Debug.log "updatePhotos" ()
     seed = Random.initialSeed <| floor <| Time.inSeconds state.time
     photos' = refinePhotos seed photos
-    -- dict = Dict.fromList <| List.map (\p -> (p.id, p)) photos'
   in Response <| noFx {state | photos = photos'}
 
 updatePhoto : Maybe Photo -> Action State
@@ -200,21 +191,18 @@ updateCategories : List Category -> Action State
 updateCategories categories state =
   let
     _ = Debug.log "updateCategories" ()
-    dict  = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.name, category)) categories
-    dict' = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.id, category))   categories
+    idMap = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.id, category))   categories
 
     findParent mp = flip Maybe.map mp <| \p -> case p of
-      Left pidx -> mapDefault (Dict.get pidx dict') p Right
+      Left pidx -> mapDefault (Dict.get pidx idMap) p Right
       Right _ -> p
 
-    castegories' = Dict.map (\_ category ->
+    categories' = List.map (\(Category c) -> Category { c | parent = findParent c.parent }) categories
+    dict = Dict.fromList <| List.map (\category ->
       let (Category c) = category
-      in Category { c
-      | parent = findParent c.parent
-      , childs = childs category categories
-    }) dict
+      in (c.name, Category { c | childs = childs category categories'})) categories'
   in
-    Response <| noFx {state | categories = castegories'}
+    Response <| noFx {state | categories = dict}
 
 resolveLocale : Router Route State -> Action State
 resolveLocale router state =
