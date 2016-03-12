@@ -39,6 +39,7 @@ type Category = Category {
   , parent: Maybe (Either Int Category)
   , description: Maybe String
   , shortDescription: Maybe String
+  , childs: List Category
   }
 
 -- Category constuctor
@@ -52,6 +53,7 @@ category id name title image date parent desc shortDesc = Category {
   , parent = parent
   , description = desc
   , shortDescription = shortDesc
+  , childs = []
   }
 
 decodeCategories : Json.Decoder (List Category)

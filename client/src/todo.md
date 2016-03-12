@@ -35,9 +35,9 @@
 >> styling
 >> arrows styles and hover/click effects
 >> footer css
+>> category childs?
+>> meta
 
-- meta
-- category childs?
 - final refactoring
 - final optimization
 

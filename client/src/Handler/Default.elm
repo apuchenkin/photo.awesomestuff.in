@@ -90,7 +90,7 @@ categoryHandler router =
           Html.ul []
             <| List.map    (\c -> Html.li [] [categoryLink router c state.locale (Just c == subcategory)])
             <| Maybe.withDefault []
-            <| flip Maybe.map category <| \c -> childs c (Dict.values state.categories)
+            <| flip Maybe.map category <| \(Category c) -> c.childs
         ]
 
       in Dict.fromList <| List.filterMap identity [

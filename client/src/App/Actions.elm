@@ -200,19 +200,21 @@ updateCategories : List Category -> Action State
 updateCategories categories state =
   let
     _ = Debug.log "updateCategories" ()
-    dict  = Dict.fromList   <| List.map (\(Category c) -> (c.name, c)) categories
-    dict' = Dict.fromList   <| List.map (\(Category c) -> (c.id, c))   categories
+    dict  = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.name, category)) categories
+    dict' = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.id, category))   categories
 
-    castegoris' = Dict.map (\name category -> Category {category | parent = Maybe.map (\p ->
-      case p of
-        Right _ -> p
-        Left  pidx -> case (Dict.get pidx dict') of
-          Nothing -> p
-          Just p' -> Right <| Category p'
-      ) category.parent}) dict
-    -- _ = Debug.log "cs" categories
+    findParent mp = flip Maybe.map mp <| \p -> case p of
+      Left pidx -> mapDefault (Dict.get pidx dict') p Right
+      Right _ -> p
+
+    castegories' = Dict.map (\_ category ->
+      let (Category c) = category
+      in Category { c
+      | parent = findParent c.parent
+      , childs = childs category categories
+    }) dict
   in
-    Response <| noFx {state | categories = castegoris'}
+    Response <| noFx {state | categories = castegories'}
 
 resolveLocale : Router Route State -> Action State
 resolveLocale router state =

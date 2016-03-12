@@ -83,12 +83,12 @@ galleriesWidget : Router Route State -> List Category -> Locale -> Html
 galleriesWidget router categories locale = Html.div [class "galleries"] [
   Html.h2 [] [text <| Locale.i18n locale "Galleries" []],
   Html.ul []
-      <| List.map (\c -> Html.li [] [categoryWidget router c (childs c categories) locale])
+      <| List.map (\c -> Html.li [] [categoryWidget router c locale])
       <| List.filter (\(Category c) -> c.parent == Nothing) categories
     ]
 
-categoryWidget : Router Route State -> Category -> List Category -> Locale -> Html
-categoryWidget router category childs locale =
+categoryWidget : Router Route State -> Category -> Locale -> Html
+categoryWidget router category locale =
   let
     (Category c) = category
     params = case c.parent of
@@ -108,7 +108,7 @@ categoryWidget router category childs locale =
       ]
     aside = Html.aside [] [
         Html.h3 [] [categoryLink router category locale True],
-        Html.ul [] (List.map (\c -> Html.li [] [categoryLink router c locale False]) childs)
+        Html.ul [] (List.map (\child -> Html.li [] [categoryLink router child locale False]) c.childs)
       ]
   in
     Html.div [class "gallery"] [
