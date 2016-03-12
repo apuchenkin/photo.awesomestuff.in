@@ -1,7 +1,7 @@
 module App.Locale where
 
 import I18n exposing (withLanguage, createLookup, Language(Language))
-
+import App.Config exposing (config)
 type Locale = Ru | En
 
 fallbackLocale: Locale
@@ -64,6 +64,7 @@ lookup = createLookup
     , ( "Galleries", "Галереи")
     , ( "Travel in photography", "Путешествия в фотографиях")
     , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
+    , ("TITLE", "{0} - " ++ config.title)
     , ("CLOSE", "Закрыть")
     , ("PREV", "Предыдущая")
     , ("NEXT", "Следующая")
@@ -93,6 +94,7 @@ lookup = createLookup
     (Language <| toString En) <|
     [ ( "about", "About")
     , ( "contacts", "Contacts")
+    , ("TITLE", "{0} - " ++ config.title)
     , ("CLOSE", "Close")
     , ("PREV", "Previous")
     , ("NEXT", "Next")

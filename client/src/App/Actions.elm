@@ -27,7 +27,7 @@ pred : number -> number
 pred a = a - 1
 
 transition : Router Route State -> from -> to -> Action State
-transition router _ _ = resetLoading `chainAction` createLinks router
+transition router _ _ = resetMeta `chainAction` resetLoading `chainAction` createLinks router
 
 isLoading : State -> Bool
 isLoading state = state.isLoading /= 0
@@ -41,6 +41,37 @@ startLoading : Action State
 startLoading state =
   let _ = Debug.log "startLoading" ()
   in Response <| noFx { state | isLoading = succ state.isLoading}
+
+setTitle : Maybe String -> Action State
+setTitle title state =
+  let
+    _ = Debug.log "setTitle" title
+    meta = state.meta
+    title' = Maybe.withDefault config.title <| Maybe.map (\t -> Locale.i18n state.locale "TITLE" [t]) title
+  in Response <| noFx {state | meta = {meta | title = title'}}
+
+setDescription : Maybe String -> Action State
+setDescription desc state =
+  let
+    _ = Debug.log "setDescription" desc
+    meta = state.meta
+    desc' = Maybe.withDefault (Locale.i18n state.locale "META.DESCRIPTION" []) desc
+  in Response <| noFx {state | meta = {meta | description = desc'}}
+
+resetMeta : Action State
+resetMeta = setTitle Nothing `chainAction` setDescription Nothing
+
+setMetaFromCategory : Category -> Action State
+setMetaFromCategory (Category c) =
+    setTitle (Just c.title)
+    `chainAction`
+    setDescription (Maybe.withDefault c.description <| Maybe.map Just c.shortDescription)
+
+setMetaFromPhoto : Photo -> Action State
+setMetaFromPhoto photo =
+    setTitle photo.caption
+    `chainAction`
+    (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale "META.DESCRIPTION.PHOTO" [author.name, caption]) photo.author photo.caption) state)
 
 stopLoading : Action State
 stopLoading state =
@@ -107,6 +138,7 @@ loadCategories router state =
           update
             `chainAction` (checkCategory router category)
             `chainAction` (loadPhotos router)
+            `chainAction` (\state -> mapDefault (getCategory state) (doNothing state) (\c -> setMetaFromCategory c state))
 
       in Task.succeed <| action
 
@@ -161,7 +193,8 @@ updatePhotos photos state =
   in Response <| noFx {state | photos = photos'}
 
 updatePhoto : Maybe Photo -> Action State
-updatePhoto photo state = Response <| noFx {state | photo = photo}
+updatePhoto photo = (\state -> Response <| noFx {state | photo = photo})
+  `chainAction` (\state -> mapDefault photo (doNothing state) (\p -> setMetaFromPhoto p state))
 
 updateCategories : List Category -> Action State
 updateCategories categories state =

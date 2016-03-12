@@ -15,6 +15,7 @@ import App.Routes as Routes exposing (Route)
 
 type alias Meta = {
     title: String,
+    description: String,
     links: List (String, String)
   }
 
@@ -36,27 +37,33 @@ type Category = Category {
   , image: Maybe String
   , date: Maybe Date
   , parent: Maybe (Either Int Category)
+  , description: Maybe String
+  , shortDescription: Maybe String
   }
 
 -- Category constuctor
-category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Category
-category id name title image date parent = Category {
+category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Maybe String -> Maybe String -> Category
+category id name title image date parent desc shortDesc = Category {
     id = id
   , name = name
   , title = title
   , image = image
   , date  = date `Maybe.andThen` \d -> Result.toMaybe (Date.fromString d)
   , parent = parent
+  , description = desc
+  , shortDescription = shortDesc
   }
 
 decodeCategories : Json.Decoder (List Category)
-decodeCategories = Json.list <| Json.object6 category
+decodeCategories = Json.list <| Json.object8 category
   ("id"     := Json.int)
   ("name"   := Json.string)
   ("title"  := Json.string)
-  (Json.maybe ("image"  := Json.string))
-  (Json.maybe ("date"  := Json.string))
+  (Json.maybe ("image" := Json.string))
+  (Json.maybe ("date" := Json.string))
   (Json.maybe ("parent" := Json.map Left Json.int))
+  (Json.maybe ("description" := Json.string))
+  (Json.maybe ("short_description" := Json.string))
 
 -- todo: persist child in categories
 childs : Category -> List Category -> List Category

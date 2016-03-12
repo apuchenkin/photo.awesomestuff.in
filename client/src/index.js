@@ -32,6 +32,7 @@ headerObserver.observe(headerElm, {childList: true});
 
 function metaUpdate(meta) {
   document.title = meta.title;
+  document.head.querySelector('meta[name=description]').content = meta.description;
   meta.links.map(function(data) {
     var link = links[data[0]] || document.head.appendChild(document.createElement('link'));
     link.href = data[1];

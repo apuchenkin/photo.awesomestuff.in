@@ -6,6 +6,7 @@ import Html exposing (div, text, Html, button)
 import Html.Attributes as Attr exposing (href,class)
 import List.Extra as List'
 import Router.Types exposing (Router, Handler, Response (..))
+import Router.Helpers exposing (doNothing)
 
 import App.Routes as Route exposing (Route)
 import App.Locale as Locale exposing (Locale)
@@ -36,7 +37,9 @@ notFoundHandler router =
   in
     {
       view = view,
-      actions = []
+      actions = [
+        \state -> setTitle (Just <| Locale.i18n state.locale "ERROR" ["404"]) state
+      ]
     }
 
 staticHandler : String -> Router Route State -> Handler State
@@ -46,15 +49,17 @@ staticHandler page router =
       "about" -> aboutWidget locale
       "contacts" -> contactsWidget locale
       _ -> Html.div [] []
-    title locale = Html.text <| Locale.i18n locale page []
+    title locale = Locale.i18n locale page []
     view address state _ = Dict.fromList [
-      ("header", innerHeader router state.locale (title state.locale))
+      ("header", innerHeader router state.locale (Html.text <| title state.locale))
     , ("body", body state.locale)
     ]
   in
     {
       view = view,
-      actions = []
+      actions = [
+        \state -> setTitle (Just <| title state.locale) state
+      ]
     }
 
 homeHandler : Router Route State -> Handler State
@@ -98,6 +103,7 @@ categoryHandler router =
       view = view,
       actions = [
         loadPhotos router
+      , (\state -> mapDefault (getCategory state) (doNothing state) (\c -> setMetaFromCategory c state))
       ]
     }
 

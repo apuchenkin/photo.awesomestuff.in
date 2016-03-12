@@ -9,7 +9,6 @@
     "exposed-modules": [],
     "dependencies": {
         "Apanatshka/elm-signal-extra": "5.7.0 <= v < 6.0.0",
-        "Bogdanp/elm-combine": "2.0.0 <= v < 3.0.0",
         "NoRedInk/elm-lazy-list": "2.0.0 <= v < 3.0.0",
         "apuchenkin/elm-nested-router": "1.0.0 <= v < 2.0.0",
         "apuchenkin/elm-multiway-tree-extra": "1.0.0 <= v < 2.0.0",

@@ -39,16 +39,17 @@
 - meta
 - category childs?
 - final refactoring
-- problem with trailing slash "/ru"
 - final optimization
 
 -- add cached router views "do not re-render rendered handlers"
 -- expose address through router insted of export
+-- router remove trailing slash
 
 ===== post ====
 - replace cover with exact size image on server/database
 - loader effects
 - transition effects
+- photo has separate loader
 
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
 -- raise bug about structure re-rendering when first node is changes

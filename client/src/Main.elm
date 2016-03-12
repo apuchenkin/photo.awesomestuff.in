@@ -25,22 +25,22 @@ config route = case route of
   , handler = localeHandler
   }
   Route.Home -> {
-    segment = "/"
+    segment = ""
   , constraints = Dict.empty
   , handler = homeHandler
   }
   Route.NotFound -> {
-    segment = "404"
+    segment = "/404"
   , constraints = Dict.empty
   , handler = notFoundHandler
   }
   Route.Static page -> {
-    segment = page
+    segment = "/" ++ page
   , constraints = Dict.empty
   , handler = staticHandler page
   }
   Route.Category -> {
-    segment = ":category[/:subcategory]"
+    segment = "/:category[/:subcategory]"
   , constraints = Dict.empty
   , handler = categoryHandler
   }
@@ -53,6 +53,7 @@ config route = case route of
 initialMeta : Meta
 initialMeta = {
     title = "PHOTO.AWESOMESTUFF.IN",
+    description = Locale.i18n Locale.fallbackLocale "META.DESCRIPTION" [],
     links = []
   }
 
@@ -68,7 +69,6 @@ initialState = {
   , time = 0
   , window = (0,0)
   }
-
 
 router : Router Route State
 router = Router.router <| RouterConfig {
