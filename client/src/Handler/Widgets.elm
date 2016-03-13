@@ -144,11 +144,11 @@ brickWidget router params photo =
       content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
     in photoLink router photo params content
 
-photoWidget : Router Route State -> Signal.Address (Action State) -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Bool -> Locale -> Html
-photoWidget router address params photo (prev, next) (w,h) isLoading locale =
+photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Bool -> Locale -> Html
+photoWidget router params photo (prev, next) (w,h) isLoading locale =
     let
       (w', h') = adjust (w - 40, h - 40)
-      onLoad = Events.on "load" Json.value <| always <| Signal.message address stopLoading
+      onLoad = Events.on "load" Json.value <| always <| Signal.message router.address stopLoading
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ String.join "/" ["", "hs", "photo", toString photo.id, toString w', toString h', filename]
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src, onLoad]) []

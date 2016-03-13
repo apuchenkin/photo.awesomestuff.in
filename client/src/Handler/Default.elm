@@ -17,7 +17,7 @@ import Handler.Static exposing (..)
 localeHandler : Router Route State -> Handler State
 localeHandler router =
   let
-    view address state _ = Dict.empty
+    view state _ = Dict.empty
   in {
     view = view,
     actions = [
@@ -30,7 +30,7 @@ localeHandler router =
 notFoundHandler : Router Route State -> Handler State
 notFoundHandler router =
   let
-    view address state _ = Dict.fromList [
+    view state _ = Dict.fromList [
       ("body", notFoundWidget router state.locale)
     ]
   in {
@@ -48,7 +48,7 @@ staticHandler page router =
       "contacts" -> contactsWidget locale
       _ -> Html.div [] []
     title locale = Locale.i18n locale page []
-    view address state _ = Dict.fromList [
+    view state _ = Dict.fromList [
       ("header", innerHeader router state.locale (Html.text <| title state.locale))
     , ("body", body state.locale)
     ]
@@ -62,7 +62,7 @@ staticHandler page router =
 homeHandler : Router Route State -> Handler State
 homeHandler router =
   let
-    view address state _ = Dict.fromList [
+    view state _ = Dict.fromList [
         ("body", galleriesWidget router (Dict.values state.categories) state.locale)
       ]
   in {
@@ -76,7 +76,7 @@ categoryHandler : Router Route State -> Handler State
 categoryHandler router =
   let
     gallery' = gallery router
-    view address state _ =
+    view state _ =
       let
         -- _ = Debug.log "categoryHandler" state
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
@@ -99,7 +99,7 @@ categoryHandler router =
 photoHandler : Router Route State -> Handler State
 photoHandler router =
   let
-    view address state _ =
+    view state _ =
       let
         pid = Maybe.map ((Result.withDefault 0) << String.toInt) <| Dict.get "photo" state.router.params
         params = Maybe.andThen pid <| \p ->
@@ -115,7 +115,7 @@ photoHandler router =
                 in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
-        photo' = flip Maybe.map params <| \p -> photoWidget router address state.router.params p.photo p.neighbors state.window (isLoading state) state.locale
+        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window (isLoading state) state.locale
       in Dict.fromList <| mapDefault photo' [] <| \p -> [("photo", p)]
   in {
     view = view,
