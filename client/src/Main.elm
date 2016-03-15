@@ -73,8 +73,8 @@ initialState = {
 router : Router Route State
 router = Router.router <| RouterConfig {
     init = initialState
-  , useCache = True
   , html5 = True
+  , removeTrailingSlash = True
   , fallback = (Route.NotFound, Dict.empty)
   , layout = layout
   , onTransition = transition
