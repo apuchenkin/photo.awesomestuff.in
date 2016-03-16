@@ -40,9 +40,9 @@
 >> final refactoring
 >> expose address through router instead of export
 >> router remove trailing slash
+>> final optimization
 
 -- add cached router views "do not re-render rendered handlers"
-- final optimization
 - loader effects
 - transition effects
 - photo has separate loader

@@ -125,11 +125,12 @@ categoryWidget = lazy3 <| \router category locale ->
 gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
 gallery router = lazy3 <| \ params photos time ->
   let
+    brick = brickWidget router params
     seed = Random.initialSeed <| floor <| Time.inSeconds time
     photos' = remapPhotos seed photos
   in Html.div [Attr.class "gallery"]
   <| singleton <| Html.ul [] <| flip List.map photos'
-  <| \photo -> Html.li [] [brickWidget router params photo]
+  <| \photo -> Html.li [] [brick photo]
 
 brickWidget : Router Route State -> RouteParams -> Photo -> Html
 brickWidget router params photo =

@@ -34,18 +34,20 @@ isLoading state = state.isLoading /= 0
 
 resetLoading : Action State
 resetLoading state =
-  let _ = Debug.log "resetLoading" ()
-  in Response <| noFx { state | isLoading = 0}
+  -- let _ = Debug.log "resetLoading" ()
+  -- in
+  Response <| noFx { state | isLoading = 0}
 
 startLoading : Action State
 startLoading state =
-  let _ = Debug.log "startLoading" ()
-  in Response <| noFx { state | isLoading = succ state.isLoading}
+  -- let _ = Debug.log "startLoading" ()
+  -- in
+   Response <| noFx { state | isLoading = succ state.isLoading}
 
 setTitle : Maybe String -> Action State
 setTitle title state =
   let
-    _ = Debug.log "setTitle" title
+    -- _ = Debug.log "setTitle" title
     meta = state.meta
     title' = Maybe.withDefault config.title <| Maybe.map (\t -> Locale.i18n state.locale "TITLE" [t]) title
   in Response <| noFx {state | meta = {meta | title = title'}}
@@ -53,7 +55,7 @@ setTitle title state =
 setDescription : Maybe String -> Action State
 setDescription desc state =
   let
-    _ = Debug.log "setDescription" desc
+    -- _ = Debug.log "setDescription" desc
     meta = state.meta
     desc' = Maybe.withDefault (Locale.i18n state.locale "META.DESCRIPTION" []) desc
   in Response <| noFx {state | meta = {meta | description = desc'}}
@@ -75,28 +77,32 @@ setMetaFromPhoto photo =
 
 stopLoading : Action State
 stopLoading state =
-  let _ = Debug.log "stopLoading" ()
-  in Response <| noFx { state | isLoading = if state.isLoading > 0 then pred state.isLoading else 0}
+  -- let _ = Debug.log "stopLoading" ()
+  -- in
+    Response <| noFx { state | isLoading = if state.isLoading > 0 then pred state.isLoading else 0}
 
 setTime : Time -> Action State
 setTime time state =
-  let _ = Debug.log "setTime" time
-  in Response <| noFx {state | time = time}
+  -- let _ = Debug.log "setTime" time
+  -- in
+    Response <| noFx {state | time = time}
 
 setDims : (Int, Int) -> Action State
 setDims dims state =
-  let _ = Debug.log "setDims" dims
-  in Response <| noFx {state | window = dims}
+  -- let _ = Debug.log "setDims" dims
+  -- in
+    Response <| noFx {state | window = dims}
 
 setLocale : Locale -> Action State
 setLocale locale state =
-  let _ = Debug.log "setLocale" locale
-  in Response <| noFx {state | locale = locale}
+  -- let _ = Debug.log "setLocale" locale
+  -- in
+    Response <| noFx {state | locale = locale}
 
 createLinks : Router Route State -> Action State
 createLinks router state =
   let
-    _ = Debug.log "createLinks" ()
+    -- _ = Debug.log "createLinks" ()
     meta = state.meta
     links = flip Maybe.map state.router.route <| \ route ->
       ("x-default", config.hostname ++ router.buildUrl (route, Dict.remove "locale" state.router.params))
@@ -117,7 +123,7 @@ getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSett
 loadCategories : Router Route State -> Action State
 loadCategories router state =
   let
-    _ = Debug.log "loadCategories" ()
+    -- _ = Debug.log "loadCategories" ()
     fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state
     task = Task.map (\f -> startLoading `chainAction` f) <| fetch `Task.andThen` \mcategories ->
       let
@@ -145,7 +151,7 @@ checkCategory router category state =
 loadPhotos : Router Route State -> Action State
 loadPhotos router state =
   let
-    _ = Debug.log "loadPhotos" ()
+    -- _ = Debug.log "loadPhotos" ()
     task = case Dict.isEmpty state.categories of
       True   -> Nothing
       False  ->
@@ -165,7 +171,7 @@ loadPhotos router state =
 loadPhoto : Action State
 loadPhoto state =
   let
-    _ = Debug.log "loadPhoto" ()
+    -- _ = Debug.log "loadPhoto" ()
     photoId = Dict.get "photo" state.router.params
     task = flip Maybe.map photoId <| \pid ->
       let fetch = Task.toMaybe <| getRequest decodePhoto (config.apiEndpoint ++ "/photo/" ++ pid) state
@@ -178,7 +184,7 @@ loadPhoto state =
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =
   let
-    _ = Debug.log "updatePhotos" ()
+    -- _ = Debug.log "updatePhotos" ()
     seed = Random.initialSeed <| floor <| Time.inSeconds state.time
     photos' = refinePhotos seed photos
   in Response <| noFx {state | photos = photos'}
@@ -190,7 +196,7 @@ updatePhoto photo = (\state -> Response <| noFx {state | photo = photo})
 updateCategories : List Category -> Action State
 updateCategories categories state =
   let
-    _ = Debug.log "updateCategories" ()
+    -- _ = Debug.log "updateCategories" ()
     idMap = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.id, category))   categories
 
     findParent mp = flip Maybe.map mp <| \p -> case p of
@@ -208,7 +214,7 @@ resolveLocale : Router Route State -> Action State
 resolveLocale router state =
   let
     locale = Dict.get "locale" state.router.params
-    _ = Debug.log "resolveLocale" locale
+    -- _ = Debug.log "resolveLocale" locale
     route = Maybe.withDefault Routes.Home state.router.route
     params = Dict.fromList [("locale", Locale.toString state.locale)]
   in case locale of
