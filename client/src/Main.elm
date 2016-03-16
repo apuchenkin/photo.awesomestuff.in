@@ -15,39 +15,37 @@ import Handler.Default exposing (..)
 import Router
 import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..), RouteParams)
 
--- import Mouse
-
-config : Route -> RouteConfig Route State
+config : Route -> RouteConfig State
 config route = case route of
   Route.Locale -> {
     segment = "[/:locale]"
   , constraints = Dict.fromList [("locale", Enum ["ru", "en"])]
-  , handler = localeHandler
+  , handler = localeHandler router
   }
   Route.Home -> {
     segment = ""
   , constraints = Dict.empty
-  , handler = homeHandler
+  , handler = homeHandler router
   }
   Route.NotFound -> {
     segment = "/404"
   , constraints = Dict.empty
-  , handler = notFoundHandler
+  , handler = notFoundHandler router
   }
   Route.Static page -> {
     segment = "/" ++ page
   , constraints = Dict.empty
-  , handler = staticHandler page
+  , handler = staticHandler page router
   }
   Route.Category -> {
     segment = "/:category[/:subcategory]"
   , constraints = Dict.empty
-  , handler = categoryHandler
+  , handler = categoryHandler router
   }
   Route.Photo -> {
     segment = "/photo/:photo"
   , constraints = Dict.fromList [("photo", Int)]
-  , handler = photoHandler
+  , handler = photoHandler router
   }
 
 initialMeta : Meta

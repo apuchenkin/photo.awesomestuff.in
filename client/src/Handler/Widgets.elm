@@ -123,7 +123,7 @@ categoryWidget = lazy3 <| \router category locale ->
     ]
 
 gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
-gallery router params photos time =
+gallery router = lazy3 <| \ params photos time ->
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds time
     photos' = remapPhotos seed photos
