@@ -15,35 +15,47 @@ import Handler.Default exposing (..)
 import Router
 import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..), RouteParams)
 
-config : Route -> RouteConfig State
+config : Route -> RouteConfig Route State
 config route = case route of
   Route.Locale -> {
     segment = "[/:locale]"
+  , bypass = True
+  , parent = Nothing
   , constraints = Dict.fromList [("locale", Enum ["ru", "en"])]
   , handler = localeHandler router
   }
-  Route.Home -> {
-    segment = ""
-  , constraints = Dict.empty
-  , handler = homeHandler router
-  }
   Route.NotFound -> {
     segment = "/404"
+  , bypass = False
+  , parent = Just Route.Locale
   , constraints = Dict.empty
   , handler = notFoundHandler router
   }
   Route.Static page -> {
     segment = "/" ++ page
+  , bypass = False
+  , parent = Just Route.Locale
   , constraints = Dict.empty
   , handler = staticHandler page router
   }
+  Route.Home -> {
+    segment = ""
+  , bypass = False
+  , parent = Just Route.Locale
+  , constraints = Dict.empty
+  , handler = homeHandler router
+  }
   Route.Category -> {
     segment = "/:category[/:subcategory]"
+  , bypass = False
+  , parent = Just Route.Home
   , constraints = Dict.empty
   , handler = categoryHandler router
   }
   Route.Photo -> {
     segment = "/photo/:photo"
+  , bypass = False
+  , parent = Just Route.Category
   , constraints = Dict.fromList [("photo", Int)]
   , handler = photoHandler router
   }
