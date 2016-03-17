@@ -41,11 +41,12 @@
 >> expose address through router instead of export
 >> router remove trailing slash
 >> final optimization
+>> add cached router views "do not re-render rendered handlers"
 
--- add cached router views "do not re-render rendered handlers"
+- separate loader for photo
 - loader effects
 - transition effects
-- photo has separate loader
+- check that router does not falls
 
 ===== post ====
 - replace cover with exact size image on server/database
