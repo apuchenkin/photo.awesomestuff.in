@@ -76,7 +76,7 @@ categoryHandler : Router Route State -> Handler State
 categoryHandler router =
   let
     gallery' = gallery router
-    -- _ = Debug.log "gallery" gallery'
+    _ = Debug.log "gallery" gallery'
     view state _ =
       let
         -- _ = Debug.log "categoryHandler" state

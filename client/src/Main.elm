@@ -22,42 +22,42 @@ config route = case route of
   , bypass = True
   , parent = Nothing
   , constraints = Dict.fromList [("locale", Enum ["ru", "en"])]
-  , handler = localeHandler router
+  , handler = localeHandler
   }
   Route.NotFound -> {
     segment = "/404"
   , bypass = False
   , parent = Just Route.Locale
   , constraints = Dict.empty
-  , handler = notFoundHandler router
+  , handler = notFoundHandler
   }
   Route.Static page -> {
     segment = "/" ++ page
   , bypass = False
   , parent = Just Route.Locale
   , constraints = Dict.empty
-  , handler = staticHandler page router
+  , handler = staticHandler page
   }
   Route.Home -> {
     segment = ""
   , bypass = False
   , parent = Just Route.Locale
   , constraints = Dict.empty
-  , handler = homeHandler router
+  , handler = homeHandler
   }
   Route.Category -> {
     segment = "/:category[/:subcategory]"
   , bypass = False
   , parent = Just Route.Home
   , constraints = Dict.empty
-  , handler = categoryHandler router
+  , handler = categoryHandler
   }
   Route.Photo -> {
     segment = "/photo/:photo"
   , bypass = False
   , parent = Just Route.Category
   , constraints = Dict.fromList [("photo", Int)]
-  , handler = photoHandler router
+  , handler = photoHandler
   }
 
 initialMeta : Meta
@@ -80,8 +80,8 @@ initialState = {
   , window = (0,0)
   }
 
-router : Router Route State
-router = Router.router <| RouterConfig {
+result : RouterResult State
+result = Router.runRouter <| RouterConfig {
     init = initialState
   , html5 = True
   , removeTrailingSlash = True
@@ -97,9 +97,6 @@ router = Router.router <| RouterConfig {
     ]
   , inputs = []
   }
-
-result : RouterResult State
-result = Router.runRouter router
 
 main : Signal Html
 main = result.html
