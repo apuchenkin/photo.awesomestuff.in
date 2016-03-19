@@ -26,18 +26,20 @@ isJust a = case a of
 layout : Router Route State -> State -> Dict String Html -> Html
 layout router state views =
   let
+    languageSelector' = languageSelector router
     defaultHeader = homeHeader router state.locale
     defaultFooter = footer router state.locale
     defaultBody = Html.div [Attr.class "body"] []
     page = Maybe.andThen state.router.route (fromCamelCase << toString)
-  in Html.div [Attr.id "main", Attr.classList [(Maybe.withDefault "" page, isJust page)]] [
-    loader (isLoading state)
-  , Maybe.withDefault (Html.div [] []) <| Dict.get "photo" views
-  , Html.div [Attr.class "content"] [
-        Maybe.withDefault defaultHeader <| Dict.get "header" views
-      , Maybe.withDefault (Html.div [] []) <| Dict.get "navigation" views
-      , Maybe.withDefault defaultBody   <| Dict.get "body" views
-      , Maybe.withDefault defaultFooter <| Dict.get "footer" views
-      , languageSelector router state
-      ]
-  ]
+  in
+    Html.div [Attr.key "main", Attr.id "main", Attr.classList [(Maybe.withDefault "" page, isJust page)]] <| List.filterMap identity [
+      Just <| loader (isLoading state)
+    , Dict.get "photo" views
+    , Just <| Html.div [Attr.class "content", Attr.key "content"] <| List.filterMap identity [
+          Just <| Maybe.withDefault defaultHeader <| Dict.get "header" views
+        , Dict.get "navigation" views
+        , Dict.get "body" views
+        , Just <| Maybe.withDefault defaultFooter <| Dict.get "footer" views
+        ]
+    , Just <| languageSelector' state.router.route state.router.params state.locale
+    ]

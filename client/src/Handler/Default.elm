@@ -76,7 +76,9 @@ categoryHandler : Router Route State -> Handler State
 categoryHandler router =
   let
     gallery' = gallery router
+    navigation' = navigation router
     _ = Debug.log "gallery" gallery'
+
     view state _ =
       let
         -- _ = Debug.log "categoryHandler" state
@@ -86,7 +88,7 @@ categoryHandler router =
 
       in Dict.fromList <| List.filterMap identity [
         Maybe.map (\h -> ("header", h)) header
-      , Just <| ("navigation", navigation router state.locale category subcategory)
+      , Just <| ("navigation", navigation' state.locale category subcategory)
       , Just <| ("body", gallery' state.router.params state.photos state.time)
       ]
   in {

@@ -30,27 +30,28 @@ loader = lazy <| \visible ->
       ("hidden", not visible),
       ("loader", True)
     ]
-  in Html.div [attributes] [Html.div [Attr.class "accent"] []]
+  in Html.div [attributes, Attr.key "loader"] [Html.div [Attr.class "accent"] []]
 
-languageSelector :  Router Route State -> State -> Html
-languageSelector = lazy2 <| \router state ->
+languageSelector :  Router Route State -> Maybe Route -> RouteParams -> Locale -> Html
+languageSelector router = lazy3 <| \route params locale ->
   let
-    route = Maybe.withDefault Routes.Home state.router.route
-    params locale = flip Dict.union state.router.params <| Dict.fromList [("locale", Locale.toString locale)]
+    _ = Debug.log "languageSelector"
+    route' = Maybe.withDefault Routes.Home route
+    params = flip Dict.union params <| Dict.fromList [("locale", Locale.toString locale)]
     attributes locale = [
-      classList [("active", locale == state.locale)],
+      classList [("active", locale == locale)],
       hreflang (Locale.toString locale)
     ]
-  in Html.div [class "language"]
+  in Html.div [class "language", Attr.key "language-selector"]
   <| flip List.map Locale.locales
-  <| \locale -> Html.a (router.bindForward (route, params locale) (attributes locale)) [Html.text <| Locale.toString locale]
+  <| \locale -> Html.a (router.bindForward (route', params) (attributes locale)) [Html.text <| Locale.toString locale]
 
 homeHeader : Router Route State -> Locale -> Html
 homeHeader = lazy2 <| \router locale ->
   let
     version = span [class "version"] [text <| Locale.i18n locale "alpha" []]
   in
-    Html.header [class "main"] [
+    Html.header [class "main", Attr.key "header-home"] [
       Html.h1 [class "title"] [homeLink router locale config.title, version],
       Html.h2 [class "subtitle"] [text <| Locale.i18n locale "SUBTITLE" []]
     ]
@@ -60,17 +61,18 @@ innerHeader = lazy3 <| \router locale title ->
   let
     homeText = Locale.i18n locale "Home" []
   in
-    Html.header [class "main"] [
+    Html.header [class "main", Attr.key "header-inner"] [
       Html.h1 [class "title"] [homeLink router locale homeText, text " / ", title]
     ]
 
 footer : Router Route State -> Locale -> Html
 footer = lazy2 <| \router locale ->
   let
+    _ = Debug.log "footer" ()
     about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "About" []]
     contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "Contacts" []]
     sep = text " | "
-  in Html.footer [] [
+  in Html.footer [Attr.key "footer"] [
     homeLink router locale (String.toLower config.title),
     sep, text <| Locale.i18n locale "© 2015, Artem Puchenkin" [],
     sep, about,
@@ -78,15 +80,21 @@ footer = lazy2 <| \router locale ->
   ]
 
 navigation : Router Route State -> Locale -> Maybe Category -> Maybe Category -> Html
-navigation router locale category subcategory = Html.nav [Attr.class "categories"] [
-    Html.ul []
-      <| List.map    (\c -> Html.li [] [categoryLink router c locale (Just c == subcategory)])
-      <| Maybe.withDefault []
-      <| flip Maybe.map category <| \(Category c) -> c.childs
-  ]
+navigation router =
+  let
+    _ = Debug.log "navigation" ()
+    categoryLink' = categoryLink router
+  in
+    lazy3 <| \locale category subcategory ->
+      Html.nav [Attr.class "categories", Attr.key "navigation"] [
+        Html.ul []
+          <| List.map    (\c -> Html.li [] [categoryLink' c locale (Just c == subcategory)])
+          <| Maybe.withDefault []
+          <| flip Maybe.map category <| \(Category c) -> c.childs
+      ]
 
 galleriesWidget : Router Route State -> List Category -> Locale -> Html
-galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries"] [
+galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries", Attr.key "galleries"] [
   Html.h2 [] [text <| Locale.i18n locale "Galleries" []],
   Html.ul []
       <| List.map (\c -> Html.li [] [categoryWidget router c locale])
@@ -117,7 +125,7 @@ categoryWidget = lazy3 <| \router category locale ->
         Html.ul [] (List.map (\child -> Html.li [] [categoryLink router child locale False]) c.childs)
       ]
   in
-    Html.div [class "gallery"] [
+    Html.div [class "gallery", Attr.key "gallery-brick"] [
       cover,
       aside
     ]
@@ -125,16 +133,18 @@ categoryWidget = lazy3 <| \router category locale ->
 gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
 gallery router = lazy3 <| \ params photos time ->
   let
+    -- _ = Debug.log "galleryWidget" photos
     brick = brickWidget router params
     seed = Random.initialSeed <| floor <| Time.inSeconds time
     photos' = remapPhotos seed photos
-  in Html.div [Attr.class "gallery"]
+  in Html.div [Attr.class "gallery", Attr.key "gallery"]
   <| singleton <| Html.ul [] <| flip List.map photos'
   <| \photo -> Html.li [] [brick photo]
 
 brickWidget : Router Route State -> RouteParams -> Photo -> Html
 brickWidget router params photo =
     let
+      -- _ = Debug.log "brickWidget" photo
       (w,h) = (photo.width, photo.height)
       ratio = photo.ratio
       inc = if ratio >= 1 then ratio else 1 / ratio
@@ -156,7 +166,7 @@ photoWidget router params photo (prev, next) (w,h) isLoading locale =
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
       author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale "author " [], Html.span [Attr.class "author"] [Html.text author.name]]
     in
-      Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True)]]) [
+      Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True)], Attr.key "photo"]) [
         Html.figure [classList [("content", True), ("hidden", isLoading)]] [
           Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "CLOSE" [], Html.text " ", Html.i [Attr.class "icon-cancel"] []]]
         , image

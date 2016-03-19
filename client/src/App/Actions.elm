@@ -27,22 +27,35 @@ pred : number -> number
 pred a = a - 1
 
 transition : Router Route State -> from -> to -> Action State
-transition router _ _ = resetMeta `chainAction` resetLoading `chainAction` createLinks router
+transition router _ _ =
+  -- let
+  --   _ = Debug.log "onTransition" ()
+  -- in
+    resetMeta `chainAction` resetLoading `chainAction` createLinks router
 
 isLoading : State -> Bool
-isLoading state = state.isLoading /= 0
+isLoading state = state.isLoading
 
 resetLoading : Action State
 resetLoading state =
-  -- let _ = Debug.log "resetLoading" ()
+  -- let
+  --   _ = Debug.log "resetLoading" ()
   -- in
-  Response <| noFx { state | isLoading = 0}
+    Response <| noFx { state | isLoading = False}
 
 startLoading : Action State
 startLoading state =
-  -- let _ = Debug.log "startLoading" ()
+  -- let
+  --   _ = Debug.log "startLoading" ()
   -- in
-   Response <| noFx { state | isLoading = succ state.isLoading}
+    Response <| noFx { state | isLoading = True}
+
+stopLoading : Action State
+stopLoading state =
+  -- let
+  --   _ = Debug.log "stopLoading" ()
+  -- in
+    Response <| noFx { state | isLoading = False}
 
 setTitle : Maybe String -> Action State
 setTitle title state =
@@ -75,27 +88,24 @@ setMetaFromPhoto photo =
     `chainAction`
     (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale "META.DESCRIPTION.PHOTO" [author.name, caption]) photo.author photo.caption) state)
 
-stopLoading : Action State
-stopLoading state =
-  -- let _ = Debug.log "stopLoading" ()
-  -- in
-    Response <| noFx { state | isLoading = if state.isLoading > 0 then pred state.isLoading else 0}
-
 setTime : Time -> Action State
 setTime time state =
-  -- let _ = Debug.log "setTime" time
+  -- let
+    -- _ = Debug.log "setTime" time
   -- in
     Response <| noFx {state | time = time}
 
 setDims : (Int, Int) -> Action State
 setDims dims state =
-  -- let _ = Debug.log "setDims" dims
+  -- let
+    -- _ = Debug.log "setDims" dims
   -- in
     Response <| noFx {state | window = dims}
 
 setLocale : Locale -> Action State
 setLocale locale state =
-  -- let _ = Debug.log "setLocale" locale
+  -- let
+  --   _ = Debug.log "setLocale" locale
   -- in
     Response <| noFx {state | locale = locale}
 
@@ -124,15 +134,16 @@ loadCategories : Router Route State -> Action State
 loadCategories router state =
   let
     -- _ = Debug.log "loadCategories" ()
-    fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state
-    task = Task.map (\f -> startLoading `chainAction` f) <| fetch `Task.andThen` \mcategories ->
+    (Response (state', _)) = startLoading state
+    fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state'
+    task = fetch `Task.andThen` \mcategories ->
       let
         categories = Maybe.withDefault [] mcategories
-        update = updateCategories categories `chainAction` stopLoading
+        update = updateCategories categories
         categoryParam =  case Dict.get "subcategory" state.router.params of
             Nothing -> Dict.get "category" state.router.params
             c -> c
-        action = Maybe.withDefault update <| flip Maybe.map categoryParam <| \category ->
+        action = Maybe.withDefault (update `chainAction` stopLoading) <| flip Maybe.map categoryParam <| \category ->
           update
             `chainAction` (checkCategory router category)
             `chainAction` (loadPhotos router)
@@ -140,7 +151,7 @@ loadCategories router state =
 
       in Task.succeed <| action
 
-  in Response ({state | categories = Dict.empty}, Effects.task task)
+  in Response ({state' | categories = Dict.empty}, Effects.task task)
 
 checkCategory : Router Route State -> String -> Action State
 checkCategory router category state =
@@ -157,8 +168,8 @@ loadPhotos router state =
       False  ->
         let
           category = getCategory state
-          default = Task.succeed <| stopLoading `chainAction` router.redirect (Routes.NotFound, Dict.empty)
-          updateTask photos = Task.succeed <| stopLoading `chainAction` (updatePhotos <| Maybe.withDefault [] photos)
+          default = Task.succeed <| router.redirect (Routes.NotFound, Dict.empty) `chainAction` stopLoading
+          updateTask photos = Task.succeed <| (updatePhotos <| Maybe.withDefault [] photos) `chainAction` stopLoading
           fetchTask (Category c) = Task.toMaybe <| getRequest decodePhotos (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
           task = flip Maybe.map category
             <| \c ->  fetchTask c `Task.andThen` updateTask

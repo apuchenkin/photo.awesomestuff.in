@@ -25,7 +25,7 @@ type alias State = WithRouter Route {
   , categories: Dict String Category
   , photos: List Photo
   , photo: Maybe Photo
-  , isLoading: Int
+  , isLoading: Bool
   , time: Time
   , window: (Int, Int)
   }

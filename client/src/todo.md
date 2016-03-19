@@ -42,14 +42,16 @@
 >> router remove trailing slash
 >> final optimization
 >> add cached router views "do not re-render rendered handlers"
+>> improve mapParams (router)
 
 - separate loader for photo
+- bug with navigation jumps
+- bug language selector (.active)
+- bug gallery styles offset
 - loader effects
 - transition effects
-- check that router does not falls
 
 ===== post ====
 - replace cover with exact size image on server/database
 -- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
--- raise bug about structure re-rendering when first node is changes
 -- 404 forwarded page and backUrl

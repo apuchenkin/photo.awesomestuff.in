@@ -75,7 +75,7 @@ initialState = {
   , categories = Dict.empty
   , photos = []
   , photo = Nothing
-  , isLoading = 0
+  , isLoading = False
   , time = 0
   , window = (0,0)
   }
