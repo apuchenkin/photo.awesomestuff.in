@@ -4,7 +4,6 @@
   "description": "photo client",
   "private": true,
   "scripts": {
-    "test": "cd test && elm-test TestRunner.elm --compiler elm-make.cmd",
     "build": "webpack -p --optimize-occurence-order",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server"

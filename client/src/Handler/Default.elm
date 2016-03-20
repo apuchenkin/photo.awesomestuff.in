@@ -77,11 +77,8 @@ categoryHandler router =
   let
     gallery' = gallery router
     navigation' = navigation router
-    _ = Debug.log "gallery" gallery'
-
     view state _ =
       let
-        -- _ = Debug.log "categoryHandler" state
         category = Dict.get "category" state.router.params &> flip Dict.get state.categories
         subcategory = Dict.get "subcategory" state.router.params &> flip Dict.get state.categories
         header = flip Maybe.map category <| \c -> innerHeader router state.locale (categoryLink router c state.locale True)
@@ -118,7 +115,7 @@ photoHandler router =
                 in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
-        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window (isLoading state) state.locale
+        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window state.locale
       in Dict.fromList <| mapDefault photo' [] <| \p -> [("photo", p)]
   in {
     view = view,

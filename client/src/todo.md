@@ -43,15 +43,17 @@
 >> final optimization
 >> add cached router views "do not re-render rendered handlers"
 >> improve mapParams (router)
+>> bug language selector (.active)
+>> bug with navigation jumps
+>> double footer bug
+>> bug gallery styles offset
+>> separate loader for photo
 
-- separate loader for photo
-- bug with navigation jumps
-- bug language selector (.active)
-- bug gallery styles offset
-- loader effects
-- transition effects
+- vertical photo max-height fix
+- test builded
+
 
 ===== post ====
 - replace cover with exact size image on server/database
--- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
--- 404 forwarded page and backUrl
+- 404 forwarded page and backUrl
+- transition effects / loader effects

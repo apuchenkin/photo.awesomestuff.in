@@ -56,6 +56,7 @@ type alias Photo = {
   , group: Maybe Int
   , caption: Maybe String
   , author: Maybe Author
+  , isLoaded: Bool
   }
 
 -- Category constuctor
@@ -86,6 +87,7 @@ photo id src width height views group caption author =
   , group = group
   , caption = caption
   , author = author
+  , isLoaded = False
   }
 
 decodeCategories : Json.Decoder (List Category)

@@ -105,10 +105,16 @@ port localePort : Signal String
 port timePort: Signal Time
 
 port tasks : Signal (Task Never ())
-port tasks = result.tasks -- Signal.map (\_ -> ) main
+port tasks = result.tasks
 
 port meta : Signal Meta
-port meta = Signal.map .meta result.state
+port meta = Signal.dropRepeats <| Signal.map .meta result.state
 
-port rs : Signal ()
-port rs = Signal.map (always ()) result.state
+mailbox : Signal.Mailbox (List String)
+mailbox = Signal.mailbox []
+
+port t2 : Signal (Task Never ())
+port t2 = Signal.map (\s -> Effects.toTask mailbox.address <| Effects.tick (always s)) <| Signal.dropRepeats <| Signal.map (\state -> toString state.router.route) result.state
+
+port rs : Signal (List String)
+port rs = mailbox.signal

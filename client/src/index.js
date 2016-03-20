@@ -20,15 +20,8 @@ var main = wrapper.querySelector(':scope > #main');
 var links = {};
 var packery;
 var content = main.querySelector(':scope > .content');
-Ps.initialize(content);
-
-var headerElm = content.querySelector(':scope > header');
-var headerObserver = new MutationObserver(function(mutations) {
-  main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
-  Ps.update(content);
-});
-main.setAttribute("style", "padding-top: " + headerElm.offsetHeight + "px;");
-headerObserver.observe(headerElm, {childList: true});
+var gallery = content.querySelector(':scope > .gallery > ul');
+var photoWidget = main.querySelector(':scope > .photo-widget');
 
 function metaUpdate(meta) {
   document.title = meta.title;
@@ -42,11 +35,16 @@ function metaUpdate(meta) {
   })
 }
 
-function onTransition() {
-    content.scrollTop = 0;
-    Ps.update(content);
+Ps.initialize(content);
 
-    var gallery = content.querySelector(':scope > .gallery > ul');
+function onTransition() {
+    // clean up
+    content.scrollTop = 0;
+    Ps.destroy(content);
+
+    content = main.querySelector(':scope > .content');
+    gallery = content.querySelector(':scope > .gallery > ul');
+    Ps.initialize(content);
 
     if (gallery && !packery) {
       require.ensure([], function() {
@@ -62,21 +60,13 @@ function onTransition() {
         });
         packery.observer.observe(gallery, { childList: true });
       });
-    } else if (!gallery && packery) {
-        packery.observer.disconnect();
-        packery.destroy();
-        packery = null;
     }
 
-    var photoWidget = main.querySelector(':scope > .photo-widget');
-    if (photoWidget) {
-      var widgetContent = photoWidget.querySelector(':scope > .content');
-      photoWidget.observer = new MutationObserver(function(mutations) {
-          var photo = widgetContent.querySelector(':scope > .photo');
-          var offset = widgetContent.offsetHeight - photo.offsetHeight;
-          photo.style.maxHeight = (document.body.offsetHeight - offset) + 'px';
-          photoWidget.observer.disconnect();
-      });
-      photoWidget.observer.observe(widgetContent, { attributes: true });
+    if (packery && !gallery) {
+      packery.observer.disconnect();
+      packery.destroy();
+      packery = null;
     }
 }
+
+onTransition();

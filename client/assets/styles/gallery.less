@@ -1,6 +1,7 @@
 .content > .gallery {
   padding-top: 2 * @divisor + @divisor / 4;
   position: relative;
+  overflow: visible !important;
 
   .brick {
     display: block;
@@ -12,11 +13,6 @@
     display: block;
     float: left;
     height: 100%;
-
-    // & > a {
-    //   overflow: hidden;
-    //   display: block;
-    // }
 
     &:hover {
       outline-color: @accent;
