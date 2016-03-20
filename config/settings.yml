@@ -5,22 +5,33 @@ static-dir:     "_env:STATIC_DIR:static"
 host:           "_env:HOST:*4" # any IPv4 host
 port:           "_env:PORT:3000"
 ip-from-header: "_env:IP_FROM_HEADER:false"
+development: true
+should-log-all: true
+detailed-logging: true
 
 # Optional values with the following production defaults.
 # In development, they default to the inverse.
 #
-# development: false
-# detailed-logging: false
-# should-log-all: false
+# development: true
+# detailed-logging: true
+# should-log-all: true
 # reload-templates: false
 # mutable-static: false
 # skip-combining: false
 
+#database:
+#  user:     "_env:MYSQL_USER:root"
+#  password: "_env:MYSQL_PASSWORD:r00t"
+#  host:     "_env:MYSQL_HOST:localhost"
+#  port:     "_env:MYSQL_PORT:5432"
+#  database: "_env:MYSQL_DATABASE:aws-photo-service"
+#  poolsize: "_env:MYSQL_POOLSIZE:10"
+
 database:
-  user:     "_env:MYSQL_USER:root"
-  password: "_env:MYSQL_PASSWORD:r00t"
-  host:     "_env:MYSQL_HOST:localhost"
-  port:     "_env:MYSQL_PORT:5432"
+  user:     "_env:MYSQL_USER:aws-photo"
+  password: "_env:MYSQL_PASSWORD:aws-photo"
+  host:     "_env:MYSQL_HOST:78.47.123.230"
+  port:     "_env:MYSQL_PORT:3306"
   database: "_env:MYSQL_DATABASE:aws-photo"
   poolsize: "_env:MYSQL_POOLSIZE:10"
 

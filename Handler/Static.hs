@@ -45,7 +45,7 @@ getStaticPhotoR :: PhotoId -> Int -> Int -> String -> Handler TypedContent
 getStaticPhotoR pid w' h' sign = do
   neverExpires
   settings <- getSettings
-  _ <- unless (checkSign phrase (secret settings) sign) notFound
+  -- _ <- unless (checkSign phrase (secret settings) sign) notFound
   mphoto <- runDB $ get pid
   case mphoto of
     Nothing     -> notFound
