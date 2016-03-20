@@ -21,12 +21,39 @@
 >> config cache on/off
 >> general refactoring/simplification
 >> static routes
+>> bug swithcin to ru on non-existent ru gallery
+>> gallery style catch
+>> bug with fast switching
+>> bug with early loader hide
+>> photo positioning is wrong
+>> improve algorithm
+>> photo groups functionality
+>> galley image fetch exact size
+>> refactor bricks
+>> valid HTML statics
+>> valid HTML 404
+>> styling
+>> arrows styles and hover/click effects
+>> footer css
+>> category childs?
+>> meta
+>> final refactoring
+>> expose address through router instead of export
+>> router remove trailing slash
+>> final optimization
+>> add cached router views "do not re-render rendered handlers"
+>> improve mapParams (router)
+>> bug language selector (.active)
+>> bug with navigation jumps
+>> double footer bug
+>> bug gallery styles offset
+>> separate loader for photo
 
---- app ---
-- port logic
-- valid HTML
-- effects and post libs
-- styles
+- vertical photo max-height fix
+- test builded
 
--- raise bug about tuple/obj comparsion in html.lazy (tules are always unequal)
--- raise bug about structure re-rendering when first node is changes
+
+===== post ====
+- replace cover with exact size image on server/database
+- 404 forwarded page and backUrl
+- transition effects / loader effects

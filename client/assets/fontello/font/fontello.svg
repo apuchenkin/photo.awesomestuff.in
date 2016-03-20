@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<metadata>Copyright (C) 2016 by original authors @ fontello.com</metadata>
+<defs>
+<font id="fontello" horiz-adv-x="1000" >
+<font-face font-family="fontello" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="cancel" unicode="&#xe800;" d="M654 349l346-346-154-154-346 346-346-346-154 154 346 346-346 346 154 154 346-346 346 346 154-154z" horiz-adv-x="1000" />
+<glyph glyph-name="left-open" unicode="&#xe801;" d="M308 349l346-346-154-154-500 500 500 500 154-154z" horiz-adv-x="654" />
+<glyph glyph-name="right-open" unicode="&#xe802;" d="M154 849l500-500-500-500-154 154 346 346-346 346z" horiz-adv-x="654" />
+<glyph glyph-name="left-circle" unicode="&#xe803;" d="M1000 349q0-136-67-251t-182-182-251-67-251 67-182 182-67 251 67 251 182 182 251 67 251-67 182-182 67-251z m-453-232l71 71-161 161 161 161-71 71-233-232z" horiz-adv-x="1000" />
+<glyph glyph-name="right-circle" unicode="&#xe804;" d="M1000 349q0-136-67-251t-182-182-251-67-251 67-182 182-67 251 67 251 182 182 251 67 251-67 182-182 67-251z m-547-232l233 232-233 232-71-71 161-161-161-161z" horiz-adv-x="1000" />
+<glyph glyph-name="resize-full" unicode="&#xe805;" d="M1000 849v-467l-168 161-161-161q-29-29-69-29t-69 29-29 69 29 69l161 161-161 168h467z m-694-832l161-168h-467v467l168-161 161 161q29 29 69 29t69-29 29-69-29-69z" horiz-adv-x="1000" />
+</font>
+</defs>
+</svg>

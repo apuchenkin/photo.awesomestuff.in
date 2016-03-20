@@ -2,15 +2,30 @@
 
 require('./index.html');
 var Elm = require('./Main');
-var css = require("!style!css!less!../assets/styles/main.less");
+var css = require("../assets/styles/main.less");
+var fontello = require('../assets/fontello/css/fontello.css');
+var Ps = require('perfect-scrollbar');
+var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
-var Main = Elm.embed(Elm.Main, document.getElementById('main'), {localePort: navigator.language});
+var wrapper = document.body.querySelector('.wrapper');
+var Main = Elm.embed(Elm.Main, wrapper, {
+  localePort: navigator.language,
+  timePort: Date.now()
+});
 
 Main.ports.meta.subscribe(metaUpdate);
+Main.ports.rs.subscribe(onTransition);
+
+var main = wrapper.querySelector(':scope > #main');
 var links = {};
+var packery;
+var content = main.querySelector(':scope > .content');
+var gallery = content.querySelector(':scope > .gallery > ul');
+var photoWidget = main.querySelector(':scope > .photo-widget');
 
 function metaUpdate(meta) {
   document.title = meta.title;
+  document.head.querySelector('meta[name=description]').content = meta.description;
   meta.links.map(function(data) {
     var link = links[data[0]] || document.head.appendChild(document.createElement('link'));
     link.href = data[1];
@@ -19,3 +34,39 @@ function metaUpdate(meta) {
     links[data[0]] = link;
   })
 }
+
+Ps.initialize(content);
+
+function onTransition() {
+    // clean up
+    content.scrollTop = 0;
+    Ps.destroy(content);
+
+    content = main.querySelector(':scope > .content');
+    gallery = content.querySelector(':scope > .gallery > ul');
+    Ps.initialize(content);
+
+    if (gallery && !packery) {
+      require.ensure([], function() {
+        var Packery = require('packery');
+        packery = new Packery(gallery, {
+          columnWidth: 100,
+          itemSelector: 'li',
+          gutter: 10
+        });
+        packery.observer = new MutationObserver(function(mutations) {
+            packery.reloadItems();
+            packery.layout();
+        });
+        packery.observer.observe(gallery, { childList: true });
+      });
+    }
+
+    if (packery && !gallery) {
+      packery.observer.disconnect();
+      packery.destroy();
+      packery = null;
+    }
+}
+
+onTransition();

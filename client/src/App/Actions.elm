@@ -1,56 +1,83 @@
 module App.Actions where
 
 import Http
-import Date exposing (Date)
+import Random
+import Time exposing (Time)
 import Either exposing (Either (..))
 import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
 import Effects exposing (Never)
 import Task exposing (Task)
 import Router.Types exposing (WithRouter, Action, Response (..), Router)
-import Router.Helpers exposing (noFx, chainAction)
+import Router.Helpers exposing (noFx, chainAction, doNothing)
 
+import App.Model exposing (..)
 import App.Config exposing (config)
 import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
+import Service.Photo exposing (refinePhotos)
 
-(&>) : Maybe a -> (a -> Maybe b) -> Maybe b
-(&>) = Maybe.andThen
+mapDefault : Maybe a -> b -> (a -> b) -> b
+mapDefault maybe default map = Maybe.withDefault default <| Maybe.map map maybe
 
-type alias Promise value = Either (Task Http.Error value) value
+succ : number -> number
+succ a = a + 1
 
-type alias Meta = {
-    title: String,
-    links: List (String, String)
-  }
+pred : number -> number
+pred a = a - 1
 
-type alias State = WithRouter Route
-  {
-    meta: Meta,
-    locale: Locale,
-    categories: Dict String Category,
-    photos: List Photo,
-    photo: Maybe Photo,
-    isLoading: Bool,
-    mouse: (Int, Int)
-  }
+transition : Router Route State -> from -> to -> Action State
+transition router _ _ = resetMeta `chainAction` resetLoading `chainAction` createLinks router
 
--- type ParentCategory =
-type Category = Category {
-    id: Int,
-    name: String,
-    title: String,
-    image: Maybe String,
-    date: Maybe Date,
-    parent: Maybe (Either Int Category)
-  }
+isLoading : State -> Bool
+isLoading state = state.isLoading
 
-type alias Photo = {
-  id: Int,
-  src: String,
-  width: Int,
-  height: Int
-}
+resetLoading : Action State
+resetLoading state = Response <| noFx { state | isLoading = False}
+
+startLoading : Action State
+startLoading state = Response <| noFx { state | isLoading = True}
+
+stopLoading : Action State
+stopLoading state = Response <| noFx { state | isLoading = False}
+
+setTitle : Maybe String -> Action State
+setTitle title state =
+  let
+    meta = state.meta
+    title' = Maybe.withDefault config.title <| Maybe.map (\t -> Locale.i18n state.locale "TITLE" [t]) title
+  in Response <| noFx {state | meta = {meta | title = title'}}
+
+setDescription : Maybe String -> Action State
+setDescription desc state =
+  let
+    meta = state.meta
+    desc' = Maybe.withDefault (Locale.i18n state.locale "META.DESCRIPTION" []) desc
+  in Response <| noFx {state | meta = {meta | description = desc'}}
+
+resetMeta : Action State
+resetMeta = setTitle Nothing `chainAction` setDescription Nothing
+
+setMetaFromCategory : Category -> Action State
+setMetaFromCategory (Category c) =
+    setTitle (Just c.title)
+    `chainAction`
+    setDescription (Maybe.withDefault c.description <| Maybe.map Just c.shortDescription)
+
+setMetaFromPhoto : Photo -> Action State
+setMetaFromPhoto photo =
+    setTitle photo.caption
+    `chainAction`
+    (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale "META.DESCRIPTION.PHOTO" [author.name, caption]) photo.author photo.caption) state)
+
+setTime : Time -> Action State
+setTime time state = Response <| noFx {state | time = time}
+
+setDims : (Int, Int) -> Action State
+setDims dims state = Response <| noFx {state | window = dims}
+
+setLocale : Locale -> Action State
+setLocale locale state = Response <| noFx {state | locale = locale}
 
 createLinks : Router Route State -> Action State
 createLinks router state =
@@ -64,48 +91,10 @@ createLinks router state =
 
   in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] links}}
 
--- Category constuctor
-category : Int -> String -> String -> Maybe String -> Maybe String -> Maybe (Either Int Category) -> Category
-category id name title image date parent = Category {
-    id = id,
-    name = name,
-    title = title,
-    image = image,
-    date  = date &> \d -> Result.toMaybe (Date.fromString d),
-    parent = parent
-  }
-
-getCategory : State -> Maybe Category
-getCategory state =
-  let
-    param = case Dict.get "subcategory" state.router.params of
-      Nothing -> Dict.get "category" state.router.params
-      c -> c
-  in param &> flip Dict.get state.categories
-
-decodeCategories : Json.Decoder (List Category)
-decodeCategories = Json.list <| Json.object6 category
-  ("id"     := Json.int)
-  ("name"   := Json.string)
-  ("title"  := Json.string)
-  (Json.maybe ("image"  := Json.string))
-  (Json.maybe ("date"  := Json.string))
-  (Json.maybe ("parent" := Json.map Left Json.int))
-
-decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object4 Photo
-  ("id"     := Json.int)
-  ("src"    := Json.string)
-  ("width"  := Json.int)
-  ("height" := Json.int)
-
-decodePhotos : Json.Decoder (List Photo)
-decodePhotos = Json.list decodePhoto
-
 getRequest: Json.Decoder value -> String -> State -> Task Http.Error value
 getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSettings
   { verb = "GET"
-  , headers = [("Accept-languadge", Locale.toString state.locale)]
+  , headers = [("Accept-language", Locale.toString state.locale)]
   , url = url
   , body = Http.empty
   })
@@ -113,7 +102,8 @@ getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSett
 loadCategories : Router Route State -> Action State
 loadCategories router state =
   let
-    fetch = Task.toMaybe <| getRequest decodeCategories "/api/v1/category" state
+    (Response (state', _)) = startLoading state
+    fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state'
     task = fetch `Task.andThen` \mcategories ->
       let
         categories = Maybe.withDefault [] mcategories
@@ -121,71 +111,82 @@ loadCategories router state =
         categoryParam =  case Dict.get "subcategory" state.router.params of
             Nothing -> Dict.get "category" state.router.params
             c -> c
-        action = Maybe.withDefault update <| flip Maybe.map categoryParam <| \category ->
-          update `chainAction` (loadPhotos router)
-      in Task.succeed <| action --case state.router.route of
-        -- Just (Routes.Category) ->
-        -- Just (Routes.Photo)    -> update `chainAction` loadPhotos
-        -- _ -> update
+        action = Maybe.withDefault (update `chainAction` stopLoading) <| flip Maybe.map categoryParam <| \category ->
+          update
+            `chainAction` (checkCategory router category)
+            `chainAction` (loadPhotos router)
+            `chainAction` (\state -> mapDefault (getCategory state) (doNothing state) (\c -> setMetaFromCategory c state))
 
-  in Response ({state | isLoading = True}, Effects.task task)
+      in Task.succeed <| action
+
+  in Response ({state' | categories = Dict.empty}, Effects.task task)
+
+checkCategory : Router Route State -> String -> Action State
+checkCategory router category state =
+    case Dict.get category state.categories of
+      Nothing -> router.redirect (Routes.Home, Dict.empty) state
+      _ -> doNothing state
 
 loadPhotos : Router Route State -> Action State
 loadPhotos router state =
   let
-    -- _ = Debug.log "loadPhotos" state
-    stopLoading state = Response (noFx {state | isLoading = False})
     task = case Dict.isEmpty state.categories of
       True   -> Nothing
       False  ->
         let
           category = getCategory state
-          fetch = flip Maybe.map category <| \(Category c) ->
-            let fetch = Task.toMaybe <| getRequest decodePhotos ("/api/v1/category/" ++ toString c.id ++ "/photo") state
-            in fetch `Task.andThen` \photos -> Task.succeed <| updatePhotos <| Maybe.withDefault [] photos
+          default = Task.succeed <| router.redirect (Routes.NotFound, Dict.empty) `chainAction` stopLoading
+          updateTask photos = Task.succeed <| (updatePhotos <| Maybe.withDefault [] photos) `chainAction` stopLoading
+          fetchTask (Category c) = Task.toMaybe <| getRequest decodePhotos (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
+          task = flip Maybe.map category
+            <| \c ->  fetchTask c `Task.andThen` updateTask
 
-        in Just <| Maybe.withDefault (Task.succeed <| stopLoading `chainAction` router.redirect (Routes.NotFound, Dict.empty)) fetch
+        in Just <| Maybe.withDefault default task
+    (Response (state', _)) = startLoading state
 
-  in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
+  in Response (mapDefault task state (always state'), mapDefault task Effects.none Effects.task)
 
 loadPhoto : Action State
 loadPhoto state =
   let
     photoId = Dict.get "photo" state.router.params
     task = flip Maybe.map photoId <| \pid ->
-      let fetch = Task.toMaybe <| getRequest decodePhoto ("/api/v1/photo/" ++ pid) state
-      in fetch `Task.andThen` \photo -> Task.succeed <| updatePhoto photo
+      let fetch = Task.toMaybe <| getRequest decodePhoto (config.apiEndpoint ++ "/photo/" ++ pid) state
+      in fetch `Task.andThen` \photo -> Task.succeed <| stopLoading `chainAction` updatePhoto photo
+    (Response (state', _)) = startLoading state
 
-  in Response ({state | isLoading = True}, Maybe.withDefault Effects.none <| Maybe.map Effects.task task)
+  in Response ({state' | photo = Nothing}, mapDefault task Effects.none Effects.task)
 
 updatePhotos : List Photo -> Action State
-updatePhotos photos state = Response <| noFx {state | isLoading = False, photos = photos}
+updatePhotos photos state =
+  let
+    seed = Random.initialSeed <| floor <| Time.inSeconds state.time
+    photos' = refinePhotos seed photos
+  in Response <| noFx {state | photos = photos'}
 
 updatePhoto : Maybe Photo -> Action State
-updatePhoto photo state = Response <| noFx {state | isLoading = False, photo = photo}
+updatePhoto photo = (\state -> Response <| noFx {state | photo = photo})
+  `chainAction` (\state -> mapDefault photo (doNothing state) (\p -> setMetaFromPhoto p state))
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
   let
-    -- _ = Debug.log "updateCategories" state
-    dict  = Dict.fromList   <| List.map (\(Category c) -> (c.name, c)) categories
-    dict' = Dict.fromList   <| List.map (\(Category c) -> (c.id, c))   categories
+    idMap = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.id, category))   categories
 
-    castegoris' = Dict.map (\name category -> Category {category | parent = Maybe.map (\p ->
-      case p of
-        Right _ -> p
-        Left  pidx -> case (Dict.get pidx dict') of
-          Nothing -> p
-          Just p' -> Right <| Category p'
-      ) category.parent}) dict
-    -- _ = Debug.log "cs" categories
+    findParent mp = flip Maybe.map mp <| \p -> case p of
+      Left pidx -> mapDefault (Dict.get pidx idMap) p Right
+      Right _ -> p
+
+    categories' = List.map (\(Category c) -> Category { c | parent = findParent c.parent }) categories
+    dict = Dict.fromList <| List.map (\category ->
+      let (Category c) = category
+      in (c.name, Category { c | childs = childs category categories'})) categories'
   in
-    Response <| noFx {state | isLoading = False, categories = castegoris'}
+    Response <| noFx {state | categories = dict}
 
-setLocale : Router Route State -> Action State
-setLocale router state =
+resolveLocale : Router Route State -> Action State
+resolveLocale router state =
   let
-    _ = Debug.log "locale" locale
     locale = Dict.get "locale" state.router.params
     route = Maybe.withDefault Routes.Home state.router.route
     params = Dict.fromList [("locale", Locale.toString state.locale)]

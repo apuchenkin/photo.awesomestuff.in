@@ -1,0 +1,93 @@
+figure, img {
+    border: none;
+    outline: 0;
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+
+.photo-widget {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  overflow: hidden;
+  position: fixed;
+  background: rgba(0,0,0,0.8);
+  padding: 0 @divisor;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 100%;
+
+  &:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    margin-right: -0.25em; /* Adjusts for spacing */
+  }
+
+  & > .nav {
+    position: absolute;
+    font-size: 24px;
+    top: 50%;
+    margin-top: -@divisor;
+    padding: @divisor * 1.5 @divisor;
+    display: block;
+    background: transparent;
+    transition: background 0.2s ease-out;
+    text-shadow: 0 0 8px black;
+    &:hover {
+      background: fade(black, 70%);
+    }
+    &.prev {
+      left: 0;
+    }
+    &.next {
+      right: 0;
+    }
+  }
+
+  & > .content {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    cursor: auto;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    margin: 0 auto;
+    text-align: left;
+
+    .photo {
+      max-width: 100%;
+    }
+    .tools {
+      font-size: 14px;
+      text-align: right;
+      line-height: @divisor * 2;
+      height: @divisor * 2;
+    }
+
+    figcaption {
+      padding: @divisor / 2 0;
+      font-size: .8em;
+      line-height: 1.2em;
+      color: darken(@light-grey, 20%);
+      font-family: @font-default;
+
+      & > .caption {
+        font-size: 1.2em;
+        display: block;
+        float: none;
+        color: @white;
+        margin-bottom: .2em;
+      }
+
+      & .author {
+        color: @light-grey;
+      }
+    }
+  }
+}

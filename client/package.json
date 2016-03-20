@@ -4,18 +4,26 @@
   "description": "photo client",
   "private": true,
   "scripts": {
-    "test": "cd test && elm-test TestRunner.elm --compiler elm-make.cmd",
-    "build": "webpack",
+    "build": "webpack -p --optimize-occurence-order",
     "watch": "webpack --watch",
-    "dev": "webpack-dev-server --port 3000"
+    "dev": "webpack-dev-server"
   },
   "dependencies": {
+    "packery": "^2.0.0",
+    "perfect-scrollbar": "^0.6.10"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.3.3",
     "css-loader": "^0.23.1",
     "elm-webpack-loader": "^2.0.0",
+    "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.8.5",
     "less": "^2.6.0",
     "less-loader": "^2.2.2",
+    "postcss-loader": "^0.8.1",
+    "precss": "^1.4.0",
     "style-loader": "^0.13.0",
+    "url-loader": "^0.5.7",
     "webpack": "^1.12.0",
     "webpack-dev-server": "^1.14.0"
   }
