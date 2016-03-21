@@ -58,11 +58,11 @@ lookup = createLookup
   [ withLanguage
     (Language <| toString Ru) <|
     [ ( "Home", "Главная" )
-    , ( "alpha", "альфа")
-    , ( "about", "О сайте")
-    , ( "contacts", "Контакты")
     , ( "Galleries", "Галереи")
     , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
+    , ("ALFA", " альфа")
+    , ("ABOUT", "О сайте")
+    , ("CONTACTS", "Контакты")
     , ("TITLE", "{0} - " ++ config.title)
     , ("SUBTITLE", "Путешествия в фотографиях")
     , ("CLOSE", "Закрыть")
@@ -92,8 +92,10 @@ lookup = createLookup
     ] ++ month_ru
   , withLanguage
     (Language <| toString En) <|
-    [ ( "about", "About")
-    , ( "contacts", "Contacts")
+    [
+      ("ALFA", " alfa")
+    , ("ABOUT", "About")
+    , ("CONTACTS", "Contacts")
     , ("TITLE", "{0} - " ++ config.title)
     , ("SUBTITLE", "Travel in photography")
     , ("CLOSE", "Close")

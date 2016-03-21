@@ -1,7 +1,8 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
+    "summary": "photo gallery",
+    "repository": "https://github.com/apuchenkin/aws.photo.service.git",
+    "website": "http://photo.awesomestuff.in",
     "license": "BSD3",
     "source-directories": [
         "src"
@@ -9,7 +10,6 @@
     "exposed-modules": [],
     "dependencies": {
         "Apanatshka/elm-signal-extra": "5.7.0 <= v < 6.0.0",
-        "NoRedInk/elm-lazy-list": "2.0.0 <= v < 3.0.0",
         "apuchenkin/elm-nested-router": "1.0.0 <= v < 2.0.0",
         "circuithub/elm-list-extra": "3.9.0 <= v < 4.0.0",
         "circuithub/elm-maybe-extra": "1.6.0 <= v < 2.0.0",

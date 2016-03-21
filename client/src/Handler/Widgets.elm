@@ -46,7 +46,7 @@ languageSelector router = lazy3 <| \route params locale ->
 homeHeader : Router Route State -> Locale -> Html
 homeHeader = lazy2 <| \router locale ->
   let
-    version = span [class "version"] [text <| Locale.i18n locale "alpha" []]
+    version = span [class "version"] [text <| Locale.i18n locale "ALFA" []]
   in
     Html.header [class "main", Attr.key "header-home"] [
       Html.h1 [class "title"] [homeLink router locale config.title, version],
@@ -65,8 +65,8 @@ innerHeader = lazy3 <| \router locale title ->
 footer : Router Route State -> Locale -> Html
 footer = lazy2 <| \router locale ->
   let
-    about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "About" []]
-    contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "Contacts" []]
+    about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "ABOUT" []]
+    contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "CONTACTS" []]
     sep = text " | "
   in Html.footer [Attr.key "footer"] [
     homeLink router locale (String.toLower config.title),

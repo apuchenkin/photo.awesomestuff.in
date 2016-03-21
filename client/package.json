@@ -1,7 +1,8 @@
 {
   "name": "client",
-  "version": "1.2.5",
+  "version": "2.0.0",
   "description": "photo client",
+  "website": "http://photo.awesomestuff.in",
   "private": true,
   "scripts": {
     "build": "webpack -p --optimize-occurence-order",

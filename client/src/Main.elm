@@ -108,7 +108,7 @@ port tasks : Signal (Task Never ())
 port tasks = result.tasks
 
 port meta : Signal Meta
-port meta = Signal.dropRepeats <| Signal.map .meta result.state
+port meta = Signal.map .meta result.state
 
 mailbox : Signal.Mailbox (List String)
 mailbox = Signal.mailbox []
