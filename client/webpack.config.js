@@ -72,15 +72,4 @@ module.exports = {
     new ExtractTextPlugin("[name].css"),
     new webpack.optimize.CommonsChunkPlugin('common.js')
   ]
-  // plugins: [
-  //     // extract CSS into a separate file
-  //     // new ExtractTextPlugin( './css/stylesheet.css', { allChunks: true } ),
-  //
-  //     // minify & mangle JS/CSS
-  //     new webpack.optimize.UglifyJsPlugin({
-  //         minimize:   true,
-  //         compressor: { warnings: false },
-  //         mangle:     true                      // TODO: need any exceptions?
-  //     })
-  //   ]
 };

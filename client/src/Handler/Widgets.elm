@@ -183,12 +183,15 @@ homeLink =
 photoLink : Router Route State -> Photo -> Locale -> Html -> Html
 photoLink router photo locale content =
     let
-      params = Dict.fromList <| List.filterMap identity [
-        Just <| ("photo", toString photo.id)
-      , Just <| ("locale", Locale.toString locale)
-      , flip Maybe.map photo.category <| \(Category c) -> ("subcategory", c.name)
-      , Maybe.andThen photo.category <| \(Category c) -> Maybe.andThen c.parent <| \p -> Either.elim (always Nothing) (\(Category p') -> Just ("category", p'.name)) p
-      ]
+      categoryParams = Maybe.withDefault []
+        <| flip Maybe.map photo.category
+        <| \(Category c) -> Maybe.withDefault [("category", c.name)] <| flip Maybe.map c.parent
+        <| \p -> Either.elim (always [("category", c.name)]) (\(Category p') -> [("category", p'.name),("subcategory", c.name)]) p
+
+      params = Dict.fromList <| [
+        ("photo", toString photo.id)
+      , ("locale", Locale.toString locale)
+      ] ++ categoryParams
     in
       Html.a (router.bindForward (Routes.Photo, params) []) [content]
 
