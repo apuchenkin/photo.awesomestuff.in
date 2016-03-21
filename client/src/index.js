@@ -47,6 +47,7 @@ function onTransition() {
     Ps.initialize(content);
 
     if (gallery && !packery) {
+      packery = {};
       require.ensure([], function() {
         var Packery = require('packery');
         packery = new Packery(gallery, {
@@ -55,6 +56,7 @@ function onTransition() {
           gutter: 10
         });
         packery.observer = new MutationObserver(function(mutations) {
+            content.scrollTop = 0;
             packery.reloadItems();
             packery.layout();
         });

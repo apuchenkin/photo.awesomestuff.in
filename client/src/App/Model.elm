@@ -56,6 +56,7 @@ type alias Photo = {
   , group: Maybe Int
   , caption: Maybe String
   , author: Maybe Author
+  , category: Maybe Category
   , isLoaded: Bool
   }
 
@@ -74,8 +75,8 @@ category id name title image date parent desc shortDesc = Category {
   }
 
 -- Category constuctor
-photo : Int -> String -> Int -> Int -> Int -> Maybe Int -> Maybe String -> Maybe Author -> Photo
-photo id src width height views group caption author =
+photo : Maybe Category -> Int -> String -> Int -> Int -> Int -> Maybe Int -> Maybe String -> Maybe Author -> Photo
+photo c id src width height views group caption author =
   let ratio = (toFloat width) / (toFloat height)
   in {
     id = id
@@ -87,6 +88,7 @@ photo id src width height views group caption author =
   , group = group
   , caption = caption
   , author = author
+  , category = c
   , isLoaded = False
   }
 
@@ -101,8 +103,8 @@ decodeCategories = Json.list <| Json.object8 category
   (Json.maybe ("description" := Json.string))
   (Json.maybe ("short_description" := Json.string))
 
-decodePhoto : Json.Decoder Photo
-decodePhoto = Json.object8 photo
+decodePhoto : Maybe Category -> Json.Decoder Photo
+decodePhoto c = Json.object8 (photo c)
   ("id"     := Json.int)
   ("src"    := Json.string)
   ("width"  := Json.int)
@@ -112,8 +114,8 @@ decodePhoto = Json.object8 photo
   (Json.maybe ("caption" := Json.string))
   (Json.maybe ("author"  := Json.object1 Author ("name" := Json.string)))
 
-decodePhotos : Json.Decoder (List Photo)
-decodePhotos = Json.list decodePhoto
+decodePhotos : Maybe Category -> Json.Decoder (List Photo)
+decodePhotos c = Json.list (decodePhoto c)
 
 getCategory : State -> Maybe Category
 getCategory state =

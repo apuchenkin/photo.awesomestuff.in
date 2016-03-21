@@ -137,7 +137,7 @@ loadPhotos router state =
           category = getCategory state
           default = Task.succeed <| router.redirect (Routes.NotFound, Dict.empty) `chainAction` stopLoading
           updateTask photos = Task.succeed <| (updatePhotos <| Maybe.withDefault [] photos) `chainAction` stopLoading
-          fetchTask (Category c) = Task.toMaybe <| getRequest decodePhotos (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
+          fetchTask (Category c) = Task.toMaybe <| getRequest (decodePhotos category) (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
           task = flip Maybe.map category
             <| \c ->  fetchTask c `Task.andThen` updateTask
 
@@ -151,7 +151,7 @@ loadPhoto state =
   let
     photoId = Dict.get "photo" state.router.params
     task = flip Maybe.map photoId <| \pid ->
-      let fetch = Task.toMaybe <| getRequest decodePhoto (config.apiEndpoint ++ "/photo/" ++ pid) state
+      let fetch = Task.toMaybe <| getRequest (decodePhoto Nothing) (config.apiEndpoint ++ "/photo/" ++ pid) state
       in fetch `Task.andThen` \photo -> Task.succeed <| stopLoading `chainAction` updatePhoto photo
     (Response (state', _)) = startLoading state
 

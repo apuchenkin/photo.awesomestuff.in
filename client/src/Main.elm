@@ -18,7 +18,7 @@ import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (
 config : Route -> RouteConfig Route State
 config route = case route of
   Route.Locale -> {
-    segment = "[/:locale]"
+    segment = "/[:locale]"
   , bypass = True
   , parent = Nothing
   , constraints = Dict.fromList [("locale", Enum ["ru", "en"])]

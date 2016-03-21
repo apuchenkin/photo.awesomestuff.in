@@ -1,3 +1,3 @@
-- bug: scroll reset position on category to category transition
+- bug with fast swithing between planes 
 - 404 forwarded page and backUrl
 - transition effects / loader effects

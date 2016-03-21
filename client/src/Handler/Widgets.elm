@@ -126,18 +126,18 @@ categoryWidget = lazy3 <| \router category locale ->
       aside
     ]
 
-gallery : Router Route State -> RouteParams -> List Photo -> Time -> Html
-gallery router = lazy3 <| \ params photos time ->
+gallery : Router Route State -> Locale -> List Photo -> Time -> Html
+gallery router = lazy3 <| \ locale photos time ->
   let
-    brick = brickWidget router params
+    brick = brickWidget router locale
     seed = Random.initialSeed <| floor <| Time.inSeconds time
     photos' = remapPhotos seed photos
   in Html.div [Attr.class "gallery", Attr.key "gallery"]
   <| singleton <| Html.ul [] <| flip List.map photos'
   <| \photo -> Html.li [] [brick photo]
 
-brickWidget : Router Route State -> RouteParams -> Photo -> Html
-brickWidget router params photo =
+brickWidget : Router Route State -> Locale -> Photo -> Html
+brickWidget router locale photo =
     let
       (w,h) = (photo.width, photo.height)
       ratio = photo.ratio
@@ -147,7 +147,7 @@ brickWidget router params photo =
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ "/hs/photo/" ++ toString photo.id ++ "/" ++ toString s ++ "/" ++ toString s ++ "/" ++ filename
       content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
-    in photoLink router photo params content
+    in photoLink router photo locale content
 
 photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Locale -> Html
 photoWidget router params photo (prev, next) (w,h) locale =
@@ -180,9 +180,17 @@ homeLink =
   lazy3 <| \router locale title ->
     Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text title]
 
-photoLink : Router Route State -> Photo -> RouteParams -> Html -> Html
-photoLink router photo params content =
-    Html.a (router.bindForward (Routes.Photo, Dict.insert "photo" (toString photo.id) params) []) [content]
+photoLink : Router Route State -> Photo -> Locale -> Html -> Html
+photoLink router photo locale content =
+    let
+      params = Dict.fromList <| List.filterMap identity [
+        Just <| ("photo", toString photo.id)
+      , Just <| ("locale", Locale.toString locale)
+      , flip Maybe.map photo.category <| \(Category c) -> ("subcategory", c.name)
+      , Maybe.andThen photo.category <| \(Category c) -> Maybe.andThen c.parent <| \p -> Either.elim (always Nothing) (\(Category p') -> Just ("category", p'.name)) p
+      ]
+    in
+      Html.a (router.bindForward (Routes.Photo, params) []) [content]
 
 categoryLink : Router Route State -> Category -> Locale -> Bool -> Html
 categoryLink router = lazy3 <| \ (Category category) locale isActive ->

@@ -47,7 +47,7 @@ staticHandler page router =
       "about" -> aboutWidget locale
       "contacts" -> contactsWidget locale
       _ -> Html.div [] []
-    title locale = Locale.i18n locale page []
+    title locale = Locale.i18n locale (String.toUpper page) []
     view state _ = Dict.fromList [
       ("header", innerHeader router state.locale (Html.text <| title state.locale))
     , ("body", body state.locale)
@@ -76,6 +76,7 @@ categoryHandler : Router Route State -> Handler State
 categoryHandler router =
   let
     gallery' = gallery router
+    _ = Debug.log "gallery'" ()
     navigation' = navigation router
     view state _ =
       let
@@ -86,7 +87,7 @@ categoryHandler router =
       in Dict.fromList <| List.filterMap identity [
         Maybe.map (\h -> ("header", h)) header
       , Just <| ("navigation", navigation' state.locale category subcategory)
-      , Just <| ("body", gallery' state.router.params state.photos state.time)
+      , Just <| ("body", gallery' state.locale state.photos state.time)
       ]
   in {
     view = view,
