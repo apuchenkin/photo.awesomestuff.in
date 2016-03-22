@@ -41,6 +41,9 @@ startLoading state = Response <| noFx { state | isLoading = True}
 stopLoading : Action State
 stopLoading state = Response <| noFx { state | isLoading = False}
 
+fallbackAction : Router Route State -> Action State
+fallbackAction router state = router.redirect (Routes.NotFound, state.router.params) state
+
 setTitle : Maybe String -> Action State
 setTitle title state =
   let

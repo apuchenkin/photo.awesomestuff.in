@@ -1,6 +1,7 @@
 'use strict';
 
 require('./index.html');
+require('./polyfill/scope.js');
 var Elm = require('./Main');
 var css = require("../assets/styles/main.less");
 var fontello = require('../assets/fontello/css/fontello.css');
@@ -9,7 +10,7 @@ var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
 var wrapper = document.body.querySelector('.wrapper');
 var Main = Elm.embed(Elm.Main, wrapper, {
-  localePort: navigator.language,
+  localePort: window.navigator.userLanguage || window.navigator.language,
   timePort: Date.now()
 });
 
@@ -50,15 +51,36 @@ function onTransition() {
       packery = {};
       require.ensure([], function() {
         var Packery = require('packery');
+
         packery = new Packery(gallery, {
           columnWidth: 100,
           itemSelector: 'li',
-          gutter: 10
+          gutter: 10,
+          initLayout: false
+        });
+
+        packery.delay = [];
+        packery.reload = function() {
+          packery.isLoading = true;
+          packery.reloadItems();
+          packery.layout();
+        }
+
+        packery.on("layoutComplete", function() {
+          packery.isLoading = false;
+          if (packery.delay.length) {
+            var fn = packery.delay.pop();
+            fn.apply(packery);
+          }
         });
         packery.observer = new MutationObserver(function(mutations) {
             content.scrollTop = 0;
-            packery.reloadItems();
-            packery.layout();
+            if (!packery.isLoading) {
+              packery.reload();
+            } else {
+              packery.reload();
+              packery.delay.push(packery.reload);
+            }
         });
         packery.observer.observe(gallery, { childList: true });
       });
