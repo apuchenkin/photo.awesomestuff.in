@@ -65,6 +65,9 @@ function onTransition() {
           packery.reloadItems();
           packery.layout();
         }
+        if (gallery.children.length) {
+          packery.reload();
+        }
 
         packery.on("layoutComplete", function() {
           packery.isLoading = false;
