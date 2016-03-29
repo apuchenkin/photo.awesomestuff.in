@@ -78,6 +78,7 @@ initialState = {
   , isLoading = False
   , time = 0
   , window = (0,0)
+  , transition = False
   }
 
 result : RouterResult State

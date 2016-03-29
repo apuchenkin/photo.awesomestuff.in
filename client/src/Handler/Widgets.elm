@@ -22,11 +22,12 @@ import App.Locale as Locale exposing (Locale)
 import Service.Resolutions exposing (adjust)
 import Service.Photo exposing (..)
 
-loader : Bool -> Html
-loader = lazy <| \visible ->
+loader : Bool -> Bool -> Html
+loader = lazy2 <| \visible transition ->
   let attributes = classList [
-      ("hidden", not visible),
-      ("loader", True)
+      ("hidden", not visible)
+    , ("transition", transition)
+    , ("loader", True)
     ]
   in Html.div [attributes, Attr.key "loader"] [Html.div [Attr.class "accent"] []]
 
@@ -162,7 +163,7 @@ photoWidget router params photo (prev, next) (w,h) locale =
       author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale "author " [], Html.span [Attr.class "author"] [Html.text author.name]]
     in
       Html.div (router.bindForward (Routes.Category, params) [classList [("photo-widget", True)], Attr.key "photo-widget"]) [
-        loader (not photo.isLoaded)
+        loader (not photo.isLoaded) False
       , Html.figure [classList [("content", True), ("hidden", not photo.isLoaded)]] [
           Html.div [Attr.class "tools"] [Html.a (router.bindForward (Routes.Category, params) []) <| [Html.text <| Locale.i18n locale "CLOSE" [], Html.text " ", Html.i [Attr.class "icon-cancel"] []]]
         , image

@@ -33,7 +33,7 @@ layout router state views =
     header = Dict.get "header" views
   in
     Html.div [Attr.key "main", Attr.id "main", Attr.classList [(Maybe.withDefault "" page, isJust page)]] <| List.filterMap identity [
-      Just <| loader (isLoading state)
+      Just <| loader (isLoading state) state.transition
     , Dict.get "photo" views
     , Just <| Html.div [
       Attr.key "content",

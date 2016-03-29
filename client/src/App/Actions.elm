@@ -33,13 +33,13 @@ isLoading : State -> Bool
 isLoading state = state.isLoading
 
 resetLoading : Action State
-resetLoading state = Response <| noFx { state | isLoading = False}
+resetLoading state = Response <| withTransition { state | isLoading = False}
 
 startLoading : Action State
-startLoading state = Response <| noFx { state | isLoading = True}
+startLoading state = Response <| withTransition { state | isLoading = True}
 
 stopLoading : Action State
-stopLoading state = Response <| noFx { state | isLoading = False}
+stopLoading state = Response <| withTransition { state | isLoading = False}
 
 fallbackAction : Router Route State -> Action State
 fallbackAction router state = router.redirect (Routes.NotFound, state.router.params) state
