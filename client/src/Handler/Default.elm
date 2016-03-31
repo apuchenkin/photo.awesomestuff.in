@@ -115,7 +115,7 @@ photoHandler router =
                 in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
-        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window state.locale
+        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window state.locale state.transition.transitionOut
       in Dict.fromList <| mapDefault photo' [] <| \p -> [("photo", p)]
   in {
     view = view,

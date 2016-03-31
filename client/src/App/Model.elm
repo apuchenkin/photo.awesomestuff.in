@@ -1,14 +1,11 @@
 module App.Model where
 
-import Effects
-import Task
 import Dict exposing (Dict)
 import Date exposing (Date)
 import Time exposing (Time)
 import Either exposing (Either (..))
 import Json.Decode  as Json exposing ((:=))
 import Router.Types exposing (WithRouter, Action, Response (..), Router, ActionEffects)
-import Router.Helpers exposing (noFx)
 
 import App.Locale as Locale exposing (Locale)
 import App.Routes as Routes exposing (Route)
@@ -31,7 +28,10 @@ type alias State = WithRouter Route {
   , isLoading: Bool
   , time: Time
   , window: (Int, Int)
-  , transition: Bool
+  , transition: {
+      transitionIn: Bool
+    , transitionOut: Bool
+    }
   }
 
 type Category = Category {
@@ -134,11 +134,3 @@ childs category categories =
   let (Category pc) = category
   in flip List.filter categories <| \(Category c) ->
   Maybe.withDefault False <| c.parent &> \p -> Just <| Either.elim ((==) pc.id) ((==) category) p
-
-withTransition : State -> (State, ActionEffects State)
-withTransition state =
-  let
-    state' = { state | transition = True }
-    effects = Effects.task <| Task.sleep 200 `Task.andThen` (\_ -> Task.succeed <| \state -> Response <| noFx { state | transition = False})
-  in
-    (state', effects)

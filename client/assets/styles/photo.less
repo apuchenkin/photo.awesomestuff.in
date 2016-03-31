@@ -19,6 +19,12 @@ figure, img {
   box-sizing: border-box;
   text-align: center;
   line-height: 100%;
+  transition: all 0.2s ease-out;
+
+  &.transition {
+    display: block !important;
+    opacity: 0;
+  }
 
   &:before {
     content: '';

@@ -26,20 +26,40 @@ succ a = a + 1
 pred : number -> number
 pred a = a - 1
 
-transition : Router Route State -> from -> to -> Action State
-transition router _ _ = resetMeta `chainAction` resetLoading `chainAction` createLinks router
+onTransition : Router Route State -> from -> to -> Action State
+onTransition router _ _ = resetMeta `chainAction` resetLoading `chainAction` createLinks router
+
+type TransitionType = In | Out
+
+transitionAction : Bool -> TransitionType -> Action State
+transitionAction transitionState transitionType state =
+  let
+    transition = state.transition
+    transition' = case transitionType of
+      In -> {transition | transitionIn = transitionState}
+      Out -> {transition | transitionOut = transitionState}
+  in
+    Response <| ({ state | transition = transition' }, Effects.none)
+
+withTransition : TransitionType -> Action State -> Action State
+withTransition transitionType action state =
+  let
+    (Response (state', _)) = transitionAction True transitionType state
+    effects = Effects.task <| Task.sleep config.transition `Task.andThen` (\_ -> Task.succeed (action `chainAction` transitionAction False transitionType))
+  in
+    Response <| (state', effects)
 
 isLoading : State -> Bool
 isLoading state = state.isLoading
 
 resetLoading : Action State
-resetLoading state = Response <| withTransition { state | isLoading = False}
+resetLoading state = withTransition In doNothing { state | isLoading = False }
 
 startLoading : Action State
-startLoading state = Response <| withTransition { state | isLoading = True}
+startLoading state = withTransition In doNothing { state | isLoading = True }
 
 stopLoading : Action State
-stopLoading state = Response <| withTransition { state | isLoading = False}
+stopLoading state = withTransition In doNothing { state | isLoading = False }
 
 fallbackAction : Router Route State -> Action State
 fallbackAction router state = router.redirect (Routes.NotFound, state.router.params) state
@@ -156,9 +176,9 @@ loadPhoto state =
     task = flip Maybe.map photoId <| \pid ->
       let fetch = Task.toMaybe <| getRequest (decodePhoto Nothing) (config.apiEndpoint ++ "/photo/" ++ pid) state
       in fetch `Task.andThen` \photo -> Task.succeed <| stopLoading `chainAction` updatePhoto photo
-    (Response (state', _)) = startLoading state
+    (Response (state', effects)) = startLoading {state | photo = Nothing}
 
-  in Response ({state' | photo = Nothing}, mapDefault task Effects.none Effects.task)
+  in Response (state', Effects.batch [effects, mapDefault task Effects.none Effects.task])
 
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =

@@ -1,5 +1,7 @@
 module App.Config where
 
+import Time exposing (Time)
+
 type alias Config = {
     staticEndpoint : String
   , apiEndpoint : String
@@ -9,6 +11,7 @@ type alias Config = {
   , gutter : Int
   , brickWidth: Int
   , title : String
+  , transition: Time
   }
 
 config : Config
@@ -20,6 +23,7 @@ config = {
   , secret = "secret"
   , gutter = 10
   , brickWidth = 100
+  , transition = 200
   , gallery = {
       width   = 320,
       height  = 240

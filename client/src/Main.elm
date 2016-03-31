@@ -78,7 +78,10 @@ initialState = {
   , isLoading = False
   , time = 0
   , window = (0,0)
-  , transition = False
+  , transition = {
+      transitionIn = False
+    , transitionOut = False
+    }
   }
 
 result : RouterResult State
@@ -88,7 +91,7 @@ result = Router.runRouter <| RouterConfig {
   , removeTrailingSlash = True
   , fallbackAction = fallbackAction
   , layout = layout
-  , onTransition = transition
+  , onTransition = onTransition
   , routes = routes
   , routeConfig = config
   , inits = [
