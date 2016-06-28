@@ -1,5 +1,6 @@
-module App.Model where
+module App.Model exposing (..)
 
+import Window
 import Dict exposing (Dict)
 import Date exposing (Date)
 import Time exposing (Time)
@@ -27,7 +28,7 @@ type alias State = WithRouter Route {
   , photo: Maybe Photo
   , isLoading: Bool
   , time: Time
-  , window: (Int, Int)
+  , window: Window.Size
   , transition: {
       transitionIn: Bool
     , transitionOut: Bool

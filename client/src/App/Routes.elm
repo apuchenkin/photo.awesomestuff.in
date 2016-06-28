@@ -1,4 +1,4 @@
-module App.Routes where
+module App.Routes exposing (..)
 
 type Route = Locale | Home | NotFound | Static String | Category | Photo
 

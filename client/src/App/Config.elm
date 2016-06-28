@@ -1,4 +1,4 @@
-module App.Config where
+module App.Config exposing (..)
 
 import Time exposing (Time)
 

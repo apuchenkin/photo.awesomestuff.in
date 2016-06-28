@@ -1,7 +1,7 @@
-module App.Locale where
+module App.Locale exposing (..)
 
-import I18n exposing (withLanguage, createLookup, Language(Language))
 import App.Config exposing (config)
+
 type Locale = Ru | En
 
 fallbackLocale: Locale
@@ -20,6 +20,65 @@ toString : Locale -> String
 toString locale = case locale of
   Ru -> "ru"
   En -> "en"
+
+-- type Translation
+--   = Month String
+--   | Home
+--   | Galleries
+--   | Copy
+--   | Alfa
+--   | Contacts
+--   | Title String
+--   | Subtitle
+--   | Close
+--   | Prev
+--   | Next
+--   | Form TranslationForm
+--   | About TraslationAbout
+--   | Contacts TranslationContacts
+--   | Error TranslationError
+--   | Meta TranslationMeta
+--
+-- type TranslationForm
+--   = Bugreport
+--   | Feedback
+--
+-- type TraslationAbout = Sdd
+-- type TranslationContacts = Pdd
+-- type TranslationError = Rff
+-- type TranslationMeta = Mtt
+  --
+  -- , ( "Galleries", "Галереи")
+  -- , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
+  -- , ("ALFA", " альфа")
+  -- , ("ABOUT", "О сайте")
+  -- , ("CONTACTS", "Контакты")
+  -- , ("TITLE", "{0} - " ++ config.title)
+  -- , ("SUBTITLE", "Путешествия в фотографиях")
+  -- , ("CLOSE", "Закрыть")
+  -- , ("PREV", "Предыдущая")
+  -- , ("NEXT", "Следующая")
+  -- , ("FORM.BUGREPORT", "http://goo.gl/forms/gjCXgnadYm")
+  -- , ("FORM.FEEDBACK", "http://goo.gl/forms/jCZLgQfTx4")
+  -- , ("ABOUT.TEXT1", "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):")
+  -- , ("ABOUT.TEXT2", "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:")
+  -- , ("ABOUT.TEXT3", "Спасибо за внимание!")
+  -- , ("CONTACTS.AUTHORS", "Авторы:")
+  -- , ("CONTACTS.AUTHOR1", "Артём Пученкин")
+  -- , ("CONTACTS.AUTHOR2", "Татьяна Кузмичева")
+  -- , ("CONTACTS.EMAIL", "email: {0}")
+  -- , ("CONTACTS.SKYPE", "skype: {0}")
+  -- , ("CONTACTS.QUESTIONS", "По вопросам о работе веб-сайта: {0}")
+  -- , ("ERROR", "Ошибка {0}")
+  -- , ("ERROR.NOT_FOUND", "Cтраница не существует")
+  -- , ("ERROR.THIS_MIGHT_BE", "Это могло случиться по следующим причинам:")
+  -- , ("ERROR.REASON1", "Страница ещё не была создана")
+  -- , ("ERROR.REASON2", "Страница была удалена")
+  -- , ("ERROR.CONSEQUENCE", "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in")
+  -- , ("ERROR.URL.BACK", "Назад")
+  -- , ("ERROR.URL.HOME", "На главную")
+  -- , ("META.DESCRIPTION", "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.")
+  -- , ("META.DESCRIPTION.PHOTO", "Автор: {0}, Описание: {1}")
 
 month_en : List (String, String)
 month_en =
@@ -53,77 +112,77 @@ month_ru =
   , ( "Dec", "Декабрь" )
   ]
 
-lookup : Language -> String -> List String -> String
-lookup = createLookup
-  [ withLanguage
-    (Language <| toString Ru) <|
-    [ ( "Home", "Главная" )
-    , ( "Galleries", "Галереи")
-    , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
-    , ("ALFA", " альфа")
-    , ("ABOUT", "О сайте")
-    , ("CONTACTS", "Контакты")
-    , ("TITLE", "{0} - " ++ config.title)
-    , ("SUBTITLE", "Путешествия в фотографиях")
-    , ("CLOSE", "Закрыть")
-    , ("PREV", "Предыдущая")
-    , ("NEXT", "Следующая")
-    , ("FORM.BUGREPORT", "http://goo.gl/forms/gjCXgnadYm")
-    , ("FORM.FEEDBACK", "http://goo.gl/forms/jCZLgQfTx4")
-    , ("ABOUT.TEXT1", "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):")
-    , ("ABOUT.TEXT2", "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:")
-    , ("ABOUT.TEXT3", "Спасибо за внимание!")
-    , ("CONTACTS.AUTHORS", "Авторы:")
-    , ("CONTACTS.AUTHOR1", "Артём Пученкин")
-    , ("CONTACTS.AUTHOR2", "Татьяна Кузмичева")
-    , ("CONTACTS.EMAIL", "email: {0}")
-    , ("CONTACTS.SKYPE", "skype: {0}")
-    , ("CONTACTS.QUESTIONS", "По вопросам о работе веб-сайта: {0}")
-    , ("ERROR", "Ошибка {0}")
-    , ("ERROR.NOT_FOUND", "Cтраница не существует")
-    , ("ERROR.THIS_MIGHT_BE", "Это могло случиться по следующим причинам:")
-    , ("ERROR.REASON1", "Страница ещё не была создана")
-    , ("ERROR.REASON2", "Страница была удалена")
-    , ("ERROR.CONSEQUENCE", "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in")
-    , ("ERROR.URL.BACK", "Назад")
-    , ("ERROR.URL.HOME", "На главную")
-    , ("META.DESCRIPTION", "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.")
-    , ("META.DESCRIPTION.PHOTO", "Автор: {0}, Описание: {1}")
-    ] ++ month_ru
-  , withLanguage
-    (Language <| toString En) <|
-    [
-      ("ALFA", " alfa")
-    , ("ABOUT", "About")
-    , ("CONTACTS", "Contacts")
-    , ("TITLE", "{0} - " ++ config.title)
-    , ("SUBTITLE", "Travel in photography")
-    , ("CLOSE", "Close")
-    , ("PREV", "Previous")
-    , ("NEXT", "Next")
-    , ("FORM.BUGREPORT", "http://goo.gl/forms/PytHUvBm48")
-    , ("FORM.FEEDBACK", "http://goo.gl/forms/mD6GCLnzCT")
-    , ("ABOUT.TEXT1", "This is alpha release of photo gallery. If you found any bugs, please, complete the following form (will open in a new page):")
-    , ("ABOUT.TEXT2", "If you want to left feedback or have any improvement ideas, submit following:")
-    , ("ABOUT.TEXT3", "Thanks for your attention!")
-    , ("CONTACTS.AUTHORS", "Authors:")
-    , ("CONTACTS.AUTHOR1", "Artem Puchenkin")
-    , ("CONTACTS.AUTHOR2", "Tatiana Kuzmicheva")
-    , ("CONTACTS.EMAIL", "email: {0}")
-    , ("CONTACTS.SKYPE", "skype: {0}")
-    , ("CONTACTS.QUESTIONS", "Questions related to web-site: {0}")
-    , ("ERROR", "Error {0}")
-    , ("ERROR.NOT_FOUND", "This page does not exists")
-    , ("ERROR.THIS_MIGHT_BE", "This might be because of:")
-    , ("ERROR.REASON1", "Page has not been created yet")
-    , ("ERROR.REASON2", "Page has been deleted for some reason")
-    , ("ERROR.CONSEQUENCE", "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in")
-    , ("ERROR.URL.BACK", "Go back")
-    , ("ERROR.URL.HOME", "Return home")
-    , ("META.DESCRIPTION", "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva.")
-    , ("META.DESCRIPTION.PHOTO", "Author: {0}, Title: {1}")
-    ] ++ month_en
-  ]
+-- lookup : Language -> String -> List String -> String
+-- lookup = createLookup
+--   [ withLanguage
+--     (Language <| toString Ru) <|
+--     [ ( "Home", "Главная" )
+--     , ( "Galleries", "Галереи")
+--     , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
+--     , ("ALFA", " альфа")
+--     , ("ABOUT", "О сайте")
+--     , ("CONTACTS", "Контакты")
+--     , ("TITLE", "{0} - " ++ config.title)
+--     , ("SUBTITLE", "Путешествия в фотографиях")
+--     , ("CLOSE", "Закрыть")
+--     , ("PREV", "Предыдущая")
+--     , ("NEXT", "Следующая")
+--     , ("FORM.BUGREPORT", "http://goo.gl/forms/gjCXgnadYm")
+--     , ("FORM.FEEDBACK", "http://goo.gl/forms/jCZLgQfTx4")
+--     , ("ABOUT.TEXT1", "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):")
+--     , ("ABOUT.TEXT2", "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:")
+--     , ("ABOUT.TEXT3", "Спасибо за внимание!")
+--     , ("CONTACTS.AUTHORS", "Авторы:")
+--     , ("CONTACTS.AUTHOR1", "Артём Пученкин")
+--     , ("CONTACTS.AUTHOR2", "Татьяна Кузмичева")
+--     , ("CONTACTS.EMAIL", "email: {0}")
+--     , ("CONTACTS.SKYPE", "skype: {0}")
+--     , ("CONTACTS.QUESTIONS", "По вопросам о работе веб-сайта: {0}")
+--     , ("ERROR", "Ошибка {0}")
+--     , ("ERROR.NOT_FOUND", "Cтраница не существует")
+--     , ("ERROR.THIS_MIGHT_BE", "Это могло случиться по следующим причинам:")
+--     , ("ERROR.REASON1", "Страница ещё не была создана")
+--     , ("ERROR.REASON2", "Страница была удалена")
+--     , ("ERROR.CONSEQUENCE", "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in")
+--     , ("ERROR.URL.BACK", "Назад")
+--     , ("ERROR.URL.HOME", "На главную")
+--     , ("META.DESCRIPTION", "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.")
+--     , ("META.DESCRIPTION.PHOTO", "Автор: {0}, Описание: {1}")
+--     ] ++ month_ru
+--   , withLanguage
+--     (Language <| toString En) <|
+--     [
+--       ("ALFA", " alfa")
+--     , ("ABOUT", "About")
+--     , ("CONTACTS", "Contacts")
+--     , ("TITLE", "{0} - " ++ config.title)
+--     , ("SUBTITLE", "Travel in photography")
+--     , ("CLOSE", "Close")
+--     , ("PREV", "Previous")
+--     , ("NEXT", "Next")
+--     , ("FORM.BUGREPORT", "http://goo.gl/forms/PytHUvBm48")
+--     , ("FORM.FEEDBACK", "http://goo.gl/forms/mD6GCLnzCT")
+--     , ("ABOUT.TEXT1", "This is alpha release of photo gallery. If you found any bugs, please, complete the following form (will open in a new page):")
+--     , ("ABOUT.TEXT2", "If you want to left feedback or have any improvement ideas, submit following:")
+--     , ("ABOUT.TEXT3", "Thanks for your attention!")
+--     , ("CONTACTS.AUTHORS", "Authors:")
+--     , ("CONTACTS.AUTHOR1", "Artem Puchenkin")
+--     , ("CONTACTS.AUTHOR2", "Tatiana Kuzmicheva")
+--     , ("CONTACTS.EMAIL", "email: {0}")
+--     , ("CONTACTS.SKYPE", "skype: {0}")
+--     , ("CONTACTS.QUESTIONS", "Questions related to web-site: {0}")
+--     , ("ERROR", "Error {0}")
+--     , ("ERROR.NOT_FOUND", "This page does not exists")
+--     , ("ERROR.THIS_MIGHT_BE", "This might be because of:")
+--     , ("ERROR.REASON1", "Page has not been created yet")
+--     , ("ERROR.REASON2", "Page has been deleted for some reason")
+--     , ("ERROR.CONSEQUENCE", "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in")
+--     , ("ERROR.URL.BACK", "Go back")
+--     , ("ERROR.URL.HOME", "Return home")
+--     , ("META.DESCRIPTION", "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva.")
+--     , ("META.DESCRIPTION.PHOTO", "Author: {0}, Title: {1}")
+--     ] ++ month_en
+--   ]
 
 i18n : Locale -> String -> List String -> String
-i18n locale = lookup (Language <| toString locale)
+i18n locale str _ = str

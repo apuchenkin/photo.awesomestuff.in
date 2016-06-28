@@ -1,4 +1,4 @@
-module Handler.Widgets where
+module Handler.Widgets exposing (..)
 
 import Dict
 import String
@@ -12,7 +12,7 @@ import Html.Events as Events
 import Either exposing (Either (..))
 import Json.Decode  as Json
 import List.Extra as List'
-import Router.Helpers exposing (singleton, noFx, chainAction)
+import Router.Helpers exposing (noFx, chainAction)
 import Router.Types exposing (Router, RouteParams, Response (..), Action)
 
 import App.Config exposing (..)
@@ -23,16 +23,20 @@ import App.Locale as Locale exposing (Locale)
 import Service.Resolutions exposing (adjust)
 import Service.Photo exposing (..)
 
-loader : Bool -> Bool -> Html
+{-| Wraps something in a list -}
+singleton : a -> List a
+singleton action = [ action ]
+
+loader : Bool -> Bool -> Html (Action State)
 loader = lazy2 <| \visible transition ->
   let attributes = classList [
       ("hidden", not visible)
     , ("transition", transition)
     , ("loader", True)
-    ]
-  in Html.div [attributes, Attr.key "loader"] [Html.div [Attr.class "accent"] []]
+    ] -- :: [Attr.key "loader"]
+  in Html.div [attributes] [Html.div [Attr.class "accent"] []]
 
-languageSelector :  Router Route State -> Maybe Route -> RouteParams -> Locale -> Html
+languageSelector :  Router Route State -> Maybe Route -> RouteParams -> Locale -> Html (Action State)
 languageSelector router = lazy3 <| \route params locale ->
   let
     route' = Maybe.withDefault Routes.Home route
@@ -41,49 +45,49 @@ languageSelector router = lazy3 <| \route params locale ->
       classList [("active", locale == loc)],
       hreflang (Locale.toString loc)
     ]
-  in Html.div [class "language", Attr.key "language-selector"]
+  in Html.div [class "language"] --, Attr.key "language-selector"]
   <| flip List.map Locale.locales
   <| \loc -> Html.a (router.bindForward (route', params' loc) (attributes loc)) [Html.text <| Locale.toString loc]
 
-homeHeader : Router Route State -> Locale -> Html
+homeHeader : Router Route State -> Locale -> Html (Action State)
 homeHeader = lazy2 <| \router locale ->
   let
     version = span [class "version"] [text <| Locale.i18n locale "ALFA" []]
   in
-    Html.header [class "main", Attr.key "header-home"] [
+    Html.header [class "main"] [ --, Attr.key "header-home"] [
       Html.h1 [class "title"] [homeLink router locale config.title, version],
       Html.h2 [class "subtitle"] [text <| Locale.i18n locale "SUBTITLE" []]
     ]
 
-innerHeader : Router Route State -> Locale -> Html -> Html
+innerHeader : Router Route State -> Locale -> Html (Action State) -> Html (Action State)
 innerHeader = lazy3 <| \router locale title ->
   let
     homeText = Locale.i18n locale "Home" []
   in
-    Html.header [class "main", Attr.key "header-inner"] [
+    Html.header [class "main"] [ --, Attr.key "header-inner"] [
       Html.h1 [class "title"] [homeLink router locale homeText, text " / ", title]
     ]
 
-footer : Router Route State -> Locale -> Html
+footer : Router Route State -> Locale -> Html (Action State)
 footer = lazy2 <| \router locale ->
   let
     about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "ABOUT" []]
     contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "CONTACTS" []]
     sep = text " | "
-  in Html.footer [Attr.key "footer"] [
+  in Html.footer [] [ -- [Attr.key "footer"] [
     homeLink router locale (String.toLower config.title),
     sep, text <| Locale.i18n locale "© 2015, Artem Puchenkin" [],
     sep, about,
     sep, contacts
   ]
 
-navigation : Router Route State -> Locale -> Maybe Category -> Maybe Category -> Html
+navigation : Router Route State -> Locale -> Maybe Category -> Maybe Category -> Html (Action State)
 navigation router =
   let
     categoryLink' = categoryLink router
   in
     lazy3 <| \locale category subcategory ->
-      Html.nav [Attr.key "navigation", Attr.class "categories"] [
+      Html.nav [Attr.class "categories"] [ -- Attr.key "navigation"
         Html.ul []
           <| List.map    (\c -> Html.li [] [categoryLink' c locale (Just c == subcategory)])
           <| Maybe.withDefault []
@@ -91,15 +95,15 @@ navigation router =
       ]
 
 
-galleriesWidget : Router Route State -> List Category -> Locale -> Html
-galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries", Attr.key "galleries"] [
+galleriesWidget : Router Route State -> List Category -> Locale -> Html (Action State)
+galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries"] [ -- [, Attr.key "galleries"] [
   Html.h2 [] [text <| Locale.i18n locale "Galleries" []],
   Html.ul []
       <| List.map (\c -> Html.li [] [categoryWidget router c locale])
       <| List.filter (\(Category c) -> c.parent == Nothing) categories
     ]
 
-categoryWidget : Router Route State -> Category -> Locale -> Html
+categoryWidget : Router Route State -> Category -> Locale -> Html (Action State)
 categoryWidget = lazy3 <| \router category locale ->
   let
     (Category c) = category
@@ -123,22 +127,22 @@ categoryWidget = lazy3 <| \router category locale ->
         Html.ul [] (List.map (\child -> Html.li [] [categoryLink router child locale False]) c.childs)
       ]
   in
-    Html.div [class "gallery", Attr.key "gallery-brick"] [
+    Html.div [class "gallery"] [--, Attr.key "gallery-brick"] [
       cover,
       aside
     ]
 
-gallery : Router Route State -> Locale -> List Photo -> Time -> Html
+gallery : Router Route State -> Locale -> List Photo -> Time -> Html (Action State)
 gallery router = lazy3 <| \ locale photos time ->
   let
     brick = brickWidget router locale
     seed = Random.initialSeed <| floor <| Time.inSeconds time
     photos' = remapPhotos seed photos
-  in Html.div [Attr.class "gallery", Attr.key "gallery"]
+  in Html.div [Attr.class "gallery"] --, Attr.key "gallery"]
   <| singleton <| Html.ul [] <| flip List.map photos'
   <| \photo -> Html.li [] [brick photo]
 
-brickWidget : Router Route State -> Locale -> Photo -> Html
+brickWidget : Router Route State -> Locale -> Photo -> Html (Action State)
 brickWidget router locale photo =
     let
       (w,h) = (photo.width, photo.height)
@@ -151,31 +155,31 @@ brickWidget router locale photo =
       content = Html.div [Attr.class "brick", Attr.style [("width", toString w ++ "px"), ("height", toString h ++ "px"),("background-image", "url(" ++ src ++ ")")]] []
     in photoLink router photo locale content
 
-photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Locale -> Bool -> Html
+photoWidget : Router Route State -> RouteParams -> Photo -> (Int, Int) -> (Int, Int) -> Locale -> Bool -> Html (Action State)
 photoWidget router params photo (prev, next) (w,h) locale transition =
     let
       (w', h') = adjust (w - 40, h - 40)
       loadAction state = let photo' = {photo | isLoaded = True} in Response <| noFx {state | photo = Just photo'}
-      onLoad = Events.on "load" Json.value <| always <| Signal.message router.address loadAction
+      onLoad = Events.on "load" (Json.succeed loadAction)
       filename = Maybe.withDefault "photo.jpg" <| List'.last <| String.split "/" photo.src
       src = config.apiEndpoint ++ String.join "/" ["", "hs", "photo", toString photo.id, toString w', toString h', filename]
 
-      bindExit : List Html.Attribute -> List Html.Attribute
+      bindExit : List (Html.Attribute (Action State)) -> List (Html.Attribute (Action State))
       bindExit attrs =
         let
           route = (Routes.Category, params)
           options = {stopPropagation = True, preventDefault = True}
-          action _ = Signal.message router.address <| withTransition Out <| (\state -> Response <| noFx {state | photo = Nothing}) `chainAction` (router.forward route)
+          action = withTransition Out <| (\state -> Response <| noFx {state | photo = Nothing}) `chainAction` (router.forward route)
         in
           Attr.href (router.buildUrl route)
-          :: Events.onWithOptions "click" options Json.value action
+          :: Events.onWithOptions "click" options (Json.succeed action)
           :: attrs
 
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src, Attr.style [("max-height", toString (h - 120) ++ "px")],onLoad]) []
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
       author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale "author " [], Html.span [Attr.class "author"] [Html.text author.name]]
     in
-      Html.div (bindExit [classList [("photo-widget", True), ("transition", transition)], Attr.key "photo-widget"]) [
+      Html.div (bindExit [classList [("photo-widget", True), ("transition", transition)]]) [ --, Attr.key "photo-widget"]) [
         loader (not photo.isLoaded) False
       , Html.figure [classList [("content", True), ("hidden", not photo.isLoaded)]] [
           Html.div [Attr.class "tools"] [Html.a (bindExit []) <| [Html.text <| Locale.i18n locale "CLOSE" [], Html.text " ", Html.i [Attr.class "icon-cancel"] []]]
@@ -189,12 +193,12 @@ photoWidget router params photo (prev, next) (w,h) locale transition =
       ]
     --
 {-| Links -}
-homeLink : Router Route State -> Locale -> String -> Html
+homeLink : Router Route State -> Locale -> String -> Html (Action State)
 homeLink =
   lazy3 <| \router locale title ->
     Html.a (router.bindForward (Routes.Home, Dict.fromList [("locale", Locale.toString locale)]) []) [text title]
 
-photoLink : Router Route State -> Photo -> Locale -> Html -> Html
+photoLink : Router Route State -> Photo -> Locale -> Html (Action State) -> Html (Action State)
 photoLink router photo locale content =
     let
       categoryParams = Maybe.withDefault []
@@ -209,7 +213,7 @@ photoLink router photo locale content =
     in
       Html.a (router.bindForward (Routes.Photo, params) []) [content]
 
-categoryLink : Router Route State -> Category -> Locale -> Bool -> Html
+categoryLink : Router Route State -> Category -> Locale -> Bool -> Html (Action State)
 categoryLink router = lazy3 <| \ (Category category) locale isActive ->
   let
     params = case category.parent of

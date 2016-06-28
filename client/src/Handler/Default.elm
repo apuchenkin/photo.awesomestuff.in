@@ -1,4 +1,4 @@
-module Handler.Default where
+module Handler.Default exposing (..)
 
 import String
 import Dict
@@ -101,6 +101,7 @@ photoHandler router =
   let
     view state _ =
       let
+        window = (state.window.width, state.window.height)
         pid = Maybe.map ((Result.withDefault 0) << String.toInt) <| Dict.get "photo" state.router.params
         params = Maybe.andThen pid <| \p ->
           let
@@ -115,7 +116,7 @@ photoHandler router =
                 in Maybe.map2 (,) prev next
           in Maybe.map2 (\p n -> {photo = p, neighbors = n}) photo neghbors
 
-        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors state.window state.locale state.transition.transitionOut
+        photo' = flip Maybe.map params <| \p -> photoWidget router state.router.params p.photo p.neighbors window state.locale state.transition.transitionOut
       in Dict.fromList <| mapDefault photo' [] <| \p -> [("photo", p)]
   in {
     view = view,

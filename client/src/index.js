@@ -9,20 +9,24 @@ var Ps = require('perfect-scrollbar');
 var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
 
 var wrapper = document.body.querySelector('.wrapper');
-var Main = Elm.embed(Elm.Main, wrapper, {
-  localePort: window.navigator.userLanguage || window.navigator.language,
-  timePort: Date.now()
+while (wrapper.firstChild) {
+    wrapper.removeChild(wrapper.firstChild);
+}
+var Main = Elm.Main.embed(wrapper, {
+  locale: window.navigator.userLanguage || window.navigator.language,
+  time: Date.now()
 });
 
 Main.ports.meta.subscribe(metaUpdate);
-Main.ports.rs.subscribe(onTransition);
+// Main.ports.meta.subscribe(onTransition);
 
 var main = wrapper.querySelector(':scope > #main');
 var links = {};
 var packery;
-var content = main.querySelector(':scope > .content');
-var gallery = content.querySelector(':scope > .gallery > ul');
-var photoWidget = main.querySelector(':scope > .photo-widget');
+// var content = main.querySelector(':scope > .content');
+// var gallery = content.querySelector(':scope > .gallery > ul');
+// var photoWidget = main.querySelector(':scope > .photo-widget');
+//
 
 function metaUpdate(meta) {
   document.title = meta.title;
@@ -36,64 +40,62 @@ function metaUpdate(meta) {
   })
 }
 
-Ps.initialize(content);
-
-function onTransition() {
-    // clean up
-    content.scrollTop = 0;
-    Ps.destroy(content);
-
-    content = main.querySelector(':scope > .content');
-    gallery = content.querySelector(':scope > .gallery > ul');
-    Ps.initialize(content);
-
-    if (gallery && !packery) {
-      packery = {};
-      require.ensure([], function() {
-        var Packery = require('packery');
-
-        packery = new Packery(gallery, {
-          columnWidth: 100,
-          itemSelector: 'li',
-          gutter: 10,
-          initLayout: false
-        });
-
-        packery.delay = [];
-        packery.reload = function() {
-          packery.isLoading = true;
-          packery.reloadItems();
-          packery.layout();
-        }
-        if (gallery.children.length) {
-          packery.reload();
-        }
-
-        packery.on("layoutComplete", function() {
-          packery.isLoading = false;
-          if (packery.delay.length) {
-            var fn = packery.delay.pop();
-            fn.apply(packery);
-          }
-        });
-        packery.observer = new MutationObserver(function(mutations) {
-            content.scrollTop = 0;
-            if (!packery.isLoading) {
-              packery.reload();
-            } else {
-              packery.reload();
-              packery.delay.push(packery.reload);
-            }
-        });
-        packery.observer.observe(gallery, { childList: true });
-      });
-    }
-
-    if (packery && !gallery) {
-      packery.observer.disconnect();
-      packery.destroy();
-      packery = null;
-    }
-}
-
-onTransition();
+// function onTransition() {
+//     // clean up
+//     content.scrollTop = 0;
+//     Ps.destroy(content);
+//
+//     content = main.querySelector(':scope > .content');
+//     gallery = content.querySelector(':scope > .gallery > ul');
+//     Ps.initialize(content);
+//
+//     if (gallery && !packery) {
+//       packery = {};
+//       require.ensure([], function() {
+//         var Packery = require('packery');
+//
+//         packery = new Packery(gallery, {
+//           columnWidth: 100,
+//           itemSelector: 'li',
+//           gutter: 10,
+//           initLayout: false
+//         });
+//
+//         packery.delay = [];
+//         packery.reload = function() {
+//           packery.isLoading = true;
+//           packery.reloadItems();
+//           packery.layout();
+//         }
+//         if (gallery.children.length) {
+//           packery.reload();
+//         }
+//
+//         packery.on("layoutComplete", function() {
+//           packery.isLoading = false;
+//           if (packery.delay.length) {
+//             var fn = packery.delay.pop();
+//             fn.apply(packery);
+//           }
+//         });
+//         packery.observer = new MutationObserver(function(mutations) {
+//             content.scrollTop = 0;
+//             if (!packery.isLoading) {
+//               packery.reload();
+//             } else {
+//               packery.reload();
+//               packery.delay.push(packery.reload);
+//             }
+//         });
+//         packery.observer.observe(gallery, { childList: true });
+//       });
+//     }
+//
+//     if (packery && !gallery) {
+//       packery.observer.disconnect();
+//       packery.destroy();
+//       packery = null;
+//     }
+// }
+//
+// onTransition();

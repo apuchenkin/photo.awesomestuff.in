@@ -1,20 +1,22 @@
-module App.Actions where
+module App.Actions exposing (..)
 
 import Http
 import Random
+import Process
+import Window
 import Time exposing (Time)
 import Either exposing (Either (..))
 import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
-import Effects exposing (Never)
 import Task exposing (Task)
 import Router.Types exposing (WithRouter, Action, Response (..), Router)
-import Router.Helpers exposing (noFx, chainAction, doNothing)
+import Router.Helpers exposing (noFx, chainAction, doNothing, combineActions)
 
 import App.Model exposing (..)
 import App.Config exposing (config)
 import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
+import App.Ports
 import Service.Photo exposing (refinePhotos)
 
 mapDefault : Maybe a -> b -> (a -> b) -> b
@@ -27,9 +29,17 @@ pred : number -> number
 pred a = a - 1
 
 onTransition : Router Route State -> from -> to -> Action State
-onTransition router _ _ = resetMeta `chainAction` resetLoading `chainAction` createLinks router
+onTransition router _ _ = combineActions [
+    resetMeta
+  , resetLoading
+  , createLinks router
+  , \state -> Response (state, Cmd.map (\_ -> doNothing) <| (App.Ports.meta state.meta)) -- send meta to port
+  ]
 
 type TransitionType = In | Out
+
+execute : Task Never (Action State) -> Cmd (Action State)
+execute task = Task.perform (always doNothing) (identity) task
 
 transitionAction : Bool -> TransitionType -> Action State
 transitionAction transitionState transitionType state =
@@ -39,13 +49,13 @@ transitionAction transitionState transitionType state =
       In -> {transition | transitionIn = transitionState}
       Out -> {transition | transitionOut = transitionState}
   in
-    Response <| ({ state | transition = transition' }, Effects.none)
+    Response <| noFx { state | transition = transition' }
 
 withTransition : TransitionType -> Action State -> Action State
 withTransition transitionType action state =
   let
     (Response (state', _)) = transitionAction True transitionType state
-    effects = Effects.task <| Task.sleep config.transition `Task.andThen` (\_ -> Task.succeed (action `chainAction` transitionAction False transitionType))
+    effects = execute <| Process.sleep config.transition `Task.andThen` (\_ -> Task.succeed (action `chainAction` transitionAction False transitionType))
   in
     Response <| (state', effects)
 
@@ -96,7 +106,7 @@ setMetaFromPhoto photo =
 setTime : Time -> Action State
 setTime time state = Response <| noFx {state | time = time}
 
-setDims : (Int, Int) -> Action State
+setDims : Window.Size -> Action State
 setDims dims state = Response <| noFx {state | window = dims}
 
 setLocale : Locale -> Action State
@@ -142,7 +152,7 @@ loadCategories router state =
 
       in Task.succeed <| action
 
-  in Response ({state' | categories = Dict.empty}, Effects.task task)
+  in Response ({state' | categories = Dict.empty}, execute task)
 
 checkCategory : Router Route State -> String -> Action State
 checkCategory router category state =
@@ -167,7 +177,7 @@ loadPhotos router state =
         in Just <| Maybe.withDefault default task
     (Response (state', _)) = startLoading state
 
-  in Response (mapDefault task state (always state'), mapDefault task Effects.none Effects.task)
+  in Response (mapDefault task state (always state'), mapDefault task Cmd.none execute)
 
 loadPhoto : Action State
 loadPhoto state =
@@ -178,7 +188,7 @@ loadPhoto state =
       in fetch `Task.andThen` \photo -> Task.succeed <| stopLoading `chainAction` updatePhoto photo
     (Response (state', effects)) = startLoading {state | photo = Nothing}
 
-  in Response (state', Effects.batch [effects, mapDefault task Effects.none Effects.task])
+  in Response (state', Cmd.batch [effects, mapDefault task Cmd.none execute])
 
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =
