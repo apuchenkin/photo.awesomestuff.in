@@ -16,7 +16,7 @@ import App.Model exposing (..)
 import App.Config exposing (config)
 import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
-import App.Ports
+import App.Ports exposing (portCmd, portDelayCmd, execute)
 import Service.Photo exposing (refinePhotos)
 
 mapDefault : Maybe a -> b -> (a -> b) -> b
@@ -28,18 +28,19 @@ succ a = a + 1
 pred : number -> number
 pred a = a - 1
 
-onTransition : Router Route State -> from -> to -> Action State
-onTransition router _ _ = combineActions [
-    resetMeta
-  , resetLoading
-  , createLinks router
-  , \state -> Response (state, Cmd.map (\_ -> doNothing) <| (App.Ports.meta state.meta)) -- send meta to port
-  ]
+onTransition : Router Route State -> Maybe from -> Maybe to -> Action State
+onTransition router _ to = case to of
+  Nothing -> fallbackAction router
+  Just route -> combineActions [
+      resetMeta
+    , resetLoading
+    , createLinks router
+    , \state -> Response (state, portCmd <| App.Ports.meta state.meta) -- send meta to port
+    , \state -> Response (state, portCmd <| App.Ports.transition <| Maybe.map toString to)
+    ]
 
 type TransitionType = In | Out
 
-execute : Task Never (Action State) -> Cmd (Action State)
-execute task = Task.perform (always doNothing) (identity) task
 
 transitionAction : Bool -> TransitionType -> Action State
 transitionAction transitionState transitionType state =
@@ -66,13 +67,21 @@ resetLoading : Action State
 resetLoading state = withTransition In doNothing { state | isLoading = False }
 
 startLoading : Action State
-startLoading state = withTransition In doNothing { state | isLoading = True }
+startLoading state =
+    let
+      _ = Debug.log "startLoading" ()
+    in
+      withTransition In doNothing { state | isLoading = True }
 
 stopLoading : Action State
-stopLoading state = withTransition In doNothing { state | isLoading = False }
+stopLoading state =
+  let
+    _ = Debug.log "stopLoading" ()
+  in
+    withTransition In doNothing { state | isLoading = False }
 
 fallbackAction : Router Route State -> Action State
-fallbackAction router state = router.redirect (Routes.NotFound, state.router.params) state
+fallbackAction router state = let _ = Debug.log "nf" () in router.redirect (Routes.NotFound, state.router.params) state
 
 setTitle : Maybe String -> Action State
 setTitle title state =
@@ -195,7 +204,8 @@ updatePhotos photos state =
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds state.time
     photos' = refinePhotos seed photos
-  in Response <| noFx {state | photos = photos'}
+    _ = Debug.log "updatePhotos" ()
+  in Response ({state | photos = photos'}, portDelayCmd <| App.Ports.photos True)
 
 updatePhoto : Maybe Photo -> Action State
 updatePhoto photo = (\state -> Response <| noFx {state | photo = photo})

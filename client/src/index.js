@@ -2,6 +2,7 @@
 
 require('./index.html');
 require('./polyfill/scope.js');
+
 var Elm = require('./Main');
 var css = require("../assets/styles/main.less");
 var fontello = require('../assets/fontello/css/fontello.css');
@@ -18,15 +19,11 @@ var Main = Elm.Main.embed(wrapper, {
 });
 
 Main.ports.meta.subscribe(metaUpdate);
-// Main.ports.meta.subscribe(onTransition);
+// Main.ports.photos.subscribe(onPhotosLoad);
+Main.ports.transition.subscribe(onTransition);
 
-var main = wrapper.querySelector(':scope > #main');
 var links = {};
 var packery;
-// var content = main.querySelector(':scope > .content');
-// var gallery = content.querySelector(':scope > .gallery > ul');
-// var photoWidget = main.querySelector(':scope > .photo-widget');
-//
 
 function metaUpdate(meta) {
   document.title = meta.title;
@@ -40,62 +37,85 @@ function metaUpdate(meta) {
   })
 }
 
-// function onTransition() {
-//     // clean up
-//     content.scrollTop = 0;
-//     Ps.destroy(content);
-//
-//     content = main.querySelector(':scope > .content');
-//     gallery = content.querySelector(':scope > .gallery > ul');
-//     Ps.initialize(content);
-//
-//     if (gallery && !packery) {
-//       packery = {};
-//       require.ensure([], function() {
-//         var Packery = require('packery');
-//
-//         packery = new Packery(gallery, {
-//           columnWidth: 100,
-//           itemSelector: 'li',
-//           gutter: 10,
-//           initLayout: false
-//         });
-//
-//         packery.delay = [];
-//         packery.reload = function() {
-//           packery.isLoading = true;
-//           packery.reloadItems();
-//           packery.layout();
-//         }
-//         if (gallery.children.length) {
-//           packery.reload();
-//         }
-//
-//         packery.on("layoutComplete", function() {
-//           packery.isLoading = false;
-//           if (packery.delay.length) {
-//             var fn = packery.delay.pop();
-//             fn.apply(packery);
-//           }
-//         });
-//         packery.observer = new MutationObserver(function(mutations) {
-//             content.scrollTop = 0;
-//             if (!packery.isLoading) {
-//               packery.reload();
-//             } else {
-//               packery.reload();
-//               packery.delay.push(packery.reload);
-//             }
-//         });
-//         packery.observer.observe(gallery, { childList: true });
-//       });
-//     }
-//
-//     if (packery && !gallery) {
-//       packery.observer.disconnect();
-//       packery.destroy();
-//       packery = null;
-//     }
-// }
-//
-// onTransition();
+function onTransition(route) {
+  var main = wrapper.querySelector(':scope > #main');
+  var content = main.querySelector(':scope > .content');
+  var gallery = content.querySelector(':scope > .gallery > ul');
+
+  content.scrollTop = 0;
+  Ps.initialize(content);
+  if (!packery && gallery) {
+    require.ensure([], function() {
+      var Packery = require('packery');
+
+      packery = new Packery(gallery, {
+        columnWidth: 100,
+        itemSelector: 'li',
+        gutter: 10,
+        initLayout: false
+      });
+      // debugger;
+      packery.reloadItems();
+      packery.layout();
+    })
+  } else {
+    packery.delay = [];
+    packery.reload = function() {
+      packery.isLoading = true;
+      packery.reloadItems();
+      packery.layout();
+    }
+    if (gallery.children.length) {
+      packery.reload();
+    }
+
+    packery.on("layoutComplete", function() {
+      packery.isLoading = false;
+      if (packery.delay.length) {
+        var fn = packery.delay.pop();
+        fn.apply(packery);
+      }
+    });
+
+    packery.observer = new MutationObserver(function(mutations) {
+
+        if (!packery.isLoading) {
+          packery.reload();
+        } else {
+          packery.reload();
+          packery.delay.push(packery.reload);
+        }
+    });
+    packery.observer.observe(gallery, { childList: true });
+  }
+//);
+  // }
+
+
+  // }
+  //
+  // if (packery && !gallery) {
+  //   packery.observer.disconnect();
+  //   packery.destroy();
+  //   packery = null;
+  // }
+  if (!gallery && packery) {
+      debugger;
+      packery.destroy();
+      packery = null;
+  }
+}
+
+function onPhotosLoad() {
+
+    // clean up
+    // content.scrollTop = 0;
+    // Ps.destroy(content);
+
+    var main = wrapper.querySelector(':scope > #main');
+    var content = main.querySelector(':scope > .content');
+    var gallery = content.querySelector(':scope > .gallery > ul');
+    console.log(gallery.children.length);
+
+
+}
