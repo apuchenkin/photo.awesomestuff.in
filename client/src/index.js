@@ -8,6 +8,7 @@ var css = require("../assets/styles/main.less");
 var fontello = require('../assets/fontello/css/fontello.css');
 var Ps = require('perfect-scrollbar');
 var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
+var Packery = require('packery');
 
 var wrapper = document.body.querySelector('.wrapper');
 while (wrapper.firstChild) {
@@ -19,11 +20,10 @@ var Main = Elm.Main.embed(wrapper, {
 });
 
 Main.ports.meta.subscribe(metaUpdate);
-// Main.ports.photos.subscribe(onPhotosLoad);
+Main.ports.photos.subscribe(onPhotosLoad);
 Main.ports.transition.subscribe(onTransition);
 
 var links = {};
-var packery;
 
 function metaUpdate(meta) {
   document.title = meta.title;
@@ -37,6 +37,8 @@ function metaUpdate(meta) {
   })
 }
 
+var packery;
+
 function onTransition(route) {
   var main = wrapper.querySelector(':scope > #main');
   var content = main.querySelector(':scope > .content');
@@ -44,78 +46,31 @@ function onTransition(route) {
 
   content.scrollTop = 0;
   Ps.initialize(content);
-  if (!packery && gallery) {
-    require.ensure([], function() {
-      var Packery = require('packery');
 
-      packery = new Packery(gallery, {
-        columnWidth: 100,
-        itemSelector: 'li',
-        gutter: 10,
-        initLayout: false
-      });
-      // debugger;
-      packery.reloadItems();
-      packery.layout();
-    })
-  } else {
-    packery.delay = [];
-    packery.reload = function() {
-      packery.isLoading = true;
-      packery.reloadItems();
-      packery.layout();
-    }
-    if (gallery.children.length) {
-      packery.reload();
-    }
-
-    packery.on("layoutComplete", function() {
-      packery.isLoading = false;
-      if (packery.delay.length) {
-        var fn = packery.delay.pop();
-        fn.apply(packery);
-      }
-    });
-
-    packery.observer = new MutationObserver(function(mutations) {
-
-        if (!packery.isLoading) {
-          packery.reload();
-        } else {
-          packery.reload();
-          packery.delay.push(packery.reload);
-        }
-    });
-    packery.observer.observe(gallery, { childList: true });
-  }
-//);
-  // }
-
-
-  // }
-  //
-  // if (packery && !gallery) {
-  //   packery.observer.disconnect();
-  //   packery.destroy();
-  //   packery = null;
-  // }
-  if (!gallery && packery) {
-      debugger;
+  // clean up packery if gallery is hidden
+  if (packery && !gallery) {
       packery.destroy();
       packery = null;
   }
 }
 
 function onPhotosLoad() {
-
-    // clean up
-    // content.scrollTop = 0;
-    // Ps.destroy(content);
-
     var main = wrapper.querySelector(':scope > #main');
     var content = main.querySelector(':scope > .content');
     var gallery = content.querySelector(':scope > .gallery > ul');
-    console.log(gallery.children.length);
 
+    if (!packery) {
+      require.ensure([], function() {
+        var Packery = require('packery');
 
+        packery = new Packery(gallery, {
+          columnWidth: 100,
+          itemSelector: 'li',
+          gutter: 10
+        });
+      })
+    } else {
+      packery.reloadItems();
+      packery.layout();
+    }
 }

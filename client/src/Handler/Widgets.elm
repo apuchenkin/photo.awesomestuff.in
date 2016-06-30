@@ -33,7 +33,7 @@ loader = lazy2 <| \visible transition ->
       ("hidden", not visible)
     , ("transition", transition)
     , ("loader", True)
-    ] -- :: [Attr.key "loader"]
+    ]
   in Html.div [attributes] [Html.div [Attr.class "accent"] []]
 
 languageSelector :  Router Route State -> Maybe Route -> RouteParams -> Locale -> Html (Action State)
@@ -45,7 +45,7 @@ languageSelector router = lazy3 <| \route params locale ->
       classList [("active", locale == loc)],
       hreflang (Locale.toString loc)
     ]
-  in Html.div [class "language"] --, Attr.key "language-selector"]
+  in Html.div [class "language"]
   <| flip List.map Locale.locales
   <| \loc -> Html.a (router.bindForward (route', params' loc) (attributes loc)) [Html.text <| Locale.toString loc]
 
@@ -54,7 +54,7 @@ homeHeader = lazy2 <| \router locale ->
   let
     version = span [class "version"] [text <| Locale.i18n locale "ALFA" []]
   in
-    Html.header [class "main"] [ --, Attr.key "header-home"] [
+    Html.header [class "main"] [
       Html.h1 [class "title"] [homeLink router locale config.title, version],
       Html.h2 [class "subtitle"] [text <| Locale.i18n locale "SUBTITLE" []]
     ]
@@ -64,7 +64,7 @@ innerHeader = lazy3 <| \router locale title ->
   let
     homeText = Locale.i18n locale "Home" []
   in
-    Html.header [class "main"] [ --, Attr.key "header-inner"] [
+    Html.header [class "main"] [
       Html.h1 [class "title"] [homeLink router locale homeText, text " / ", title]
     ]
 
@@ -74,7 +74,7 @@ footer = lazy2 <| \router locale ->
     about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "ABOUT" []]
     contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "CONTACTS" []]
     sep = text " | "
-  in Html.footer [] [ -- [Attr.key "footer"] [
+  in Html.footer [] [
     homeLink router locale (String.toLower config.title),
     sep, text <| Locale.i18n locale "© 2015, Artem Puchenkin" [],
     sep, about,
@@ -87,7 +87,7 @@ navigation router =
     categoryLink' = categoryLink router
   in
     lazy3 <| \locale category subcategory ->
-      Html.nav [Attr.class "categories"] [ -- Attr.key "navigation"
+      Html.nav [Attr.class "categories"] [
         Html.ul []
           <| List.map    (\c -> Html.li [] [categoryLink' c locale (Just c == subcategory)])
           <| Maybe.withDefault []
@@ -96,7 +96,7 @@ navigation router =
 
 
 galleriesWidget : Router Route State -> List Category -> Locale -> Html (Action State)
-galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries"] [ -- [, Attr.key "galleries"] [
+galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries"] [
   Html.h2 [] [text <| Locale.i18n locale "Galleries" []],
   Html.ul []
       <| List.map (\c -> Html.li [] [categoryWidget router c locale])
@@ -169,7 +169,7 @@ photoWidget router params photo (prev, next) (w,h) locale transition =
         let
           route = (Routes.Category, params)
           options = {stopPropagation = True, preventDefault = True}
-          action = withTransition Out <| (\state -> Response <| noFx {state | photo = Nothing}) `chainAction` (router.forward route)
+          action = withTransition Out <| Just <| (\state -> Response <| noFx {state | photo = Nothing}) `chainAction` (router.forward route)
         in
           Attr.href (router.buildUrl route)
           :: Events.onWithOptions "click" options (Json.succeed action)

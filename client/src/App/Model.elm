@@ -20,6 +20,8 @@ type alias Meta = {
     links: List (String, String)
   }
 
+type Deferred = Deferred (Cmd (Action State))
+
 type alias State = WithRouter Route {
     meta: Meta
   , locale: Locale
@@ -28,6 +30,7 @@ type alias State = WithRouter Route {
   , photo: Maybe Photo
   , isLoading: Bool
   , time: Time
+  , defer: List Deferred
   , window: Window.Size
   , transition: {
       transitionIn: Bool

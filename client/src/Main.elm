@@ -1,18 +1,21 @@
 port module Main exposing (..)
 
+import Task
 import Dict     exposing (Dict)
 import Time     exposing (Time)
 import Window
+import AnimationFrame
 
 import App.Locale as Locale exposing (Locale)
 import App.Model exposing (..)
 import App.Actions exposing (..)
 import App.Routes as Route exposing (Route, routes)
 import App.Layout exposing (layout)
+import App.Ports  exposing (execute)
 import Handler.Default exposing (..)
 
 import Router
-import Router.Types  exposing (RouteConfig, Router, RouterConfig (..), Response (..), Constraint (..), RouteParams)
+import Router.Types  exposing (RouteConfig, Router, RouterConfig (..), Response (..), Constraint (..), RouteParams, Action)
 
 config : Route -> RouteConfig Route State
 config route = case route of
@@ -76,6 +79,7 @@ initialState = {
   , photo = Nothing
   , isLoading = False
   , time = 0
+  , defer = []
   , window = {width = 0, height = 0}
   , transition = {
       transitionIn = False
@@ -88,11 +92,13 @@ type alias Flags =
   , time: Time
   }
 
-setFlags : Flags -> State
-setFlags flags = { initialState |
+setFlags : Flags -> (State, Cmd (Action State))
+setFlags flags = let
+  state = { initialState |
     locale = Locale.fromString flags.locale
   , time = flags.time
   }
+  in state ! [execute <| Window.size `Task.andThen` (\size -> Task.succeed <| setSize size)]
 
 main : Program Flags
 main = Router.dispatch
@@ -104,17 +110,10 @@ main = Router.dispatch
     , transition = onTransition
     , routes = routes
     , routeConfig = config
-    , subscriptions = \_ -> Window.resizes setDims
+    , subscriptions = \state -> Sub.batch [
+        Window.resizes setSize
+      , case state.defer of
+        [] -> Sub.none
+        _ -> AnimationFrame.times tick
+      ]
     }
-
--- port tasks : Signal (Task Never ())
--- port tasks = result.tasks
-
-
--- port meta = Signal.map .meta result.state
-
--- port t2 : Signal (Task Never ())
--- port t2 = Signal.map (\s -> Effects.toTask mailbox.address <| Effects.tick (always s)) <| Signal.dropRepeats <| Signal.map (\state -> toString state.router.route) result.state
---
--- port rs : Signal (List String)
--- port rs = mailbox.signal

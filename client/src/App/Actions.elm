@@ -36,15 +36,18 @@ onTransition router _ to = case to of
     , resetLoading
     , createLinks router
     , \state -> Response (state, portCmd <| App.Ports.meta state.meta) -- send meta to port
-    , \state -> Response (state, portCmd <| App.Ports.transition <| Maybe.map toString to)
+    , \state -> Response <| noFx {state | defer = Deferred (App.Ports.transition <| Maybe.map toString to) :: state.defer}
     ]
 
 type TransitionType = In | Out
 
+catMaybes : List (Maybe a) -> List a
+catMaybes = List.filterMap identity
 
 transitionAction : Bool -> TransitionType -> Action State
 transitionAction transitionState transitionType state =
   let
+    -- _ = Debug.log "transitionAction" transitionState
     transition = state.transition
     transition' = case transitionType of
       In -> {transition | transitionIn = transitionState}
@@ -52,11 +55,13 @@ transitionAction transitionState transitionType state =
   in
     Response <| noFx { state | transition = transition' }
 
-withTransition : TransitionType -> Action State -> Action State
+withTransition : TransitionType -> Maybe (Action State) -> Action State
 withTransition transitionType action state =
   let
     (Response (state', _)) = transitionAction True transitionType state
-    effects = execute <| Process.sleep config.transition `Task.andThen` (\_ -> Task.succeed (action `chainAction` transitionAction False transitionType))
+    effects = execute <| Process.sleep config.transition `Task.andThen` (\_ -> Task.succeed <|
+      combineActions <| catMaybes <| [action, Just <| transitionAction False transitionType]
+      )
   in
     Response <| (state', effects)
 
@@ -64,21 +69,13 @@ isLoading : State -> Bool
 isLoading state = state.isLoading
 
 resetLoading : Action State
-resetLoading state = withTransition In doNothing { state | isLoading = False }
+resetLoading state = withTransition In Nothing { state | isLoading = False }
 
 startLoading : Action State
-startLoading state =
-    let
-      _ = Debug.log "startLoading" ()
-    in
-      withTransition In doNothing { state | isLoading = True }
+startLoading state = withTransition In Nothing { state | isLoading = True }
 
 stopLoading : Action State
-stopLoading state =
-  let
-    _ = Debug.log "stopLoading" ()
-  in
-    withTransition In doNothing { state | isLoading = False }
+stopLoading state = withTransition In Nothing { state | isLoading = False }
 
 fallbackAction : Router Route State -> Action State
 fallbackAction router state = let _ = Debug.log "nf" () in router.redirect (Routes.NotFound, state.router.params) state
@@ -101,22 +98,27 @@ resetMeta : Action State
 resetMeta = setTitle Nothing `chainAction` setDescription Nothing
 
 setMetaFromCategory : Category -> Action State
-setMetaFromCategory (Category c) =
-    setTitle (Just c.title)
+setMetaFromCategory (Category c) = setTitle (Just c.title)
     `chainAction`
     setDescription (Maybe.withDefault c.description <| Maybe.map Just c.shortDescription)
 
 setMetaFromPhoto : Photo -> Action State
-setMetaFromPhoto photo =
-    setTitle photo.caption
+setMetaFromPhoto photo = setTitle photo.caption
     `chainAction`
     (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale "META.DESCRIPTION.PHOTO" [author.name, caption]) photo.author photo.caption) state)
 
 setTime : Time -> Action State
 setTime time state = Response <| noFx {state | time = time}
 
-setDims : Window.Size -> Action State
-setDims dims state = Response <| noFx {state | window = dims}
+setSize : Window.Size -> Action State
+setSize dims state = Response <| noFx {state | window = dims}
+
+tick : Time -> Action State
+tick frame state =
+  let
+    -- _ = Debug.log "tick" frame
+    cmd = List.map (\(Deferred cmd) -> cmd) state.defer
+  in Response <| {state | defer = []} ! cmd
 
 setLocale : Locale -> Action State
 setLocale locale state = Response <| noFx {state | locale = locale}
@@ -154,10 +156,12 @@ loadCategories router state =
             Nothing -> Dict.get "category" state.router.params
             c -> c
         action = Maybe.withDefault (update `chainAction` stopLoading) <| flip Maybe.map categoryParam <| \category ->
-          update
-            `chainAction` (checkCategory router category)
-            `chainAction` (loadPhotos router)
-            `chainAction` (\state -> mapDefault (getCategory state) (doNothing state) (\c -> setMetaFromCategory c state))
+          combineActions <| catMaybes <| [
+            Just update
+          , Just <| checkCategory router category
+          , Just <| loadPhotos router
+          , Maybe.map setMetaFromCategory (getCategory state)
+          ]
 
       in Task.succeed <| action
 
@@ -167,7 +171,7 @@ checkCategory : Router Route State -> String -> Action State
 checkCategory router category state =
     case Dict.get category state.categories of
       Nothing -> router.redirect (Routes.Home, Dict.empty) state
-      _ -> doNothing state
+      _ -> (\state -> let _ = Debug.log "checkCategory" in Response <| noFx state) state
 
 loadPhotos : Router Route State -> Action State
 loadPhotos router state =
@@ -204,12 +208,14 @@ updatePhotos photos state =
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds state.time
     photos' = refinePhotos seed photos
-    _ = Debug.log "updatePhotos" ()
-  in Response ({state | photos = photos'}, portDelayCmd <| App.Ports.photos True)
+    -- _ = Debug.log "updatePhotos" ()
+  in Response <| noFx {state | photos = photos', defer = Deferred (portCmd <| App.Ports.photos True) :: state.defer}
 
 updatePhoto : Maybe Photo -> Action State
-updatePhoto photo = (\state -> Response <| noFx {state | photo = photo})
-  `chainAction` (\state -> mapDefault photo (doNothing state) (\p -> setMetaFromPhoto p state))
+updatePhoto photo = combineActions <| catMaybes <| [
+    Just <| \state -> Response <| noFx {state | photo = photo}
+  , Maybe.map setMetaFromPhoto photo
+  ]
 
 updateCategories : List Category -> Action State
 updateCategories categories state =
