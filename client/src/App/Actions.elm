@@ -10,13 +10,13 @@ import Dict exposing (Dict)
 import Json.Decode  as Json exposing ((:=))
 import Task exposing (Task)
 import Router.Types exposing (WithRouter, Action, Response (..), Router)
-import Router.Helpers exposing (noFx, chainAction, doNothing, combineActions)
+import Router.Helpers exposing (noFx, chainAction, doNothing, combineActions, performTask)
 
 import App.Model exposing (..)
 import App.Config exposing (config)
 import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
-import App.Ports exposing (portCmd, portDelayCmd, execute)
+import App.Ports exposing (portCmd, portDelayCmd)
 import Service.Photo exposing (refinePhotos)
 
 mapDefault : Maybe a -> b -> (a -> b) -> b
@@ -35,7 +35,6 @@ onTransition router _ to = case to of
       resetMeta
     , resetLoading
     , createLinks router
-    , \state -> Response (state, portCmd <| App.Ports.meta state.meta) -- send meta to port
     , \state -> Response <| noFx {state | defer = Deferred (App.Ports.transition <| Maybe.map toString to) :: state.defer}
     ]
 
@@ -59,7 +58,7 @@ withTransition : TransitionType -> Maybe (Action State) -> Action State
 withTransition transitionType action state =
   let
     (Response (state', _)) = transitionAction True transitionType state
-    effects = execute <| Process.sleep config.transition `Task.andThen` (\_ -> Task.succeed <|
+    effects = performTask <| Process.sleep config.transition `Task.andThen` (\_ -> Task.succeed <|
       combineActions <| catMaybes <| [action, Just <| transitionAction False transitionType]
       )
   in
@@ -80,32 +79,50 @@ stopLoading state = withTransition In Nothing { state | isLoading = False }
 fallbackAction : Router Route State -> Action State
 fallbackAction router state = let _ = Debug.log "nf" () in router.redirect (Routes.NotFound, state.router.params) state
 
+setMeta : Meta -> Action State
+setMeta meta state = Response ({state | meta = meta}, App.Ports.meta meta)
+
 setTitle : Maybe String -> Action State
 setTitle title state =
   let
     meta = state.meta
-    title' = Maybe.withDefault config.title <| Maybe.map (\t -> Locale.i18n state.locale "TITLE" [t]) title
-  in Response <| noFx {state | meta = {meta | title = title'}}
+    title' = Maybe.withDefault config.title <| Maybe.map (\t -> Locale.i18n state.locale <| Locale.Title t) title
+    meta' = {meta | title = title'}
+  in setMeta meta' state
 
 setDescription : Maybe String -> Action State
 setDescription desc state =
   let
     meta = state.meta
-    desc' = Maybe.withDefault (Locale.i18n state.locale "META.DESCRIPTION" []) desc
-  in Response <| noFx {state | meta = {meta | description = desc'}}
+    desc' = Maybe.withDefault (Locale.i18n state.locale <| Locale.Meta Locale.Description) desc
+    meta' = {meta | description = desc'}
+  in setMeta meta' state
 
 resetMeta : Action State
-resetMeta = setTitle Nothing `chainAction` setDescription Nothing
+resetMeta = combineActions [
+    setTitle Nothing
+  , setDescription Nothing
+  ]
 
 setMetaFromCategory : Category -> Action State
-setMetaFromCategory (Category c) = setTitle (Just c.title)
-    `chainAction`
-    setDescription (Maybe.withDefault c.description <| Maybe.map Just c.shortDescription)
+setMetaFromCategory (Category c) =
+  let
+  _ = Debug.log "setMetaFromCategory" c.title
+  in
+  combineActions [
+    setTitle <| Just c.title
+  , setDescription (Maybe.withDefault c.description <| Maybe.map Just c.shortDescription)
+  ]
 
 setMetaFromPhoto : Photo -> Action State
-setMetaFromPhoto photo = setTitle photo.caption
-    `chainAction`
-    (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale "META.DESCRIPTION.PHOTO" [author.name, caption]) photo.author photo.caption) state)
+setMetaFromPhoto photo =
+  let
+  _ = Debug.log "setMetaFromPhoto" photo
+  in
+  combineActions [
+    setTitle photo.caption
+  , (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale <| Locale.Meta (Locale.PhotoDescription author.name caption)) photo.author photo.caption) state)
+  ]
 
 setTime : Time -> Action State
 setTime time state = Response <| noFx {state | time = time}
@@ -132,8 +149,9 @@ createLinks router state =
       :: (flip List.map Locale.locales
       <| \locale -> (Locale.toString locale, config.hostname ++ router.buildUrl (route, Dict.insert "locale" (Locale.toString locale) state.router.params))
       )
+    meta' = {meta | links = Maybe.withDefault [] links}
 
-  in Response <| noFx {state | meta = {meta | links = Maybe.withDefault [] links}}
+  in setMeta meta' state
 
 getRequest: Json.Decoder value -> String -> State -> Task Http.Error value
 getRequest decoder url state = Http.fromJson decoder (Http.send Http.defaultSettings
@@ -156,16 +174,16 @@ loadCategories router state =
             Nothing -> Dict.get "category" state.router.params
             c -> c
         action = Maybe.withDefault (update `chainAction` stopLoading) <| flip Maybe.map categoryParam <| \category ->
-          combineActions <| catMaybes <| [
-            Just update
-          , Just <| checkCategory router category
-          , Just <| loadPhotos router
-          , Maybe.map setMetaFromCategory (getCategory state)
+          combineActions [
+            update
+          , checkCategory router category
+          , loadPhotos router
+          , \state -> (mapDefault (getCategory state) doNothing setMetaFromCategory) state
           ]
 
       in Task.succeed <| action
 
-  in Response ({state' | categories = Dict.empty}, execute task)
+  in Response ({state' | categories = Dict.empty}, performTask task)
 
 checkCategory : Router Route State -> String -> Action State
 checkCategory router category state =
@@ -190,7 +208,7 @@ loadPhotos router state =
         in Just <| Maybe.withDefault default task
     (Response (state', _)) = startLoading state
 
-  in Response (mapDefault task state (always state'), mapDefault task Cmd.none execute)
+  in Response (mapDefault task state (always state'), mapDefault task Cmd.none performTask)
 
 loadPhoto : Action State
 loadPhoto state =
@@ -201,7 +219,7 @@ loadPhoto state =
       in fetch `Task.andThen` \photo -> Task.succeed <| stopLoading `chainAction` updatePhoto photo
     (Response (state', effects)) = startLoading {state | photo = Nothing}
 
-  in Response (state', Cmd.batch [effects, mapDefault task Cmd.none execute])
+  in Response (state', Cmd.batch [effects, mapDefault task Cmd.none performTask])
 
 updatePhotos : List Photo -> Action State
 updatePhotos photos state =

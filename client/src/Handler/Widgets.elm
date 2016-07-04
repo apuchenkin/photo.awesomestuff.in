@@ -2,7 +2,6 @@ module Handler.Widgets exposing (..)
 
 import Dict
 import String
-import Date
 import Random
 import Time exposing (Time)
 import Html exposing (Html, text, span)
@@ -52,17 +51,17 @@ languageSelector router = lazy3 <| \route params locale ->
 homeHeader : Router Route State -> Locale -> Html (Action State)
 homeHeader = lazy2 <| \router locale ->
   let
-    version = span [class "version"] [text <| Locale.i18n locale "ALFA" []]
+    version = span [class "version"] [text <| Locale.i18n locale <| Locale.Alfa]
   in
     Html.header [class "main"] [
       Html.h1 [class "title"] [homeLink router locale config.title, version],
-      Html.h2 [class "subtitle"] [text <| Locale.i18n locale "SUBTITLE" []]
+      Html.h2 [class "subtitle"] [text <| Locale.i18n locale <| Locale.Subtitle]
     ]
 
 innerHeader : Router Route State -> Locale -> Html (Action State) -> Html (Action State)
 innerHeader = lazy3 <| \router locale title ->
   let
-    homeText = Locale.i18n locale "Home" []
+    homeText = Locale.i18n locale <| Locale.Home
   in
     Html.header [class "main"] [
       Html.h1 [class "title"] [homeLink router locale homeText, text " / ", title]
@@ -71,12 +70,12 @@ innerHeader = lazy3 <| \router locale title ->
 footer : Router Route State -> Locale -> Html (Action State)
 footer = lazy2 <| \router locale ->
   let
-    about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "ABOUT" []]
-    contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale "CONTACTS" []]
+    about    = Html.a (router.bindForward (Routes.Static "about",    Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale <| Locale.About Locale.AboutTitle]
+    contacts = Html.a (router.bindForward (Routes.Static "contacts", Dict.fromList [("locale", Locale.toString locale)]) []) [text <| Locale.i18n locale <| Locale.Contacts Locale.ContactsTitle]
     sep = text " | "
   in Html.footer [] [
     homeLink router locale (String.toLower config.title),
-    sep, text <| Locale.i18n locale "© 2015, Artem Puchenkin" [],
+    sep, text <| Locale.i18n locale <| Locale.Copy,
     sep, about,
     sep, contacts
   ]
@@ -97,7 +96,7 @@ navigation router =
 
 galleriesWidget : Router Route State -> List Category -> Locale -> Html (Action State)
 galleriesWidget = lazy3 <| \router categories locale -> Html.div [class "galleries"] [
-  Html.h2 [] [text <| Locale.i18n locale "Galleries" []],
+  Html.h2 [] [text <| Locale.i18n locale <| Locale.Galleries ],
   Html.ul []
       <| List.map (\c -> Html.li [] [categoryWidget router c locale])
       <| List.filter (\(Category c) -> c.parent == Nothing) categories
@@ -112,10 +111,7 @@ categoryWidget = lazy3 <| \router category locale ->
       _ -> [("category", c.name)]
     params' = ("locale", Locale.toString locale) :: params
 
-    dateText date = Locale.i18n locale "{0}, {1}" [
-        Locale.i18n locale (toString <| Date.month date) [],
-        toString (Date.year date)
-      ]
+    dateText date = Locale.i18n locale <| Locale.Date date
 
     cover = Html.a (router.bindForward (Routes.Category, Dict.fromList params') [class "cover"])
       <| List.filterMap identity [
@@ -177,18 +173,18 @@ photoWidget router params photo (prev, next) (w,h) locale transition =
 
       image = Html.img (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [Attr.class "photo", Attr.src src, Attr.style [("max-height", toString (h - 120) ++ "px")],onLoad]) []
       caption = flip Maybe.map photo.caption <| \c -> Html.span [Attr.class "caption"] [Html.text c]
-      author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale "author " [], Html.span [Attr.class "author"] [Html.text author.name]]
+      author = flip Maybe.map photo.author <| \author -> Html.div [] [Html.text <| Locale.i18n locale <| Locale.Author, Html.span [Attr.class "author"] [Html.text author.name]]
     in
       Html.div (bindExit [classList [("photo-widget", True), ("transition", transition)]]) [ --, Attr.key "photo-widget"]) [
         loader (not photo.isLoaded) False
       , Html.figure [classList [("content", True), ("hidden", not photo.isLoaded)]] [
-          Html.div [Attr.class "tools"] [Html.a (bindExit []) <| [Html.text <| Locale.i18n locale "CLOSE" [], Html.text " ", Html.i [Attr.class "icon-cancel"] []]]
+          Html.div [Attr.class "tools"] [Html.a (bindExit []) <| [Html.text <| Locale.i18n locale <| Locale.Action Locale.Close, Html.text " ", Html.i [Attr.class "icon-cancel"] []]]
         , image
         , Html.figcaption [Attr.class "description"] <| List.filterMap identity [caption, author]
         ]
-      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)], Attr.title <| Locale.i18n locale "PREV" []])
+      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString prev)]) params) [classList [("nav", True), ("prev", True)], Attr.title <| Locale.i18n locale <| Locale.Action Locale.Prev])
           <| [Html.i [Attr.class "icon-left-open"] []]
-      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)], Attr.title <| Locale.i18n locale "NEXT" []])
+      , Html.a (router.bindForward (Routes.Photo, Dict.union (Dict.fromList [("photo", toString next)]) params) [classList [("nav", True), ("next", True)], Attr.title <| Locale.i18n locale <| Locale.Action Locale.Next])
           <| [Html.i [Attr.class "icon-right-open"] []]
       ]
     --

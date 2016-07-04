@@ -11,10 +11,10 @@ import App.Model exposing (..)
 import App.Actions exposing (..)
 import App.Routes as Route exposing (Route, routes)
 import App.Layout exposing (layout)
-import App.Ports  exposing (execute)
 import Handler.Default exposing (..)
 
 import Router
+import Router.Helpers exposing (performTask)
 import Router.Types  exposing (RouteConfig, Router, RouterConfig (..), Response (..), Constraint (..), RouteParams, Action)
 
 config : Route -> RouteConfig Route State
@@ -64,9 +64,9 @@ config route = case route of
 
 initialMeta : Meta
 initialMeta = {
-    title = "PHOTO.AWESOMESTUFF.IN",
-    description = Locale.i18n Locale.fallbackLocale "META.DESCRIPTION" [],
-    links = []
+    title = "PHOTO.AWESOMESTUFF.IN"
+  , description = Locale.i18n Locale.fallbackLocale <| Locale.Meta Locale.Description
+  , links = []
   }
 
 initialState : State
@@ -98,7 +98,7 @@ setFlags flags = let
     locale = Locale.fromString flags.locale
   , time = flags.time
   }
-  in state ! [execute <| Window.size `Task.andThen` (\size -> Task.succeed <| setSize size)]
+  in state ! [performTask <| Window.size `Task.andThen` (\size -> Task.succeed <| setSize size)]
 
 main : Program Flags
 main = Router.dispatch

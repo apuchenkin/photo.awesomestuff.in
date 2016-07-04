@@ -6,7 +6,7 @@ import Date exposing (Date)
 import Time exposing (Time)
 import Either exposing (Either (..))
 import Json.Decode  as Json exposing ((:=))
-import Router.Types exposing (WithRouter, Action, Response (..), Router, ActionEffects)
+import Router.Types exposing (WithRouter, Action, Response (..), Router, Commands)
 
 import App.Locale as Locale exposing (Locale)
 import App.Routes as Routes exposing (Route)

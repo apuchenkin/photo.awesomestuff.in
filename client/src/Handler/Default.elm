@@ -36,7 +36,7 @@ notFoundHandler router =
   in {
     view = view,
     actions = [
-      \state -> setTitle (Just <| Locale.i18n state.locale "ERROR" ["404"]) state
+      \state -> setTitle (Just <| Locale.i18n state.locale <| Locale.Error <| Locale.DefaultError "404") state
     ]
   }
 
@@ -47,7 +47,10 @@ staticHandler page router =
       "about" -> aboutWidget locale
       "contacts" -> contactsWidget locale
       _ -> Html.div [] []
-    title locale = Locale.i18n locale (String.toUpper page) []
+    title locale = Locale.i18n locale <| case page of
+      "about" -> Locale.About Locale.AboutTitle
+      "contacts" -> Locale.Contacts Locale.ContactsTitle
+      _ -> Debug.crash "unknown page"
     view state _ = Dict.fromList [
       ("header", innerHeader router state.locale (Html.text <| title state.locale))
     , ("body", body state.locale)

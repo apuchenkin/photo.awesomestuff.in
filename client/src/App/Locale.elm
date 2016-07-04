@@ -1,5 +1,8 @@
 module App.Locale exposing (..)
 
+import Date
+import Dict exposing (Dict)
+
 import App.Config exposing (config)
 
 type Locale = Ru | En
@@ -21,168 +24,180 @@ toString locale = case locale of
   Ru -> "ru"
   En -> "en"
 
--- type Translation
---   = Month String
---   | Home
---   | Galleries
---   | Copy
---   | Alfa
---   | Contacts
---   | Title String
---   | Subtitle
---   | Close
---   | Prev
---   | Next
---   | Form TranslationForm
---   | About TraslationAbout
---   | Contacts TranslationContacts
---   | Error TranslationError
---   | Meta TranslationMeta
---
--- type TranslationForm
---   = Bugreport
---   | Feedback
---
--- type TraslationAbout = Sdd
--- type TranslationContacts = Pdd
--- type TranslationError = Rff
--- type TranslationMeta = Mtt
-  --
-  -- , ( "Galleries", "Галереи")
-  -- , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
-  -- , ("ALFA", " альфа")
-  -- , ("ABOUT", "О сайте")
-  -- , ("CONTACTS", "Контакты")
-  -- , ("TITLE", "{0} - " ++ config.title)
-  -- , ("SUBTITLE", "Путешествия в фотографиях")
-  -- , ("CLOSE", "Закрыть")
-  -- , ("PREV", "Предыдущая")
-  -- , ("NEXT", "Следующая")
-  -- , ("FORM.BUGREPORT", "http://goo.gl/forms/gjCXgnadYm")
-  -- , ("FORM.FEEDBACK", "http://goo.gl/forms/jCZLgQfTx4")
-  -- , ("ABOUT.TEXT1", "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):")
-  -- , ("ABOUT.TEXT2", "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:")
-  -- , ("ABOUT.TEXT3", "Спасибо за внимание!")
-  -- , ("CONTACTS.AUTHORS", "Авторы:")
-  -- , ("CONTACTS.AUTHOR1", "Артём Пученкин")
-  -- , ("CONTACTS.AUTHOR2", "Татьяна Кузмичева")
-  -- , ("CONTACTS.EMAIL", "email: {0}")
-  -- , ("CONTACTS.SKYPE", "skype: {0}")
-  -- , ("CONTACTS.QUESTIONS", "По вопросам о работе веб-сайта: {0}")
-  -- , ("ERROR", "Ошибка {0}")
-  -- , ("ERROR.NOT_FOUND", "Cтраница не существует")
-  -- , ("ERROR.THIS_MIGHT_BE", "Это могло случиться по следующим причинам:")
-  -- , ("ERROR.REASON1", "Страница ещё не была создана")
-  -- , ("ERROR.REASON2", "Страница была удалена")
-  -- , ("ERROR.CONSEQUENCE", "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in")
-  -- , ("ERROR.URL.BACK", "Назад")
-  -- , ("ERROR.URL.HOME", "На главную")
-  -- , ("META.DESCRIPTION", "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.")
-  -- , ("META.DESCRIPTION.PHOTO", "Автор: {0}, Описание: {1}")
+type alias TranslationSet =
+  { en : String
+  , ru : String
+  }
 
-month_en : List (String, String)
-month_en =
-  [ ( "Jan", "January" )
-  , ( "Feb", "February")
-  , ( "Mar", "March")
-  , ( "Apr", "April")
-  , ( "May", "May")
-  , ( "Jun", "June")
-  , ( "Jul", "July" )
-  , ( "Aug", "August" )
-  , ( "Sep", "September" )
-  , ( "Oct", "October" )
-  , ( "Nov", "November" )
-  , ( "Dec", "December" )
+type Translation
+  = Month String
+  | Home
+  | Galleries
+  | Copy
+  | Alfa
+  | Title String
+  | Subtitle
+  | Date Date.Date
+  | Author
+  | Action TranslationAction
+  | Form TranslationForm
+  | About TraslationAbout
+  | Contacts TranslationContacts
+  | Error TranslationError
+  | Meta TranslationMeta
+
+type TranslationAction
+  = Close
+  | Prev
+  | Next
+
+translateAction : TranslationAction -> TranslationSet
+translateAction action = case action of
+    Close -> TranslationSet "Close" "Закрыть"
+    Prev -> TranslationSet "Previous" "Предыдущая"
+    Next -> TranslationSet "Next" "Следующая"
+
+type TranslationForm
+  = Bugreport
+  | Feedback
+
+translateForm : TranslationForm -> TranslationSet
+translateForm translation = case translation of
+    Bugreport -> TranslationSet "http://goo.gl/forms/PytHUvBm48" "http://goo.gl/forms/gjCXgnadYm"
+    Feedback -> TranslationSet "http://goo.gl/forms/mD6GCLnzCT" "http://goo.gl/forms/jCZLgQfTx4"
+
+type TraslationAbout
+  = AboutTitle
+  | About1
+  | About2
+  | About3
+
+translateAbout : TraslationAbout -> TranslationSet
+translateAbout translation = case translation of
+    AboutTitle -> TranslationSet "About" "О сайте"
+    About1 -> TranslationSet
+      "This is alpha release of photo gallery. If you found any bugs, please, complete the following form (will open in a new page):"
+      "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):"
+    About2 -> TranslationSet
+      "If you want to left feedback or have any improvement ideas, submit following:"
+      "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:"
+    About3 -> TranslationSet
+      "Thanks for your attention!"
+      "Спасибо за внимание!"
+
+type TranslationContacts
+  = ContactsTitle
+  | Authors
+  | Author1
+  | Author2
+  | Email String
+  | Skype String
+  | Questions String
+
+translateContacts : TranslationContacts -> TranslationSet
+translateContacts translation = case translation of
+  ContactsTitle -> TranslationSet "Contacts" "Контакты"
+  Authors -> TranslationSet "Authors:" "Авторы:"
+  Author1 -> TranslationSet "Artem Puchenkin" "Артём Пученкин"
+  Author2 -> TranslationSet "Tatiana Kuzmicheva" "Татьяна Кузмичева"
+  Email email -> TranslationSet ("email: " ++ email) ("email: " ++ email)
+  Skype skype -> TranslationSet ("skype: " ++ skype) ("skype: " ++ skype)
+  Questions email -> TranslationSet ("Questions related to web-site: " ++ email) ("По вопросам о работе веб-сайта: " ++ email)
+
+type TranslationError
+  = DefaultError String
+  | NotFound
+  | Reasons
+  | Reason1
+  | Reason2
+  | Consequence
+  | BackUrl
+  | HomeUrl
+
+translateError : TranslationError -> TranslationSet
+translateError translation = case translation of
+  DefaultError error -> TranslationSet
+    ("Error " ++ error)
+    ("Ошибка " ++ error)
+  NotFound -> TranslationSet
+    "This page does not exists"
+    "Cтраница не существует"
+  Reasons -> TranslationSet
+    "This might be because of:"
+    "Это могло случиться по следующим причинам:"
+  Reason1 -> TranslationSet
+    "Page has not been created yet"
+    "Страница ещё не была создана"
+  Reason2 -> TranslationSet
+    "Page has been deleted for some reason"
+    "Страница была удалена"
+  Consequence -> TranslationSet
+    "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in"
+    "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in"
+  BackUrl -> TranslationSet
+    "Go back"
+    "Назад"
+  HomeUrl -> TranslationSet
+    "Return home"
+    "На главную"
+
+type TranslationMeta
+  = Description
+  | PhotoDescription String String
+
+translateMeta : TranslationMeta -> TranslationSet
+translateMeta translation = case translation of
+  Description -> TranslationSet
+      "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva."
+      "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий."
+  PhotoDescription author title -> TranslationSet
+      ("Author: " ++ author ++ ", Title: " ++ title)
+      ("Автор: " ++ author ++ ", Описание: " ++ title)
+
+monthTranslations : Dict String TranslationSet
+monthTranslations = Dict.fromList
+  [ ( "Jan", TranslationSet "January" "Январь")
+  , ( "Feb", TranslationSet "February" "Февраль")
+  , ( "Mar", TranslationSet "March" "Март")
+  , ( "Apr", TranslationSet "April" "Апрель")
+  , ( "May", TranslationSet "May" "Май")
+  , ( "Jun", TranslationSet "June" "Июнь")
+  , ( "Jul", TranslationSet "July" "Июль" )
+  , ( "Aug", TranslationSet "August" "Август" )
+  , ( "Sep", TranslationSet "September" "Сентябрь" )
+  , ( "Oct", TranslationSet "October" "Октябрь" )
+  , ( "Nov", TranslationSet "November" "Ноябрь" )
+  , ( "Dec", TranslationSet "December" "Декабрь" )
   ]
 
-month_ru : List (String, String)
-month_ru =
-  [ ( "Jan", "Январь" )
-  , ( "Feb", "Февраль")
-  , ( "Mar", "Март")
-  , ( "Apr", "Апрель")
-  , ( "May", "Май")
-  , ( "Jun", "Июнь")
-  , ( "Jul", "Июль" )
-  , ( "Aug", "Август" )
-  , ( "Sep", "Сентябрь" )
-  , ( "Oct", "Октябрь" )
-  , ( "Nov", "Ноябрь" )
-  , ( "Dec", "Декабрь" )
-  ]
+singleton : String -> TranslationSet
+singleton translation = TranslationSet translation translation
 
--- lookup : Language -> String -> List String -> String
--- lookup = createLookup
---   [ withLanguage
---     (Language <| toString Ru) <|
---     [ ( "Home", "Главная" )
---     , ( "Galleries", "Галереи")
---     , ( "© 2015, Artem Puchenkin", "© 2015, Пученкин Артём")
---     , ("ALFA", " альфа")
---     , ("ABOUT", "О сайте")
---     , ("CONTACTS", "Контакты")
---     , ("TITLE", "{0} - " ++ config.title)
---     , ("SUBTITLE", "Путешествия в фотографиях")
---     , ("CLOSE", "Закрыть")
---     , ("PREV", "Предыдущая")
---     , ("NEXT", "Следующая")
---     , ("FORM.BUGREPORT", "http://goo.gl/forms/gjCXgnadYm")
---     , ("FORM.FEEDBACK", "http://goo.gl/forms/jCZLgQfTx4")
---     , ("ABOUT.TEXT1", "Этот сайт находится в состоянии альфа-тестирования и может содержать ошибки. Если вы обнаружили ошибку, пожалуйста, укажите их на следующей форме (откроется в новом окне):")
---     , ("ABOUT.TEXT2", "Если бы вы хотели поделиться впечатлением о веб-сайте, или у вас есть идеи как его можно было бы улучшить, заполните форму обратной связи:")
---     , ("ABOUT.TEXT3", "Спасибо за внимание!")
---     , ("CONTACTS.AUTHORS", "Авторы:")
---     , ("CONTACTS.AUTHOR1", "Артём Пученкин")
---     , ("CONTACTS.AUTHOR2", "Татьяна Кузмичева")
---     , ("CONTACTS.EMAIL", "email: {0}")
---     , ("CONTACTS.SKYPE", "skype: {0}")
---     , ("CONTACTS.QUESTIONS", "По вопросам о работе веб-сайта: {0}")
---     , ("ERROR", "Ошибка {0}")
---     , ("ERROR.NOT_FOUND", "Cтраница не существует")
---     , ("ERROR.THIS_MIGHT_BE", "Это могло случиться по следующим причинам:")
---     , ("ERROR.REASON1", "Страница ещё не была создана")
---     , ("ERROR.REASON2", "Страница была удалена")
---     , ("ERROR.CONSEQUENCE", "Если эта страница необходима, пожалуйста, напишите на: info 'at' photo.awesomestuff.in")
---     , ("ERROR.URL.BACK", "Назад")
---     , ("ERROR.URL.HOME", "На главную")
---     , ("META.DESCRIPTION", "Туристическая фотография Пученина Артёма и Татьяны Кузмичевой - фотографии путешествий, интересных мест и событий.")
---     , ("META.DESCRIPTION.PHOTO", "Автор: {0}, Описание: {1}")
---     ] ++ month_ru
---   , withLanguage
---     (Language <| toString En) <|
---     [
---       ("ALFA", " alfa")
---     , ("ABOUT", "About")
---     , ("CONTACTS", "Contacts")
---     , ("TITLE", "{0} - " ++ config.title)
---     , ("SUBTITLE", "Travel in photography")
---     , ("CLOSE", "Close")
---     , ("PREV", "Previous")
---     , ("NEXT", "Next")
---     , ("FORM.BUGREPORT", "http://goo.gl/forms/PytHUvBm48")
---     , ("FORM.FEEDBACK", "http://goo.gl/forms/mD6GCLnzCT")
---     , ("ABOUT.TEXT1", "This is alpha release of photo gallery. If you found any bugs, please, complete the following form (will open in a new page):")
---     , ("ABOUT.TEXT2", "If you want to left feedback or have any improvement ideas, submit following:")
---     , ("ABOUT.TEXT3", "Thanks for your attention!")
---     , ("CONTACTS.AUTHORS", "Authors:")
---     , ("CONTACTS.AUTHOR1", "Artem Puchenkin")
---     , ("CONTACTS.AUTHOR2", "Tatiana Kuzmicheva")
---     , ("CONTACTS.EMAIL", "email: {0}")
---     , ("CONTACTS.SKYPE", "skype: {0}")
---     , ("CONTACTS.QUESTIONS", "Questions related to web-site: {0}")
---     , ("ERROR", "Error {0}")
---     , ("ERROR.NOT_FOUND", "This page does not exists")
---     , ("ERROR.THIS_MIGHT_BE", "This might be because of:")
---     , ("ERROR.REASON1", "Page has not been created yet")
---     , ("ERROR.REASON2", "Page has been deleted for some reason")
---     , ("ERROR.CONSEQUENCE", "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in")
---     , ("ERROR.URL.BACK", "Go back")
---     , ("ERROR.URL.HOME", "Return home")
---     , ("META.DESCRIPTION", "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva.")
---     , ("META.DESCRIPTION.PHOTO", "Author: {0}, Title: {1}")
---     ] ++ month_en
---   ]
+translateDate : Locale -> Date.Date -> TranslationSet
+translateDate locale date = singleton <| (i18n locale <| Month (Basics.toString <| Date.month date)) ++ ", "++ (Basics.toString <| Date.year date)
 
-i18n : Locale -> String -> List String -> String
-i18n locale str _ = str
+i18n : Locale -> Translation -> String
+i18n locale trans =
+  let
+    translation = case trans of
+      Month month -> case Dict.get month monthTranslations of
+        Just set -> set
+        _ -> Debug.crash <| "Month not translated: " ++ month
+      Home -> TranslationSet "Home" "Главная"
+      Galleries -> TranslationSet "Galleries" "Галереи"
+      Copy -> TranslationSet "© 2015, Artem Puchenkin" "© 2015, Пученкин Артём"
+      Alfa -> TranslationSet " alfa" " альфа"
+      Title title -> singleton <| title ++ " - " ++ config.title
+      Subtitle -> TranslationSet "Travel in photography" "Путешествия в фотографиях"
+      Date date -> translateDate locale date
+      Author -> TranslationSet "Author " "Автор "
+      Action action -> translateAction action
+      Form form -> translateForm form
+      About translation -> translateAbout translation
+      Contacts translation -> translateContacts translation
+      Error translation -> translateError translation
+      Meta translation -> translateMeta translation
+
+  in case locale of
+    En -> translation.en
+    Ru -> translation.ru
