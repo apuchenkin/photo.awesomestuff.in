@@ -16,7 +16,7 @@ import App.Model exposing (..)
 import App.Config exposing (config)
 import App.Routes as Routes exposing (Route)
 import App.Locale as Locale exposing (Locale)
-import App.Ports exposing (portCmd, portDelayCmd)
+import App.Ports exposing (portCmd)
 import Service.Photo exposing (refinePhotos)
 
 mapDefault : Maybe a -> b -> (a -> b) -> b
@@ -77,7 +77,7 @@ stopLoading : Action State
 stopLoading state = withTransition In Nothing { state | isLoading = False }
 
 fallbackAction : Router Route State -> Action State
-fallbackAction router state = let _ = Debug.log "nf" () in router.redirect (Routes.NotFound, state.router.params) state
+fallbackAction router state = router.redirect (Routes.NotFound, state.router.params) state
 
 setMeta : Meta -> Action State
 setMeta meta state = Response ({state | meta = meta}, App.Ports.meta meta)
@@ -93,22 +93,27 @@ setTitle title state =
 setDescription : Maybe String -> Action State
 setDescription desc state =
   let
+    -- _ = Debug.log "setDescription" desc
     meta = state.meta
     desc' = Maybe.withDefault (Locale.i18n state.locale <| Locale.Meta Locale.Description) desc
     meta' = {meta | description = desc'}
   in setMeta meta' state
 
 resetMeta : Action State
-resetMeta = combineActions [
+resetMeta =
+  -- let
+  -- _ = Debug.log "resetMeta" photo
+  -- in
+  combineActions [
     setTitle Nothing
   , setDescription Nothing
   ]
 
 setMetaFromCategory : Category -> Action State
 setMetaFromCategory (Category c) =
-  let
-  _ = Debug.log "setMetaFromCategory" c.title
-  in
+  -- let
+  -- _ = Debug.log "setMetaFromCategory" c.title
+  -- in
   combineActions [
     setTitle <| Just c.title
   , setDescription (Maybe.withDefault c.description <| Maybe.map Just c.shortDescription)
@@ -143,6 +148,7 @@ setLocale locale state = Response <| noFx {state | locale = locale}
 createLinks : Router Route State -> Action State
 createLinks router state =
   let
+    -- _ = Debug.log "createLinks" ()
     meta = state.meta
     links = flip Maybe.map state.router.route <| \ route ->
       ("x-default", config.hostname ++ router.buildUrl (route, Dict.remove "locale" state.router.params))
