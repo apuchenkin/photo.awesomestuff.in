@@ -1,4 +1,4 @@
-module Service.Resolutions where
+module Service.Resolutions exposing (..)
 
 import List.Extra exposing (zip, minimumBy)
 

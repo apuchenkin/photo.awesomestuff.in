@@ -1,9 +1,10 @@
-import Task     exposing (Task)
-import Html     exposing (Html)
-import Effects  exposing (Never)
+port module Main exposing (..)
+
+import Task
 import Dict     exposing (Dict)
 import Time     exposing (Time)
 import Window
+import AnimationFrame
 
 import App.Locale as Locale exposing (Locale)
 import App.Model exposing (..)
@@ -13,7 +14,8 @@ import App.Layout exposing (layout)
 import Handler.Default exposing (..)
 
 import Router
-import Router.Types  exposing (RouteConfig, Router, RouterResult, RouterConfig (..), Response (..), Constraint (..), RouteParams)
+import Router.Helpers exposing (performTask)
+import Router.Types  exposing (RouteConfig, Router, RouterConfig (..), Response (..), Constraint (..), RouteParams, Action)
 
 config : Route -> RouteConfig Route State
 config route = case route of
@@ -62,9 +64,9 @@ config route = case route of
 
 initialMeta : Meta
 initialMeta = {
-    title = "PHOTO.AWESOMESTUFF.IN",
-    description = Locale.i18n Locale.fallbackLocale "META.DESCRIPTION" [],
-    links = []
+    title = "PHOTO.AWESOMESTUFF.IN"
+  , description = Locale.i18n Locale.fallbackLocale <| Locale.Meta Locale.Description
+  , links = []
   }
 
 initialState : State
@@ -77,48 +79,41 @@ initialState = {
   , photo = Nothing
   , isLoading = False
   , time = 0
-  , window = (0,0)
+  , defer = []
+  , window = {width = 0, height = 0}
   , transition = {
       transitionIn = False
     , transitionOut = False
     }
   }
 
-result : RouterResult State
-result = Router.runRouter <| RouterConfig {
-    init = initialState
-  , html5 = True
-  , removeTrailingSlash = True
-  , fallbackAction = fallbackAction
-  , layout = layout
-  , onTransition = onTransition
-  , routes = routes
-  , routeConfig = config
-  , inits = [
-      Signal.map (setLocale << Locale.fromString) localePort
-    , Signal.map setTime timePort
-    , Signal.map setDims Window.dimensions
-    ]
-  , inputs = []
+type alias Flags =
+  { locale: String
+  , time: Time
   }
 
-main : Signal Html
-main = result.html
+setFlags : Flags -> (State, Cmd (Action State))
+setFlags flags = let
+  state = { initialState |
+    locale = Locale.fromString flags.locale
+  , time = flags.time
+  }
+  in state ! [performTask <| Window.size `Task.andThen` (\size -> Task.succeed <| setSize size)]
 
-port localePort : Signal String
-port timePort: Signal Time
-
-port tasks : Signal (Task Never ())
-port tasks = result.tasks
-
-port meta : Signal Meta
-port meta = Signal.map .meta result.state
-
-mailbox : Signal.Mailbox (List String)
-mailbox = Signal.mailbox []
-
-port t2 : Signal (Task Never ())
-port t2 = Signal.map (\s -> Effects.toTask mailbox.address <| Effects.tick (always s)) <| Signal.dropRepeats <| Signal.map (\state -> toString state.router.route) result.state
-
-port rs : Signal (List String)
-port rs = mailbox.signal
+main : Program Flags
+main = Router.dispatch
+    setFlags
+    <| RouterConfig {
+      html5 = True
+    , removeTrailingSlash = True
+    , layout = layout
+    , transition = onTransition
+    , routes = routes
+    , routeConfig = config
+    , subscriptions = \state -> Sub.batch [
+        Window.resizes setSize
+      , case state.defer of
+        [] -> Sub.none
+        _ -> AnimationFrame.times tick
+      ]
+    }

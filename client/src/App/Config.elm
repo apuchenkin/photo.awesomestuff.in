@@ -1,4 +1,4 @@
-module App.Config where
+module App.Config exposing (..)
 
 import Time exposing (Time)
 
@@ -23,7 +23,7 @@ config = {
   , secret = "secret"
   , gutter = 10
   , brickWidth = 100
-  , transition = 200
+  , transition = 200 * Time.millisecond
   , gallery = {
       width   = 320,
       height  = 240

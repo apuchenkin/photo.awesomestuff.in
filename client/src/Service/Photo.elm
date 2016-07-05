@@ -1,4 +1,4 @@
-module Service.Photo (refinePhotos, remapPhotos) where
+module Service.Photo exposing (refinePhotos, remapPhotos)
 
 import Dict
 import Random
@@ -43,7 +43,7 @@ remapPhoto seed avg photo =
     prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
     probList = List.concat <| List.map2 (\m p -> List.repeat p m) [A,B,C,D] prob'
     gen = Random.int 0 (List.length probList - 1)
-    (r, seed') = Random.generate gen seed
+    (r, seed') = Random.step gen seed
     mode = Maybe.withDefault A <| probList !! r
     isHorisontal = (photo.width > photo.height)
     ratio = photo.ratio
@@ -70,7 +70,7 @@ refinePhotos seed photos =
     groups' = List.filterMap identity <| snd <| Dict.foldl (\_ list (s, res) ->
       let
         gen = Random.int 0 (List.length list - 1)
-        (r, s') = Random.generate gen s
+        (r, s') = Random.step gen s
       in (s', list !! r :: res)) (seed, []) <| Dict.remove 0 groups
 
   in List.map snd <| List.sortBy fst <| groups' ++ photos'

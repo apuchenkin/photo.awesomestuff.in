@@ -1,5 +1,8 @@
 >> loader effects
 >> transition effects
+>> translations
+>> check meta sets
+>> defer working buggy
 
-- IE 10: mutation observer polyfill
+- check bugs
 - 404 forwarded page and backUrl
