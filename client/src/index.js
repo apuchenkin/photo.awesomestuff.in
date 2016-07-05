@@ -70,7 +70,9 @@ function onPhotosLoad() {
         });
       })
     } else {
-      packery.reloadItems();
-      packery.layout();
+      setTimeout(function() {
+        packery.reloadItems();
+        packery.layout();
+      });
     }
 }

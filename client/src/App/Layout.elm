@@ -30,7 +30,6 @@ keyedView k dict = Maybe.map (\v -> (k, v)) <| Dict.get k dict
 layout : Router Route State -> State -> Dict String (Html (Action State)) -> Html (Action State)
 layout router state views =
   let
-    -- _ = Debug.log "layout" ()
     languageSelector' = languageSelector router
     defaultHeader = homeHeader router state.locale
     defaultFooter = footer router state.locale

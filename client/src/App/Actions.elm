@@ -121,9 +121,9 @@ setMetaFromCategory (Category c) =
 
 setMetaFromPhoto : Photo -> Action State
 setMetaFromPhoto photo =
-  let
-  _ = Debug.log "setMetaFromPhoto" photo
-  in
+  -- let
+  -- _ = Debug.log "setMetaFromPhoto" photo
+  -- in
   combineActions [
     setTitle photo.caption
   , (\state -> setDescription (Maybe.map2 (\author caption -> Locale.i18n state.locale <| Locale.Meta (Locale.PhotoDescription author.name caption)) photo.author photo.caption) state)
@@ -139,8 +139,8 @@ tick : Time -> Action State
 tick frame state =
   let
     -- _ = Debug.log "tick" frame
-    cmd = List.map (\(Deferred cmd) -> cmd) state.defer
-  in Response <| {state | defer = []} ! cmd
+    cmds = List.map (\(Deferred cmd) -> cmd) state.defer
+  in Response <| {state | defer = []} ! cmds
 
 setLocale : Locale -> Action State
 setLocale locale state = Response <| noFx {state | locale = locale}
@@ -148,7 +148,6 @@ setLocale locale state = Response <| noFx {state | locale = locale}
 createLinks : Router Route State -> Action State
 createLinks router state =
   let
-    -- _ = Debug.log "createLinks" ()
     meta = state.meta
     links = flip Maybe.map state.router.route <| \ route ->
       ("x-default", config.hostname ++ router.buildUrl (route, Dict.remove "locale" state.router.params))
@@ -195,7 +194,7 @@ checkCategory : Router Route State -> String -> Action State
 checkCategory router category state =
     case Dict.get category state.categories of
       Nothing -> router.redirect (Routes.Home, Dict.empty) state
-      _ -> (\state -> let _ = Debug.log "checkCategory" in Response <| noFx state) state
+      _ -> doNothing state
 
 loadPhotos : Router Route State -> Action State
 loadPhotos router state =
