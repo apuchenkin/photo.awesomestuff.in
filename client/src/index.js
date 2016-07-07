@@ -54,25 +54,47 @@ function onTransition(route) {
   }
 }
 
+function createPackery(container) {
+  var packery = new Packery(container, {
+    columnWidth: 100,
+    itemSelector: 'li',
+    gutter: 10,
+    initLayout: false,
+  });
+
+  packery.defer = [];
+
+  packery.on('layoutComplete', function() {
+    packery.isLoading = false;
+    if (packery.defer.length) {
+      packery.defer.pop().apply(packery);
+    }
+  });
+
+  packery.doUpdate = function() {
+    packery.reloadItems();
+    packery.layout();
+
+    if (!packery.isLoading) {
+      packery.isLoading = true;
+    } else {
+      packery.defer.push(packery.doUpdate);
+    }
+  }
+
+  return packery;
+}
+
 function onPhotosLoad() {
     var main = wrapper.querySelector(':scope > #main');
     var content = main.querySelector(':scope > .content');
     var gallery = content.querySelector(':scope > .gallery > ul');
 
     if (!packery) {
-      require.ensure([], function() {
-        var Packery = require('packery');
-
-        packery = new Packery(gallery, {
-          columnWidth: 100,
-          itemSelector: 'li',
-          gutter: 10
-        });
-      })
-    } else {
-      setTimeout(function() {
-        packery.reloadItems();
-        packery.layout();
-      });
+      packery = createPackery(gallery);
     }
+
+    setTimeout(function() {
+      packery.doUpdate();
+    });
 }
