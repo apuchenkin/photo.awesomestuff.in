@@ -100,6 +100,14 @@ setFlags flags = let
   }
   in state ! [performTask <| Window.size `Task.andThen` (\size -> Task.succeed <| setSize size)]
 
+subscriptions : State -> Sub (Action State)
+subscriptions state = Sub.batch [
+    Window.resizes setSize
+  , case state.defer of
+    [] -> Sub.none
+    _ -> AnimationFrame.times tick
+  ]
+
 main : Program Flags
 main = Router.dispatch
     setFlags
@@ -110,10 +118,5 @@ main = Router.dispatch
     , transition = onTransition
     , routes = routes
     , routeConfig = config
-    , subscriptions = \state -> Sub.batch [
-        Window.resizes setSize
-      , case state.defer of
-        [] -> Sub.none
-        _ -> AnimationFrame.times tick
-      ]
+    , subscriptions = subscriptions
     }
