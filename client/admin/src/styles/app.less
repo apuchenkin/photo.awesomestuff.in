@@ -1,0 +1,107 @@
+@import "../../../assets/styles/main";
+
+.admin {
+  height:100%;
+  margin:auto;
+  position:relative;
+
+  h1.title {
+    .tools {
+      float: right;
+    }
+    span.show-hidden {
+      cursor: pointer;
+      margin-left: @divisor;
+      font-size: 14pt;
+      &.active {
+        background: black;
+      }
+    }
+  }
+
+  .content {
+    padding: 0;
+    overflow: auto;
+    position:absolute;
+    bottom:0;
+    top: 80px; /*must match the height of #header*/
+  }
+
+  nav.aside {
+    float: left;
+    padding: @divisor 0;
+    background: @grey-light;
+    color: @light-grey;
+    height: 100%;
+    position: fixed;
+    width: 160px;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li {
+        padding: 0.2em @divisor;
+        cursor: pointer;
+
+        &.on-drag-hover {
+          background: greenyellow;
+        }
+
+        &:hover {
+          background: lighten(@grey-light, 10%);
+        }
+
+        &.active {
+          color: black;
+          background: @light-grey;
+        }
+      }
+    }
+  }
+
+  #masonry {
+    margin-left: 160px;
+    padding: 10px;
+
+    .masonry-brick {
+      float: left;
+      margin: 0 @divisor / 2 @divisor / 2 0;
+      position: relative;
+
+      &.on-drag-hover {
+        outline: 2px solid greenyellow;
+      }
+
+      &.selected {
+        outline: 2px solid rgba(255,255,255,1);
+      }
+
+      &.hidden {
+        img { opacity: 0.3; }
+      }
+      .parent {
+        position: absolute;
+        top: @divisor / 2;
+        right: @divisor / 2;
+        width: @divisor / 2;
+        height: @divisor / 2;
+        outline: 1px solid @accent;
+        background: yellow;
+      }
+      .group {
+        position: absolute;
+        top: @divisor / 2;
+        left: @divisor / 2;
+        width: @divisor;
+        height: @divisor;
+        outline: 1px solid rgba(255,255,255,1);
+
+        &:hover {
+          outline: 2px solid rgba(255,255,255,1);
+        }
+      }
+    }
+  }
+}

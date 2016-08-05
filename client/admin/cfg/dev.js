@@ -23,7 +23,19 @@ let config = Object.assign({}, baseConfig, {
       searchResolveModulesDirectories: false
     })
   ],
-  module: defaultSettings.getDefaultModules()
+  module: defaultSettings.getDefaultModules(),
+  devServer: Object.assign(baseConfig.devServer, {
+    proxy: {
+        '/api/v1*': {
+            target: 'http://192.168.138.34:3000',
+            rewrite: function(req) {
+              req.url = req.url.replace(/^\/api\/v1/, '');
+            },
+            changeOrigin: true,
+            secure: false,
+        },
+    },
+  })
 });
 
 // Add needed loaders to the defaults here
