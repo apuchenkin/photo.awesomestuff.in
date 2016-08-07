@@ -3,6 +3,7 @@ require('styles/app.less');
 
 import React from 'react'
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router'
+import DragSource from 'react-dnd';
 
 // let yeomanImage = require('../images/yeoman.png');
 
@@ -109,15 +110,15 @@ const Categories = React.createClass({
   render() {
     let categories = this.props.data.map(function(category) {
           return (
-            <Category data={category} key={category.id} />
+            <li className="item" key={category.id} >
+              <Category data={category} />
+            </li>
           );
     });
 
     return (
       <nav className="aside">
-        <ul>
-          <li className="item">{categories}</li>
-        </ul>
+        <ul>{categories}</ul>
       </nav>
     );
   }
@@ -127,15 +128,15 @@ const Photos = React.createClass({
   render() {
     let photos = this.props.data.map(function(photo) {
       return (
-        <Photo data={photo} key={photo.id} />
+        <li key={photo.id} >
+          <Photo data={photo} />
+        </li>
       );
     });
 
     return (
       <div className="photos">
-        <ul>
-          <li>{photos}</li>
-        </ul>
+        <ul>{photos}</ul>
       </div>
     );
   }

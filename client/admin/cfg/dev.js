@@ -27,7 +27,7 @@ let config = Object.assign({}, baseConfig, {
   devServer: Object.assign(baseConfig.devServer, {
     proxy: {
         '/api/v1*': {
-            target: 'http://192.168.138.34:3000',
+            target: 'http://127.0.0.1:3004',
             rewrite: function(req) {
               req.url = req.url.replace(/^\/api\/v1/, '');
             },
