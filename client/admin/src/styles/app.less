@@ -1,6 +1,11 @@
 @import "../../../assets/styles/main";
 
+#app {
+  width: 100%;
+  height: 100%;
+}
 .admin {
+  width: 100%;
   height:100%;
   margin:auto;
   position:relative;
@@ -8,6 +13,7 @@
   h1.title {
     .tools {
       float: right;
+      font-size: 18px;
     }
     span.show-hidden {
       cursor: pointer;
@@ -20,11 +26,10 @@
   }
 
   .content {
-    padding: 0;
+    padding-top: 70px;
+    width: 100%;
     overflow: auto;
-    position:absolute;
-    bottom:0;
-    top: 80px; /*must match the height of #header*/
+    height: 100%;
   }
 
   nav.aside {
@@ -61,16 +66,21 @@
     }
   }
 
-  #masonry {
+  .photos {
     margin-left: 160px;
     padding: 10px;
+    overflow: auto;
 
-    .masonry-brick {
+    .photo {
       float: left;
       margin: 0 @divisor / 2 @divisor / 2 0;
       position: relative;
 
-      &.on-drag-hover {
+      &.dragging {
+        opacity: 0.5;
+      }
+
+      &.photo--hovered {
         outline: 2px solid greenyellow;
       }
 
@@ -81,6 +91,20 @@
       &.hidden {
         img { opacity: 0.3; }
       }
+      .views {
+        position: absolute;
+        top: @divisor / 2;
+        left: @divisor / 2;
+        width: @divisor / 2;
+        height: @divisor / 2;
+        color: white;
+        text-shadow:
+          -1px -1px 0 black,
+          1px -1px 0 black,
+          -1px 1px 0 black,
+          1px 1px 0 black;
+      }
+
       .parent {
         position: absolute;
         top: @divisor / 2;

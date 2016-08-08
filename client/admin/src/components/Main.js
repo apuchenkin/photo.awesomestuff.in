@@ -1,13 +1,16 @@
 require('normalize.css/normalize.css');
 require('styles/app.less');
 
-import React from 'react'
-import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router'
-import DragSource from 'react-dnd';
+import React from 'react';
+import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router';
+import { DragSource, DropTarget, DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import classNames from 'classnames';
 
 // let yeomanImage = require('../images/yeoman.png');
 
-const AUTH = "auth"
+const AUTH = 'auth';
+const PHOTO = 'photo';
 
 const App = React.createClass({
   render() {
@@ -19,11 +22,11 @@ const App = React.createClass({
   }
 })
 
-const Admin = React.createClass({
+const Admin = withRouter(React.createClass({
   getInitialState() {
     return {
       token: localStorage.getItem(AUTH) || '',
-      category: this.props.location.query ? this.props.location.query.category : null,
+      category: this.props.params ? this.props.params.category : null,
       categories: [],
       photos: []
     };
@@ -78,7 +81,7 @@ const Admin = React.createClass({
         style = {background: 'red'};
 
     return (
-      <div>Admin ({state.token}):
+      <div className="admin">
         <header className="main">
           <h1 className="title">
           {/*<span>
@@ -99,12 +102,14 @@ const Admin = React.createClass({
             </div>
           </h1>
         </header>
-        <Categories data={state.categories} />
-        <Photos data={state.photos} />
+        <div className="content">
+          <Categories data={state.categories} />
+          <Photos data={state.photos} />
+        </div>
       </div>
     )
   }
-})
+}));
 
 const Categories = React.createClass({
   render() {
@@ -146,35 +151,86 @@ const Category = React.createClass({
   render() {
     let category = this.props.data;
     return (
-        <Link to={`/?category=${category.id}`} activeClassName="active">{category.name}</Link>
+        <Link to={`/category/${category.id}`} activeClassName="active">{category.name}</Link>
     );
   }
 })
 
-const Photo = React.createClass({
+const photoSource = {
+  beginDrag: function (props) {
+    // Return the data describing the dragged item
+    var item = { id: props.id };
+    return item;
+  },
+
+  endDrag: function (props, monitor, component) {
+    if (!monitor.didDrop()) {
+      return;
+    }
+
+    // When dropped on a compatible target, do something
+    var item = monitor.getItem();
+    var dropResult = monitor.getDropResult();
+    // CardActions.moveCardToList(item.id, dropResult.listId);
+  }
+}
+
+const photoDrop = {
+
+}
+
+/**
+ * Specifies which props to inject into your component.
+ */
+function collect(connect, monitor) {
+  return {
+    // Call this function inside render()
+    // to let React DnD handle the drag events:
+    connectDragSource: connect.dragSource(),
+    // You can ask the monitor about the current drag state:
+    isDragging: monitor.isDragging()
+  };
+}
+
+function collectDrop(connect, monitor) {
+  return {
+    highlighted: monitor.canDrop(),
+    hovered: monitor.isOver(),
+    connectDropTarget: connect.dropTarget()
+  };
+}
+
+const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDrop, collectDrop)(React.createClass({
   render() {
     let photo = this.props.data;
 
-    return (
-      <div>
+    // These two props are injected by React DnD,
+    // as defined by your `collect` function above:
+    var isDragging = this.props.isDragging;
+    var connectDragSource = this.props.connectDragSource;
+    var connectDropTarget = this.props.connectDropTarget;
+    var highlighted = this.props.highlighted;
+    var hovered = this.props.hovered;
+
+    return connectDragSource(connectDropTarget(
+      <div className={classNames({
+          'photo': true,
+          'photo--highlighted': highlighted,
+          'photo--hovered': hovered,
+          'dragging': isDragging
+        })}>
+        <div className="views">{photo.views}</div>
+        {photo.hasParent && <div class="parent"></div>}
+        {/*
+        <div class="group" ng-style="admin.groupStyle[item.group]" ng-if="item.group"
+             ng-click="admin.unGroup(item);"></div>
+         */}
         <img src={"/api/v1/" + photo.thumb} height="160" />
       </div>
-    );
+    ));
   }
-})
+})));
 
-// <nav ng-cloak ng-if="admin.categories" class="aside">
-//   <ul>
-//     <li class="item"
-//         ng-cloak
-//         ui-on-drop="admin.onDrop($data, c);"
-//         drop-validate="c.name !== admin.category"
-//         ng-class="{active: c.name == admin.category}"
-//         ng-click="admin.setCategory(c);"
-//         ng-repeat="c in admin.categories">{{c.name}}
-//     </li>
-//   </ul>
-// </nav>
 
 const checkAuth = (nextState, replace, callback) => {
   if (!localStorage.getItem(AUTH)) {
@@ -183,7 +239,7 @@ const checkAuth = (nextState, replace, callback) => {
   callback();
 }
 
-const Auth = React.createClass({
+const Auth = withRouter(React.createClass({
   getInitialState() {
     return {email: '', password: ''};
   },
@@ -214,7 +270,7 @@ const Auth = React.createClass({
       </div>
     )
   }
-})
+}))
 
 const NoMatch = React.createClass({
   render() {
@@ -224,52 +280,14 @@ const NoMatch = React.createClass({
   }
 })
 
-// const Users = React.createClass({
-//   render() {
-//     return (
-//       <div>
-//         <h1>Users</h1>
-//         <div className="master">
-//           <ul>
-//             {/* use Link to route around the app */}
-//             {this.state.users.map(user => (
-//               <li key={user.id}><Link to={`/user/${user.id}`}>{user.name}</Link></li>
-//             ))}
-//           </ul>
-//         </div>
-//         <div className="detail">
-//           {this.props.children}
-//         </div>
-//       </div>
-//     )
-//   }
-// })
-//
-// const User = React.createClass({
-//   componentDidMount() {
-//     this.setState({
-//       // route components are rendered with useful information, like URL params
-//       user: findUserById(this.props.params.userId)
-//     })
-//   },
-//
-//   render() {
-//     return (
-//       <div>
-//         <h2>{this.state.user.name}</h2>
-//         {/* etc. */}
-//       </div>
-//     )
-//   }
-// })
-
 class AppComponent extends React.Component {
   render() {
     return (
       <Router history={browserHistory}>
-        <Route path="/(?category=:category)" component={App}>
-          <IndexRoute onEnter={checkAuth} component={withRouter(Admin)} />
-          <Route path="auth" component={withRouter(Auth)} />
+        <Route path="/" component={App} >
+          <IndexRoute onEnter={checkAuth} component={Admin} />
+          <Route path="auth" component={Auth} />
+          <Route path="category/:category" component={Admin} />
           <Route path="*" component={NoMatch} />
         </Route>
       </Router>
@@ -280,4 +298,4 @@ class AppComponent extends React.Component {
 AppComponent.defaultProps = {
 };
 
-export default AppComponent;
+export default DragDropContext(HTML5Backend)(AppComponent);
