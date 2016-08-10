@@ -30,8 +30,10 @@ const Admin = withRouter(React.createClass({
     return {
       token: localStorage.getItem(AUTH) || '',
       category: this.props.params ? this.props.params.category : null,
+      selection: [],
       categories: [],
-      photos: []
+      photos: [],
+      isShowHidden: false
     };
   },
 
@@ -59,7 +61,7 @@ const Admin = withRouter(React.createClass({
       });
   },
 
-  loadState() {
+  componentDidMount() {
     let me = this,
         state = me.state;
 
@@ -69,18 +71,37 @@ const Admin = withRouter(React.createClass({
     }
   },
 
-  componentDidMount() {
-    this.loadState();
-  },
-
-  componentWillReceiveProps() {
-    this.setState(this.getInitialState());
-    this.loadState();
+  componentWillReceiveProps(props) {
+    this.setState({category: props.params && props.params.category}, function(){
+      this.fetchPhotos(this.state.category);
+    });
   },
 
   logout() {
     localStorage.removeItem(AUTH);
     this.props.router.push('/auth');
+  },
+
+  isSelected(photo) {
+    return this.state.selection && this.state.selection.length && this.state.selection.find(p => p.id == photo.id);
+  },
+
+  select(photo, shift) {
+    let selection = this.state.selection;
+
+    if (shift) {
+      this.isSelected(photo)
+        ? selection = selection.filter(p => p.id != photo.id)
+        : selection.push(photo);
+      } else {
+        selection = [photo];
+      }
+
+    this.setState({selection: selection});
+  },
+
+  toggleHidden() {
+    this.setState({isShowHidden: !this.state.isShowHidden});
   },
 
   render() {
@@ -91,27 +112,30 @@ const Admin = withRouter(React.createClass({
       <div className="admin">
         <header className="main">
           <h1 className="title">
-          {/*<span>
-            {{admin.selected.length}} selected
+          <span>
+            {state.selection.length} selected
           </span>
-            <span class="show-hidden" ng-click="admin.toggleHidden();" ng-class="{active: admin.isShowHidden}">
-              hidden
-            </span>*/}
-
-            <div className="tools">
-              {/*
-              <button ng-disabled="admin.selected.length !== 1" ng-click="admin.toggleVisibility(admin.selected[0]);">
-                Show/Hide
-              </button>
-              <button ng-disabled="!admin.selected.length" ng-click="admin.drop();">Drop</button>
-              */}
-              <button style={style} onClick={this.logout}>Logout</button>
-            </div>
+          <span className={classNames({
+              'show-hidden': true,
+              'active': state.isShowHidden,
+            })}
+            onClick={this.toggleHidden}>
+            hidden
+          </span>
+          <div className="tools">
+            {/*
+            <button ng-disabled="admin.selected.length !== 1" ng-click="admin.toggleVisibility(admin.selected[0]);">
+              Show/Hide
+            </button>
+            <button ng-disabled="!admin.selected.length" ng-click="admin.drop();">Drop</button>
+            */}
+            <button style={style} onClick={this.logout}>Logout</button>
+          </div>
           </h1>
         </header>
         <div className="content">
           <Categories data={state.categories} />
-          <Photos data={state.photos} />
+          <Photos data={state.photos} admin={this} />
         </div>
       </div>
     )
@@ -138,12 +162,14 @@ const Categories = React.createClass({
 
 const Photos = React.createClass({
   render() {
-    let photos = this.props.data.map(function(photo) {
-      return (
-        <li key={photo.id} >
-          <Photo data={photo} />
-        </li>
-      );
+    let
+      admin = this.props.admin,
+      photos = this.props.data.map(function(photo) {
+        return (
+          <li key={photo.id} >
+            <Photo data={photo} admin={admin} />
+          </li>
+        );
     });
 
     return (
@@ -208,8 +234,14 @@ function collectDrop(connect, monitor) {
 }
 
 const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDrop, collectDrop)(React.createClass({
+  // componentWillReceiveProps(props) {
+  //   debugger;
+  // },
   render() {
-    let photo = this.props.data;
+    let
+      photo = this.props.data,
+      admin = this.props.admin
+    ;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -224,8 +256,13 @@ const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDro
           'photo': true,
           'photo--highlighted': highlighted,
           'photo--hovered': hovered,
-          'dragging': isDragging
-        })}>
+          'dragging': isDragging,
+          'selected': admin.isSelected(photo),
+          'hasParent': photo.hasParent,
+          'hidden': photo.hidden
+        })}
+        onClick={e => admin.select(photo, e.ctrlKey)}
+        >
         <div className="views">{photo.views}</div>
         {photo.hasParent && <div className="parent"></div>}
         {/*
