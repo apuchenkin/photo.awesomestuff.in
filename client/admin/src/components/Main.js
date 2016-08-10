@@ -6,6 +6,9 @@ import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'rea
 import { DragSource, DropTarget, DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
+import Auth from './Auth';
+import PhotoService from '../service/Photo';
+import CategoryService from '../service/Category';
 
 // let yeomanImage = require('../images/yeoman.png');
 
@@ -33,35 +36,30 @@ const Admin = withRouter(React.createClass({
   },
 
   fetchCategories () {
-    let me = this;
+    let me = this,
+        categoryService = new CategoryService(me.state.token);
 
-    fetch('/api/v1/category')
-      .then(response => {
-        return response.text();
-      })
-      .then(strem => {
-        me.setState({categories: JSON.parse(strem)});
-      })
+    categoryService.fetchCategories()
+      .then(categories => me.setState({categories: categories}));
   },
 
   fetchPhotos (category) {
-    let me = this;
+    let me = this,
+        photoService = new PhotoService(me.state.token);
 
-    fetch('/api/v1/category/' + category + '/photo', {
-        headers: {
-          'Authorization': me.state.token,
-          'Content-Type': 'application/json; charset=utf-8'
-        },
-      })
-      .then(response => {
-        return response.text();
-      })
-      .then(strem => {
-        me.setState({photos: JSON.parse(strem)});
-      })
+    photoService.fetchPhotos(category)
+      .then(photos => {
+        let parent = me.state.categories.find(c => c.id == me.state.category);
+
+        if (parent && parent.parent) {
+          photoService.updateParents(photos, parent.parent).then(result => me.setState({photos: result}));
+        } else {
+          me.setState({photos: photos});
+        }
+      });
   },
 
-  componentDidMount: function() {
+  loadState() {
     let me = this,
         state = me.state;
 
@@ -69,6 +67,15 @@ const Admin = withRouter(React.createClass({
     if (state.category) {
       me.fetchPhotos(state.category);
     }
+  },
+
+  componentDidMount() {
+    this.loadState();
+  },
+
+  componentWillReceiveProps() {
+    this.setState(this.getInitialState());
+    this.loadState();
   },
 
   logout() {
@@ -220,7 +227,7 @@ const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDro
           'dragging': isDragging
         })}>
         <div className="views">{photo.views}</div>
-        {photo.hasParent && <div class="parent"></div>}
+        {photo.hasParent && <div className="parent"></div>}
         {/*
         <div class="group" ng-style="admin.groupStyle[item.group]" ng-if="item.group"
              ng-click="admin.unGroup(item);"></div>
@@ -238,39 +245,6 @@ const checkAuth = (nextState, replace, callback) => {
   }
   callback();
 }
-
-const Auth = withRouter(React.createClass({
-  getInitialState() {
-    return {email: '', password: ''};
-  },
-
-  submit() {
-    localStorage.setItem(AUTH, 'Basic ' + window.btoa([this.state.email, this.state.password].join(':')));
-    this.props.router.push('/');
-  },
-
-  render() {
-    return (
-      <div>
-        <form onSubmit={this.submit}>
-          Username ({this.state.email}):
-          <input name="email"
-            type="email"
-            value={this.state.email}
-            onChange={e => this.setState({email: e.target.value})}
-          />
-          Password ({this.state.password}):
-          <input name="password"
-            type="passord"
-            value={this.state.password}
-            onChange={e => this.setState({password: e.target.value})}
-          />
-          <input type="submit" />
-        </form>
-      </div>
-    )
-  }
-}))
 
 const NoMatch = React.createClass({
   render() {
