@@ -5,10 +5,13 @@ const PhotoService = class {
     this.token = token;
   }
 
-  fetchPhotos (category) {
-    let me = this;
+  fetchPhotos (category, showHidden) {
+    let me = this,
+        url = new URL('/api/v1/category/' + category + '/photo', location.origin);
 
-    return fetch('/api/v1/category/' + category + '/photo', {
+    url.searchParams.append('hidden', showHidden);
+
+    return fetch(url, {
         headers: {
           'Authorization': me.token,
           'Content-Type': 'application/json; charset=utf-8'
@@ -22,27 +25,14 @@ const PhotoService = class {
       })
   }
 
-  updateParents(photos, parent) {
-    return this.fetchPhotos(parent)
+  updateParents(photos, parent, showHidden) {
+    return this.fetchPhotos(parent, showHidden)
       .then(parents => {
         return photos.map(photo => {
           photo.hasParent = parents.find(p => p.id == photo.id);
           return photo;
         });
       });
-
-    // debugger;
-    // var category = categories.$findByName(me.category);
-    // if (category && category.parent) {
-    //   var parent = categories.$findById(category.parent);
-    //   me.parentPhotos = parent.photo.$fetch();
-    //   me.parentPhotos.$then(function () {
-    //     var ids = _.intersection(_.map(photos, 'id'), _.map(me.parentPhotos,'id'));
-    //     ids.map(function(i){
-    //       _.find(photos, {id: i}).hasParent = true;
-    //     });
-    //   });
-    // }
   }
 };
 

@@ -33,7 +33,7 @@ const Admin = withRouter(React.createClass({
       selection: [],
       categories: [],
       photos: [],
-      isShowHidden: false
+      showHidden: false
     };
   },
 
@@ -45,16 +45,18 @@ const Admin = withRouter(React.createClass({
       .then(categories => me.setState({categories: categories}));
   },
 
-  fetchPhotos (category) {
+  fetchPhotos () {
     let me = this,
-        photoService = new PhotoService(me.state.token);
+        state = me.state,
+        photoService = new PhotoService(state.token);
 
-    photoService.fetchPhotos(category)
+    me.setState({photos: []});
+    photoService.fetchPhotos(state.category, state.showHidden)
       .then(photos => {
-        let parent = me.state.categories.find(c => c.id == me.state.category);
+        let parent = state.categories.find(c => c.id == state.category);
 
         if (parent && parent.parent) {
-          photoService.updateParents(photos, parent.parent).then(result => me.setState({photos: result}));
+          photoService.updateParents(photos, parent.parent, state.showHidden).then(result => me.setState({photos: result}));
         } else {
           me.setState({photos: photos});
         }
@@ -67,14 +69,12 @@ const Admin = withRouter(React.createClass({
 
     me.fetchCategories();
     if (state.category) {
-      me.fetchPhotos(state.category);
+      me.fetchPhotos();
     }
   },
 
   componentWillReceiveProps(props) {
-    this.setState({category: props.params && props.params.category}, function(){
-      this.fetchPhotos(this.state.category);
-    });
+    this.setState({category: props.params && props.params.category}, this.fetchPhotos);
   },
 
   logout() {
@@ -101,7 +101,24 @@ const Admin = withRouter(React.createClass({
   },
 
   toggleHidden() {
-    this.setState({isShowHidden: !this.state.isShowHidden});
+    this.setState({showHidden: !this.state.showHidden}, this.fetchPhotos);
+  },
+
+  toggleVisibility(photo) {
+    photo.hidden = !photo.hidden;
+    return fetch('/api/v1/photo/' + photo.id, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': this.state.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify({hidden: photo.hidden})
+      });
+        // item.$save(['hidden']);
+  },
+
+  dropPhotos() {
+    return true;
   },
 
   render() {
@@ -117,18 +134,16 @@ const Admin = withRouter(React.createClass({
           </span>
           <span className={classNames({
               'show-hidden': true,
-              'active': state.isShowHidden,
+              'active': state.showHidden,
             })}
             onClick={this.toggleHidden}>
             hidden
           </span>
           <div className="tools">
-            {/*
-            <button ng-disabled="admin.selected.length !== 1" ng-click="admin.toggleVisibility(admin.selected[0]);">
+            <button disabled={state.selection.length !== 1} onClick={this.toggleVisibility.bind(this, state.selection[0])}>
               Show/Hide
             </button>
-            <button ng-disabled="!admin.selected.length" ng-click="admin.drop();">Drop</button>
-            */}
+            <button disabled={!state.selection.length} onClick={this.dropPhotos}>Drop</button>
             <button style={style} onClick={this.logout}>Logout</button>
           </div>
           </h1>
@@ -259,7 +274,7 @@ const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDro
           'dragging': isDragging,
           'selected': admin.isSelected(photo),
           'hasParent': photo.hasParent,
-          'hidden': photo.hidden
+          'isHidden': photo.hidden
         })}
         onClick={e => admin.select(photo, e.ctrlKey)}
         >
