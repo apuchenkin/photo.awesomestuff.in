@@ -51,8 +51,9 @@
         padding: 0.2em @divisor;
         cursor: pointer;
 
-        &.on-drag-hover {
+        .category--hovered {
           background: greenyellow;
+          cursor: pointer;
         }
 
         &:hover {
@@ -117,7 +118,7 @@
       }
       .group {
         position: absolute;
-        top: @divisor / 2;
+        bottom: @divisor / 2;
         left: @divisor / 2;
         width: @divisor;
         height: @divisor;

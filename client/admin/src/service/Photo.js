@@ -5,6 +5,15 @@ const PhotoService = class {
     this.token = token;
   }
 
+  getRandomColor () {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
   fetchPhotos (category, showHidden) {
     let me = this,
         url = new URL('/api/v1/category/' + category + '/photo', location.origin);
@@ -23,6 +32,16 @@ const PhotoService = class {
       .then(stream => {
         return JSON.parse(stream);
       })
+  }
+
+  groupColors(photos) {
+    let
+      style = {},
+      groups = [...new Set(photos.map(p => p.group).filter(x => !!x))];
+
+    groups.map(g => style[g] = this.getRandomColor());
+
+    return style;
   }
 
   updateParents(photos, parent, showHidden) {

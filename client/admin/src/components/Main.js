@@ -33,6 +33,7 @@ const Admin = withRouter(React.createClass({
       selection: [],
       categories: [],
       photos: [],
+      groups: [],
       showHidden: false
     };
   },
@@ -56,11 +57,19 @@ const Admin = withRouter(React.createClass({
         let parent = state.categories.find(c => c.id == state.category);
 
         if (parent && parent.parent) {
-          photoService.updateParents(photos, parent.parent, state.showHidden).then(result => me.setState({photos: result}));
+          photoService.updateParents(photos, parent.parent, state.showHidden).then(me.setPhotos);
         } else {
-          me.setState({photos: photos});
+          me.setPhotos(photos);
         }
       });
+  },
+
+  setPhotos(photos) {
+    let
+      photoService = new PhotoService(this.state.token),
+      groups = photoService.groupColors(photos);
+
+    this.setState({photos: photos, groups: groups});
   },
 
   componentDidMount() {
@@ -114,11 +123,18 @@ const Admin = withRouter(React.createClass({
         },
         body: JSON.stringify({hidden: photo.hidden})
       });
-        // item.$save(['hidden']);
   },
 
   dropPhotos() {
     return true;
+  },
+
+  ungroup(photo) {
+    console.log("ungroup", photo);
+  },
+
+  group(p1, p2) {
+    console.log("group", p1, p2);
   },
 
   render() {
@@ -195,20 +211,37 @@ const Photos = React.createClass({
   }
 })
 
-const Category = React.createClass({
+const categoryDrop = {
+  drop: function({admin, data}, monitor) {
+    console.log(admin, data, monitor.getItem());
+  },
+  canDrop(props, monitor) {
+    return true;
+  }
+}
+
+const Category = DropTarget(PHOTO, categoryDrop, collectDrop)(React.createClass({
   render() {
     let category = this.props.data;
-    return (
-        <Link to={`/category/${category.id}`} activeClassName="active">{category.name}</Link>
-    );
+
+    var connectDropTarget = this.props.connectDropTarget;
+    var highlighted = this.props.highlighted;
+    var hovered = this.props.hovered;
+
+    return connectDropTarget(
+        <div className={classNames({
+            'category': true,
+            'category--hovered': hovered
+          })}>
+          <Link to={`/category/${category.id}`} activeClassName="active">{category.name}</Link>
+        </div>
+      );
   }
-})
+}))
 
 const photoSource = {
   beginDrag: function (props) {
-    // Return the data describing the dragged item
-    var item = { id: props.id };
-    return item;
+    return props.data;
   },
 
   endDrag: function (props, monitor, component) {
@@ -224,13 +257,18 @@ const photoSource = {
 }
 
 const photoDrop = {
-
+  drop: function({admin, data}, monitor) {
+    admin.group(data, monitor.getItem());
+  },
+  canDrop(props, monitor) {
+    return props.data.id != monitor.getItem().id;
+  }
 }
 
 /**
  * Specifies which props to inject into your component.
  */
-function collect(connect, monitor) {
+function collectDrag(connect, monitor) {
   return {
     // Call this function inside render()
     // to let React DnD handle the drag events:
@@ -243,12 +281,12 @@ function collect(connect, monitor) {
 function collectDrop(connect, monitor) {
   return {
     highlighted: monitor.canDrop(),
-    hovered: monitor.isOver(),
+    hovered: monitor.isOver() && monitor.canDrop(),
     connectDropTarget: connect.dropTarget()
   };
 }
 
-const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDrop, collectDrop)(React.createClass({
+const Photo = DragSource(PHOTO, photoSource, collectDrag)(DropTarget(PHOTO, photoDrop, collectDrop)(React.createClass({
   // componentWillReceiveProps(props) {
   //   debugger;
   // },
@@ -277,13 +315,11 @@ const Photo = DragSource(PHOTO, photoSource, collect)(DropTarget(PHOTO, photoDro
           'isHidden': photo.hidden
         })}
         onClick={e => admin.select(photo, e.ctrlKey)}
+        onDoubleClick={() => console.log(photo)}
         >
         <div className="views">{photo.views}</div>
         {photo.hasParent && <div className="parent"></div>}
-        {/*
-        <div class="group" ng-style="admin.groupStyle[item.group]" ng-if="item.group"
-             ng-click="admin.unGroup(item);"></div>
-         */}
+        {photo.group && <div className="group" style={{background: admin.state.groups[photo.group]}} onClick={admin.ungroup.bind(admin, photo)}></div>}
         <img src={"/api/v1/" + photo.thumb} height="160" />
       </div>
     ));
