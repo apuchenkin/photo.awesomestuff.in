@@ -11,7 +11,7 @@ import           Import
 import Model
 
 data ExifData = ExifData {
-    categories  :: [Text],
+    categories  :: Either Text [Text],
     name        :: String,
     src         :: Text,
     width       :: Int,
@@ -25,7 +25,10 @@ data ExifData = ExifData {
 instance FromJSON ExifData where
     parseJSON = withObject "ExifData" $ \o -> do
         let exifObject = o
-        categories  <- o .:  "IPTC:Keywords"
+        categories  <-
+          (   (Left  <$> o .: "IPTC:Keywords")
+          <|> (Right <$> o .: "IPTC:Keywords")
+          )
         name        <- o .:  "File:FileName"
         src         <- o .:  "SourceFile"
         width       <- o .:  "File:ImageWidth"
@@ -38,7 +41,7 @@ instance FromJSON ExifData where
 
 doInstall :: SqlPersistT IO ()
 doInstall = do
-    print $ "read: exif.json"
+    print "read: exif.json"
     exifFile <- liftIO $ readFile "exif.json"
     let eresult = eitherDecode exifFile :: Either String [Value]
     case eresult of
@@ -52,8 +55,10 @@ doInstall = do
     where
         persistData :: ExifData -> SqlPersistT IO ()
         persistData exif = do
+            print exif
+            let categoriesList = either singleton id (categories exif)
             aid <- maybe (return Nothing) persistAuthor (author exif)
-            categories <- mapM persistCategory (categories exif)
+            categories <- mapM persistCategory categoriesList
             pid <- persistPhoto exif aid
             _   <- mapM (\cid -> insertUnique $ PhotoCategory cid pid) categories
             return ()
