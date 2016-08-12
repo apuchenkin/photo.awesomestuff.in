@@ -125,16 +125,55 @@ const Admin = withRouter(React.createClass({
       });
   },
 
-  dropPhotos() {
-    return true;
+  deletePhotos() {
+    let me = this,
+        category = me.state.categories.find(c => c.id == me.state.category),
+        categoryService = new CategoryService(me.state.token);
+
+    if (category) {
+      categoryService.unlinkPhotos(category, me.state.selection)
+        .then(() => {
+          me.cleanSelection();
+          me.fetchPhotos();
+        });
+    }
+  },
+
+  addToCategory(category, photos) {
+    let me = this,
+        categoryService = new CategoryService(me.state.token);
+
+    categoryService.linkPhotos(category, [photos])
+      .then(() => {
+        me.cleanSelection();
+        me.fetchPhotos();
+      });
+  },
+
+  cleanSelection() {
+    this.setState({selection: []});
   },
 
   ungroup(photo) {
-    console.log("ungroup", photo);
+    let me = this,
+        photoService = new PhotoService(me.state.token);
+
+    photoService.removeGroup(photo.group, [photo])
+      .then(() => {
+        me.cleanSelection();
+        me.fetchPhotos();
+      });
   },
 
   group(p1, p2) {
-    console.log("group", p1, p2);
+    let me = this,
+        photoService = new PhotoService(me.state.token);
+
+    photoService.group([p1, p2])
+      .then(() => {
+        me.cleanSelection();
+        me.fetchPhotos();
+      });
   },
 
   render() {
@@ -159,13 +198,13 @@ const Admin = withRouter(React.createClass({
             <button disabled={state.selection.length !== 1} onClick={this.toggleVisibility.bind(this, state.selection[0])}>
               Show/Hide
             </button>
-            <button disabled={!state.selection.length} onClick={this.dropPhotos}>Drop</button>
+            <button disabled={!state.selection.length} onClick={this.deletePhotos}>Delete</button>
             <button style={style} onClick={this.logout}>Logout</button>
           </div>
           </h1>
         </header>
         <div className="content">
-          <Categories data={state.categories} />
+          <Categories data={state.categories} admin={this} />
           <Photos data={state.photos} admin={this} />
         </div>
       </div>
@@ -175,10 +214,12 @@ const Admin = withRouter(React.createClass({
 
 const Categories = React.createClass({
   render() {
-    let categories = this.props.data.map(function(category) {
+    let
+      admin = this.props.admin,
+      categories = this.props.data.map(function(category) {
           return (
             <li className="item" key={category.id} >
-              <Category data={category} />
+              <Category data={category} admin={admin} />
             </li>
           );
     });
@@ -213,7 +254,7 @@ const Photos = React.createClass({
 
 const categoryDrop = {
   drop: function({admin, data}, monitor) {
-    console.log(admin, data, monitor.getItem());
+    admin.addToCategory(data, monitor.getItem());
   },
   canDrop(props, monitor) {
     return true;

@@ -53,6 +53,39 @@ const PhotoService = class {
         });
       });
   }
+
+  group(photos) {
+    return fetch('/api/v1/photo/group', {
+        method: 'POST',
+        headers: {
+          'Authorization': this.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(photos.map(p => p.id))
+      });
+  }
+
+  appendGroup(groupId, photos) {
+    return fetch('/api/v1/photo/group/' + groupId, {
+        method: 'LINK',
+        headers: {
+          'Authorization': this.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(photos.map(p => p.id))
+      });
+  }
+
+  removeGroup(groupId, photos) {
+    return fetch('/api/v1/photo/group/' + groupId, {
+        method: 'UNLINK',
+        headers: {
+          'Authorization': this.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(photos.map(p => p.id))
+      });
+  }
 };
 
 export default PhotoService;

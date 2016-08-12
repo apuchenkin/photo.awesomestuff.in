@@ -16,6 +16,28 @@ const CategoryService = class {
           return JSON.parse(stream);
         })
   }
+
+  linkPhotos(category, photos) {
+    return fetch('/api/v1/category/' + category.id + '/photo', {
+        method: 'LINK',
+        headers: {
+          'Authorization': this.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(photos.map(p => p.id))
+      });
+  }
+
+  unlinkPhotos(category, photos) {
+    return fetch('/api/v1/category/' + category.id + '/photo', {
+        method: 'UNLINK',
+        headers: {
+          'Authorization': this.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(photos.map(p => p.id))
+      });
+  }
 };
 
 export default CategoryService;

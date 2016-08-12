@@ -11,7 +11,7 @@ import           Import
 import Model
 
 data ExifData = ExifData {
-    categories  :: [Text],
+    categories  :: Either Text [Text],
     name        :: String,
     src         :: Text,
     width       :: Int,
@@ -38,7 +38,7 @@ instance FromJSON ExifData where
 
 doInstall :: SqlPersistT IO ()
 doInstall = do
-    print $ "read: exif.json"
+    print "read: exif.json"
     exifFile <- liftIO $ readFile "exif.json"
     let eresult = eitherDecode exifFile :: Either String [Value]
     case eresult of
