@@ -272,6 +272,7 @@ const Category = DropTarget(PHOTO, categoryDrop, collectDrop)(React.createClass(
     return connectDropTarget(
         <div className={classNames({
             'category': true,
+            'isHidden': category.hidden,
             'category--hovered': hovered
           })}>
           <Link to={`/category/${category.id}`} activeClassName="active">{category.name}</Link>

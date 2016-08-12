@@ -6,15 +6,23 @@ const CategoryService = class {
   }
 
   fetchCategories () {
-    let me = this;
+    let me = this,
+        url = new URL('/api/v1/category', location.origin);
 
-    return fetch('/api/v1/category')
-        .then(response => {
-          return response.text();
-        })
-        .then(stream => {
-          return JSON.parse(stream);
-        })
+    url.searchParams.append('hidden', true);
+
+    return fetch(url, {
+        headers: {
+          'Authorization': me.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+      })
+      .then(response => {
+        return response.text();
+      })
+      .then(stream => {
+        return JSON.parse(stream);
+      })
   }
 
   linkPhotos(category, photos) {
