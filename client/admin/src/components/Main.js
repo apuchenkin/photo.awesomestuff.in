@@ -110,18 +110,22 @@ const Admin = withRouter(React.createClass({
   },
 
   toggleHidden() {
-    this.setState({showHidden: !this.state.showHidden}, this.fetchPhotos);
+    let me = this;
+
+    me.setState({showHidden: !me.state.showHidden}, () => {
+      me.cleanSelection();
+      me.fetchPhotos();
+    });
   },
 
   toggleVisibility(photo) {
-    photo.hidden = !photo.hidden;
-    return fetch('/api/v1/photo/' + photo.id, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': this.state.token,
-          'Content-Type': 'application/json; charset=utf-8'
-        },
-        body: JSON.stringify({hidden: photo.hidden})
+    let me = this,
+        photoService = new PhotoService(me.state.token);
+
+    photoService.patchPhoto(photo, {hidden: !photo.hidden})
+      .then(() => {
+        me.cleanSelection();
+        me.fetchPhotos();
       });
   },
 
@@ -165,15 +169,22 @@ const Admin = withRouter(React.createClass({
       });
   },
 
-  group(p1, p2) {
+  group(photos) {
     let me = this,
-        photoService = new PhotoService(me.state.token);
+        photoService = new PhotoService(me.state.token),
+        group = photos.find(p => !!p.group),
+        promise;
 
-    photoService.group([p1, p2])
-      .then(() => {
-        me.cleanSelection();
-        me.fetchPhotos();
-      });
+    if (group) {
+      promise = photoService.appendGroup(group, photos);
+    } else {
+      promise = photoService.group(photos);
+    }
+
+    promise.then(() => {
+      me.cleanSelection();
+      me.fetchPhotos();
+    });
   },
 
   render() {
@@ -197,6 +208,9 @@ const Admin = withRouter(React.createClass({
           <div className="tools">
             <button disabled={state.selection.length !== 1} onClick={this.toggleVisibility.bind(this, state.selection[0])}>
               Show/Hide
+            </button>
+            <button disabled={!state.selection.length || state.selection.filter(p => !!p.group).length} onClick={this.group.bind(this, state.selection)}>
+              Group
             </button>
             <button disabled={!state.selection.length} onClick={this.deletePhotos}>Delete</button>
             <button style={style} onClick={this.logout}>Logout</button>
@@ -265,11 +279,11 @@ const Category = DropTarget(PHOTO, categoryDrop, collectDrop)(React.createClass(
   render() {
     let category = this.props.data;
 
-    var connectDropTarget = this.props.connectDropTarget;
+    var dropTarget = this.props.dropTarget;
     var highlighted = this.props.highlighted;
     var hovered = this.props.hovered;
 
-    return connectDropTarget(
+    return dropTarget(
         <div className={classNames({
             'category': true,
             'isHidden': category.hidden,
@@ -284,23 +298,12 @@ const Category = DropTarget(PHOTO, categoryDrop, collectDrop)(React.createClass(
 const photoSource = {
   beginDrag: function (props) {
     return props.data;
-  },
-
-  endDrag: function (props, monitor, component) {
-    if (!monitor.didDrop()) {
-      return;
-    }
-
-    // When dropped on a compatible target, do something
-    var item = monitor.getItem();
-    var dropResult = monitor.getDropResult();
-    // CardActions.moveCardToList(item.id, dropResult.listId);
   }
 }
 
 const photoDrop = {
   drop: function({admin, data}, monitor) {
-    admin.group(data, monitor.getItem());
+    admin.group([monitor.getItem(), data]);
   },
   canDrop(props, monitor) {
     return props.data.id != monitor.getItem().id;
@@ -314,7 +317,7 @@ function collectDrag(connect, monitor) {
   return {
     // Call this function inside render()
     // to let React DnD handle the drag events:
-    connectDragSource: connect.dragSource(),
+    dragSource: connect.dragSource(),
     // You can ask the monitor about the current drag state:
     isDragging: monitor.isDragging()
   };
@@ -324,7 +327,7 @@ function collectDrop(connect, monitor) {
   return {
     highlighted: monitor.canDrop(),
     hovered: monitor.isOver() && monitor.canDrop(),
-    connectDropTarget: connect.dropTarget()
+    dropTarget: connect.dropTarget()
   };
 }
 
@@ -341,12 +344,12 @@ const Photo = DragSource(PHOTO, photoSource, collectDrag)(DropTarget(PHOTO, phot
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
     var isDragging = this.props.isDragging;
-    var connectDragSource = this.props.connectDragSource;
-    var connectDropTarget = this.props.connectDropTarget;
+    var dragSource = this.props.dragSource;
+    var dropTarget = this.props.dropTarget;
     var highlighted = this.props.highlighted;
     var hovered = this.props.hovered;
 
-    return connectDragSource(connectDropTarget(
+    return dragSource(dropTarget(
       <div className={classNames({
           'photo': true,
           'photo--highlighted': highlighted,

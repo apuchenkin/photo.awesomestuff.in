@@ -44,6 +44,17 @@ const PhotoService = class {
     return style;
   }
 
+  patchPhoto(photo, props) {
+    return fetch('/api/v1/photo/' + photo.id, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': this.token,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(props)
+      });
+  }
+
   updateParents(photos, parent, showHidden) {
     return this.fetchPhotos(parent, showHidden)
       .then(parents => {
