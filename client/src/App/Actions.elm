@@ -230,8 +230,7 @@ updatePhotos : List Photo -> Action State
 updatePhotos photos state =
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds state.time
-    photos' = refinePhotos seed photos
-    -- _ = Debug.log "updatePhotos" ()
+    photos' = refinePhotos seed photos state.photo
   in Response <| noFx {state | photos = photos', defer = Deferred (portCmd <| App.Ports.photos True) :: state.defer}
 
 updatePhoto : Maybe Photo -> Action State

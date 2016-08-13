@@ -54,8 +54,8 @@ remapPhoto seed avg photo =
 {-|
   Reduces list of photos by removing photo dublicates
 -}
-refinePhotos : Random.Seed -> List Photo -> List Photo
-refinePhotos seed photos =
+refinePhotos : Random.Seed -> List Photo -> Maybe Photo -> List Photo
+refinePhotos seed photos exclude =
   let
     orderedPhotos = List.map2 (,) [1 .. List.length photos] photos
     groups = List.foldl (\op dict ->
@@ -73,4 +73,6 @@ refinePhotos seed photos =
         (r, s') = Random.step gen s
       in (s', list !! r :: res)) (seed, []) <| Dict.remove 0 groups
 
-  in List.map snd <| List.sortBy fst <| groups' ++ photos'
+    excluded = Maybe.withDefault [] <| flip Maybe.map exclude <| \e -> List.filter (\(_, p) -> p.id == e.id) orderedPhotos
+
+  in List.map snd <| List.sortBy fst <| groups' ++ photos' ++ excluded
