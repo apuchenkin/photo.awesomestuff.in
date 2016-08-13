@@ -173,7 +173,7 @@ loadCategories router state =
     fetch = Task.toMaybe <| getRequest decodeCategories (config.apiEndpoint ++ "/category") state'
     task = fetch `Task.andThen` \mcategories ->
       let
-        categories = Maybe.withDefault [] mcategories
+        categories = List.filterMap identity <| Maybe.withDefault [] mcategories
         update = updateCategories categories
         categoryParam =  case Dict.get "subcategory" state.router.params of
             Nothing -> Dict.get "category" state.router.params

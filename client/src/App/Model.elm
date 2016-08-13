@@ -100,8 +100,8 @@ photo c id src width height views group caption author =
   , isLoaded = False
   }
 
-decodeCategories : Json.Decoder (List Category)
-decodeCategories = Json.list <| Json.object8 category
+decodeCategories : Json.Decoder (List (Maybe Category))
+decodeCategories = Json.list <| Json.maybe <| Json.object8 category
   ("id"     := Json.int)
   ("name"   := Json.string)
   ("title"  := Json.string)

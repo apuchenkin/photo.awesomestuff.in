@@ -37,8 +37,8 @@ remapPhoto seed avg photo =
   let
     v = toFloat photo.views
     std = sqrt <| (v - avg) ^ 2
-    norm  = List.map ((*) (floor avg)) [32,16,4,1]
-    norm' = List.map (\r -> floor <| r * (std * v) / avg) [1,2,3,4]
+    norm  = List.map ((*) (floor avg + 1)) [16,8,4,1]
+    norm' = List.map (\r -> floor <| (r * (std * v) / avg) + 1) [1,2,3,4]
     prob = List.map2 (+) norm norm'
     prob' = List.map (\p -> p // (Maybe.withDefault 1 <| List.minimum prob)) prob
     probList = List.concat <| List.map2 (\m p -> List.repeat p m) [A,B,C,D] prob'

@@ -58,7 +58,7 @@ module.exports = {
     historyApiFallback: true,
     proxy: {
         '/api/v1*': {
-            target: 'http://192.168.138.34:3000',
+            target: 'http://awesomestuff.in:3000',
             rewrite: function(req) {
               req.url = req.url.replace(/^\/api\/v1/, '');
             },
