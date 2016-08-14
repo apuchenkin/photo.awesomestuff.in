@@ -48,9 +48,17 @@ Photo json
     UniquePhoto src
     deriving Show
 
+Page json
+    alias String
+    parent PageId Maybe
+    category CategoryId Maybe
+    hidden Bool
+
+    UniquePage alias parent category
+
 Translation json
     language Language sqltype=enum('Ru','En')
-    refType TranslationType sqltype=enum('CategoryType','PhotoType')
+    refType TranslationType sqltype=enum('CategoryType','PhotoType','PageType')
     refId Int64
     field String
     value Text

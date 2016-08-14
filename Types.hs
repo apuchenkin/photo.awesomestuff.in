@@ -3,19 +3,8 @@
 module Types where
 
 import ClassyPrelude.Yesod
-import Text.Read              (reads)
 
-instance ToJSON Day where
-    toJSON = toJSON . show
---
--- instance FromJSON Day where
---     parseJSON x = do
---         s <- parseJSON x
---         case reads s of
---             (d, _):_ -> return d
---             [] -> mzero
-
-data TranslationType = CategoryType | PhotoType
+data TranslationType = CategoryType | PhotoType | PageType
     deriving (Show, Read, Eq)
 derivePersistField "TranslationType"
 
@@ -23,11 +12,13 @@ instance FromJSON TranslationType where
     parseJSON tt = case tt of
             "category"  -> pure CategoryType
             "photo"     -> pure PhotoType
+            "page"      -> pure PageType
             _           -> mempty
 
 instance ToJSON TranslationType where
     toJSON CategoryType = "category"
     toJSON PhotoType    = "photo"
+    toJSON PageType     = "page"
 
 data Language = En | Ru
     deriving (Show, Read, Eq)

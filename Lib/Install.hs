@@ -55,7 +55,6 @@ doInstall = do
     where
         persistData :: ExifData -> SqlPersistT IO ()
         persistData exif = do
-            print exif
             let categoriesList = either singleton id (categories exif)
             aid <- maybe (return Nothing) persistAuthor (author exif)
             categories <- mapM persistCategory categoriesList
@@ -87,7 +86,7 @@ doInstall = do
                 persistPhoto e aid = do
                     let thumb  = Just $ unpack $ T.replace "static/src" "static/thumb" (src e)
                         exifData = toStrict $ decodeUtf8 $ encode (exifObject e)
-                        datetime = flip fmap (date e) $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%I:%S" ds :: UTCTime
+                        datetime = flip fmap (date e) $ \ds -> readTime defaultTimeLocale "%Y:%m:%d %H:%M:%S" ds :: UTCTime
                         photo = Photo
                             (name e)            -- name
                             (unpack $ src e)    -- src
