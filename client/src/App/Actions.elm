@@ -35,7 +35,7 @@ onTransition router _ to = case to of
       resetMeta
     , resetLoading
     , createLinks router
-    , \state -> Response <| noFx {state | defer = Deferred (App.Ports.transition <| Maybe.map toString to) :: state.defer}
+    , \state -> Response <| noFx {state | defer = Deferred (App.Ports.transition state.meta.title) :: state.defer}
     ]
 
 type TransitionType = In | Out
@@ -205,7 +205,7 @@ loadPhotos router state =
         let
           category = getCategory state
           default = Task.succeed <| router.redirect (Routes.NotFound, Dict.empty) `chainAction` stopLoading
-          updateTask photos = Task.succeed <| (updatePhotos <| Maybe.withDefault [] photos) `chainAction` stopLoading
+          updateTask photos = Task.succeed <| (stopLoading `chainAction` (updatePhotos <| Maybe.withDefault [] photos))
           fetchTask (Category c) = Task.toMaybe <| getRequest (decodePhotos category) (config.apiEndpoint ++ "/category/" ++ toString c.id ++ "/photo") state
           task = flip Maybe.map category
             <| \c ->  fetchTask c `Task.andThen` updateTask
@@ -231,7 +231,8 @@ updatePhotos photos state =
   let
     seed = Random.initialSeed <| floor <| Time.inSeconds state.time
     photos' = refinePhotos seed photos state.photo
-  in Response <| noFx {state | photos = photos', defer = Deferred (portCmd <| App.Ports.photos True) :: state.defer}
+    updatePort = Task.succeed <| \state -> Response <| noFx {state | defer = Deferred (portCmd <| App.Ports.photos True) :: state.defer}
+  in Response ({state | photos = photos'}, performTask updatePort)
 
 updatePhoto : Maybe Photo -> Action State
 updatePhoto photo = combineActions <| catMaybes <| [

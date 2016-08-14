@@ -39,7 +39,7 @@ function metaUpdate(meta) {
 
 var packery;
 
-function onTransition(route) {
+function onTransition(title) {
   var main = wrapper.querySelector(':scope > #main');
   var content = main.querySelector(':scope > .content');
   var gallery = content.querySelector(':scope > .gallery > ul');
@@ -52,6 +52,10 @@ function onTransition(route) {
       packery.destroy();
       packery = null;
   }
+
+  ga('send', 'pageview', {
+    'page':  window.location.pathname
+  });
 }
 
 function createPackery(container) {
@@ -94,7 +98,5 @@ function onPhotosLoad() {
       packery = createPackery(gallery);
     }
 
-    setTimeout(function() {
-      packery.doUpdate();
-    });
+    packery.doUpdate();
 }

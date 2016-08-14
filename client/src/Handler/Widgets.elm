@@ -134,7 +134,8 @@ gallery router = lazy3 <| \ locale photos time ->
     brick = brickWidget router locale
     seed = Random.initialSeed <| floor <| Time.inSeconds time
     photos' = remapPhotos seed photos
-  in Html.div [Attr.class "gallery"] --, Attr.key "gallery"]
+
+  in Html.div [Attr.class "gallery"]
   <| singleton <| Html.ul [] <| flip List.map photos'
   <| \photo -> Html.li [] [brick photo]
 
