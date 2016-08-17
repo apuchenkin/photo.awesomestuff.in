@@ -1,12 +1,14 @@
 {
   "sourceMaps": true,
   "presets": [
-    "es2015-minimal",
-    "stage-0"
+    "react",
+    "es2015-minimal"
   ],
   "plugins": [
-    ["transform-decorators-legacy"],
-    ["transform-react-jsx", { "pragma": "h" }]
+    "transform-class-properties",
+    "transform-decorators",
+    "transform-object-rest-spread",
+    "transform-runtime"
   ],
   "env": {
     "node": {

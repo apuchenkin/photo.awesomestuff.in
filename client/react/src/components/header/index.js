@@ -1,7 +1,7 @@
-import { h, Component } from 'preact';
+import React from 'react';
 import './style.less';
 
-export default class Header extends Component {
+export default class Header extends React.Component {
 	render() {
 		return (
 			<header>

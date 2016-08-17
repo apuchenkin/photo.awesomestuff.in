@@ -1,17 +1,22 @@
-import { h, Component } from 'preact';
+import React from 'react';
 import CategoryService from '../../../../admin/src/service/Category';
 import './style.less';
 
-export default class Home extends Component {
-	getInitialState() {
-		return {
-			category: this.props.params ? this.props.params.category : null,
-			categories: [],
-			photos: [],
-			groups: [],
-			showHidden: false
-		};
-	}
+export default class Home extends React.Component {
+
+	constructor(props) {
+	    super(props);
+	    this.state ={
+				category: props.params ? props.params.category : null,
+				categories: [props.params.locale],
+				photos: [],
+				groups: [],
+				showHidden: false
+			}
+
+	    console.log(props);
+	  }
+
 
 	fetchCategories () {
     let me = this,

@@ -1,14 +1,10 @@
-import { render } from 'preact-render-to-string';
-
 import React                     from 'react';
 import ReactDOM                  from 'react-dom/server';
-
-import { h } from 'preact';
-import App from './components/app'
-import { match, Router, RouterContext } from 'react-router'
+import { match, Router, RouterContext } from 'react-router';
 import express      from 'express';
 
-import routes from './routes'
+import App from './components/app';
+import routes from './routes';
 
 const app = express();
 
@@ -24,7 +20,7 @@ app.use((req, res) => {
       // You can also check renderProps.components or renderProps.routes for
       // your "not found" component or route respectively, and send a 404 as
       // below, if you're using a catch-all route.
-      let html = render(<RouterContext {...renderProps} />, null, {shallow: true});
+      let html = ReactDOM.renderToString(<RouterContext {...renderProps} />);
       res.status(200).send(`<!DOCTYPE html><html><body>${html}</body></html>`)
     } else {
       res.status(404).send('Not found1')
