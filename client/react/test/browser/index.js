@@ -1,5 +1,4 @@
 import { h, render, rerender } from 'preact';
-import { route } from 'preact-router';
 import App from 'components/app';
 import 'style';
 

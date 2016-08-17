@@ -7,5 +7,17 @@
   "plugins": [
     ["transform-decorators-legacy"],
     ["transform-react-jsx", { "pragma": "h" }]
-  ]
+  ],
+  "env": {
+    "node": {
+      "plugins": [
+        [
+          "babel-plugin-transform-require-ignore",
+          {
+            "extensions": [".less", ".sass"]
+          }
+        ]
+      ]
+    }
+  }
 }

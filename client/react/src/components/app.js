@@ -1,9 +1,11 @@
 import { h, Component } from 'preact';
-import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router';
+import { Router, Route, Link, browserHistory, IndexRoute, withRouter, match} from 'react-router';
 
 import Header from './header';
 import Home from './home';
 import Profile from './profile';
+
+import routes         from '../routes';
 
 
 function log () {
@@ -12,7 +14,6 @@ function log () {
 
 const app = class App extends Component {
 	/** Gets fired when the route changes.
-	 *	@param {Object} event		"change" event from [preact-router](http://git.io/preact-router)
 	 *	@param {string} event.url	The newly routed URL
 	 */
 	handleRoute() {
@@ -26,11 +27,7 @@ const app = class App extends Component {
 		return (
 			<div id="app">
 				<Header />
-				<Router history={browserHistory} onUpdate={this.handleRoute} >
-					<Route path="/(:locale)" component={Home} >
-						<Route path="/:category(/:subcategory)" component={Profile} />
-					</Route>
-				</Router>
+				<Router history={browserHistory} onUpdate={this.handleRoute} routes={routes} />
 			</div>
 		);
 	}

@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
-import style from './style';
 import CategoryService from '../../../../admin/src/service/Category';
+import './style.less';
 
 export default class Home extends Component {
 	getInitialState() {
@@ -27,7 +27,7 @@ export default class Home extends Component {
 
 	render() {
 		return (
-			<div class={style.home}>
+			<div>
 				<h1>Home</h1>
 				<p>{this.state.categories}</p>
 			</div>
