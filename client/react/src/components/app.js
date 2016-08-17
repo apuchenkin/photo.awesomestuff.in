@@ -1,4 +1,4 @@
-import { h, Component } from 'preact';
+import React from 'react';
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter, match} from 'react-router';
 
 import Header from './header';
@@ -12,7 +12,7 @@ function log () {
 	console.log(arguments);
 }
 
-const app = class App extends Component {
+const app = class App extends React.Component {
 	/** Gets fired when the route changes.
 	 *	@param {string} event.url	The newly routed URL
 	 */

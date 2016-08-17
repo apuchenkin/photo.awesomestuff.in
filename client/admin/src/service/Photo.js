@@ -1,8 +1,10 @@
+require('isomorphic-fetch');
 
 const PhotoService = class {
 
-  constructor(token) {
+  constructor(token, location) {
     this.token = token;
+    this.location = location;
   }
 
   getRandomColor () {
@@ -15,12 +17,12 @@ const PhotoService = class {
   };
 
   fetchPhotos (category, showHidden) {
-    let me = this,
-        url = new URL('/api/v1/category/' + category + '/photo', location.origin);
+    let me = this;
+        // url = new URL('/api/v1/category/' + category + '/photo', location.origin);
 
-    url.searchParams.append('hidden', showHidden);
+    // url.searchParams.append('hidden', showHidden);
 
-    return fetch(url, {
+    return fetch(me.location + '/api/v1/category/' + category + '/photo', {
         headers: {
           'Authorization': me.token,
           'Content-Type': 'application/json; charset=utf-8'

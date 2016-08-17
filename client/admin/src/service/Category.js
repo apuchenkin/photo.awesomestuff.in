@@ -1,17 +1,20 @@
+require('isomorphic-fetch');
+// var url = require('url');
+// var url_parts = url.parse(request.url, true);
+// var query = url_parts.query;
 
 const CategoryService = class {
 
-  constructor(token) {
+  constructor(token, location) {
     this.token = token;
+    this.location = location;
   }
 
   fetchCategories () {
-    let me = this,
-        url = new URL('/api/v1/category', location.origin);
-
-    url.searchParams.append('hidden', true);
-
-    return fetch(url, {
+    let me = this;
+    // url.searchParams.append('hidden', true);
+    
+    return fetch(me.location + '/api/v1/category', {
         headers: {
           'Authorization': me.token,
           'Content-Type': 'application/json; charset=utf-8'
@@ -26,7 +29,7 @@ const CategoryService = class {
   }
 
   linkPhotos(category, photos) {
-    return fetch('/api/v1/category/' + category.id + '/photo', {
+    return fetch('//api/v1/category/' + category.id + '/photo', {
         method: 'LINK',
         headers: {
           'Authorization': this.token,
@@ -37,7 +40,7 @@ const CategoryService = class {
   }
 
   unlinkPhotos(category, photos) {
-    return fetch('/api/v1/category/' + category.id + '/photo', {
+    return fetch('//api/v1/category/' + category.id + '/photo', {
         method: 'UNLINK',
         headers: {
           'Authorization': this.token,

@@ -1,6 +1,6 @@
 // import 'lie';
 // import 'isomorphic-fetch';
-import { h, render } from 'preact';
+import React from 'react';
 // import './style';
 
 let root;

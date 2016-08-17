@@ -2,40 +2,45 @@ import React from 'react';
 import CategoryService from '../../../../admin/src/service/Category';
 import './style.less';
 
-export default class Home extends React.Component {
+class Home extends React.Component {
+	constructor(props, context) {
+	    super(props, context);
 
-	constructor(props) {
-	    super(props);
-	    this.state ={
+	    this.state = {
 				category: props.params ? props.params.category : null,
-				categories: [props.params.locale],
+				categories: context.initialState ? context.initialState.categories : [],
 				photos: [],
 				groups: [],
 				showHidden: false
 			}
-
-	    console.log(props);
 	  }
 
 
-	fetchCategories () {
-    let me = this,
-        categoryService = new CategoryService(me.state.token);
+	static fetchData (location) {
+    let categoryService = new CategoryService(null, location);
 
-    categoryService.fetchCategories()
-      .then(categories => me.setState({categories: categories}));
+    return {
+			categories: categoryService.fetchCategories()
+		}
   }
 
 	componentDidMount() {
-		this.fetchCategories();
+		this.fetchData(location.href)
+			.then(categories => me.setState({categories: categories}));
 	}
 
 	render() {
 		return (
 			<div>
-				<h1>Home</h1>
-				<p>{this.state.categories}</p>
+				<h1>Home1</h1>
+				<p>{this.state.categories.map(c => c.name)}</p>
 			</div>
 		);
 	}
 }
+
+Home.contextTypes = {
+  initialState: React.PropTypes.any.isRequired
+};
+
+export default Home;

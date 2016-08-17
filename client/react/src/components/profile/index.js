@@ -1,4 +1,5 @@
 import React from 'react';
+import PhotoService from '../../../../admin/src/service/Photo';
 import './style.less';
 
 export default class Profile extends React.Component {
@@ -21,6 +22,13 @@ export default class Profile extends React.Component {
 		clearInterval(this.timer);
 	}
 
+	static fetchData (location) {
+    let photoService = new PhotoService(null, location);
+
+    return {
+			photos: photoService.fetchPhotos(4)
+		}
+  }
 	// update the current time
 	updateTime() {
 		let time = new Date().toLocaleString();
