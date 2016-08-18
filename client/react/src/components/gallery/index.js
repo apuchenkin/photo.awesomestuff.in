@@ -1,4 +1,5 @@
 import React from 'react';
+import Category from '../link/category';
 // import PhotoService from '../../service/Photo';
 // import './style.less';
 
@@ -15,9 +16,22 @@ class Gallery extends React.Component {
   }
 
 	render() {
+    let
+      state = this.state,
+      category = state.categories.find(c => c.name == state.category),
+      subcategory = state.subcategory && state.categories.find(c => c.name == state.subcategory),
+      childs = state.categories.filter(c => c.parent && c.parent.name === state.category).map(category => {
+          return (
+            <li className="item" key={category.id} >
+              <Category data={category} />
+            </li>
+          );
+    });
+
 		return (
 			<div>
-				<h1>Gallery: {this.state.category}/{this.state.subcategory}</h1>
+				<h1>Gallery: <Category data={category} />/{subcategory && <Category data={subcategory} />}</h1>
+        <nav>{childs}</nav>
 			</div>
 		);
 	}

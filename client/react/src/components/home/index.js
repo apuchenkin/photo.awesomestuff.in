@@ -1,6 +1,7 @@
 import React from 'react';
 import CategoryService from '../../service/Category';
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router';
+import Category from '../link/category';
 import './style.less';
 
 class Categories extends React.Component {
@@ -22,22 +23,6 @@ class Categories extends React.Component {
   }
 }
 
-class Category extends React.Component {
-  render() {
-    let
-			category = this.props.data,
-			link = category.parent
-				? category.parent.name + '/' + category.name
-				: category.name
-
-    return (
-        <div>
-          <Link to={`/${link}`} activeClassName="active">{category.title}</Link>
-        </div>
-      );
-  }
-}
-
 class Home extends React.Component {
 	constructor(props, context) {
 	    super(props, context);
@@ -50,21 +35,6 @@ class Home extends React.Component {
 				showHidden: false
 			}
 	  }
-
-
-	static fetchData (location) {
-    let categoryService = new CategoryService(null, location);
-
-    return {
-			categories: categoryService.fetchCategories()
-		}
-  }
-
-	componentDidMount() {
-		let me = this;
-		Home.fetchData(location.origin).categories
-			.then(categories => me.setState({categories: categories}));
-	}
 
 	render() {
 		return (
