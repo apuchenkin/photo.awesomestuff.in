@@ -1,13 +1,7 @@
 import React from 'react';
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter, match} from 'react-router';
-
-import Header from './header';
-import Home from './home';
-import Profile from './profile';
 import ExtraDataProvider from './provider.js';
-
 import routes         from '../routes';
-
 
 function log () {
 	console.log(arguments);
