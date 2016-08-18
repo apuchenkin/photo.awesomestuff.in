@@ -28,23 +28,23 @@ getPagesR = do
 
   returnJson pages
 
-postPagesR :: Language -> Handler Value
-postPagesR lang = do
-  object <- getRequestBody :: Handler Value
-  let page = parseEither parseJSON object :: Either String Page
-  either (failure internalError) persistPage page
-
-  where
-    persistPage :: Page -> Handler Value
-    persistPage page = do
-      epid <- runDB $ insertBy page
-      let pid = either entityKey id epid
-      let titleTranslation = Translation En PageType (fromSqlKey pid) "title" (object ! "title")
-      insertUnique titleTranslation
-      let contentTranslation = Translation En PageType (fromSqlKey pid) "content" (object ! "content")
-      insertUnique contentTranslation
-
-      return pid
+-- postPagesR :: Language -> Handler Value
+-- postPagesR lang = do
+--   object <- getRequestBody :: Handler Value
+--   let page = parseEither parseJSON object :: Either String Page
+--   either (failure internalError) persistPage page
+--
+--   where
+--     persistPage :: Page -> Handler Value
+--     persistPage page = do
+--       epid <- runDB $ insertBy page
+--       let pid = either entityKey id epid
+--       let titleTranslation = Translation En PageType (fromSqlKey pid) "title" (object ! "title")
+--       insertUnique titleTranslation
+--       let contentTranslation = Translation En PageType (fromSqlKey pid) "content" (object ! "content")
+--       insertUnique contentTranslation
+--
+--       return pid
 
 
 getPageR :: PageId -> Handler Value

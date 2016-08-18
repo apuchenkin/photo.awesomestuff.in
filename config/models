@@ -51,10 +51,7 @@ Photo json
 Page json
     alias String
     parent PageId Maybe
-    category CategoryId Maybe
     hidden Bool
-
-    UniquePage alias parent category
 
 Translation json
     language Language sqltype=enum('Ru','En')

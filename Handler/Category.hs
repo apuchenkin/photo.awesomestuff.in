@@ -28,9 +28,18 @@ getCategoryR = do
 
 getCategoryPhotoR :: CategoryId -> Handler Value
 getCategoryPhotoR cid = do
+  mcategory <-  runDB $ get cid
+  categoryPhotos mcategory
+
+getCategoryPhoto2R :: String -> Handler Value
+getCategoryPhoto2R name = do
+  mcategory <-  runDB $ getBy $ UniqueName name
+  categoryPhotos $ entityVal <$> mcategory
+
+categoryPhotos :: Maybe Category -> Handler Value
+categoryPhotos mcategory = do
   cacheSeconds $ 24 * 60 * 60 -- day
   addHeader "Vary" "Accept-Language, Authorization"
-  mcategory <-  runDB $ get cid
   category  <- maybe notFound return mcategory
   maid      <- maybeAuthId
   request   <- getRequest
