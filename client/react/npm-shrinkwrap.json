@@ -1,0 +1,1 @@
+{ "dependencies": { "webpack-dev-server": { "version": "1.14.1", "from": "webpack-dev-server@1.14.1", "dependencies": { "sockjs-client": { "version": "1.0.1", "from": "sockjs-client@1.0.1" } } } } }
