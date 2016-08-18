@@ -1,5 +1,5 @@
 import React from 'react';
-import PhotoService from '../../../../admin/src/service/Photo';
+import PhotoService from '../../service/Photo';
 import './style.less';
 
 export default class Profile extends React.Component {

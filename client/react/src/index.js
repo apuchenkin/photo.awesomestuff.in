@@ -1,12 +1,11 @@
-// import 'lie';
-// import 'isomorphic-fetch';
 import React from 'react';
-// import './style';
+import ReactDOM from 'react-dom';
+import App from './components/app';
 
 let root;
 function init() {
 	let App = require('./components/app').default;
-	root = render(<App />, document.body, root);
+	root = ReactDOM.render(<App />, document.getElementById('react-view'), root);
 }
 
 init();

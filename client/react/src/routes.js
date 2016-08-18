@@ -1,8 +1,8 @@
 import React                     from 'react';
-import { Route, Redirect, createRoutes, withRouter } from 'react-router';
+import { Route, Redirect, createRoutes, withRouter, IndexRoute } from 'react-router';
 
 import Home from './components/home';
-import Profile from './components/profile';
+import Gallery from './components/gallery';
 
 class App extends React.Component {
     render() {
@@ -23,11 +23,12 @@ class NoMatch extends React.Component {
 }
 
 export default (
-  <Route component={withRouter(App)}>
+  // <Route component={withRouter(App)}>
     // <Redirect from='' to='/' />
-    <Route path="/:locale" component={Home} >
-      <Route path=":category(/:subcategory)" component={Profile} />
+    <Route path="/" component={App} > //(:locale)
+      <IndexRoute component={Home} />
+      <Route path=":category(/:subcategory)" component={Gallery} />
     </Route>
-    <Route path="*" component={NoMatch} />
-  </Route>
+  //   <Route path="*" component={NoMatch} />
+  // </Route>
 );

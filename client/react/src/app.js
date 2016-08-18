@@ -5,26 +5,20 @@ import express      from 'express';
 import favicon from 'serve-favicon';
 import Promise from 'promise';
 import routes from './routes';
+import proxy from 'http-proxy-middleware';
+import ExtraDataProvider from './components/provider.js';
 
 const app = express();
 
-class ExtraDataProvider extends React.Component {
-  getChildContext() {
-    return { initialState: this.initialState }
-  }
+app.use('/api', proxy({
+  target: 'http://192.168.138.34:3000',
+  pathRewrite: {
+    '^/api/v1' : '', // rewrite path
+  },
+  changeOrigin: true
+}));
 
-  constructor(props, context) {
-    super(props, context)
-    this.initialState = props.initialState
-  }
-
-  render() {
-    return React.Children.only(this.props.children)
-  }
-}
-ExtraDataProvider.childContextTypes = {
-  initialState: React.PropTypes.any.isRequired
-};
+app.listen(3000);
 
 app.use(favicon(__dirname + '/assets/favicon.ico'));
 
@@ -38,17 +32,37 @@ app.use((req, res) => {
     } else if (redirectLocation) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
-
+      let location = req.protocol + '://' + req.get('host');
       let fetchers = renderProps.components.filter(c => !!c.fetchData)
       const promises = fetchers
-        .map(f => f.fetchData('http://photo.awesomestuff.in'))
+        .map(f => f.fetchData(location))
         .reduce((obj, p) => Object.assign(obj, p), {});
 
       Promise.all(Object.keys(promises).map(p => promises[p])).then(data => {
         // let state = Object.keys(promises).reduce((obj, p) => obj[p] = , {});
-          let state = Object.keys(promises).reduce((o,p) => {o[p] = data[o.i]; return o}, {i: 0}); //todo: refactor this shit
-          let html = ReactDOM.renderToString(<ExtraDataProvider initialState={state}><RouterContext {...renderProps} /></ExtraDataProvider>);
-          res.status(200).send(`<!DOCTYPE html><html><body>${html}</body></html>`)
+          let initialState = Object.keys(promises).reduce((o,p) => {o[p] = data[o.i]; return o}, {i: 0}); //todo: refactor this shit
+
+          let componentHTML = ReactDOM.renderToString(
+            <ExtraDataProvider initialState={initialState}>
+              <RouterContext {...renderProps} />
+            </ExtraDataProvider>
+          );
+
+          let metaData = {
+            title: 1,
+            description: 1
+          }
+
+          let clientConfig = {
+            "staticUrl": "http://localhost:8080",
+          }
+
+          res.status(200).send(renderHTML({
+              componentHTML,
+              initialState,
+              metaData,
+              config : clientConfig
+          }))
         }).catch(e => console.log(e))
         ;
 
@@ -61,6 +75,32 @@ app.use((req, res) => {
     }
   })
 })
+
+//todo: mock
+const escapeHTML = x => x;
+
+function renderHTML({ componentHTML, initialState, metaData, config }) {
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${escapeHTML(metaData.title)}</title>
+            <meta name="description" content="${escapeHTML(metaData.description)}">
+            <link rel="stylesheet" href="${config.staticUrl}/bundle.css">
+        </head>
+        <body>
+        <div id="react-view">${componentHTML}</div>
+          <script type="application/javascript">
+            window.__CONFIG__ = ${JSON.stringify(config)};
+            window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
+          </script>
+          <script type="application/javascript" src="${config.staticUrl}/bundle.js"></script>
+        </body>
+        </html>
+    `;
+}
 
 const PORT = process.env.PORT || 3001;
 
