@@ -1,8 +1,40 @@
 import React from 'react';
-import Category from '../link/category';
-import Photo from '../link/photo';
+import CategoryLink from '../link/category';
+import PhotoLink from '../link/photo';
 import PhotoService from '../../service/Photo';
-// import './style.less';
+import config from '../../config.json';
+import Link from 'react-router/lib/Link';
+import './gallery.less';
+
+class Brick extends React.Component {
+	constructor (props, context) {
+		super(props, context);
+
+		this.state = {
+	      photo: props.photo
+	    }
+		}
+
+		render() {
+	    let
+				photo = this.state.photo,
+				{ w, h, ratio } = photo,
+	      inc = ratio >= 1 ? ratio : 1 / ratio,
+				[m1,m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w],
+				s = Math.max(m1, m2),
+				filename = photo.src.split('/').pop(),
+				src = [config.apiEndpoint, 'hs/photo', photo.id, s, s, filename].join('/')
+			;
+
+			return (
+				<div className="brick" style={{width: w + 'px', height: h + 'px', backgroundImage: `url(${src})`}} />
+			);
+		}
+}
+
+Brick.propTypes = {
+  photo: React.PropTypes.object.isRequired
+}
 
 class Gallery extends React.Component {
 
@@ -73,13 +105,15 @@ class Gallery extends React.Component {
       categories = state.categories.filter(c => c.parent && c.parent.name === state.category).map(category => {
           return (
 						 <li className="item" key={category.id} >
-	             <Category category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name}>{category.title}</Category>
+	             <CategoryLink category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name}>{category.title}</CategoryLink>
 	           </li>
           );
 			}),
 			photos = state.photos.map(p => (
 				<li className="photo" key={p.id} >
-					<Photo photoId={p.id} category={state.category} subcategory={state.subcategory}>({p.id}, {p.group}, {p.views}, [{p.w}x{p.h}])</Photo>
+					<PhotoLink photoId={p.id} category={state.category} subcategory={state.subcategory}>
+						<Brick photo={p} />
+					</PhotoLink>
 				</li>
 			)),
       childrens = state.photos && state.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
@@ -87,13 +121,11 @@ class Gallery extends React.Component {
       }));
 
 		return (
-			<div>
-				<h1>Gallery: <Category category={state.category}>{category && category.title}</Category>
-					>
-					{subcategory && <Category category={state.category} subcategory={state.subcategory} >{subcategory && subcategory.title}</Category>}
+			<div className="content">
+				<h1><Link to='/' activeClassName="active">HOME</Link>> <CategoryLink category={state.category}>{category && category.title}</CategoryLink>
 				</h1>
         <nav>{categories}</nav>
-				<div>{photos}</div>
+				<div className="gallery">{photos}</div>
 				<div>{childrens}</div>
 			</div>
 		);

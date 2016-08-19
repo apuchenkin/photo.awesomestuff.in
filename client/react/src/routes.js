@@ -4,6 +4,7 @@ import CategoryService from './service/Category';
 import Home from './components/home';
 import Gallery from './components/gallery';
 import Photo from './components/photo';
+import './style/main.less';
 
 class App extends React.Component {
 

@@ -75,7 +75,7 @@ const PhotoService = class {
   }
 
   patchPhoto(photo, props) {
-    return fetch(config.apiPrefix + '/photo/' + photo.id, {
+    return fetch(me.location + config.apiPrefix + '/photo/' + photo.id, {
         method: 'PATCH',
         headers: {
           'Authorization': this.token,
@@ -96,7 +96,7 @@ const PhotoService = class {
   }
 
   group(photos) {
-    return fetch(config.apiPrefix + '/photo/group', {
+    return fetch(me.location + config.apiPrefix + '/photo/group', {
         method: 'POST',
         headers: {
           'Authorization': this.token,
@@ -107,7 +107,7 @@ const PhotoService = class {
   }
 
   appendGroup(groupId, photos) {
-    return fetch(config.apiPrefix + '/photo/group/' + groupId, {
+    return fetch(me.location + config.apiPrefix + '/photo/group/' + groupId, {
         method: 'LINK',
         headers: {
           'Authorization': this.token,
@@ -118,7 +118,7 @@ const PhotoService = class {
   }
 
   removeGroup(groupId, photos) {
-    return fetch(config.apiPrefix + '/photo/group/' + groupId, {
+    return fetch(me.location + config.apiPrefix + '/photo/group/' + groupId, {
         method: 'UNLINK',
         headers: {
           'Authorization': this.token,
@@ -164,7 +164,8 @@ const PhotoService = class {
 
     return Object.assign(photo, {
       w: w,
-      h: h
+      h: h,
+      ratio: ratio
     })
   }
 
