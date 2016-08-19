@@ -16,16 +16,22 @@ class Gallery extends React.Component {
     this.state = {
       category: params.category,
       subcategory: params.subcategory,
-      categories: initial.categories || [],
+      categories: initial.categories || props.categories || [],
 			photos: initial.photos || []
     }
   }
 
+	// pick(object, params) {
+	// 	return Object.keys(object).filter(k => params.indexOf(k) > 0).reduce((o,k) => {o[k] = object[k]; return o}, {})
+	// }
+
 	componentDidMount() {
 		let me = this;
 
-		Gallery.fetchData(location.origin, me.props.params).photos
-			.then(photos => me.setState({photos: photos}));
+		if (!me.state.photos.length) {
+			Gallery.fetchData(location.origin, me.props.params).photos
+				.then(photos => me.setState({photos: photos}));
+		}
 	}
 
 	componentWillReceiveProps(props) {
@@ -33,13 +39,16 @@ class Gallery extends React.Component {
 			me = this,
 			params = props.params;
 
-    this.setState({
-			category: params.category,
-			subcategory: params.subcategory
-		}, () => {
-			Gallery.fetchData(location.origin, params).photos
-				.then(photos => me.setState({photos: photos}));
-		});
+		if (me.state.category !== params.category
+			|| me.state.subcategory !== params.subcategory) {
+				this.setState({
+					category: params.category,
+					subcategory: params.subcategory
+				}, () => {
+					Gallery.fetchData(location.origin, params).photos
+						.then(photos => me.setState({photos: photos}));
+				});
+			}
   }
 
 	static fetchData (location, params) {
@@ -48,7 +57,11 @@ class Gallery extends React.Component {
 			photoService = new PhotoService(null, location);
 
     return {
-			photos: photoService.fetchPhotos(category).then(p => photoService.refinePhotos(p, params.photoId))
+			photos: photoService.fetchPhotos(category).then(p =>
+				photoService.remapPhotos(
+					photoService.refinePhotos(p, params.photoId)
+				)
+			)
 		}
   }
 
@@ -60,25 +73,28 @@ class Gallery extends React.Component {
       categories = state.categories.filter(c => c.parent && c.parent.name === state.category).map(category => {
           return (
 						 <li className="item" key={category.id} >
-	             <Category category={category.name} subcategory={category.parent && category.parent.name}>{category.title}</Category>
+	             <Category category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name}>{category.title}</Category>
 	           </li>
           );
 			}),
 			photos = state.photos.map(p => (
 				<li className="photo" key={p.id} >
-					<Photo photoId={p.id} category={state.category} subcategory={state.subcategory}>({p.id}, {p.group}, {p.views})</Photo>
+					<Photo photoId={p.id} category={state.category} subcategory={state.subcategory}>({p.id}, {p.group}, {p.views}, [{p.w}x{p.h}])</Photo>
 				</li>
-			));
+			)),
+      childrens = state.photos && state.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
+        photos: state.photos
+      }));
 
 		return (
 			<div>
-				<h1>Gallery: <Category category={state.category}>{category.title}</Category>
+				<h1>Gallery: <Category category={state.category}>{category && category.title}</Category>
 					>
-					{subcategory && <Category category={state.category} subcategory={state.subcategory} >{subcategory.title}</Category>}
+					{subcategory && <Category category={state.category} subcategory={state.subcategory} >{subcategory && subcategory.title}</Category>}
 				</h1>
         <nav>{categories}</nav>
 				<div>{photos}</div>
-				<div>{this.props.children}</div>
+				<div>{childrens}</div>
 			</div>
 		);
 	}

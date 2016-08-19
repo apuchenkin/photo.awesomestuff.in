@@ -7,11 +7,12 @@ import Promise from 'promise';
 import routes from './routes';
 import proxy from 'http-proxy-middleware';
 import ExtraDataProvider from './components/provider.js';
+import config from './config.json';
 
 const app = express();
 
 app.use('/api', proxy({
-  target: 'http://192.168.138.34:3000',
+  target: config.apiEndpoint,
   pathRewrite: {
     '^/api/v1' : '', // rewrite path
   },

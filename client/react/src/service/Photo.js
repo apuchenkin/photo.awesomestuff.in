@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import config from '../config.json';
 
 const PhotoService = class {
 
@@ -7,6 +8,13 @@ const PhotoService = class {
     this.location = location;
     this.locale = 'en';
     this.contentType = 'application/json; charset=utf-8';
+
+    this.sizes = [
+      (config.brickWidth)
+    , (config.brickWidth * 2 + config.gutter)
+    , (config.brickWidth * 3 + config.gutter * 2)
+    , (config.brickWidth * 4 + config.gutter * 3)
+    ]
   }
 
   getRandomColor () {
@@ -23,7 +31,7 @@ const PhotoService = class {
         // url = new URL('/api/v1/category/' + category + '/photo', location.origin);
         // url.searchParams.append('hidden', showHidden);
 
-    return fetch(me.location + '/api/v1/category/' + category + '/photo', {
+    return fetch(me.location + config.apiPrefix + '/category/' + category + '/photo', {
         headers: {
           'Authorization': me.token,
           'Accept-Language': me.locale,
@@ -41,7 +49,7 @@ const PhotoService = class {
   fetchPhoto (photoId) {
     let me = this;
 
-    return fetch(me.location + '/api/v1/photo/' + photoId, {
+    return fetch(me.location + config.apiPrefix + '/photo/' + photoId, {
         headers: {
           'Authorization': me.token,
           'Accept-Language': me.locale,
@@ -67,7 +75,7 @@ const PhotoService = class {
   }
 
   patchPhoto(photo, props) {
-    return fetch('/api/v1/photo/' + photo.id, {
+    return fetch(config.apiPrefix + '/photo/' + photo.id, {
         method: 'PATCH',
         headers: {
           'Authorization': this.token,
@@ -88,7 +96,7 @@ const PhotoService = class {
   }
 
   group(photos) {
-    return fetch('/api/v1/photo/group', {
+    return fetch(config.apiPrefix + '/photo/group', {
         method: 'POST',
         headers: {
           'Authorization': this.token,
@@ -99,7 +107,7 @@ const PhotoService = class {
   }
 
   appendGroup(groupId, photos) {
-    return fetch('/api/v1/photo/group/' + groupId, {
+    return fetch(config.apiPrefix + '/photo/group/' + groupId, {
         method: 'LINK',
         headers: {
           'Authorization': this.token,
@@ -110,7 +118,7 @@ const PhotoService = class {
   }
 
   removeGroup(groupId, photos) {
-    return fetch('/api/v1/photo/group/' + groupId, {
+    return fetch(config.apiPrefix + '/photo/group/' + groupId, {
         method: 'UNLINK',
         headers: {
           'Authorization': this.token,
@@ -118,6 +126,56 @@ const PhotoService = class {
         },
         body: JSON.stringify(photos.map(p => p.id))
       });
+  }
+
+
+
+  dsmap(mode, ratio, isHorisontal) {
+    let
+      [s1,s2,s3,s4] = this.sizes,
+      modes = [
+        [ratio >= 2   ? s2 : s1, s1]
+      , isHorisontal ? [ratio >= 3 ? s3 : s2, s1] : [s1, s2]
+      , ratio >= 4   ? [s4, s1] : [ratio >= 2 ? s3 : s2, s2]
+      , isHorisontal ? [ratio >= 2 ? s4 : s3, s2] : [s2, s3]
+      ];
+
+    return modes[mode];
+  }
+
+  remapPhotos(photos) {
+    let avg = photos.reduce((sum, p) => sum + p.views, 0) / photos.length;
+    return photos.map(this.remapPhoto.bind(this, avg));
+  }
+
+  remapPhoto(avg, photo) {
+    // console.log(arguments);
+    let
+      v = photo.views,
+      std = Math.sqrt(Math.pow((v - avg), 2)),
+      norm = [16,8,4,1].map(i => i * (Math.floor(avg) + 1)),
+      norm$ = [1,2,3,4].map(i => Math.floor(i * std * v / avg) + 1),
+      probs = norm.map((n,i) => n + norm$[i]),
+      mode = this.weightedRandom(probs),
+      isHorisontal = (photo.width > photo.height),
+      ratio = photo.width / photo.height,
+      [w, h] = this.dsmap(mode, ratio, isHorisontal)
+    ;
+
+    return Object.assign(photo, {
+      w: w,
+      h: h
+    })
+  }
+
+  weightedRandom = function (probabilities) {
+    var probabilitiesMap = probabilities.reduce((acc, v) => {
+        acc.push(v + (acc.length ? acc[acc.length - 1] : 0));
+        return acc;
+      }, []),
+      pointer = Math.floor(Math.random() * probabilitiesMap[probabilitiesMap.length - 1]);
+
+    return probabilitiesMap.reduce((acc, v) => pointer <= v ? acc : ++acc, 0);
   }
 
   refinePhotos(photos, excludeId) {

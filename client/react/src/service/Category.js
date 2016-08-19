@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-fetch';
-
+import config from '../config.json';
 // var url = require('url');
 // var url_parts = url.parse(request.url, true);
 // var query = url_parts.query;
@@ -9,17 +9,19 @@ const CategoryService = class {
   constructor(token, location) {
     this.token = token;
     this.location = location;
+    this.locale = 'en';
+    this.contentType = 'application/json; charset=utf-8';
   }
 
   fetchCategories () {
     let me = this;
     // url.searchParams.append('hidden', true);
 
-    return fetch(me.location + '/api/v1/category', {
+    return fetch(me.location + config.apiPrefix + '/category', {
         headers: {
           'Authorization': me.token,
-          'Accept-Language': 'en',
-          'Content-Type': 'application/json; charset=utf-8'
+          'Accept-Language': me.locale,
+          'Content-Type': me.contentType
         },
       })
       .then(response => {
@@ -50,22 +52,22 @@ const CategoryService = class {
   }
 
   linkPhotos(category, photos) {
-    return fetch('//api/v1/category/' + category.id + '/photo', {
+    return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
         method: 'LINK',
         headers: {
           'Authorization': this.token,
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': me.contentType
         },
         body: JSON.stringify(photos.map(p => p.id))
       });
   }
 
   unlinkPhotos(category, photos) {
-    return fetch('//api/v1/category/' + category.id + '/photo', {
+    return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
         method: 'UNLINK',
         headers: {
           'Authorization': this.token,
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': me.contentType
         },
         body: JSON.stringify(photos.map(p => p.id))
       });

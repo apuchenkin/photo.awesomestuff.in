@@ -15,7 +15,7 @@ class Photo extends React.Component {
 
     this.state = {
       params: params,
-			photos: initial.photos || [],
+			photos: initial.photos || props.photos || [],
       photo: initial.photo || []
     }
   }
@@ -63,9 +63,9 @@ class Photo extends React.Component {
 		return (
 			<div>
 				<h1>Photo:
-          <PhotoLink category={category} subcategory={subcategory} photoId={prev.id}>prev</PhotoLink>
+          <PhotoLink category={category} subcategory={subcategory} photoId={prev && prev.id}>prev</PhotoLink>
           {photo.id}
-          <PhotoLink category={category} subcategory={subcategory} photoId={next.id}>next</PhotoLink>
+          <PhotoLink category={category} subcategory={subcategory} photoId={next && next.id}>next</PhotoLink>
         </h1>
 			</div>
 		);

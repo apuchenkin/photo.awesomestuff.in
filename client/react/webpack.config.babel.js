@@ -3,6 +3,7 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import autoprefixer from 'autoprefixer';
 import path from 'path';
+import config from './src/config.json';
 
 const ENV = process.env.NODE_ENV || 'development';
 
@@ -122,7 +123,7 @@ module.exports = {
 		historyApiFallback: true,
 		proxy: {
 			'/api/v1*': {
-					target: 'http://192.168.138.34:3000',
+					target: config.apiEndpoint,
 					rewrite: function(req) {
 						req.url = req.url.replace(/^\/api\/v1/, '');
 					},

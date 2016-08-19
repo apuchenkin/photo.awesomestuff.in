@@ -1,46 +1,42 @@
 import React from 'react';
 import CategoryService from '../../service/Category';
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router';
-import Category from '../link/category';
+import CategoryLink from '../link/category';
 import './style.less';
 
-class Categories extends React.Component {
-  render() {
+class Home extends React.Component {
+	constructor(props, context) {
     let
-      categories = this.props.data.map(function(category) {
+      params = props.params,
+      initial = context.initialState;
+
+    super(props, context);
+
+    this.state = {
+			category: params ? params.category : null,
+			categories: initial.categories || props.categories || [],
+			photos: [],
+			groups: [],
+			showHidden: false
+		}
+  }
+
+	render() {
+    let
+      categories = this.state.categories.filter(c => !!c.title).map(function(category) {
           return (
             <li className="item" key={category.id} >
-              <Category data={category} />
+              <CategoryLink category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name} >{category.title}</CategoryLink>
             </li>
           );
     });
 
-    return (
-      <nav className="aside">
-        <ul>{categories}</ul>
-      </nav>
-    );
-  }
-}
-
-class Home extends React.Component {
-	constructor(props, context) {
-	    super(props, context);
-
-	    this.state = {
-				category: props.params ? props.params.category : null,
-				categories: context.initialState ? context.initialState.categories || [] : [],
-				photos: [],
-				groups: [],
-				showHidden: false
-			}
-	  }
-
-	render() {
 		return (
 			<div>
 				<h1>Home</h1>
-				<Categories data={this.state.categories} />
+        <nav className="aside">
+          <ul>{categories}</ul>
+        </nav>
 			</div>
 		);
 	}

@@ -1,3 +1,12 @@
 {
-	"key": "value"
+	"apiEndpoint": "http://awesomestuff.in:3000",
+	"apiPrefix": "/api/v1",
+	"title": "PHOTO.AWESOMESTUFF.IN",
+	"gutter": 10,
+	"brickWidth": 100,
+	"transition": 200,
+	"gallery": {
+		"width": 320,
+		"height": 240
+	}
 }

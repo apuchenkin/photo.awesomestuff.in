@@ -12,10 +12,7 @@ class App extends React.Component {
 
 	    this.state = {
 				category: props.params ? props.params.category : null,
-				categories: context.initialState ? context.initialState.categories || [] : [],
-				photos: [],
-				groups: [],
-				showHidden: false
+				categories: context.initialState ? context.initialState.categories || [] : []
 			}
 	  }
 
@@ -34,10 +31,16 @@ class App extends React.Component {
   	}
 
     render() {
+      const
+        categories = this.state.categories,
+        childrens = categories && categories.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
+          categories: categories
+        }));
+
       return (
-          <div id='app-view'>
-              {this.props.children}
-          </div>
+        <div id='app-view'>
+          {childrens}
+        </div>
       );
     }
 }
