@@ -119,6 +119,50 @@ const PhotoService = class {
         body: JSON.stringify(photos.map(p => p.id))
       });
   }
+
+  refinePhotos(photos, excludeId) {
+    photos.reduce((i,p) => {
+      p.order = i++;
+      return i;
+    }, 0);
+
+    let
+      exclude = photos.find(p => p.id == excludeId),
+
+      // spread list on grouped and not grouped photos
+      [init, grouped] = photos.reduce((acc, p) => {
+        let [i,r] = acc;
+        p.group ? r.push(p) : i.push(p);
+        return acc;
+      }, [[],[]]),
+
+      groups = grouped.reduce((m,p) => {
+      if (p.group) {
+        let
+          v = m.get(p.group) || [];
+
+        v.push(p);
+        m.set(p.group, v);
+      }
+
+      return m;
+    }, new Map());
+
+    groups.forEach((value, key) => {
+        let item;
+
+        if (exclude && exclude.group == key) {
+          item = exclude;
+        } else {
+          item = value[Math.floor(Math.random() * value.length)];
+        }
+
+        item.views = value.reduce((sum, v) => sum + v.views, 0);
+        init.push(item);
+    });
+
+    return init.sort((a,b) => a.order - b.order);
+  }
 };
 
 export default PhotoService;

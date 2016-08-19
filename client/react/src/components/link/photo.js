@@ -1,25 +1,25 @@
 import React from 'react';
 import Link from 'react-router/lib/Link';
 
-export default class Photo extends React.Component {
-
-  propTypes: {
-    children: React.PropTypes.element.isRequired,
-    category: React.PropTypes.object.isRequired,
-    data: React.PropTypes.object.isRequired
-  }
-
+class PhotoLink extends React.Component {
   render() {
     let
       props = this.props,
-      category = props.category,
-			photo = props.data,
-			link = category.parent
-				? category.parent.name + '/' + category.name
-				: category.name
+			link = props.subcategory
+				? props.category + '/' + props.subcategory
+				: props.category
 
     return (
-        <Link to={`/${link}/photo/${photo.id}`} activeClassName="active">{this.props.children}</Link>
+        <Link to={`/${link}/photo/${props.photoId}`} activeClassName="active">{props.children}</Link>
       );
   }
 }
+
+PhotoLink.propTypes = {
+  children: React.PropTypes.any.isRequired,
+  category: React.PropTypes.string.isRequired,
+  subcategory: React.PropTypes.string,
+  photoId: React.PropTypes.number
+}
+
+export default PhotoLink;

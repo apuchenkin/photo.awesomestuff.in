@@ -48,7 +48,7 @@ class Gallery extends React.Component {
 			photoService = new PhotoService(null, location);
 
     return {
-			photos: photoService.fetchPhotos(category)
+			photos: photoService.fetchPhotos(category).then(p => photoService.refinePhotos(p, params.photoId))
 		}
   }
 
@@ -60,19 +60,22 @@ class Gallery extends React.Component {
       categories = state.categories.filter(c => c.parent && c.parent.name === state.category).map(category => {
           return (
 						 <li className="item" key={category.id} >
-	             <Category data={category}>{category.title}</Category>
+	             <Category category={category.name} subcategory={category.parent && category.parent.name}>{category.title}</Category>
 	           </li>
           );
 			}),
 			photos = state.photos.map(p => (
 				<li className="photo" key={p.id} >
-					<Photo data={p} category={subcategory || category}>{p.id}</Photo>
+					<Photo photoId={p.id} category={state.category} subcategory={state.subcategory}>({p.id}, {p.group}, {p.views})</Photo>
 				</li>
 			));
 
 		return (
 			<div>
-				<h1>Gallery: <Category data={category} />/{subcategory && <Category data={subcategory} />}</h1>
+				<h1>Gallery: <Category category={state.category}>{category.title}</Category>
+					>
+					{subcategory && <Category category={state.category} subcategory={state.subcategory} >{subcategory.title}</Category>}
+				</h1>
         <nav>{categories}</nav>
 				<div>{photos}</div>
 				<div>{this.props.children}</div>

@@ -49,23 +49,6 @@ const CategoryService = class {
     return categories;
   }
 
-  // updateCategories : List Category -> Action State
-  // updateCategories categories state =
-  //   let
-  //     idMap = Dict.fromList   <| List.map (\category -> let (Category c) = category in (c.id, category))   categories
-  //
-  //     findParent mp = flip Maybe.map mp <| \p -> case p of
-  //       Left pidx -> mapDefault (Dict.get pidx idMap) p Right
-  //       Right _ -> p
-  //
-  //     categories' = List.map (\(Category c) -> Category { c | parent = findParent c.parent }) categories
-  //     dict = Dict.fromList <| List.map (\category ->
-  //       let (Category c) = category
-  //       in (c.name, Category { c | childs = childs category categories'})) categories'
-  //   in
-  //     Response <| noFx {state | categories = dict}
-
-
   linkPhotos(category, photos) {
     return fetch('//api/v1/category/' + category.id + '/photo', {
         method: 'LINK',

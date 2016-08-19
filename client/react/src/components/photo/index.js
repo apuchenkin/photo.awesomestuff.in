@@ -1,6 +1,7 @@
 import React from 'react';
 import Category from '../link/category';
 import PhotoService from '../../service/Photo';
+import PhotoLink from '../link/photo';
 // import './style.less';
 
 class Photo extends React.Component {
@@ -51,11 +52,21 @@ class Photo extends React.Component {
 	render() {
     let
       state = this.state,
-      photo = state.photo
+      photo = state.photo,
+      category = state.params.category,
+      subcategory = state.params.subcategory,
+      pidx = state.photos.findIndex(p => p.id == state.params.photoId),
+      prev = state.photos[pidx - 1 < 0 ? state.photos.length - 1 : pidx - 1],
+      next = state.photos[pidx + 1 > state.photos.length - 1 ? 0 : pidx + 1]
+    ;
 
 		return (
 			<div>
-				<h1>Photo: {photo.id}</h1>
+				<h1>Photo:
+          <PhotoLink category={category} subcategory={subcategory} photoId={prev.id}>prev</PhotoLink>
+          {photo.id}
+          <PhotoLink category={category} subcategory={subcategory} photoId={next.id}>next</PhotoLink>
+        </h1>
 			</div>
 		);
 	}
