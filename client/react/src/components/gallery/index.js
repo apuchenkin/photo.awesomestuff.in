@@ -1,5 +1,6 @@
 import React from 'react';
 import Category from '../link/category';
+import Photo from '../link/photo';
 import PhotoService from '../../service/Photo';
 // import './style.less';
 
@@ -22,30 +23,32 @@ class Gallery extends React.Component {
 
 	componentDidMount() {
 		let me = this;
-		Gallery.fetchData(location.origin).photos
+
+		Gallery.fetchData(location.origin, me.props.params).photos
 			.then(photos => me.setState({photos: photos}));
 	}
 
 	componentWillReceiveProps(props) {
-		let params = props.params;
+		let
+			me = this,
+			params = props.params;
 
     this.setState({
 			category: params.category,
 			subcategory: params.subcategory
 		}, () => {
-			console.log(123);
+			Gallery.fetchData(location.origin, params).photos
+				.then(photos => me.setState({photos: photos}));
 		});
   }
 
-	static fetchData (location) {
+	static fetchData (location, params) {
     let
-			state = this.state,
-			categoryName = state.subcategory || state.category,
-			category = state.categories.find(c => c.name == categoryName)
+			category = params.subcategory || params.category,
 			photoService = new PhotoService(null, location);
 
     return {
-			photos: photoService.fetchPhotos(category.id)
+			photos: photoService.fetchPhotos(category)
 		}
   }
 
@@ -54,19 +57,25 @@ class Gallery extends React.Component {
       state = this.state,
       category = state.categories.find(c => c.name == state.category),
       subcategory = state.subcategory && state.categories.find(c => c.name == state.subcategory),
-      childs = state.categories.filter(c => c.parent && c.parent.name === state.category).map(category => {
+      categories = state.categories.filter(c => c.parent && c.parent.name === state.category).map(category => {
           return (
 						 <li className="item" key={category.id} >
-	             <Category data={category} />
+	             <Category data={category}>{category.title}</Category>
 	           </li>
           );
-    });
+			}),
+			photos = state.photos.map(p => (
+				<li className="photo" key={p.id} >
+					<Photo data={p} category={subcategory || category}>{p.id}</Photo>
+				</li>
+			));
 
 		return (
 			<div>
 				<h1>Gallery: <Category data={category} />/{subcategory && <Category data={subcategory} />}</h1>
-        <nav>{childs}</nav>
-				<div>{state.photos.map(p => p.id)}</div>
+        <nav>{categories}</nav>
+				<div>{photos}</div>
+				<div>{this.props.children}</div>
 			</div>
 		);
 	}

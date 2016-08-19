@@ -3,6 +3,7 @@ import { Route, Redirect, createRoutes, withRouter, IndexRoute } from 'react-rou
 import CategoryService from './service/Category';
 import Home from './components/home';
 import Gallery from './components/gallery';
+import Photo from './components/photo';
 
 class App extends React.Component {
 
@@ -58,7 +59,9 @@ export default (
     // <Redirect from='' to='/' />
     <Route path="/" component={App} > //(:locale)
       <IndexRoute component={Home} />
-      <Route path=":category(/:subcategory)" component={Gallery} />
+      <Route path=":category(/:subcategory)" component={Gallery} >
+        <Route path="photo/:photoId" component={Photo} />
+      </Route>
     </Route>
   //   <Route path="*" component={NoMatch} />
   // </Route>

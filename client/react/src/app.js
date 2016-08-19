@@ -11,7 +11,7 @@ import ExtraDataProvider from './components/provider.js';
 const app = express();
 
 app.use('/api', proxy({
-  target: 'http://awesomestuff.in:3000',
+  target: 'http://192.168.138.34:3000',
   pathRewrite: {
     '^/api/v1' : '', // rewrite path
   },
@@ -34,13 +34,14 @@ app.use((req, res) => {
     } else if (renderProps) {
       let location = req.protocol + '://' + req.get('host');
       let fetchers = renderProps.components.filter(c => !!c.fetchData)
+
       const promises = fetchers
-        .map(f => f.fetchData(location))
+        .map(f => f.fetchData(location, renderProps.params))
         .reduce((obj, p) => Object.assign(obj, p), {});
 
       Promise.all(Object.keys(promises).map(p => promises[p])).then(data => {
         // let state = Object.keys(promises).reduce((obj, p) => obj[p] = , {});
-          let initialState = Object.keys(promises).reduce((o,p) => {o[p] = data[o.i]; return o}, {i: 0}); //todo: refactor this shit
+          let initialState = Object.keys(promises).reduce((o,p) => {o[p] = data[o.i++]; return o}, {i: 0}); //todo: refactor this shit
 
           let componentHTML = ReactDOM.renderToString(
             <ExtraDataProvider initialState={initialState}>

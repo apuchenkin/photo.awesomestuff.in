@@ -5,6 +5,8 @@ const PhotoService = class {
   constructor(token, location) {
     this.token = token;
     this.location = location;
+    this.locale = 'en';
+    this.contentType = 'application/json; charset=utf-8';
   }
 
   getRandomColor () {
@@ -24,8 +26,26 @@ const PhotoService = class {
     return fetch(me.location + '/api/v1/category/' + category + '/photo', {
         headers: {
           'Authorization': me.token,
-          'Accept-Language': 'en',
-          'Content-Type': 'application/json; charset=utf-8'
+          'Accept-Language': me.locale,
+          'Content-Type': me.contentType
+        },
+      })
+      .then(response => {
+        return response.text();
+      })
+      .then(stream => {
+        return JSON.parse(stream);
+      })
+  }
+
+  fetchPhoto (photoId) {
+    let me = this;
+
+    return fetch(me.location + '/api/v1/photo/' + photoId, {
+        headers: {
+          'Authorization': me.token,
+          'Accept-Language': me.locale,
+          'Content-Type': me.contentType
         },
       })
       .then(response => {
@@ -51,7 +71,7 @@ const PhotoService = class {
         method: 'PATCH',
         headers: {
           'Authorization': this.token,
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': me.contentType
         },
         body: JSON.stringify(props)
       });
@@ -72,7 +92,7 @@ const PhotoService = class {
         method: 'POST',
         headers: {
           'Authorization': this.token,
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': me.contentType
         },
         body: JSON.stringify(photos.map(p => p.id))
       });
@@ -83,7 +103,7 @@ const PhotoService = class {
         method: 'LINK',
         headers: {
           'Authorization': this.token,
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': me.contentType
         },
         body: JSON.stringify(photos.map(p => p.id))
       });
@@ -94,7 +114,7 @@ const PhotoService = class {
         method: 'UNLINK',
         headers: {
           'Authorization': this.token,
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': me.contentType
         },
         body: JSON.stringify(photos.map(p => p.id))
       });
