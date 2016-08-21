@@ -93,7 +93,7 @@ function renderHTML({ componentHTML, initialState, metaData, config }) {
             <link rel="stylesheet" href="${config.staticUrl}/bundle.css">
         </head>
         <body>
-        <div id="react-view">${componentHTML}</div>
+          <div id="react-view">${componentHTML}</div>
           <script type="application/javascript">
             window.__CONFIG__ = ${JSON.stringify(config)};
             window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};

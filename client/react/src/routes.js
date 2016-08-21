@@ -58,13 +58,42 @@ class NoMatch extends React.Component {
   }
 }
 
+
+// const CourseRoute = {
+//   path: 'course/:courseId',
+//
+//   getChildRoutes(partialNextState, callback) {
+//     require.ensure([], function (require) {
+//       callback(null, [
+//         require('./routes/Announcements'),
+//         require('./routes/Assignments'),
+//         require('./routes/Grades'),
+//       ])
+//     })
+//   },
+//
+//   getIndexRoute(partialNextState, callback) {
+//     require.ensure([], function (require) {
+//       callback(null, {
+//         component: require('./components/Index'),
+//       })
+//     })
+//   },
+//
+//   getComponents(nextState, callback) {
+//     require.ensure([], function (require) {
+//       callback(null, require('./components/Course'))
+//     })
+//   }
+// }
+
 export default (
   // <Route component={withRouter(App)}>
     // <Redirect from='' to='/' />
     <Route path="/" component={App} > //(:locale)
       <IndexRoute component={Home} />
       <Route path=":category(/:subcategory)" component={Gallery} >
-        <Route path="photo/:photoId" component={Photo} />
+        <Route path="/:category(/:subcategory)/photo/:photoId" component={Photo} />
       </Route>
     </Route>
   //   <Route path="*" component={NoMatch} />

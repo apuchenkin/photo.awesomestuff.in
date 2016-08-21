@@ -6,6 +6,9 @@ import config from '../../config.json';
 import Link from 'react-router/lib/Link';
 import './gallery.less';
 
+var isBrowser = (typeof window !== 'undefined');
+var Packery = isBrowser ? window.Packery || require('packery') : null;
+
 class Brick extends React.Component {
 	constructor (props, context) {
 		super(props, context);
@@ -53,12 +56,10 @@ class Gallery extends React.Component {
     }
   }
 
-	// pick(object, params) {
-	// 	return Object.keys(object).filter(k => params.indexOf(k) > 0).reduce((o,k) => {o[k] = object[k]; return o}, {})
-	// }
-
 	componentDidMount() {
 		let me = this;
+
+		me.packery = me.createPackery(me.refs.gallery);
 
 		if (!me.state.photos.length) {
 			Gallery.fetchData(location.origin, me.props.params).photos
@@ -66,11 +67,50 @@ class Gallery extends React.Component {
 		}
 	}
 
+	componentDidUpdate() {
+		console.log('componentDidUpdate');
+		if (!isBrowser) return;
+
+		this.packery.doUpdate();
+	}
+
+	createPackery(container) {
+	  var packery = new Packery(container, {
+	    columnWidth: 100,
+	    itemSelector: 'li',
+	    gutter: 10
+	  });
+
+	  packery.defer = [];
+
+	  packery.on('layoutComplete', function() {
+	    packery.isLoading = false;
+	    if (packery.defer.length) {
+	      packery.defer.pop().apply(packery);
+	    }
+	  });
+
+	  packery.doUpdate = function() {
+	    packery.reloadItems();
+	    packery.layout();
+
+	    if (!packery.isLoading) {
+	      packery.isLoading = true;
+	    } else {
+	      packery.defer.push(packery.doUpdate);
+	    }
+	  }
+
+	  return packery;
+	}
+
 	componentWillReceiveProps(props) {
 		let
 			me = this,
 			params = props.params;
 
+		console.log('componentWillReceiveProps');
+		this.packery.doUpdate();
 		if (me.state.category !== params.category
 			|| me.state.subcategory !== params.subcategory) {
 				this.setState({
@@ -125,7 +165,7 @@ class Gallery extends React.Component {
 				<h1><Link to='/' activeClassName="active">HOME</Link>> <CategoryLink category={state.category}>{category && category.title}</CategoryLink>
 				</h1>
         <nav>{categories}</nav>
-				<div className="gallery">{photos}</div>
+				<div className="gallery" ref="gallery"><ul>{photos}</ul></div>
 				<div>{childrens}</div>
 			</div>
 		);
