@@ -34,7 +34,6 @@ class Header extends React.Component {
       state = this.state,
       params = state.params,
       category = state.categories.find(c => c.name == params.category),
-      subcategory = params.subcategory && state.categories.find(c => c.name == params.subcategory),
 			categories = state.categories.filter(c => c.parent && c.parent.name === params.category).map(category => {
 	      return (
 					 <li className="item" key={category.id} >
@@ -44,7 +43,7 @@ class Header extends React.Component {
 			});
 
 		return (
-			<header className="main">
+			<header className="main" ref="main">
 				<h1 className="title">
 					<Link to='/' activeClassName="active">HOME</Link> / <CategoryLink category={params.category}>{category && category.title}</CategoryLink>
 				</h1>

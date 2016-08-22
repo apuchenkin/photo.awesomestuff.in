@@ -16,7 +16,7 @@
         [
           "babel-plugin-transform-require-ignore",
           {
-            "extensions": [".less", ".sass"]
+            "extensions": [".less", ".sass", "css"]
           }
         ]
       ]

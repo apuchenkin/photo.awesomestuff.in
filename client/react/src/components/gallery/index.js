@@ -30,7 +30,7 @@ class Gallery extends React.Component {
 			props = me.props
 		;
 
-		me.packery = me.createPackery(me.refs.gallery);
+		me.packery = me.createPackery(me.refs.packery);
 
 		if (!me.state.photos.length) {
 			me.props.route.resolve(props.params).photos
@@ -108,10 +108,7 @@ class Gallery extends React.Component {
       }));
 
 		return (
-			<div className="content">
-				<div className="gallery" ref="gallery"><ul>{photos}</ul></div>
-				<div>{childrens}</div>
-			</div>
+				<div className="gallery"><ul ref="packery">{photos}</ul>{childrens}</div>
 		);
 	}
 }

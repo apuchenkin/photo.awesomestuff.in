@@ -80,6 +80,7 @@
     "es6-promise": "^3.2.1",
     "isomorphic-fetch": "^2.2.1",
     "packery": "^2.1.1",
+    "perfect-scrollbar": "^0.6.12",
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
     "react-router": "^2.0.0",

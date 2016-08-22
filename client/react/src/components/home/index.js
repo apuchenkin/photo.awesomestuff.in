@@ -33,7 +33,7 @@ class Home extends React.Component {
 								</CategoryLink>
 								<aside>
 									<h3>
-										<CategoryLink category={category.parent ? category.parent.name : category.name}>
+										<CategoryLink category={category.parent ? category.parent.name : category.name} className="active">
 										{category.title}
 										</CategoryLink>
 									</h3>
@@ -49,11 +49,9 @@ class Home extends React.Component {
     });
 
 		return (
-			<div className="content">
-        <div className="galleries">
-					<h2>Галереи</h2>
-          <ul>{galleries}</ul>
-        </div>
+			<div className="galleries">
+				<h2>Галереи</h2>
+				<ul>{galleries}</ul>
 			</div>
 		);
 	}

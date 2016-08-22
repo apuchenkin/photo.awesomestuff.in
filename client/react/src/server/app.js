@@ -1,13 +1,15 @@
-import React                     from 'react';
-import ReactDOM                  from 'react-dom/server';
-import { match, Router, RouterContext } from 'react-router';
-import express      from 'express';
+import React from 'react';
+import ReactDOM from 'react-dom/server';
+import match from 'react-router/lib/match';
+import RouterContext from 'react-router/lib/RouterContext';
+import express from 'express';
 import favicon from 'serve-favicon';
 import Promise from 'promise';
-import routes from './routes';
 import proxy from 'http-proxy-middleware';
-import ExtraDataProvider from './components/provider.js';
-import config from './config.json';
+
+import ExtraDataProvider from '../lib/provider.js';
+import config from '../config.json';
+import routes from '../routes';
 
 const app = express();
 
@@ -21,7 +23,7 @@ app.use('/api', proxy({
 
 app.listen(3000);
 
-app.use(favicon(__dirname + '/assets/favicon.ico'));
+app.use(favicon(__dirname + '/../assets/favicon.ico'));
 app.use((req, res) => {
   console.log(req.url);
   // Note that req.url here should be the full URL path from

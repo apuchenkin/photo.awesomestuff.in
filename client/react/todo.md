@@ -1,11 +1,12 @@
+- photo html & state
 - static pages
-- styles
 - localization
 - metadata server/client updates
 - loader
 - effects
 - backwards compatibility
-- prefomance & build
+- prefomance
+- deploy & build
 - encode/minify initial state
 - route smart redirects
 - pages
