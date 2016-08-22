@@ -1,8 +1,11 @@
-- localisation
+- static pages
 - styles
-- pages
+- localization
+- metadata server/client updates
 - loader
 - effects
+- backwards compatibility
 - prefomance & build
-
--- bug with concurrent routes
+- encode/minify initial state
+- route smart redirects
+- pages

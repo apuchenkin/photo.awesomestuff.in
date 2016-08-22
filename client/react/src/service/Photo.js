@@ -1,12 +1,17 @@
 import fetch from 'isomorphic-fetch';
 import config from '../config.json';
 
+const defaults = {
+  locale: 'en',
+  location: config.apiEndpoint,
+}
+
 const PhotoService = class {
 
-  constructor(token, location) {
-    this.token = token;
-    this.location = location;
-    this.locale = 'en';
+  constructor(options = defaults) {
+    this.token = options.token;
+    this.location = options.location;
+    this.locale = options.locale;
     this.contentType = 'application/json; charset=utf-8';
 
     this.sizes = [

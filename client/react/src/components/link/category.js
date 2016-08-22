@@ -1,16 +1,18 @@
 import React from 'react';
 import Link from 'react-router/lib/Link';
+import utils from '../../lib/utils';
 
 export default class CategoryLink extends React.Component {
   render() {
     let
       props = this.props,
+      props$ = utils.pick(props, ['className', 'title', 'style']),
 			link = props.subcategory
 				? props.category + '/' + props.subcategory
 				: props.category
 
     return (
-        <Link to={`/${link}`} activeClassName="active">{this.props.children}</Link>
+        <Link to={`/${link}`} activeClassName="active" {...props$}>{this.props.children}</Link>
       );
   }
 }

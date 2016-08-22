@@ -123,7 +123,7 @@ module.exports = {
 		historyApiFallback: true,
 		proxy: {
 			'/api/v1*': {
-					target: config.apiEndpoint,
+					target: config.apiProxy,
 					rewrite: function(req) {
 						req.url = req.url.replace(/^\/api\/v1/, '');
 					},

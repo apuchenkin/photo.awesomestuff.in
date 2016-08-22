@@ -12,7 +12,7 @@ import config from './config.json';
 const app = express();
 
 app.use('/api', proxy({
-  target: config.apiEndpoint,
+  target: config.apiProxy,
   pathRewrite: {
     '^/api/v1' : '', // rewrite path
   },
@@ -33,12 +33,11 @@ app.use((req, res) => {
     } else if (redirectLocation) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
-      let location = req.protocol + '://' + req.get('host');
-      let fetchers = renderProps.components.filter(c => !!c.fetchData)
-
-      const promises = fetchers
-        .map(f => f.fetchData(location, renderProps.params))
-        .reduce((obj, p) => Object.assign(obj, p), {});
+      const location = req.protocol + '://' + req.get('host');
+      const promises = renderProps.routes.filter(c => !!c.resolve)
+        .map(f => f.resolve(renderProps.params))
+        .reduce((obj, p) => Object.assign(obj, p), {})
+        ;
 
       Promise.all(Object.keys(promises).map(p => promises[p])).then(data => {
         // let state = Object.keys(promises).reduce((obj, p) => obj[p] = , {});
@@ -55,15 +54,11 @@ app.use((req, res) => {
             description: 1
           }
 
-          let clientConfig = {
-            "staticUrl": "http://localhost:8080",
-          }
-
           res.status(200).send(renderHTML({
               componentHTML,
               initialState,
               metaData,
-              config : clientConfig
+              config
           }))
         }).catch(e => console.log(e))
         ;
@@ -90,15 +85,16 @@ function renderHTML({ componentHTML, initialState, metaData, config }) {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>${escapeHTML(metaData.title)}</title>
             <meta name="description" content="${escapeHTML(metaData.description)}">
-            <link rel="stylesheet" href="${config.staticUrl}/bundle.css">
+            <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400' rel='stylesheet' type='text/css'>
+            <link rel="stylesheet" href="${config.staticEndpoint}/bundle.css">
         </head>
         <body>
-          <div id="react-view">${componentHTML}</div>
+          <div id="react-view" class="wrapper">${componentHTML}</div>
           <script type="application/javascript">
             window.__CONFIG__ = ${JSON.stringify(config)};
             window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
           </script>
-          <script type="application/javascript" src="${config.staticUrl}/bundle.js"></script>
+          <script type="application/javascript" src="${config.staticEndpoint}/bundle.js"></script>
         </body>
         </html>
     `;
