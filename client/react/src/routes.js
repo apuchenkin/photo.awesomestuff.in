@@ -55,10 +55,13 @@ const categryRoute = (category) => {
 }
 
 const pageRoute = (page) => {
-  console.log(page);
   return (
     <Route path={page.alias}
-      components={{header: PageHeader, body: Page}}
+      components={{
+        header: PageHeader,
+        body: Page
+      }}
+      page={page}
     />
   )
 }

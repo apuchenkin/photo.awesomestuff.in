@@ -2,14 +2,22 @@ import React from 'react';
 import Link from 'react-router/lib/Link';
 
 class Page extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      page: props.route.page
+    }
+  }
+
 	render() {
 		return (
-			<h1 className="main" ref="main">222</h1>
+			<div class="page" dangerouslySetInnerHTML={{__html: this.state.page.content}} ></div>
 		);
 	}
 }
 
-// Header.contextTypes = {
+// Page.contextTypes = {
 //   initialState: React.PropTypes.any.isRequired
 // };
 
