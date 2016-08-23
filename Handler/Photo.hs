@@ -48,7 +48,7 @@ photoDataReader PhotoPatch {..} = catMaybes [
 toFilter :: PhotoPatch -> [Update Photo]
 toFilter photoData = map buildFilter $ photoDataReader photoData where
     buildFilter :: FieldValue Photo -> Update Photo
-    buildFilter (FieldValue {unField = f, unValue = v}) = f  =. v
+    buildFilter FieldValue {unField = f, unValue = v} = f  =. v
 
 -- request hadlers -----------------
 

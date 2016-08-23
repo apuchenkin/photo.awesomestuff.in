@@ -22,7 +22,7 @@ getCategoryR = do
 
         return category
 
-  results <- appendTranslations categories CategoryType
+  results <- appendTranslations categories CategoryType Nothing
 
   returnJson results
 

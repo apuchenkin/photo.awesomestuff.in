@@ -6,10 +6,9 @@ import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import           Database.Persist.Sql    (fromSqlKey)
 import qualified Data.HashMap.Strict     as H (union, filterWithKey)
-import qualified Handler.Photo           as Photo
-import Data.HashMap.Strict ((!))
-import Data.Aeson.Types (parseEither)
-import Control.Failure (Failure (failure))
+-- import Data.HashMap.Strict ((!))
+-- import Data.Aeson.Types (parseEither)
+-- import Control.Failure (Failure (failure))
 
 getPagesR :: Handler Value
 getPagesR = do
@@ -26,7 +25,7 @@ getPagesR = do
 
         return page
 
-  results <- appendTranslations pages PageType
+  results <- appendTranslations pages PageType $ Just ["title"]
 
   returnJson results
 
@@ -58,6 +57,7 @@ getPageR pageId = do
     mpage   <- runDB $ get pageId
     page    <- maybe notFound return mpage
     _       <- when (pageHidden page && isNothing maid) notFound
+
     mt      <- runDB $ getBy $ UniqueTranslation
       (pickLanguadge langs)
       PageType

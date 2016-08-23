@@ -28,19 +28,26 @@ getRobotsR :: Handler TypedContent
 getRobotsR = return $ TypedContent typePlain
                     $ toContent $(embedFile "config/robots.txt")
 
-appendTranslations :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity record] -> TranslationType -> Handler Value
-appendTranslations list typ = do
+appendTranslations :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity record] -> TranslationType -> Maybe [String] -> Handler Value
+appendTranslations list typ fields = do
   langs         <- languages
   translations  <- runDB
       $ E.select
       $ E.from $ \translation -> do
         E.where_ $ translation ^. TranslationLanguage E.==. E.val (pickLanguadge langs)
-        E.where_ $ translation ^. TranslationRefType     E.==. E.val typ
+        E.where_ $ translation ^. TranslationRefType  E.==. E.val typ
+        E.where_ $ translation ^. TranslationRefId   `E.in_` E.valList (toKeys list)
+
+        case fields of
+          Nothing -> return ()
+          Just fields' -> E.where_ $ translation ^. TranslationField `E.in_` E.valList fields'
+
 
         return translation
 
   returnJson $ map (parseResult translations) list
   where
+  toKeys = map (\(Entity key _) -> E.fromSqlKey key)
   parseResult :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity Translation] -> Entity record -> Value
   parseResult translations (Entity key entity) = Object $ H.union e tl
     where

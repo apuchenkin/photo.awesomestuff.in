@@ -42,7 +42,7 @@ openCVresize src dest w h = do
   cvReleaseImage image'
 
 getStaticPhotoR :: PhotoId -> Int -> Int -> String -> Handler TypedContent
-getStaticPhotoR pid w' h' sign = do
+getStaticPhotoR pid w' h' _ = do
   neverExpires
   settings <- getSettings
   -- _ <- unless (checkSign phrase (secret settings) sign) notFound
@@ -51,9 +51,9 @@ getStaticPhotoR pid w' h' sign = do
     Nothing     -> notFound
     Just photo  -> processPhoto (cachePath settings) photo
   where
-    phrase   = show (fromSqlKey pid) ++ "-" ++ show w' ++ "x" ++ show h'
+    -- phrase   = show (fromSqlKey pid) ++ "-" ++ show w' ++ "x" ++ show h'
     getSettings :: Handler AppSettings
-    getSettings = liftM appSettings getYesod
+    getSettings = fmap appSettings getYesod
 
     processPhoto :: String -> Photo -> Handler TypedContent
     processPhoto cachePath photo = do

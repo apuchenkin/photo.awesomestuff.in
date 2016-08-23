@@ -16,7 +16,7 @@ postPhotoGroupsR = do
     True  -> do
       result  <- runDB
         $ E.select
-        $ E.from $ \(photo) -> do
+        $ E.from $ \photo -> do
           E.orderBy [E.desc (photo ^. PhotoGroup)]
           E.limit 1
           return (photo ^. PhotoGroup)
