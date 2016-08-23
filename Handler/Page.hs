@@ -26,7 +26,9 @@ getPagesR = do
 
         return page
 
-  returnJson pages
+  results <- appendTranslations pages PageType
+
+  returnJson results
 
 -- postPagesR :: Language -> Handler Value
 -- postPagesR lang = do
@@ -68,7 +70,7 @@ getPageR pageId = do
       (fromSqlKey pageId)
       "content"
 
-    let expose = ["id", "alias", "category_id", "caption", "content", "children"]
+    let expose = ["id", "alias", "category", "parent"]
         (Object r) = toJSON $ Entity pageId page
         (Object e) = object [
             "title"     .= fmap (translationValue . entityVal) mt,
