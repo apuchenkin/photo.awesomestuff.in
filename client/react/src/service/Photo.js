@@ -32,11 +32,13 @@ const PhotoService = class {
   }
 
   fetchPhotos (category, showHidden) {
-    let me = this;
+    let me = this,
+        url = me.location + config.apiPrefix + '/category/' + category + '/photo';
         // url = new URL('/api/v1/category/' + category + '/photo', location.origin);
         // url.searchParams.append('hidden', showHidden);
 
-    return fetch(me.location + config.apiPrefix + '/category/' + category + '/photo', {
+    console.log(url);
+    return fetch(url, {
         headers: {
           'Authorization': me.token,
           'Accept-Language': me.locale,

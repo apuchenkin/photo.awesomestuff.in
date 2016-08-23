@@ -4,8 +4,8 @@ import match from 'react-router/lib/match';
 import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
 import favicon from 'serve-favicon';
-import Promise from 'promise';
 import proxy from 'http-proxy-middleware';
+import Promise from 'promise';
 
 import ExtraDataProvider from '../lib/provider.js';
 import config from '../config.json';
@@ -38,13 +38,10 @@ app.use((req, res) => {
       const location = req.protocol + '://' + req.get('host');
       const promises = renderProps.routes.filter(c => !!c.resolve)
         .map(f => f.resolve(renderProps.params))
-        .reduce((obj, p) => Object.assign(obj, p), {})
         ;
 
-      Promise.all(Object.keys(promises).map(p => promises[p])).then(data => {
-        // let state = Object.keys(promises).reduce((obj, p) => obj[p] = , {});
-          let initialState = Object.keys(promises).reduce((o,p) => {o[p] = data[o.i++]; return o}, {i: 0}); //todo: refactor this shit
-
+      Promise.all(promises).then(data => {
+          let initialState = data.reduce((acc,v) => Object.assign(acc, v), {}); //todo: refactor this shit
           let componentHTML = ReactDOM.renderToString(
             <ExtraDataProvider initialState={initialState}>
               <RouterContext {...renderProps} />

@@ -12,7 +12,8 @@ class Main extends React.Component {
 	    super(props, context);
 
 	    this.state = {
-				categories: context.initialState.categories || []
+				categories: context.initialState.categories || [],
+        pages: context.initialState.pages || []
 			}
 	  }
 
