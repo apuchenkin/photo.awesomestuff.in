@@ -2,23 +2,28 @@ import React from 'react';
 import Link from 'react-router/lib/Link';
 
 class Page extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+    // console.log(context.initialState.page);
 
     this.state = {
-      page: props.route.page
+      page: context.initialState.page || props.page || {}
     }
   }
 
+  // componentDidMount() {
+  //   console.log('componentDidMount', this.state)
+  // }
+
 	render() {
 		return (
-			<div class="page" dangerouslySetInnerHTML={{__html: this.state.page.content}} ></div>
+			<div className="page" dangerouslySetInnerHTML={{__html: this.state.page.content}} ></div>
 		);
 	}
 }
 
-// Page.contextTypes = {
-//   initialState: React.PropTypes.any.isRequired
-// };
+Page.contextTypes = {
+  initialState: React.PropTypes.object.isRequired
+};
 
 export default Page;

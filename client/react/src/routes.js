@@ -9,7 +9,7 @@ import Gallery from './components/gallery';
 import GalleryHeader from './components/gallery/header';
 import Page from './components/page';
 import PageHeader from './components/page/header';
-
+import Promise from 'promise';
 import Photo from './components/photo';
 import Link from 'react-router/lib/Link';
 import Main from './components/main';
@@ -17,10 +17,12 @@ import utils from './lib/utils';
 
 import './style/main.less';
 
-
 const categoryService = new CategoryService();
 const photoService = new PhotoService();
 const pageService = new PageService();
+
+const isBrowser = (typeof window !== 'undefined');
+const initialState = isBrowser && window.__INITIAL_STATE__ || {};
 
 class NoMatch extends React.Component {
   render() {
@@ -36,6 +38,7 @@ const categryRoute = (category) => {
   return (
     <Route path={path}
       components={{header: GalleryHeader, body: Gallery}}
+      category={category}
       resolve={params => utils.fetchAll({
     			photos: photoService.fetchPhotos(category.name).then(p =>
     				photoService.remapPhotos(
@@ -55,48 +58,72 @@ const categryRoute = (category) => {
 }
 
 const pageRoute = (page) => {
-  return (
-    <Route path={page.alias}
+  return page.title && (
+    <Route
+      path={page.alias}
+      resolve={params => utils.fetchAll({
+        page: pageService.fetchPage(page.id)
+      })}
+      props={{
+        page: page
+      }}
       components={{
         header: PageHeader,
         body: Page
       }}
-      page={page}
     />
   )
 }
 
+// function cachedRoute(base, keys) {
+//   const resolve = base.resolve;
+//
+//   return Object.assign(base, {
+//     resolved: utils.pick(initialState, keys),
+//     resolve: function(params) {
+//       return
+//         Object.keys(base.resolved).length
+//         ? Promise.resolve(base.resolved)
+//         : resolve().then(data => {
+//           base.resolved = data;
+//           return data
+//         })
+//     }
+//   });
+// }
 
 const mainRoute = {
   path: '/',
   component: Main,
-  indexRoute: { components: {header: HomeHeader, body: Home} },
+
   resolve() {
+    var me = this;
+
     return utils.fetchAll({
       categories: categoryService.fetchCategories(),
       pages: pageService.fetchPages()
     })
   },
 
+  getIndexRoute(location, cb) {
+    var me = this;
+    me.resolve().then(data => {
+      cb(null, {
+        components: {header: HomeHeader, body: Home},
+        props: data
+      });
+    })
+  },
+
   getChildRoutes(location, cb) {
-    this.resolve().then(data => {
+    var me = this;
+    me.resolve().then(data => {
       cb(null, [].concat(
           data.categories.map(c => categryRoute(c)),
           data.pages.map(p => pageRoute(p))
         ));
     })
   }
-}
+};
 
 export default mainRoute;
-// (
-//     <Route path="/" component={Main} resolve={params => ({
-//         categories: categoryService.fetchCategories(),
-//         pages: pageService.fetchPages()
-//       })}
-//       > //(:locale)
-//       <IndexRoute components={{header: HomeHeader, body: Home}} />
-
-//     </Route>
-//   //   <Route path="*" component={NoMatch} />
-// );

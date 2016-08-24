@@ -7,16 +7,6 @@ var isBrowser = (typeof window !== 'undefined');
 var Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
 class Main extends React.Component {
-
-    constructor(props, context) {
-	    super(props, context);
-
-	    this.state = {
-				categories: context.initialState.categories || [],
-        pages: context.initialState.pages || []
-			}
-	  }
-
   	componentDidMount() {
   		const
         me = this,
@@ -25,10 +15,6 @@ class Main extends React.Component {
 
       me.adjustHeader();
       Ps.initialize(me.refs.content);
-      if (me.state.categories !== me.context.initialState.categories) {
-        props.route.resolve(props.params).categories
-    			.then(categories => me.setState({categories: categories}));
-      }
   	}
 
     componentDidUpdate() {
@@ -46,21 +32,16 @@ class Main extends React.Component {
 
     render() {
       const
-        categories = this.state.categories,
-        header = categories && categories.length && this.props.header && React.cloneElement(this.props.header, {
-          categories: categories,
+        header = this.props.header && React.cloneElement(this.props.header, {
           ref: "header"
-        }),
-        childrens = categories && categories.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
-          categories: categories
-        }));
+        });
 
       return (
         <div id="main" ref="main">
           {header}
           <div className="content" ref="content">
             {this.props.body}
-            {childrens}
+            {this.props.children}
             <footer>
               <Link to="/">photo.awesomestuff.in</Link> | © 2015, Пученкин Артём | <Link to="/about">О сайте</Link> | <Link to="/contacts">Контакты</Link>
             </footer>
@@ -70,8 +51,8 @@ class Main extends React.Component {
     }
 }
 
-Main.contextTypes = {
-  initialState: React.PropTypes.any.isRequired
-};
+// Main.contextTypes = {
+//   initialState: React.PropTypes.any.isRequired
+// };
 
 export default Main;

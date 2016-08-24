@@ -6,7 +6,7 @@ class Header extends React.Component {
     super(props);
 
     this.state = {
-      page: props.route.page
+      page: props.page
     }
   }
 
@@ -21,8 +21,8 @@ class Header extends React.Component {
 	}
 }
 
-// Header.contextTypes = {
-//   initialState: React.PropTypes.any.isRequired
-// };
+Header.propTypes = {
+  page: React.PropTypes.object.isRequired
+};
 
 export default Header;

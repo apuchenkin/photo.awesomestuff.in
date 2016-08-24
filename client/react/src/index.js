@@ -1,5 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './client/app';
+import Router from 'react-router/lib/Router';
+import match from 'react-router/lib/match';
+import history from 'react-router/lib/browserHistory';
 
-ReactDOM.render(<App />, document.getElementById('react-view'));
+// import ExtraDataProvider from './lib/provider.js';
+import routes         from './routes';
+
+function createElement(Component, props) {
+  return <Component {...props} {...props.route.props} />
+}
+
+match({ history, routes }, (error, redirectLocation, renderProps) => {
+  ReactDOM.render(
+    // <ExtraDataProvider initialState={initialState}>
+      <Router {...renderProps} createElement={createElement} />
+    // </ExtraDataProvider>
+    , document.getElementById('react-view')
+  );
+})

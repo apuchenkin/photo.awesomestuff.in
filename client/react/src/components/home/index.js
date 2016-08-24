@@ -6,16 +6,11 @@ import config from '../../config.json';
 import './style.less';
 
 class Home extends React.Component {
-	constructor(props, context) {
-    let
-      params = props.params,
-      initial = context.initialState;
-
-    super(props, context);
+	constructor(props) {
+    super(props);
 
     this.state = {
-			categories: initial.categories || props.categories || [],
-			showHidden: false
+			categories: props.categories || []
 		}
   }
 
@@ -57,8 +52,8 @@ class Home extends React.Component {
 	}
 }
 
-Home.contextTypes = {
-  initialState: React.PropTypes.any.isRequired
-};
+// Home.contextTypes = {
+//   initialState: React.PropTypes.any.isRequired
+// };
 
 export default Home;

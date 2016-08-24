@@ -7,11 +7,15 @@ import favicon from 'serve-favicon';
 import proxy from 'http-proxy-middleware';
 import Promise from 'promise';
 
-import ExtraDataProvider from '../lib/provider.js';
+// import ExtraDataProvider from '../lib/provider.js';
 import config from '../config.json';
 import routes from '../routes';
 
 const app = express();
+
+function createElement(Component, props) {
+  return <Component {...props} {...props.route.props} />
+}
 
 app.use('/api', proxy({
   target: config.apiProxy,
@@ -43,9 +47,9 @@ app.use((req, res) => {
       Promise.all(promises).then(data => {
           let initialState = data.reduce((acc,v) => Object.assign(acc, v), {}); //todo: refactor this shit
           let componentHTML = ReactDOM.renderToString(
-            <ExtraDataProvider initialState={initialState}>
-              <RouterContext {...renderProps} />
-            </ExtraDataProvider>
+            // <ExtraDataProvider initialState={initialState}>
+              <RouterContext {...renderProps} createElement={createElement}/>
+            // </ExtraDataProvider>
           );
 
           let metaData = {
