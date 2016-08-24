@@ -32,7 +32,27 @@ class NoMatch extends React.Component {
   }
 }
 
-const categryRoute = (category, data) => {
+const photoRoute = (props) => {
+  return new CachedRoute ({
+    path: "photo/:photoId",
+
+    getComponent(location, cb) {
+      var me = this;
+      me.resolve(location.params).then(data => {
+        me.props = Object.assign(props, data);
+        cb(null, Photo);
+      })
+    },
+
+    resolve(params) {
+      return utils.fetchAll({
+        photo: photoService.fetchPhoto(params.photoId)
+      })
+    }
+  }, utils.pick(initialState, ['photo']))
+}
+
+const categryRoute = (category, props) => {
   const path = category.parent ? category.parent.name + '/' + category.name : category.name;
 
   return new CachedRoute ({
@@ -49,24 +69,27 @@ const categryRoute = (category, data) => {
 
     getComponents(location, cb) {
       var me = this;
-      me.resolve(location.params).then(data$ => {
-        me.props = Object.assign({category: category}, data, data$);
+      me.resolve(location.params).then(data => {
+        me.props = Object.assign({category: category}, props, data);
         cb(null, {
           header: GalleryHeader,
           body: Gallery
         });
       })
+    },
+
+    getChildRoutes(location, cb) {
+      var me = this;
+      me.resolve(location.params).then(data => {
+        cb(null, [
+          photoRoute(Object.assign({
+            category: category,
+            id: location.params.photoId
+          }, data))
+        ]);
+      })
     }
   }, utils.pick(initialState, ['photos']));
-    // <Route
-    //   <Route path="photo/:photoId"
-    //     component={Photo}
-    //     resolve={params => utils.fetchAll({
-    //       photo: photoService.fetchPhoto(params.photoId)
-    //     })}
-    //     />
-    // </Route>
-  // )
 }
 
 const pageRoute = (page) => {
