@@ -2,12 +2,12 @@ import React from 'react';
 import Link from 'react-router/lib/Link';
 
 class Page extends React.Component {
-  constructor(props, context) {
-    super(props, context);
-    // console.log(context.initialState.page);
+
+  constructor(props) {
+    super(props);
 
     this.state = {
-      page: context.initialState.page || props.page || {}
+      page: props.page || {}
     }
   }
 
@@ -22,8 +22,8 @@ class Page extends React.Component {
 	}
 }
 
-Page.contextTypes = {
-  initialState: React.PropTypes.object.isRequired
-};
+// Page.contextTypes = {
+//   initialState: React.PropTypes.object.isRequired
+// };
 
 export default Page;

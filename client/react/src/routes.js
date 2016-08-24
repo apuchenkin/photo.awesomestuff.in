@@ -58,51 +58,36 @@ const categryRoute = (category) => {
 }
 
 const pageRoute = (page) => {
-  return page.title && (
-    <Route
-      path={page.alias}
-      resolve={params => utils.fetchAll({
-        page: pageService.fetchPage(page.id)
-      })}
-      props={{
-        page: page
-      }}
-      components={{
-        header: PageHeader,
-        body: Page
-      }}
-    />
-  )
-}
+  return page.title && {
+    path: page.alias,
+    resolve() {
+      return utils.fetchAll({
+        page: pageService.fetchPage.bind(pageService, page.id)
+      }, initialState);
+    },
 
-// function cachedRoute(base, keys) {
-//   const resolve = base.resolve;
-//
-//   return Object.assign(base, {
-//     resolved: utils.pick(initialState, keys),
-//     resolve: function(params) {
-//       return
-//         Object.keys(base.resolved).length
-//         ? Promise.resolve(base.resolved)
-//         : resolve().then(data => {
-//           base.resolved = data;
-//           return data
-//         })
-//     }
-//   });
-// }
+    getComponents(location, cb) {
+      var me = this;
+      me.resolve().then(data => {
+        me.props = data;
+        cb(null, {
+          header: PageHeader,
+          body: Page
+        });
+      })
+    }
+  }
+}
 
 const mainRoute = {
   path: '/',
   component: Main,
 
   resolve() {
-    var me = this;
-
     return utils.fetchAll({
-      categories: categoryService.fetchCategories(),
-      pages: pageService.fetchPages()
-    })
+      categories: categoryService.fetchCategories.bind(categoryService),
+      pages: pageService.fetchPages.bind(pageService)
+    }, initialState)
   },
 
   getIndexRoute(location, cb) {
