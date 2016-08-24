@@ -11,16 +11,12 @@ var isBrowser = (typeof window !== 'undefined');
 var Packery = isBrowser ? window.Packery || require('packery') : null;
 
 class Gallery extends React.Component {
-	constructor(props, context) {
-		let
-			params = props.params,
-			initial = context.initialState;
-
-		super(props, context);
+	constructor(props) {
+		super(props);
 
     this.state = {
-      params: params,
-			photos: initial.photos || []
+      category: props.category,
+			photos: props.photos || []
     }
   }
 
@@ -32,17 +28,19 @@ class Gallery extends React.Component {
 
 		me.packery = me.createPackery(me.refs.packery);
 
-		if (!me.state.photos.length) {
-			me.props.route.resolve(props.params).photos
-				.then(photos => me.setState({photos: photos}));
-		}
+		//TODO: client part
+		// if (!me.state.photos.length) {
+		// 	me.props.route.resolve(props.params).photos
+		// 		.then(photos => me.setState({photos: photos}));
+		// }
 	}
 
 	componentDidUpdate() {
 		console.log('componentDidUpdate');
-		if (!isBrowser) return;
 
-		this.packery.doUpdate();
+		if (isBrowser) {
+			this.packery.doUpdate();
+		}
 	}
 
 	createPackery(container) {
@@ -78,27 +76,24 @@ class Gallery extends React.Component {
 	componentWillReceiveProps(props) {
 		let
 			me = this,
-			params = props.params;
+			state = this.state;
 
-		console.log('componentWillReceiveProps');
-		// this.packery.doUpdate();
-		if (me.state.params !== params) {
-				this.setState({
-					params: params
-				}, () => {
-					props.route.resolve(params).photos
-						.then(photos => me.setState({photos: photos}));
-				});
-			}
+		if (state.category.id != props.category.id) {
+			props.route.parent.resolve(props.params).then(data => {
+				this.setState(Object.assign(data, {
+					category: props.category,
+				}))
+			})
+		}
   }
 
 	render() {
     let
       state = this.state,
-			params = state.params,
+			category = state.category,
 			photos = state.photos.map(p => (
 				<li className="photo" key={p.id} >
-					<PhotoLink photoId={p.id} category={params.category} subcategory={params.subcategory}>
+					<PhotoLink photoId={p.id} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name}>
 						<Brick photo={p} />
 					</PhotoLink>
 				</li>
@@ -113,8 +108,9 @@ class Gallery extends React.Component {
 	}
 }
 
-Gallery.contextTypes = {
-  initialState: React.PropTypes.any.isRequired
+Gallery.propTypes = {
+  category: React.PropTypes.object.isRequired,
+	photos: React.PropTypes.array.isRequired
 };
 
 export default Gallery

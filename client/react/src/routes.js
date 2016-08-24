@@ -32,38 +32,50 @@ class NoMatch extends React.Component {
   }
 }
 
-const categryRoute = (category) => {
+const categryRoute = (category, data) => {
   const path = category.parent ? category.parent.name + '/' + category.name : category.name;
 
-  return (
-    <Route path={path}
-      components={{header: GalleryHeader, body: Gallery}}
-      category={category}
-      resolve={params => utils.fetchAll({
-    			photos: photoService.fetchPhotos(category.name).then(p =>
-    				photoService.remapPhotos(
-    					photoService.refinePhotos(p, params.photoId)
-    				)
-    			)
-  		})}
-      >
-      <Route path="photo/:photoId"
-        component={Photo}
-        resolve={params => utils.fetchAll({
-          photo: photoService.fetchPhoto(params.photoId)
-        })}
-        />
-    </Route>
-  )
+  return new CachedRoute ({
+    path: path,
+    resolve(params) {
+      return utils.fetchAll({
+        photos: photoService.fetchPhotos(category.name).then(p =>
+          photoService.remapPhotos(
+            photoService.refinePhotos(p, params.photoId)
+          )
+        )
+      })
+    },
+
+    getComponents(location, cb) {
+      var me = this;
+      me.resolve(location.params).then(data$ => {
+        me.props = Object.assign({category: category}, data, data$);
+        cb(null, {
+          header: GalleryHeader,
+          body: Gallery
+        });
+      })
+    }
+  }, utils.pick(initialState, ['photos']));
+    // <Route
+    //   <Route path="photo/:photoId"
+    //     component={Photo}
+    //     resolve={params => utils.fetchAll({
+    //       photo: photoService.fetchPhoto(params.photoId)
+    //     })}
+    //     />
+    // </Route>
+  // )
 }
 
 const pageRoute = (page) => {
-  return page.title && {
+  return page.title && new CachedRoute({
     path: page.alias,
     resolve() {
       return utils.fetchAll({
-        page: pageService.fetchPage.bind(pageService, page.id)
-      }, initialState);
+        page: pageService.fetchPage(page.id)
+      });
     },
 
     getComponents(location, cb) {
@@ -76,18 +88,41 @@ const pageRoute = (page) => {
         });
       })
     }
+  }, initialState)
+}
+
+class CachedRoute extends Object {
+  constructor(obj, cache) {
+    super(obj);
+    const
+      me = this,
+      resolve = obj.resolve;
+
+    me.cache = cache;
+    me.parent = {
+      resolve: resolve
+    };
+
+    Object.assign(me, {
+      resolve(params) {
+        return Object.keys(me.cache).length
+          ? Promise.resolve(me.cache)
+          : resolve(params)
+            .then(data => Object.assign(me.cache, data))
+      }
+    })
   }
 }
 
-const mainRoute = {
+const mainRoute = new CachedRoute({
   path: '/',
   component: Main,
 
   resolve() {
     return utils.fetchAll({
-      categories: categoryService.fetchCategories.bind(categoryService),
-      pages: pageService.fetchPages.bind(pageService)
-    }, initialState)
+      categories: categoryService.fetchCategories(),
+      pages: pageService.fetchPages()
+    })
   },
 
   getIndexRoute(location, cb) {
@@ -104,11 +139,11 @@ const mainRoute = {
     var me = this;
     me.resolve().then(data => {
       cb(null, [].concat(
-          data.categories.map(c => categryRoute(c)),
+          data.categories.map(c => categryRoute(c, data)),
           data.pages.map(p => pageRoute(p))
         ));
     })
   }
-};
+}, initialState);
 
 export default mainRoute;
