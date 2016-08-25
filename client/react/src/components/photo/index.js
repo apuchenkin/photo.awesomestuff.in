@@ -26,15 +26,11 @@ class Photo extends React.Component {
     }
   }
 
-	// componentDidMount() {
-	// 	const
-	// 		me = this,
-	// 		props = me.props
-	// 	;
-	//
-	// 	props.route.resolve(props.params).photo
-	// 		.then(photo => me.setState({photo: photo}));
-	// }
+	componentDidMount() {
+		props.route.parent.resolve(props.params).then(data =>
+			me.setState(data)
+		)
+	}
 
 	componentWillReceiveProps(props) {
 		const
@@ -87,7 +83,7 @@ class Photo extends React.Component {
 			[w, h] = this.adjust (state.dimensions.width, state.dimensions.height),
 			filename = photo.src.split('/').pop(),
 			src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/'),
-			url = category.parent ? category.parent.name + '/' + category.name : category.name,
+			url = '/' + (category.parent ? category.parent.name + '/' + category.name : category.name),
 			figure = (
 				<figure className="content">
 					<div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>CLOSE <i className="icon-cancel"></i></Link></div>
@@ -98,6 +94,7 @@ class Photo extends React.Component {
 					</figcaption>
         </figure>
 			)
+		;
 
 		return (
 			<div className="photo-widget" onClick={this.close.bind(this)}>

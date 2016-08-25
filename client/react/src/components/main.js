@@ -7,38 +7,40 @@ var isBrowser = (typeof window !== 'undefined');
 var Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
 class Main extends React.Component {
+
+    constructor (props) {
+      super(props)
+
+      this.state = {
+        class: props.routes[props.routes.length - 1].class
+      }
+    }
+
   	componentDidMount() {
   		const
         me = this,
         props = me.props
       ;
 
-      me.adjustHeader();
       Ps.initialize(me.refs.content);
   	}
 
     componentDidUpdate() {
       const content = this.refs.content;
-      this.adjustHeader();
       content.scrollTop = 0;
       Ps.update(content);
     }
 
-    adjustHeader() {
-      const refs = this.refs;
-
-      refs.main.style.paddingTop = refs.header.refs.main.clientHeight + 'px';
+    componentWillReceiveProps(props) {
+      this.setState({
+        class: props.routes[props.routes.length - 1].class
+      })
     }
 
     render() {
-      const
-        header = this.props.header && React.cloneElement(this.props.header, {
-          ref: "header"
-        });
-
       return (
-        <div id="main" ref="main">
-          {header}
+        <div id="main" className={this.state.class} ref="main">
+          {this.props.header}
           <div className="content" ref="content">
             {this.props.body}
             {this.props.children}

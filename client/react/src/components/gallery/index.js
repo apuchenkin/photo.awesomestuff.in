@@ -27,12 +27,11 @@ class Gallery extends React.Component {
 		;
 
 		me.packery = me.createPackery(me.refs.packery);
-
-		//TODO: client part
-		// if (!me.state.photos.length) {
-		// 	me.props.route.resolve(props.params).photos
-		// 		.then(photos => me.setState({photos: photos}));
-		// }
+		props.route.parent.resolve(props.params).then(data => {
+			this.setState(Object.assign(data, {
+				category: props.category,
+			}))
+		})
 	}
 
 	componentDidUpdate() {
@@ -98,12 +97,16 @@ class Gallery extends React.Component {
 					</PhotoLink>
 				</li>
 			)),
-      childrens = state.photos && !!state.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
-        photos: state.photos
-      }));
+			hasNav = !!(category.parent || category).childs.length
+      // childrens = state.photos && !!state.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
+      //   photos: state.photos
+      // }));
 
 		return (
-				<div className="gallery"><ul ref="packery">{photos}</ul>{childrens}</div>
+				<div className={hasNav ? 'gallery nav' : 'gallery'} >
+					{this.props.children}
+					<ul ref="packery">{photos}</ul>
+				</div>
 		);
 	}
 }

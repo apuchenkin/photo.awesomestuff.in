@@ -55,6 +55,7 @@ const categryRoute = (category, props) => {
 
   return new CachedRoute ({
     path: path,
+    // class: !!(category.parent || category).childs.length ? 'nav' : '',
     resolve(params) {
       return utils.fetchAll({
         photos: photoService.fetchPhotos(category.name).then(p =>
@@ -142,7 +143,6 @@ class CachedRoute extends Object {
 const mainRoute = new CachedRoute({
   path: '/',
   component: Main,
-
   resolve() {
     return utils.fetchAll({
       categories: categoryService.fetchCategories(),
@@ -154,6 +154,7 @@ const mainRoute = new CachedRoute({
     var me = this;
     me.resolve().then(data => {
       cb(null, {
+        class: 'main',
         components: {header: HomeHeader, body: Home},
         props: data
       });

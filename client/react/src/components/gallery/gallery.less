@@ -1,9 +1,13 @@
 @import '~style/var';
 
 .content > .gallery {
-  padding-top: 2 * @divisor + @divisor / 4;
+  padding-top:  @divisor / 4;
   position: relative;
   overflow: visible !important;
+
+  &.nav {
+    padding-top: 2 * @divisor + @divisor / 4;
+  }
 
   .brick {
     display: block;

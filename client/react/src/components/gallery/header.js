@@ -29,7 +29,7 @@ class Header extends React.Component {
     let
       state = this.state,
       category = state.category.parent || state.category,
-			categories = state.categories
+			childrens = state.categories
 				.filter(c => c.parent && c.parent.name === category.name)
 				.map(c => {
 		      return (
@@ -44,7 +44,7 @@ class Header extends React.Component {
 				<h1 className="title">
 					<Link to='/' activeClassName="active">HOME</Link> / <CategoryLink category={category.name}>{category.title}</CategoryLink>
 				</h1>
-        <nav className="categories"><ul>{categories}</ul></nav>
+        {childrens && <nav className="categories"><ul>{childrens}</ul></nav>}
 			</header>
 		);
 	}

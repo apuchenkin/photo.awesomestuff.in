@@ -1,8 +1,9 @@
 [x] static pages
 [x] photo html & state / proper handlers
+[x] style recalcualtion on header
 
 -----------------------------
-
+- componentDidMount fixes
 - loader
 - effects
 - localization
@@ -11,7 +12,7 @@
 - 404 page
 - 500, 503 page
 - route smart redirects
-- componentDidMount fixes
+- different client/server layout for photo
 
 -----------------------------
 - encode/minify initial state
