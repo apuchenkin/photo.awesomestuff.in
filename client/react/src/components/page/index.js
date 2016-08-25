@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'react-router/lib/Link';
+import Loader from '../loader';
 
 class Page extends React.Component {
 
@@ -7,6 +8,7 @@ class Page extends React.Component {
     super(props);
 
     this.state = {
+      isLoading: false,
       page: props.page || {},
       content: props.content || {}
     }
@@ -21,11 +23,14 @@ class Page extends React.Component {
       me = this,
       state = this.state;
 
-    debugger;
     if (props.page.id != state.page.id) {
+      this.setState({
+        isLoading: true
+      });
       props.route.parent.resolve(props.params).then(data => {
         this.setState(Object.assign(data, {
           content: data.page.content,
+          isLoading: false
         }))
       })
     }
@@ -33,7 +38,10 @@ class Page extends React.Component {
 
 	render() {
 		return (
-			<div className="page" dangerouslySetInnerHTML={{__html: this.state.content}} ></div>
+      <div>
+  			<div className="page" dangerouslySetInnerHTML={{__html: this.state.content}} ></div>
+        {this.state.isLoading && <Loader />}
+      </div>
 		);
 	}
 }

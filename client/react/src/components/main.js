@@ -7,7 +7,6 @@ var isBrowser = (typeof window !== 'undefined');
 var Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
 class Main extends React.Component {
-
     constructor (props) {
       super(props)
 
@@ -37,13 +36,21 @@ class Main extends React.Component {
       })
     }
 
+
     render() {
+      const
+        state = this.state
+      ;
+
+      if(this.props.children) {
+        debugger;
+      }
+
       return (
-        <div id="main" className={this.state.class} ref="main">
+        <div id="main" className={state.class} ref="main">
           {this.props.header}
           <div className="content" ref="content">
             {this.props.body}
-            {this.props.children}
             <footer>
               <Link to="/">photo.awesomestuff.in</Link> | © 2015, Пученкин Артём | <Link to="/about">О сайте</Link> | <Link to="/contacts">Контакты</Link>
             </footer>
