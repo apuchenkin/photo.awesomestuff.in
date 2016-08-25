@@ -6,7 +6,7 @@ class PhotoLink extends React.Component {
   render() {
     let
       props = this.props,
-      props$ = utils.pick(props, ['className', 'title', 'style']),
+      props$ = utils.pick(props, ['className', 'title', 'style', 'onClick']),
 			link = props.subcategory
 				? props.category + '/' + props.subcategory
 				: props.category

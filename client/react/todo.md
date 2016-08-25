@@ -1,18 +1,23 @@
 [x] static pages
+[x] photo html & state / proper handlers
 
 -----------------------------
-- photo html & state / proper handlers
-- localization
-- metadata server/client updates
+
 - loader
 - effects
-- deploy & build
-- encode/minify initial state
+- localization
+- metadata server/client updates
+
 - 404 page
 - 500, 503 page
 - route smart redirects
-- backwards compatibility
+- componentDidMount fixes
+
+-----------------------------
+- encode/minify initial state
 - prefomance
+- backwards compatibility
+- deploy & build
 
 -----------------------------
 future

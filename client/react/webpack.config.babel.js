@@ -85,9 +85,9 @@ module.exports = {
 
 	plugins: ([
 		new webpack.NoErrorsPlugin(),
-		new ExtractTextPlugin('style.css', {
-			allChunks: true,
-			disable: ENV!=='production'
+		new ExtractTextPlugin('bundle.css', {
+			allChunks: true
+			// disable: ENV!=='production'
 		}),
 		new webpack.optimize.DedupePlugin(),
 		new webpack.DefinePlugin({

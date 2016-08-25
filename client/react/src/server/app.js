@@ -29,7 +29,6 @@ app.listen(3000);
 
 app.use(favicon(__dirname + '/../assets/favicon.ico'));
 app.use((req, res) => {
-  console.log(req.url);
   // Note that req.url here should be the full URL path from
   // the original request, including the query string.
   match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {

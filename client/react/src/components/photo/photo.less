@@ -57,14 +57,6 @@ figure, img {
     }
   }
 
-  & > .tools {
-    position: absolute;
-    font-size: 14px;
-    text-align: right;
-    line-height: @divisor * 2;
-    height: @divisor * 2;
-  }
-
   & > .content {
     display: inline-block;
     vertical-align: middle;
@@ -80,6 +72,12 @@ figure, img {
       max-width: 100%;
     }
 
+    .tools {
+      font-size: 14px;
+      text-align: right;
+      line-height: @divisor * 2;
+      height: @divisor * 2;
+    }
 
     figcaption {
       padding: @divisor / 2 0;

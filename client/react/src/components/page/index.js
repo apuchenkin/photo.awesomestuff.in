@@ -7,23 +7,40 @@ class Page extends React.Component {
     super(props);
 
     this.state = {
-      page: props.page || {}
+      page: props.page || {},
+      content: props.content || {}
     }
   }
 
-  // componentDidMount() {
-  //   console.log('componentDidMount', this.state)
-  // }
+  componentDidMount() {
+    // debugger;
+  }
+
+  componentWillReceiveProps(props) {
+    let
+      me = this,
+      state = this.state;
+
+    debugger;
+    if (props.page.id != state.page.id) {
+      props.route.parent.resolve(props.params).then(data => {
+        this.setState(Object.assign(data, {
+          content: data.page.content,
+        }))
+      })
+    }
+  }
 
 	render() {
 		return (
-			<div className="page" dangerouslySetInnerHTML={{__html: this.state.page.content}} ></div>
+			<div className="page" dangerouslySetInnerHTML={{__html: this.state.content}} ></div>
 		);
 	}
 }
 
-// Page.contextTypes = {
-//   initialState: React.PropTypes.object.isRequired
-// };
+Page.propTypes = {
+  page: React.PropTypes.object.isRequired,
+  content: React.PropTypes.string.isRequired
+};
 
 export default Page;

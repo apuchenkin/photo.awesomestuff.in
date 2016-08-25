@@ -15,8 +15,6 @@ import Link from 'react-router/lib/Link';
 import Main from './components/main';
 import utils from './lib/utils';
 
-import './style/main.less';
-
 const categoryService = new CategoryService();
 const photoService = new PhotoService();
 const pageService = new PageService();
@@ -104,14 +102,18 @@ const pageRoute = (page) => {
     getComponents(location, cb) {
       var me = this;
       me.resolve().then(data => {
-        me.props = data;
+        me.props = {
+          page: page,
+          content: data.page.content
+        };
+
         cb(null, {
           header: PageHeader,
           body: Page
         });
       })
     }
-  }, initialState)
+  }, utils.pick(initialState, ['page']))
 }
 
 class CachedRoute extends Object {

@@ -5,6 +5,8 @@ import match from 'react-router/lib/match';
 import history from 'react-router/lib/browserHistory';
 
 // import ExtraDataProvider from './lib/provider.js';
+import './assets/fontello/css/fontello.css';
+import './style/main.less';
 import routes         from './routes';
 
 function createElement(Component, props) {
