@@ -14,6 +14,7 @@ import Photo from './components/photo';
 import Link from 'react-router/lib/Link';
 import Main from './components/main';
 import utils from './lib/utils';
+import Loader from './components/loader';
 
 const categoryService = new CategoryService();
 const photoService = new PhotoService();
@@ -140,7 +141,7 @@ class CachedRoute extends Object {
   }
 }
 
-const mainRoute = new CachedRoute({
+const mainRoute = {//new CachedRoute({
   path: '/',
   component: Main,
   resolve() {
@@ -161,15 +162,30 @@ const mainRoute = new CachedRoute({
     })
   },
 
+  onChange(prevState){
+    console.log("onChange", arguments);
+  },
+
+  onEnter(nextState) {
+    console.log("onEnter");
+  },
+
   getChildRoutes(location, cb) {
     var me = this;
+    console.log(111);
+    // debugger;
     me.resolve().then(data => {
+      console.log(222);
       cb(null, [].concat(
           data.categories.map(c => categryRoute(c, data)),
           data.pages.map(p => pageRoute(p))
         ));
-    })
+    });
+
+    //TODO: https://github.com/reactjs/react-router/issues/3463
+    // cb(null, [<Route path="*" components={{body: Loader}} />]);
   }
-}, initialState);
+}
+//}, initialState);
 
 export default mainRoute;

@@ -12,6 +12,7 @@
 - 404 page
 - 500, 503 page
 - route smart redirects
+- photo window onresize + debounce
 - different client/server layout for photo
 
 -----------------------------
