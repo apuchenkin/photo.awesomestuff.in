@@ -34,6 +34,7 @@ class NoMatch extends React.Component {
 const photoRoute = (props) => {
   return new CachedRoute ({
     path: "photo/:photoId",
+    state: utils.pick(initialState, ['photo']),
 
     getComponent(location, cb) {
       var me = this;
@@ -48,7 +49,7 @@ const photoRoute = (props) => {
         photo: photoService.fetchPhoto(params.photoId)
       })
     }
-  }, utils.pick(initialState, ['photo']))
+  })
 }
 
 const categryRoute = (category, props) => {
@@ -56,6 +57,7 @@ const categryRoute = (category, props) => {
 
   return new CachedRoute ({
     path: path,
+    state: utils.pick(initialState, ['photos']),
     // class: !!(category.parent || category).childs.length ? 'nav' : '',
     resolve(params) {
       return utils.fetchAll({
@@ -89,12 +91,13 @@ const categryRoute = (category, props) => {
         ]);
       })
     }
-  }, utils.pick(initialState, ['photos']));
+  });
 }
 
 const pageRoute = (page) => {
   return page.title && new CachedRoute({
     path: page.alias,
+    state: utils.pick(initialState, ['page']),
     resolve() {
       return utils.fetchAll({
         page: pageService.fetchPage(page.id)
@@ -115,77 +118,93 @@ const pageRoute = (page) => {
         });
       })
     }
-  }, utils.pick(initialState, ['page']))
+  })
 }
 
 class CachedRoute extends Object {
-  constructor(obj, cache) {
+  constructor(obj) {
     super(obj);
+
     const
       me = this,
-      resolve = obj.resolve;
-
-    me.cache = cache;
-    me.parent = {
-      resolve: resolve
-    };
+      wrappedResolve = (promise) => {
+        return (params) => {
+          const cmp = me.cmp;
+          console.log('cmp', cmp);
+          cmp && cmp.setState({isLoading: true});
+          return promise(params)
+            .then(data => {
+              Object.assign(me.state, data);
+              console.log('stopLoading');
+              cmp && cmp.setState({isLoading: false});
+              return data;
+            })
+        }
+      }
 
     Object.assign(me, {
-      resolve(params) {
-        return Object.keys(me.cache).length
-          ? Promise.resolve(me.cache)
-          : resolve(params)
-            .then(data => Object.assign(me.cache, data))
-      }
+      resolve: wrappedResolve(obj.resolve),
+
+      //TODO: check memory leaks while binding cmp to route
+      connect: (cmp) => {
+        this.cmp = cmp;
+      },
     })
   }
 }
 
-const mainRoute = {//new CachedRoute({
+const mainRoute = new CachedRoute({
   path: '/',
   component: Main,
+  state: utils.pick(initialState, ['categories', 'pages']),
+
   resolve() {
+    var me = this;
+
     return utils.fetchAll({
       categories: categoryService.fetchCategories(),
       pages: pageService.fetchPages()
     })
   },
 
+  // onChange(prevState){
+  //   console.log("onChange", arguments);
+  // },
+  //
+  // onEnter(nextState) {
+  //   console.log("onEnter");
+  // },
+
   getIndexRoute(location, cb) {
-    var me = this;
-    me.resolve().then(data => {
-      cb(null, {
-        class: 'main',
-        components: {header: HomeHeader, body: Home},
-        props: data
-      });
-    })
-  },
+    const
+      me = this,
+      callback = (data) => cb(null, {
+        class: 'main'
+      , components: {header: HomeHeader, body: Home}
+      , props: data
+      })
+    ;
 
-  onChange(prevState){
-    console.log("onChange", arguments);
-  },
-
-  onEnter(nextState) {
-    console.log("onEnter");
+    console.log('getIndexRoute', me.state);
+    Object.keys(me.state).length
+      ? callback(me.state)
+      : me.resolve().then(callback);
   },
 
   getChildRoutes(location, cb) {
-    var me = this;
-    console.log(111);
-    // debugger;
-    me.resolve().then(data => {
-      console.log(222);
-      cb(null, [].concat(
-          data.categories.map(c => categryRoute(c, data)),
-          data.pages.map(p => pageRoute(p))
-        ));
-    });
+    const
+      me = this,
+      callback = (data) => cb(null, [].concat(
+        data.categories.map(c => categryRoute(c, data))
+      , data.pages.map(p => pageRoute(p))
+      ))
+    ;
 
-    //TODO: https://github.com/reactjs/react-router/issues/3463
-    // cb(null, [<Route path="*" components={{body: Loader}} />]);
+    console.log('getChildRoutes', me.state);
+    Object.keys(me.state).length
+      ? callback(me.state)
+      : me.resolve().then(callback);
   }
-}
-//}, initialState);
+});
 
 export default mainRoute;

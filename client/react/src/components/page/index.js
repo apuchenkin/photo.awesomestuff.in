@@ -16,6 +16,10 @@ class Page extends React.Component {
 
   componentDidMount() {
     // debugger;
+    this.props.route.connect(this);
+  }
+  componentWillUnmount() {
+    // debugger;
   }
 
   componentWillReceiveProps(props) {
@@ -23,14 +27,11 @@ class Page extends React.Component {
       me = this,
       state = this.state;
 
-    if (props.page.id != state.page.id) {
-      this.setState({
-        isLoading: true
-      });
-      props.route.parent.resolve(props.params).then(data => {
+    if (props.route.path != this.props.route.path) {
+      props.route.connect(this);
+      props.route.resolve(props.params).then(data => {
         this.setState(Object.assign(data, {
-          content: data.page.content,
-          isLoading: false
+          content: data.page.content
         }))
       })
     }

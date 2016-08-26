@@ -10,6 +10,10 @@ class Header extends React.Component {
     }
   }
 
+  componentWillReceiveProps(props) {
+    this.setState({page: props.page});
+  }
+
 	render() {
 		return (
       <header className="main" ref="main">

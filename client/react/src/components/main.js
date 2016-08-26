@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'react-router/lib/Link';
+import Loader from './loader';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
@@ -11,6 +12,7 @@ class Main extends React.Component {
       super(props)
 
       this.state = {
+        isLoading: false,
         class: props.routes[props.routes.length - 1].class
       }
     }
@@ -21,6 +23,7 @@ class Main extends React.Component {
         props = me.props
       ;
 
+      props.route.connect(this);
       Ps.initialize(me.refs.content);
   	}
 
@@ -48,6 +51,7 @@ class Main extends React.Component {
 
       return (
         <div id="main" className={state.class} ref="main">
+          {this.state.isLoading && <Loader />}
           {this.props.header}
           <div className="content" ref="content">
             {this.props.body}
