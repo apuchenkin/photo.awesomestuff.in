@@ -14,26 +14,23 @@ class Page extends React.Component {
     }
   }
 
-  componentDidMount() {
-    // debugger;
-    this.props.route.connect(this);
-  }
-  componentWillUnmount() {
-    // debugger;
-  }
+  // componentDidMount() {
+  //   // debugger;
+  //   // this.props.route.connect(this);
+  // }
+  //
+  // componentWillUnmount() {
+  //   // debugger;
+  // }
 
   componentWillReceiveProps(props) {
     let
       me = this,
       state = this.state;
+    console.log("componentWillReceiveProps");
 
     if (props.route.path != this.props.route.path) {
-      props.route.connect(this);
-      props.route.resolve(props.params).then(data => {
-        this.setState(Object.assign(data, {
-          content: data.page.content
-        }))
-      })
+      this.setState({content: props.content});
     }
   }
 
@@ -41,7 +38,6 @@ class Page extends React.Component {
 		return (
       <div>
   			<div className="page" dangerouslySetInnerHTML={{__html: this.state.content}} ></div>
-        {this.state.isLoading && <Loader />}
       </div>
 		);
 	}

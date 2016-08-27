@@ -39,8 +39,12 @@ app.use((req, res) => {
     } else if (renderProps) {
       const
         location = req.protocol + '://' + req.get('host'),
-        data = renderProps.routes.filter(c => !!c.state).map(c => c.state),
-        initialState = data.reduce((acc,v) => Object.assign(acc, v), {}),
+        // data = renderProps.routes.filter(c => !!c.state).map(c => c.state),
+        // initialState = Object.assign(
+        //   data.reduce((acc,v) => Object.assign(acc, v), {}),
+        //   {routes: renderProps.routes}
+        // ),
+        initialState = renderProps.routes,
         componentHTML = ReactDOM.renderToString(
           // <ExtraDataProvider initialState={initialState}>
             <RouterContext {...renderProps} createElement={createElement} />

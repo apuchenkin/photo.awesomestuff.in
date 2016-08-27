@@ -26,12 +26,21 @@ class Gallery extends React.Component {
 			props = me.props
 		;
 
+		me.props.route.cmp = me;
 		me.packery = me.createPackery(me.refs.packery);
-		props.route.parent.resolve(props.params).then(data => {
-			this.setState(Object.assign(data, {
+	}
+
+	componentWillReceiveProps(props) {
+		let
+			me = this,
+			state = this.state;
+
+		if (props.route.path != this.props.route.path) {
+      this.setState({
 				category: props.category,
-			}))
-		})
+				photos: props.photos
+			});
+    }
 	}
 
 	componentDidUpdate() {
@@ -41,6 +50,7 @@ class Gallery extends React.Component {
 			this.packery.doUpdate();
 		}
 	}
+
 
 	createPackery(container) {
 	  var packery = new Packery(container, {
@@ -71,20 +81,6 @@ class Gallery extends React.Component {
 
 	  return packery;
 	}
-
-	componentWillReceiveProps(props) {
-		let
-			me = this,
-			state = this.state;
-
-		if (state.category.id != props.category.id) {
-			props.route.parent.resolve(props.params).then(data => {
-				this.setState(Object.assign(data, {
-					category: props.category,
-				}))
-			})
-		}
-  }
 
 	render() {
     let

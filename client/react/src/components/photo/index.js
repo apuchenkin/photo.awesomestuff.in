@@ -27,19 +27,19 @@ class Photo extends React.Component {
   }
 
 	componentDidMount() {
-		props.route.parent.resolve(props.params).then(data =>
-			me.setState(data)
-		)
+		// props.route.parent.resolve(props.params).then(data =>
+		// 	me.setState(data)
+		// )
 	}
 
 	componentWillReceiveProps(props) {
 		const
 			me = this;
 
-		if (props.params.photoId != me.state.photo.id) {
-			  props.route.parent.resolve(props.params).then(data =>
-					me.setState(data)
-				)
+		if (props.params != this.props.params) {
+			this.setState({
+				photo: props.photo
+			});
 		}
   }
 

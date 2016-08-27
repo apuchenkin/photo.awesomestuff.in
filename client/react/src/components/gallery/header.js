@@ -15,16 +15,6 @@ class Header extends React.Component {
     }
   }
 
-	// componentWillReceiveProps(props) {
-	// 	let
-	// 		me = this,
-	// 		params = props.params;
-	//
-  //   this.setState({
-	// 		params: params
-	// 	});
-  // }
-
 	render() {
     let
       state = this.state,

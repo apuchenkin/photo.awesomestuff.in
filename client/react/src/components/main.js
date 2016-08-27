@@ -23,7 +23,7 @@ class Main extends React.Component {
         props = me.props
       ;
 
-      props.route.connect(this);
+      props.route.cmp = this;
       Ps.initialize(me.refs.content);
   	}
 
