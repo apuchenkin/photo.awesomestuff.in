@@ -7,6 +7,7 @@ import Link from 'react-router/lib/Link';
 import Brick from './brick';
 import Loader from '../loader';
 import './gallery.less';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 var isBrowser = (typeof window !== 'undefined');
 var Packery = isBrowser ? window.Packery || require('packery') : null;
@@ -113,8 +114,12 @@ class Gallery extends React.Component {
 
 		return (
 				<div className={hasNav ? 'gallery nav' : 'gallery'} >
-					{this.state.isLoading && <Loader />}
-					{this.props.children}
+					<ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
+            {this.state.isLoading && <Loader />}
+          </ReactCSSTransitionGroup>
+					<ReactCSSTransitionGroup transitionName="photo" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
+						{this.props.children}
+					</ReactCSSTransitionGroup>
 					<ul ref="packery" className={this.state.isLoading ? 'loading' : ''}>{photos}</ul>
 				</div>
 		);

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'react-router/lib/Link';
 import Loader from './loader';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
@@ -51,7 +52,9 @@ class Main extends React.Component {
 
       return (
         <div id="main" className={state.class} ref="main">
-          {this.state.isLoading && <Loader />}
+          <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
+            {this.state.isLoading && <Loader />}
+          </ReactCSSTransitionGroup>
           {this.props.header}
           <div className="content" ref="content">
             {this.props.body}

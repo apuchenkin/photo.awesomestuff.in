@@ -21,11 +21,24 @@ figure, img {
   box-sizing: border-box;
   text-align: center;
   line-height: 100%;
-  transition: all 0.2s ease-out;
 
-  // &.transition {
-  //   display: block !important;
-  // }
+  &.photo-enter, &.photo-appear {
+    opacity: 0.01;
+  }
+
+  &.photo-enter.photo-enter-active, &.photo-appear.photo-appear-active {
+    opacity: 1;
+    transition: opacity @transition ease-out;
+  }
+
+  &.photo-leave {
+    opacity: 1;
+  }
+
+  &.photo-leave.photo-leave-active {
+    opacity: 0.01;
+    transition: opacity @transition ease-out;
+  }
 
   &:before {
     content: '';
@@ -70,7 +83,7 @@ figure, img {
     transition: opacity 0.2s ease-out;
 
     &.loading {
-      opacity: 0;
+      opacity: 0.1;
     }
 
     .photo {

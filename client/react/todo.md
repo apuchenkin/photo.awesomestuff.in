@@ -3,9 +3,10 @@
 [x] style recalcualtion on header
 [x] loader
 [x] componentDidMount fixes
+[x] effects
 
 -----------------------------
-- effects
+- photo window onresize + debounce
 - different client/server layout for photo
 - localization
 - metadata server/client updates
@@ -13,7 +14,6 @@
 - 404 page
 - 500, 503 page
 - route smart redirects
-- photo window onresize + debounce
 
 -----------------------------
 - encode/minify initial state

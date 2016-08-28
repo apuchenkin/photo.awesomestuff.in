@@ -27,14 +27,31 @@ html, body, body > .wrapper {
   background: #0b0b0b;
   opacity: 0.8;
   filter: alpha(opacity=80);
-  transition: all 0.2s ease-out;
 
-  &.transition {
-    display: block !important;
-    &.hidden {
-      opacity: 0;
-    }
+  &.loader-enter, &.loader-appear {
+    opacity: 0.01;
   }
+
+  &.loader-enter.loader-enter-active, &.loader-appear.loader-appear-active {
+    opacity: 0.8;
+    transition: opacity @transition ease-out;
+  }
+
+  &.loader-leave {
+    opacity: 0.8;
+  }
+
+  &.loader-leave.loader-leave-active {
+    opacity: 0.01;
+    transition: opacity @transition ease-out;
+  }
+
+  // &.transition {
+  //   display: block !important;
+  //   &.hidden {
+  //     opacity: 0;
+  //   }
+  // }
 
   .accent {
     transition: all 1s ease-out;

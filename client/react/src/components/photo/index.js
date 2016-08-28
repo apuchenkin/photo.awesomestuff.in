@@ -8,6 +8,7 @@ import config from '../../config.json';
 import Link from 'react-router/lib/Link';
 import Loader from '../loader';
 import './photo.less';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 var isBrowser = (typeof window !== 'undefined');
 
@@ -105,11 +106,15 @@ class Photo extends React.Component {
 
 		return (
 			<div className="photo-widget" onClick={this.close.bind(this)}>
-				{this.state.isLoading && <Loader />}
+				<ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
+					{this.state.isLoading && <Loader />}
+				</ReactCSSTransitionGroup>
+
 				{figure}
 				<PhotoLink onClick={e => e.stopPropagation()} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name} photoId={prev && prev.id} className="nav prev" title="PREV"><i className="icon-left-open" /></PhotoLink>
 				<PhotoLink onClick={e => e.stopPropagation()} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name} photoId={next && next.id} className="nav next" title="NEXT"><i className="icon-right-open" /></PhotoLink>
 			</div>
+
 		);
 	}
 }
