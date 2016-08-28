@@ -4,9 +4,9 @@
 [x] loader
 [x] componentDidMount fixes
 [x] effects
+[x] photo window onresize + debounce
 
 -----------------------------
-- photo window onresize + debounce
 - different client/server layout for photo
 - localization
 - metadata server/client updates

@@ -8,6 +8,7 @@ import config from '../../config.json';
 import Link from 'react-router/lib/Link';
 import Loader from '../loader';
 import './photo.less';
+import utils from '../../lib/utils';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 var isBrowser = (typeof window !== 'undefined');
@@ -23,10 +24,16 @@ class Photo extends React.Component {
 			photos: props.photos,
       photo: props.photo,
 			dimensions: {
-				width: isBrowser ? window.outerWidth - 40 : props.photo.width / 2,
-				height: isBrowser ? window.outerHeight - 40 : props.photo.height / 2
+				width: isBrowser ? window.innerWidth - 40 : props.photo.width / 2,
+				height: isBrowser ? window.innerWidth - 40 : props.photo.height / 2
 			}
     }
+
+		this.resize = utils.debounce(this.resize, 200);
+
+		if (isBrowser) {
+			window.onresize = this.resize.bind(this);
+		}
   }
 
 	// componentDidMount() {
@@ -77,6 +84,15 @@ class Photo extends React.Component {
 
 	onLoad() {
 		this.setState({isLoading: false});
+	}
+
+	resize() {
+		this.setState({
+			dimensions: {
+				width: isBrowser ? window.innerWidth - 40 : props.photo.width / 2,
+				height: isBrowser ? window.innerWidth - 40 : props.photo.height / 2
+			}
+		});
 	}
 
 	render() {
