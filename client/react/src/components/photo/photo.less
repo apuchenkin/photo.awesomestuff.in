@@ -23,10 +23,9 @@ figure, img {
   line-height: 100%;
   transition: all 0.2s ease-out;
 
-  &.transition {
-    display: block !important;
-    opacity: 0;
-  }
+  // &.transition {
+  //   display: block !important;
+  // }
 
   &:before {
     content: '';
@@ -67,6 +66,12 @@ figure, img {
     overflow: hidden;
     margin: 0 auto;
     text-align: left;
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
+
+    &.loading {
+      opacity: 0;
+    }
 
     .photo {
       max-width: 100%;

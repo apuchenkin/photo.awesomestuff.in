@@ -6,6 +6,7 @@ import PhotoLink from '../link/photo';
 import resolutions from './resolution.json';
 import config from '../../config.json';
 import Link from 'react-router/lib/Link';
+import Loader from '../loader';
 import './photo.less';
 
 var isBrowser = (typeof window !== 'undefined');
@@ -16,6 +17,7 @@ class Photo extends React.Component {
 		super(props);
 
     this.state = {
+			isLoading: true,
 			category: props.category,
 			photos: props.photos,
       photo: props.photo,
@@ -26,11 +28,12 @@ class Photo extends React.Component {
     }
   }
 
-	componentDidMount() {
-		// props.route.parent.resolve(props.params).then(data =>
-		// 	me.setState(data)
-		// )
-	}
+	// componentDidMount() {
+	// 	// this.setState({isLoading: false});
+	// 	// props.route.parent.resolve(props.params).then(data =>
+	// 	// 	me.setState(data)
+	// 	// )
+	// }
 
 	componentWillReceiveProps(props) {
 		const
@@ -71,6 +74,10 @@ class Photo extends React.Component {
 		this.props.router.push('/' + url + '/photo/' + next.id);
 	}
 
+	onLoad() {
+		this.setState({isLoading: false});
+	}
+
 	render() {
     const
       state = this.state,
@@ -85,9 +92,9 @@ class Photo extends React.Component {
 			src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/'),
 			url = '/' + (category.parent ? category.parent.name + '/' + category.name : category.name),
 			figure = (
-				<figure className="content">
+				<figure className={this.state.isLoading ? "content loading" : "content"} >
 					<div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>CLOSE <i className="icon-cancel"></i></Link></div>
-					<img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next)}} src={src} style={{maxHeight: (h - 120) + 'px', maxWidth: w + 'px'}} />
+					<img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next)}} src={src} style={{maxHeight: (h - 120) + 'px', maxWidth: w + 'px'}} onLoad={this.onLoad.bind(this)} />
 					<figcaption className="description">
 						<span className="caption">{photo.caption}</span>
 						{photo.author && <div>AUTHOR: <span className="author">{photo.author.name}</span></div>}
@@ -98,6 +105,7 @@ class Photo extends React.Component {
 
 		return (
 			<div className="photo-widget" onClick={this.close.bind(this)}>
+				{this.state.isLoading && <Loader />}
 				{figure}
 				<PhotoLink onClick={e => e.stopPropagation()} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name} photoId={prev && prev.id} className="nav prev" title="PREV"><i className="icon-left-open" /></PhotoLink>
 				<PhotoLink onClick={e => e.stopPropagation()} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name} photoId={next && next.id} className="nav next" title="NEXT"><i className="icon-right-open" /></PhotoLink>

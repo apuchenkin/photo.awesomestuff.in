@@ -5,6 +5,7 @@ import PhotoService from '../../service/Photo';
 import config from '../../config.json';
 import Link from 'react-router/lib/Link';
 import Brick from './brick';
+import Loader from '../loader';
 import './gallery.less';
 
 var isBrowser = (typeof window !== 'undefined');
@@ -15,6 +16,7 @@ class Gallery extends React.Component {
 		super(props);
 
     this.state = {
+			isLoading: true,
       category: props.category,
 			photos: props.photos || []
     }
@@ -22,12 +24,23 @@ class Gallery extends React.Component {
 
 	componentDidMount() {
 		const
-			me = this,
-			props = me.props
+			me = this
 		;
 
+		// debugger;
+
+		me.setState({isLoading: false});
 		me.props.route.cmp = me;
 		me.packery = me.createPackery(me.refs.packery);
+	}
+
+	componentWillUnmount() {
+		const
+			me = this
+		;
+
+		me.packery.destroy();
+		me.packery = null;
 	}
 
 	componentWillReceiveProps(props) {
@@ -100,8 +113,9 @@ class Gallery extends React.Component {
 
 		return (
 				<div className={hasNav ? 'gallery nav' : 'gallery'} >
+					{this.state.isLoading && <Loader />}
 					{this.props.children}
-					<ul ref="packery">{photos}</ul>
+					<ul ref="packery" className={this.state.isLoading ? 'loading' : ''}>{photos}</ul>
 				</div>
 		);
 	}

@@ -5,6 +5,15 @@
   position: relative;
   overflow: visible !important;
 
+  & > ul {
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
+
+    &.loading {
+      opacity: 0;
+    }
+  }
+
   &.nav {
     padding-top: 2 * @divisor + @divisor / 4;
   }
