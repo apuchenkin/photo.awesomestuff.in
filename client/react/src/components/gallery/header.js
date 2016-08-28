@@ -5,21 +5,11 @@ import Link from 'react-router/lib/Link';
 import './navigation.less';
 
 class Header extends React.Component {
-
-	constructor(props) {
-		super(props);
-
-    this.state = {
-      category: props.category,
-      categories: props.categories || []
-    }
-  }
-
 	render() {
     let
-      state = this.state,
-      category = state.category.parent || state.category,
-			childrens = state.categories
+      props = this.props,
+      category = props.category.parent || props.category,
+			childrens = props.categories
 				.filter(c => c.parent && c.parent.name === category.name)
 				.map(c => {
 		      return (

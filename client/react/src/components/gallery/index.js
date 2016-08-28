@@ -17,9 +17,7 @@ class Gallery extends React.Component {
 		super(props);
 
     this.state = {
-			isLoading: true,
-      category: props.category,
-			photos: props.photos || []
+			isLoading: true
     }
   }
 
@@ -42,19 +40,6 @@ class Gallery extends React.Component {
 
 		me.packery.destroy();
 		me.packery = null;
-	}
-
-	componentWillReceiveProps(props) {
-		let
-			me = this,
-			state = this.state;
-
-		if (props.route.path != this.props.route.path) {
-      this.setState({
-				category: props.category,
-				photos: props.photos
-			});
-    }
 	}
 
 	componentDidUpdate() {
@@ -98,29 +83,30 @@ class Gallery extends React.Component {
 
 	render() {
     let
-      state = this.state,
-			category = state.category,
-			photos = state.photos.map(p => (
+      props = this.props,
+			state = this.state,
+			category = props.category,
+			photos = props.photos.map(p => (
 				<li className="photo" key={p.id} >
 					<PhotoLink photoId={p.id} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name}>
 						<Brick photo={p} />
 					</PhotoLink>
 				</li>
 			)),
-			hasNav = !!(category.parent || category).childs.length
-      // childrens = state.photos && !!state.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
-      //   photos: state.photos
-      // }));
+			hasNav = !!(category.parent || category).childs.length,
+      childrens = props.photos && !!props.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
+        photos: props.photos
+      }));
 
 		return (
 				<div className={hasNav ? 'gallery nav' : 'gallery'} >
-					<ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
-            {this.state.isLoading && <Loader />}
+					<ReactCSSTransitionGroup transitionName="loader" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
+            {state.isLoading && <Loader />}
           </ReactCSSTransitionGroup>
-					<ReactCSSTransitionGroup transitionName="photo" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
-						{this.props.children}
+					<ReactCSSTransitionGroup transitionName="photo" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
+						{childrens}
 					</ReactCSSTransitionGroup>
-					<ul ref="packery" className={this.state.isLoading ? 'loading' : ''}>{photos}</ul>
+					<ul ref="packery" className={state.isLoading ? 'loading' : ''}>{photos}</ul>
 				</div>
 		);
 	}

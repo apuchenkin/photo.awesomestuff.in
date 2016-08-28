@@ -6,18 +6,10 @@ import config from '../../config.json';
 import './style.less';
 
 class Home extends React.Component {
-	constructor(props) {
-    super(props);
-
-    this.state = {
-			categories: props.categories || []
-		}
-  }
-
 	render() {
     let
-			state = this.state,
-			categories = state.categories,
+			props = this.props,
+			categories = props.categories,
       galleries = categories.filter(c => !c.parent && c.title && c.image).map(function(category) {
           return (
             <li key={category.id} >
@@ -52,8 +44,8 @@ class Home extends React.Component {
 	}
 }
 
-// Home.contextTypes = {
-//   initialState: React.PropTypes.any.isRequired
-// };
+Home.propTypes = {
+  categories: React.PropTypes.array.isRequired
+};
 
 export default Home;

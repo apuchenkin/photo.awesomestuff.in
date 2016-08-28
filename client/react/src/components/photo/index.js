@@ -20,39 +20,31 @@ class Photo extends React.Component {
 
     this.state = {
 			isLoading: true,
-			category: props.category,
-			photos: props.photos,
-      photo: props.photo,
 			dimensions: {
 				width: isBrowser ? window.innerWidth - 40 : props.photo.width / 2,
 				height: isBrowser ? window.innerWidth - 40 : props.photo.height / 2
 			}
     }
 
-		this.resize = utils.debounce(this.resize, 200);
-
-		if (isBrowser) {
-			window.onresize = this.resize.bind(this);
-		}
+		this.resize = utils.debounce(this.resize, 200).bind(this);
   }
 
-	// componentDidMount() {
-	// 	// this.setState({isLoading: false});
-	// 	// props.route.parent.resolve(props.params).then(data =>
-	// 	// 	me.setState(data)
-	// 	// )
-	// }
+	componentDidMount() {
+		window.addEventListener('resize', this.resize);
+	}
 
-	componentWillReceiveProps(props) {
-		const
-			me = this;
+	componentWillUnmount() {
+		window.removeEventListener('resize', this.resize);
+	}
 
-		if (props.params != this.props.params) {
-			this.setState({
-				photo: props.photo
-			});
-		}
-  }
+	resize() {
+		this.setState({
+			dimensions: {
+				width: isBrowser ? window.innerWidth - 40 : props.photo.width / 2,
+				height: isBrowser ? window.innerWidth - 40 : props.photo.height / 2
+			}
+		});
+	}
 
 	adjust (w, h) {
 		const
@@ -66,7 +58,7 @@ class Photo extends React.Component {
 
 	close() {
 		const
-			category = this.state.category,
+			category = this.props.category,
 			url = category.parent ? category.parent.name + '/' + category.name : category.name
 		;
 
@@ -75,7 +67,7 @@ class Photo extends React.Component {
 
 	goNext(next) {
 		const
-			category = this.state.category,
+			category = this.props.category,
 			url = category.parent ? category.parent.name + '/' + category.name : category.name
 		;
 
@@ -86,21 +78,13 @@ class Photo extends React.Component {
 		this.setState({isLoading: false});
 	}
 
-	resize() {
-		this.setState({
-			dimensions: {
-				width: isBrowser ? window.innerWidth - 40 : props.photo.width / 2,
-				height: isBrowser ? window.innerWidth - 40 : props.photo.height / 2
-			}
-		});
-	}
-
 	render() {
     const
       state = this.state,
-      photo = state.photo,
-			category = state.category,
-			photos = state.photos,
+			props = this.props,
+      photo = props.photo,
+			category = props.category,
+			photos = props.photos,
       pidx = photos.findIndex(p => p.id == photo.id),
       prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
       next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
