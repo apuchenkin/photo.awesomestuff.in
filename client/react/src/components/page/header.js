@@ -1,4 +1,5 @@
 import React from 'react';
+import {FormattedMessage} from 'react-intl';
 import Link from 'react-router/lib/Link';
 
 class Header extends React.Component {
@@ -10,7 +11,10 @@ class Header extends React.Component {
 		return (
       <header className="main" ref="main">
 				<h1 className="title">
-					<Link to='/' activeClassName="active">HOME</Link> / {this.props.page.title}
+					<Link to='/' activeClassName="active"><FormattedMessage
+						id="home"
+						defaultMessage={`Home`}
+						/></Link> / {this.props.page.title}
 				</h1>
 			</header>
 		);

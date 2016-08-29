@@ -21,7 +21,8 @@ const photoService = new PhotoService();
 const pageService = new PageService();
 
 const isBrowser = (typeof window !== 'undefined');
-const initialState = isBrowser && window.__INITIAL_STATE__ || [];
+const initialState = isBrowser && window.__INITIAL_STATE__ || {};
+const routerState = initialState.routes || [];
 
 class NoMatch extends React.Component {
   render() {
@@ -34,7 +35,7 @@ class NoMatch extends React.Component {
 const photoRoute = (props) => {
   return new CachedRoute ({
     path: "photo/:photoId",
-    state: initialState[2] ? initialState[2].state : {},
+    state: routerState[2] ? routerState[2].state : {},
 
     getComponent(location, cb) {
       var me = this;
@@ -58,7 +59,7 @@ const categryRoute = (category, props) => {
 
   return new CachedRoute ({
     path: path,
-    state: initialState[1] && initialState[1].path === path ? initialState[1].state : {},
+    state: routerState[1] && routerState[1].path === path ? routerState[1].state : {},
 
     resolve(params) {
       return utils.fetchAll({
@@ -97,7 +98,7 @@ const categryRoute = (category, props) => {
 
 const pageRoute = (page) => new CachedRoute({
   path: page.alias,
-  state: initialState[1] && initialState[1].path === page.alias ? initialState[1].state : {},
+  state: routerState[1] && routerState[1].path === page.alias ? routerState[1].state : {},
   resolve() {
     return utils.fetchAll({
       page: pageService.fetchPage(page.id)
@@ -152,8 +153,7 @@ class CachedRoute extends Object {
 
 const mainRoute = new CachedRoute({
   path: '/',
-  component: Main,
-  state: initialState[0] ? initialState[0].state : {},
+  state: routerState[0] ? routerState[0].state : {},
 
   resolve() {
     var me = this;
@@ -162,6 +162,20 @@ const mainRoute = new CachedRoute({
       categories: categoryService.fetchCategories(),
       pages: pageService.fetchPages()
     })
+  },
+
+  getComponent(location, cb) {
+    var me = this,
+        callback = (data) => {
+          me.props = data;
+          me.component = Main;
+          cb(null, me.component);
+        }
+      ;
+
+    Object.keys(me.state).length
+      ? callback(me.state)
+      : me.resolve(location.params, location.routes[0].cmp).then(callback)
   },
 
   getIndexRoute(location, cb) {

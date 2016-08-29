@@ -3,21 +3,27 @@ import ReactDOM from 'react-dom';
 import Router from 'react-router/lib/Router';
 import match from 'react-router/lib/match';
 import history from 'react-router/lib/browserHistory';
+import { IntlProvider}  from 'react-intl';
 
-// import ExtraDataProvider from './lib/provider.js';
+import routes from './routes';
+import config from './config';
+
 import './assets/fontello/css/fontello.css';
 import './style/main.less';
-import routes         from './routes';
+
 
 function createElement(Component, props) {
   return <Component {...props} {...props.route.props} />
 }
 
+const isBrowser = (typeof window !== 'undefined');
+const initialState = isBrowser && window.__INITIAL_STATE__ || {};
+
 match({ history, routes }, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
-    // <ExtraDataProvider initialState={initialState}>
+    <IntlProvider locale={initialState.locale || config.fallbackLocale} messages={initialState.messages}>
       <Router {...renderProps} createElement={createElement} />
-    // </ExtraDataProvider>
-    , document.getElementById('react-view')
+    </IntlProvider>,
+    document.getElementById('react-view')
   );
 })

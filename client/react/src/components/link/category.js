@@ -22,5 +22,3 @@ CategoryLink.propTypes = {
   category: React.PropTypes.string.isRequired,
   subcategory: React.PropTypes.string
 }
-
-export default CategoryLink;

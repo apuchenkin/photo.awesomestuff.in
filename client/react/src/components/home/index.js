@@ -3,6 +3,7 @@ import CategoryService from '../../service/Category';
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router';
 import CategoryLink from '../link/category';
 import config from '../../config.json';
+import {FormattedMessage} from 'react-intl';
 import './style.less';
 
 class Home extends React.Component {
@@ -37,7 +38,12 @@ class Home extends React.Component {
 
 		return (
 			<div className="galleries">
-				<h2>Галереи</h2>
+				<h2>
+					<FormattedMessage
+							id="galleries"
+							defaultMessage={`Galleries`}
+					/>
+				</h2>
 				<ul>{galleries}</ul>
 			</div>
 		);

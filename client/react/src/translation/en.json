@@ -1,0 +1,26 @@
+{
+  "META_DESCRIPTION": "Travel Photography by Artem Puchenkin and Tatiana Kuzmicheva.",
+  "META_DESCRIPTION_PHOTO": "Author: {{author}}, Title: {{title}}",
+
+  "alfa": "beta",
+  "description": "Travel in photography",
+  "home": "Home",
+  "galleries": "Galleries",
+  "footer": "2016, Artem Puchenkin",
+  "RU": "Ru",
+  "EN": "En",
+  "ERROR": {
+    "404": "Error 404",
+    "NOT_EXISTS": "This page does not exists",
+    "THIS_MIGHT_BE": "This might be because of:",
+    "REASON1": "It have not been created yet",
+    "REASON2": "It have been deleted for some reason",
+    "CONSEQUENCE": "If you want to help this page to be alive, please, send your ideas to: info 'at' photo.awesomestuff.in",
+    "BACK": "Go back",
+    "HOME": "Return home"
+  },
+  "photo.author": "by {author}",
+  "icon.close": "Close {icon}",
+  "prev": "Previous (Left arrow key)",
+  "next": "Next (Right arrow key)"
+}

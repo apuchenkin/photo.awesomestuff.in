@@ -26,8 +26,6 @@ class Gallery extends React.Component {
 			me = this
 		;
 
-		// debugger;
-
 		me.setState({isLoading: false});
 		me.props.route.cmp = me;
 		me.packery = me.createPackery(me.refs.packery);

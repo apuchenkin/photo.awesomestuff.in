@@ -1,5 +1,6 @@
 import React from 'react';
 import CategoryLink from '../link/category';
+import {FormattedMessage} from 'react-intl';
 import Link from 'react-router/lib/Link';
 
 import './navigation.less';
@@ -17,12 +18,16 @@ class Header extends React.Component {
 		           <CategoryLink category={c.parent.name} subcategory={c.name}>{c.title}</CategoryLink>
 		         </li>
 		      )
-			});
+			})
+		;
 
 		return (
 			<header className="main" ref="main">
-				<h1 className="title">
-					<Link to='/' activeClassName="active">HOME</Link> / <CategoryLink category={category.name}>{category.title}</CategoryLink>
+				<h1 className="title">{[
+					<Link to='/' activeClassName="active" key="page.home"><FormattedMessage id="home" defaultMessage={`Home`} /></Link>
+					, " / "
+					, <CategoryLink category={category.name} key="page.category" >{category.title}</CategoryLink>
+				]}
 				</h1>
         {childrens && <nav className="categories"><ul>{childrens}</ul></nav>}
 			</header>

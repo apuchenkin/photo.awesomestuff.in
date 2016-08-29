@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'react-router/lib/Link';
 import Loader from './loader';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import {FormattedMessage} from 'react-intl';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
@@ -43,12 +44,11 @@ class Main extends React.Component {
 
     render() {
       const
-        state = this.state
+        state = this.state,
+        props = this.props,
+        aboutPage = props.pages.find(p => p.alias == 'about'),
+        contactsPage = props.pages.find(p => p.alias == 'contacts')
       ;
-
-      if(this.props.children) {
-        debugger;
-      }
 
       return (
         <div id="main" className={state.class} ref="main">
@@ -59,7 +59,12 @@ class Main extends React.Component {
           <div className="content" ref="content">
             {this.props.body}
             <footer>
-              <Link to="/">photo.awesomestuff.in</Link> | © 2015, Пученкин Артём | <Link to="/about">О сайте</Link> | <Link to="/contacts">Контакты</Link>
+              <Link to="/">photo.awesomestuff.in</Link> | &copy; <FormattedMessage
+                    id="footer"
+                    defaultMessage={`2016, Artem Puchenkin`}
+                />
+              {aboutPage && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
+              {contactsPage && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
             </footer>
           </div>
         </div>
@@ -67,8 +72,8 @@ class Main extends React.Component {
     }
 }
 
-// Main.contextTypes = {
-//   initialState: React.PropTypes.any.isRequired
-// };
+Main.propTypes = {
+  pages: React.PropTypes.array.isRequired
+};
 
 export default Main;

@@ -6,8 +6,8 @@ import express from 'express';
 import favicon from 'serve-favicon';
 import proxy from 'http-proxy-middleware';
 import Promise from 'promise';
+import { IntlProvider} from 'react-intl';
 
-// import ExtraDataProvider from '../lib/provider.js';
 import config from '../config.json';
 import routes from '../routes';
 
@@ -15,6 +15,11 @@ const app = express();
 
 function createElement(Component, props) {
   return <Component {...props} {...props.route.props} />
+}
+
+function determineLocale(req, props) {
+ //TODO: determine locale
+ return config.fallbackLocale
 }
 
 app.use('/api', proxy({
@@ -38,23 +43,22 @@ app.use((req, res) => {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
       const
+        locale = determineLocale(req, renderProps),
         location = req.protocol + '://' + req.get('host'),
-        // data = renderProps.routes.filter(c => !!c.state).map(c => c.state),
-        // initialState = Object.assign(
-        //   data.reduce((acc,v) => Object.assign(acc, v), {}),
-        //   {routes: renderProps.routes}
-        // ),
-        initialState = renderProps.routes,
+        messages = require('../translation/' + locale + '.json'),
+        initialState = {
+          routes: renderProps.routes,
+          locale: locale,
+          messages: messages
+        },
         componentHTML = ReactDOM.renderToString(
-          // <ExtraDataProvider initialState={initialState}>
+          <IntlProvider locale={locale} messages={messages}>
             <RouterContext {...renderProps} createElement={createElement} />
-          // </ExtraDataProvider>
-        );
-
-      let metaData = {
-        title: 1,
-        description: 1
-      }
+          </IntlProvider>,
+        ), metaData = {
+          title: 1,
+          description: 1
+        }
 
       res.status(200).send(renderHTML({
           componentHTML,
@@ -73,7 +77,7 @@ app.use((req, res) => {
   })
 })
 
-//todo: mock
+//TODO: mock
 const escapeHTML = x => x;
 
 function renderHTML({ componentHTML, initialState, metaData, config }) {
@@ -91,7 +95,6 @@ function renderHTML({ componentHTML, initialState, metaData, config }) {
         <body>
           <div id="react-view" class="wrapper">${componentHTML}</div>
           <script type="application/javascript">
-            window.__CONFIG__ = ${JSON.stringify(config)};
             window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
           </script>
           <script type="application/javascript" src="${config.staticEndpoint}/bundle.js"></script>
