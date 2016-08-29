@@ -1,15 +1,16 @@
 import React from 'react';
-import Link from 'react-router/lib/Link';
+import Link from './link';
 import Loader from './loader';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import {FormattedMessage} from 'react-intl';
+import { FormattedMessage } from 'react-intl/lib/FormattedMessage';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
-var isBrowser = (typeof window !== 'undefined');
-var Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
+const {array, string} = React.PropTypes;
+const isBrowser = (typeof window !== 'undefined');
+const Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
-class Main extends React.Component {
+export default class Main extends React.Component {
     constructor (props) {
       super(props)
 
@@ -17,6 +18,10 @@ class Main extends React.Component {
         isLoading: false,
         class: props.routes[props.routes.length - 1].class
       }
+    }
+
+    getChildContext() {
+      return {locale: this.props.route.locale};
     }
 
   	componentDidMount() {
@@ -59,7 +64,7 @@ class Main extends React.Component {
           <div className="content" ref="content">
             {this.props.body}
             <footer>
-              <Link to="/">photo.awesomestuff.in</Link> | &copy; <FormattedMessage
+              <Link to="/" >photo.awesomestuff.in</Link> | &copy; <FormattedMessage
                     id="footer"
                     defaultMessage={`2016, Artem Puchenkin`}
                 />
@@ -72,8 +77,10 @@ class Main extends React.Component {
     }
 }
 
-Main.propTypes = {
-  pages: React.PropTypes.array.isRequired
+Main.childContextTypes = {
+  locale: string
 };
 
-export default Main;
+Main.propTypes = {
+  pages: array.isRequired
+};

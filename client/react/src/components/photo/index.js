@@ -3,9 +3,10 @@ import withRouter from 'react-router/lib/withRouter';
 import Category from '../link/category';
 import PhotoService from '../../service/Photo';
 import PhotoLink from '../link/photo';
+import CategoryLink from '../link/category';
 import resolutions from './resolution.json';
 import config from '../../config.json';
-import Link from 'react-router/lib/Link';
+import Link from '../link';
 import Loader from '../loader';
 import './photo.less';
 import utils from '../../lib/utils';
@@ -16,7 +17,6 @@ import { bind, memoize, debounce } from 'decko';
 var isBrowser = (typeof window !== 'undefined');
 
 class Photo extends React.Component {
-
 	constructor(props) {
 		super(props);
 
@@ -104,7 +104,7 @@ class Photo extends React.Component {
 				id="icon.close"
 				defaultMessage={`Close {icon}`}
 				values={{icon: (<i className="icon-cancel"></i>)}}
-				/>,
+			/>,
 			figure = (
 				<figure className={this.state.isLoading ? "content loading" : "content"} >
 					<div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>{closeIcon}</Link></div>
@@ -126,22 +126,21 @@ class Photo extends React.Component {
 				<ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
 					{this.state.isLoading && <Loader />}
 				</ReactCSSTransitionGroup>
-
 				{figure}
 				<PhotoLink
 					onClick={e => e.stopPropagation()}
-					category={category.parent ? category.parent.name : category.name}
-					subcategory={category.parent && category.name}
+					{...CategoryLink.fromCategory(category)}
 					photoId={prev && prev.id}
 					className="nav prev"
-					title={intl.formatMessage({id: 'prev'})}><i className="icon-left-open" />
+					title={intl.formatMessage({id: 'prev'})}>
+					<i className="icon-left-open" />
 				</PhotoLink>
 				<PhotoLink onClick={e => e.stopPropagation()}
-					category={category.parent ? category.parent.name : category.name}
-					subcategory={category.parent && category.name}
+					{...CategoryLink.fromCategory(category)}
 					photoId={next && next.id}
 					className="nav next"
-					title={intl.formatMessage({id: 'next'})}><i className="icon-right-open" />
+					title={intl.formatMessage({id: 'next'})}>
+					<i className="icon-right-open" />
 				</PhotoLink>
 			</div>
 
@@ -157,4 +156,4 @@ Photo.propTypes = {
 	router: React.PropTypes.object.isRequired
 }
 
-export default withRouter(injectIntl(Photo));
+export default withRouter(injectIntl(Photo))

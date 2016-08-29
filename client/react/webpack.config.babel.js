@@ -7,7 +7,7 @@ import config from './src/config.json';
 
 const ENV = process.env.NODE_ENV || 'development';
 
-const CSS_MAPS = ENV!=='production';
+const CSS_MAPS = ENV !== 'production';
 
 module.exports = {
 	context: path.resolve(__dirname, "src"),
@@ -87,7 +87,6 @@ module.exports = {
 		new webpack.NoErrorsPlugin(),
 		new ExtractTextPlugin('bundle.css', {
 			allChunks: true
-			// disable: ENV!=='production'
 		}),
 		new webpack.optimize.DedupePlugin(),
 		new webpack.DefinePlugin({

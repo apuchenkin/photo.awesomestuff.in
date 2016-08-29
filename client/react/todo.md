@@ -7,8 +7,9 @@
 [x] photo window onresize + debounce
 
 -----------------------------
+
+- localization (60%)
 - different client/server layout for photo
-- localization
 - metadata server/client updates
 
 - 404 page

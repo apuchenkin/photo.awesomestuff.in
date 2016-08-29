@@ -1,11 +1,18 @@
 import React from 'react';
 import CategoryLink from '../link/category';
 import {FormattedMessage} from 'react-intl';
-import Link from 'react-router/lib/Link';
-
+import Link from '../link';
 import './navigation.less';
 
-class Header extends React.Component {
+const {object, array} = React.PropTypes;
+
+export default class Header extends React.Component {
+
+	static propTypes = {
+		category: object.isRequired,
+	  categories: array.isRequired
+	}
+
 	render() {
     let
       props = this.props,
@@ -34,10 +41,3 @@ class Header extends React.Component {
 		);
 	}
 }
-
-Header.propTypes = {
-	category: React.PropTypes.object.isRequired,
-  categories: React.PropTypes.array.isRequired
-};
-
-export default Header

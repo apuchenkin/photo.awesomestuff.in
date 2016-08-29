@@ -1,5 +1,4 @@
 import React from 'react';
-import Link from 'react-router/lib/Link';
 import Loader from '../loader';
 
 class Page extends React.Component {

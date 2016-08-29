@@ -1,9 +1,9 @@
 import React from 'react';
 import CategoryLink from '../link/category';
 import {FormattedMessage} from 'react-intl';
-import Link from 'react-router/lib/Link';
+import Link from '../link';
 
-class Header extends React.Component {
+export default class Header extends React.Component {
 	render() {
 		return (
 			<header className="main" ref="main">
@@ -21,5 +21,3 @@ class Header extends React.Component {
 		);
 	}
 }
-
-export default Header

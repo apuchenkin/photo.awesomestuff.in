@@ -1,5 +1,4 @@
 import React from 'react';
-import { Route, Redirect, createRoutes, withRouter, IndexRoute } from 'react-router';
 import CategoryService from './service/Category';
 import PhotoService from './service/Photo';
 import PageService from './service/Page';
@@ -151,8 +150,9 @@ class CachedRoute extends Object {
   }
 }
 
-const mainRoute = new CachedRoute({
-  path: '/',
+const mainRoute = (locale) => new CachedRoute({
+  path: locale ? `/${locale}` : `/`,
+  locale: locale,
   state: routerState[0] ? routerState[0].state : {},
 
   resolve() {
@@ -215,4 +215,5 @@ const mainRoute = new CachedRoute({
   }
 });
 
-export default mainRoute;
+//TODO: locales
+export default [mainRoute(), mainRoute('ru'), mainRoute('en')];

@@ -3,7 +3,6 @@ import CategoryLink from '../link/category';
 import PhotoLink from '../link/photo';
 import PhotoService from '../../service/Photo';
 import config from '../../config.json';
-import Link from 'react-router/lib/Link';
 import Brick from './brick';
 import Loader from '../loader';
 import './gallery.less';
@@ -12,7 +11,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 var isBrowser = (typeof window !== 'undefined');
 var Packery = isBrowser ? window.Packery || require('packery') : null;
 
-class Gallery extends React.Component {
+export default class Gallery extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -86,7 +85,7 @@ class Gallery extends React.Component {
 			category = props.category,
 			photos = props.photos.map(p => (
 				<li className="photo" key={p.id} >
-					<PhotoLink photoId={p.id} category={category.parent ? category.parent.name : category.name} subcategory={category.parent && category.name}>
+					<PhotoLink photoId={p.id} {...CategoryLink.fromCategory(category)}>
 						<Brick photo={p} />
 					</PhotoLink>
 				</li>
@@ -114,5 +113,3 @@ Gallery.propTypes = {
   category: React.PropTypes.object.isRequired,
 	photos: React.PropTypes.array.isRequired
 };
-
-export default Gallery

@@ -1,6 +1,6 @@
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
-import Link from 'react-router/lib/Link';
+import Link from '../link';
 
 class Header extends React.Component {
   componentWillReceiveProps(props) {
