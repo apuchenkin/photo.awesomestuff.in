@@ -6,7 +6,7 @@ import config from '../config.json';
 // var query = url_parts.query;
 
 const defaults = {
-  locale: 'en',
+  locale: config.fallbackLocale,
   location: config.apiEndpoint
 };
 

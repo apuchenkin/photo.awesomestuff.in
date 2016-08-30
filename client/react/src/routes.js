@@ -8,12 +8,12 @@ import Gallery from './components/gallery';
 import GalleryHeader from './components/gallery/header';
 import Page from './components/page';
 import PageHeader from './components/page/header';
-import Promise from 'promise';
 import Photo from './components/photo';
 import Link from 'react-router/lib/Link';
 import Main from './components/main';
 import utils from './lib/utils';
 import Loader from './components/loader';
+import Route from './lib/route';
 
 const categoryService = new CategoryService();
 const photoService = new PhotoService();
@@ -32,7 +32,7 @@ class NoMatch extends React.Component {
 }
 
 const photoRoute = (props) => {
-  return new CachedRoute ({
+  return new Route({
     path: "photo/:photoId",
     state: routerState[2] ? routerState[2].state : {},
 
@@ -56,7 +56,7 @@ const photoRoute = (props) => {
 const categryRoute = (category, props) => {
   const path = category.parent ? category.parent.name + '/' + category.name : category.name;
 
-  return new CachedRoute ({
+  return new Route({
     path,
     state: routerState[1] && routerState[1].path === path ? routerState[1].state : {},
 
@@ -95,7 +95,7 @@ const categryRoute = (category, props) => {
   });
 };
 
-const pageRoute = (page) => new CachedRoute({
+const pageRoute = (page) => new Route({
   path: page.alias,
   state: routerState[1] && routerState[1].path === page.alias ? routerState[1].state : {},
   resolve() {
@@ -126,33 +126,8 @@ const pageRoute = (page) => new CachedRoute({
   }
 });
 
-class CachedRoute extends Object {
-  constructor(obj) {
-    super(obj);
-
-    const
-      me = this,
-      wrappedResolve = (promise) => {
-        return (params, cmp) => {
-          cmp && cmp.setState({isLoading: true});
-          return promise(params)
-            .then(data => {
-              Object.assign(me.state, data);
-              cmp && cmp.setState({isLoading: false});
-              return data;
-            });
-        };
-      };
-
-    Object.assign(me, {
-      resolve: wrappedResolve(obj.resolve)
-    });
-  }
-}
-
-const mainRoute = (locale) => new CachedRoute({
-  path: locale ? `/${locale}` : `/`,
-  locale,
+const mainRoute = new Route({
+  path: "/",
   state: routerState[0] ? routerState[0].state : {},
 
   resolve() {
@@ -215,5 +190,4 @@ const mainRoute = (locale) => new CachedRoute({
   }
 });
 
-//TODO: locales
-export default [mainRoute(), mainRoute('ru'), mainRoute('en')];
+export default mainRoute;

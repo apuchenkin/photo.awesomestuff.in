@@ -3,7 +3,6 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import CategoryLink from '../link/category';
 import PhotoLink from '../link/photo';
-import PhotoService from '../../service/Photo';
 import config from '../../config.json';
 import Brick from './brick';
 import Loader from '../loader';
@@ -49,8 +48,6 @@ export default class Gallery extends React.Component {
   }
 
   componentDidUpdate() {
-    console.log('componentDidUpdate');
-
     if (isBrowser) {
       this.packery.doUpdate();
     }

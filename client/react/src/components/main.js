@@ -13,7 +13,7 @@ const Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 export default class Main extends React.Component {
 
   static childContextTypes = {
-    locale: string
+    prefix: string
   }
 
   static propTypes = {
@@ -30,7 +30,7 @@ export default class Main extends React.Component {
   }
 
   getChildContext() {
-    return {locale: this.props.route.locale};
+    return {prefix: this.props.route.locale};
   }
 
   componentDidMount() {

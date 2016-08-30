@@ -1,7 +1,8 @@
 import React from 'react';
-import CategoryLink from '../link/category';
 import {FormattedMessage} from 'react-intl';
+
 import Link from '../link';
+import CategoryLink from '../link/category';
 import './navigation.less';
 
 const {object, array} = React.PropTypes;

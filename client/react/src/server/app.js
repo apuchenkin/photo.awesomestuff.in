@@ -5,7 +5,6 @@ import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
 import favicon from 'serve-favicon';
 import proxy from 'http-proxy-middleware';
-import Promise from 'promise';
 import { IntlProvider} from 'react-intl';
 import Picker from '../components/common/langs';
 import config from '../config.json';
@@ -18,9 +17,7 @@ function createElement(Component, props) {
 }
 
 function negotiateLocale(req) {
-  const locale = req.url.replace(Picker.localeURL, '$2');
-  return locale
-  || req.acceptsLanguages(config.locales)
+  return req.acceptsLanguages(config.locales)
   || config.fallbackLocale
   ;
 }
@@ -37,21 +34,29 @@ app.listen(3000);
 
 app.use(favicon(__dirname + '/../assets/favicon.ico'));
 app.use((req, res) => {
+  const
+    piece = req.url.split('/')[1],
+    prefix = config.locales.find(l => l === piece),
+    basename = prefix && `/${prefix}`,
+    locale = prefix || negotiateLocale(req),
+    location = basename ? req.url.replace(basename, '') || "/" : req.url
+    ;
+
   // Note that req.url here should be the full URL path from
   // the original request, including the query string.
-  match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
+  match({ routes, location, basename }, (error, redirectLocation, renderProps) => {
     if (error) {
       res.status(500).send(error.message);
     } else if (redirectLocation) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
-        locale = negotiateLocale(req),
         location = req.protocol + '://' + req.get('host'),
         messages = require('../translation/' + locale + '.json'),
         initialState = {
           routes: renderProps.routes,
           locale,
+          basename,
           messages
         },
         componentHTML = ReactDOM.renderToString(

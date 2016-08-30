@@ -2,7 +2,7 @@ import fetch from 'isomorphic-fetch';
 import config from '../config.json';
 
 const defaults = {
-  locale: 'en',
+  locale: config.fallbackLocale,
   location: config.apiEndpoint
 };
 
@@ -145,8 +145,6 @@ export default class PhotoService {
     });
   }
 
-
-
   dsmap(mode, ratio, isHorisontal) {
     let
       [s1,s2,s3,s4] = this.sizes,
@@ -166,7 +164,6 @@ export default class PhotoService {
   }
 
   remapPhoto(avg, photo) {
-    // console.log(arguments);
     let
       v = photo.views,
       std = Math.sqrt(Math.pow((v - avg), 2)),

@@ -111,7 +111,7 @@ module.exports = {
 		setImmediate: false
 	},
 
-	devtool: ENV==='production' ? 'source-map' : 'cheap-module-eval-source-map',
+	devtool: ENV==='production' ? 'eval' : 'cheap-module-source-map',
 
 	devServer: {
 		port: process.env.PORT || 8080,

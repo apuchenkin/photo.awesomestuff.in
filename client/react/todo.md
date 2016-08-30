@@ -6,12 +6,12 @@
 [x] effects
 [x] photo window onresize + debounce
 [x] localization
+[x] different client/server layout for photo
 
 -----------------------------
 
-- different client/server layout for photo
+- bypass locale to service
 - metadata server/client updates
-
 - 404 page
 - 500, 503 page
 - promise error handling
@@ -19,7 +19,7 @@
 
 -----------------------------
 - encode/minify initial state
-- prefomance
+- perfomance
 - backwards compatibility
 - deploy & build
 

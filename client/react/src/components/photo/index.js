@@ -1,7 +1,6 @@
 import React from 'react';
 import withRouter from 'react-router/lib/withRouter';
 import Category from '../link/category';
-import PhotoService from '../../service/Photo';
 import PhotoLink from '../link/photo';
 import CategoryLink from '../link/category';
 import resolutions from './resolution.json';
@@ -34,14 +33,24 @@ class Photo extends React.Component {
 
     this.state = {
       isLoading: true,
-      dimensions: {
-        width: isBrowser ? window.innerWidth - 40 : props.photo.width / 2,
-        height: isBrowser ? window.innerWidth - 40 : props.photo.height / 2
-      }
+      dimensions: this.getDimensions()
     };
   }
 
+  getDimensions() {
+    return {
+      width: isBrowser ? window.innerWidth - 40 : config.photo.width,
+      height: isBrowser ? window.innerHeight - 40 : config.photo.height
+    }
+  }
+
   componentDidMount() {
+    if (this.refs.img.complete) {
+      this.setState({
+        isLoading: false
+      })
+    };
+
     window.addEventListener('resize', this.resize);
   }
 
@@ -56,10 +65,7 @@ class Photo extends React.Component {
     const { photo } = this.props;
 
     this.setState({
-      dimensions: {
-        width: isBrowser ? window.innerWidth - 40 : photo.width / 2,
-        height: isBrowser ? window.innerWidth - 40 : photo.height / 2
-      }
+      dimensions: this.getDimensions()
     });
   }
 
@@ -102,15 +108,12 @@ class Photo extends React.Component {
   render() {
     const
       state = this.state,
-      props = this.props,
-      intl = props.intl,
-      photo = props.photo,
-      category = props.category,
-      photos = props.photos,
+      {intl, photo, category, photos} = this.props,
       pidx = photos.findIndex(p => p.id === photo.id),
       prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
       next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
-      [w, h] = this.adjust (state.dimensions.width, state.dimensions.height),
+      {width, height} = state.dimensions,
+      [w, h] = this.adjust(width, height),
       filename = photo.src.split('/').pop(),
       src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/'),
       url = '/' + (category.parent ? category.parent.name + '/' + category.name : category.name),
@@ -120,9 +123,9 @@ class Photo extends React.Component {
         values={{icon: (<i className="icon-cancel"></i>)}}
       />,
       figure = (
-        <figure className={this.state.isLoading ? "content loading" : "content"} >
+        <figure className={state.isLoading ? "content loading" : "content"} >
           <div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>{closeIcon}</Link></div>
-          <img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next);}} src={src} style={{maxHeight: (h - 120) + 'px', maxWidth: w + 'px'}} onLoad={this.onLoad} />
+          <img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next);}} src={src} style={{maxWidth: w + 'px', maxHeight: (h - 120) + 'px'}} onLoad={this.onLoad} ref='img' />
           <figcaption className="description">
             <span className="caption">{photo.caption}</span>
             {photo.author && <div><FormattedMessage
@@ -157,7 +160,6 @@ class Photo extends React.Component {
           <i className="icon-right-open" />
         </PhotoLink>
       </div>
-
     );
   }
 }

@@ -4,17 +4,18 @@ import utils from '../../lib/utils';
 
 const { string, func } = React.PropTypes;
 
-export default class LocaleLink extends Link {
-
-  static contextTypes = {
-    locale: string
-  }
-
-  render() {
-    const
-      locale = this.context.locale,
-      to = this.props.to === '/' ? '' : this.props.to;
-
-    return <Link {...this.props} to={locale ? `/${locale}${to}` : to} />;
-  }
-}
+export default Link;
+// export default class LocaleLink extends Link {
+//
+//   // static contextTypes = {
+//   //   prefix: string
+//   // }
+//   //
+//   // render() {
+//   //   const
+//   //     prefix = this.context.prefix,
+//   //     to = this.props.to === '/' ? '' : this.props.to;
+//   //
+//   //   return <Link {...this.props} to={prefix ? `/${prefix}${to}` : to} />;
+//   // }
+// }
