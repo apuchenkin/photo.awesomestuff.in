@@ -14,18 +14,18 @@ import routes from '../routes';
 const app = express();
 
 function createElement(Component, props) {
-  return <Component {...props} {...props.route.props} />
+  return <Component {...props} {...props.route.props} />;
 }
 
 function determineLocale(req, props) {
  //TODO: determine locale
- return config.fallbackLocale
+  return config.fallbackLocale;
 }
 
 app.use('/api', proxy({
   target: config.apiProxy,
   pathRewrite: {
-    '^/api/v1' : '', // rewrite path
+    '^/api/v1' : '' // rewrite path
   },
   changeOrigin: true
 }));
@@ -38,9 +38,9 @@ app.use((req, res) => {
   // the original request, including the query string.
   match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
     if (error) {
-      res.status(500).send(error.message)
+      res.status(500).send(error.message);
     } else if (redirectLocation) {
-      res.redirect(302, redirectLocation.pathname + redirectLocation.search)
+      res.redirect(302, redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
         locale = determineLocale(req, renderProps),
@@ -48,8 +48,8 @@ app.use((req, res) => {
         messages = require('../translation/' + locale + '.json'),
         initialState = {
           routes: renderProps.routes,
-          locale: locale,
-          messages: messages
+          locale,
+          messages
         },
         componentHTML = ReactDOM.renderToString(
           <IntlProvider locale={locale} messages={messages}>
@@ -58,30 +58,30 @@ app.use((req, res) => {
         ), metaData = {
           title: 1,
           description: 1
-        }
+        };
 
       res.status(200).send(renderHTML({
-          componentHTML,
-          initialState,
-          metaData,
-          config
-      }))
+        componentHTML,
+        initialState,
+        metaData,
+        config
+      }));
 
       // You can also check renderProps.components or renderProps.routes for
       // your "not found" component or route respectively, and send a 404 as
       // below, if you're using a catch-all route.
 
     } else {
-      res.status(404).send('Not found1')
+      res.status(404).send('Not found1');
     }
-  })
-})
+  });
+});
 
 //TODO: mock
 const escapeHTML = x => x;
 
 function renderHTML({ componentHTML, initialState, metaData, config }) {
-    return `
+  return `
         <!DOCTYPE html>
         <html>
         <head>
@@ -106,5 +106,5 @@ function renderHTML({ componentHTML, initialState, metaData, config }) {
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-    console.log(`Server listening on: ${PORT}`);
+  console.log(`Server listening on: ${PORT}`);
 });

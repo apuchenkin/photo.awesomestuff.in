@@ -27,7 +27,7 @@ class NoMatch extends React.Component {
   render() {
     return (
       <div>NoMatch</div>
-    )
+    );
   }
 }
 
@@ -37,27 +37,27 @@ const photoRoute = (props) => {
     state: routerState[2] ? routerState[2].state : {},
 
     getComponent(location, cb) {
-      var me = this;
+      const me = this;
 
       me.resolve(location.params, location.routes[0].cmp).then(data => {
         me.props = Object.assign(props, data, location.routes[1].state);
         cb(null, Photo);
-      })
+      });
     },
 
     resolve(params) {
       return utils.fetchAll({
         photo: photoService.fetchPhoto(params.photoId)
-      })
+      });
     }
-  })
-}
+  });
+};
 
 const categryRoute = (category, props) => {
   const path = category.parent ? category.parent.name + '/' + category.name : category.name;
 
   return new CachedRoute ({
-    path: path,
+    path,
     state: routerState[1] && routerState[1].path === path ? routerState[1].state : {},
 
     resolve(params) {
@@ -66,34 +66,34 @@ const categryRoute = (category, props) => {
           .fetchPhotos(category.name)
           .then(p => photoService.refinePhotos(p, params.photoId))
           .then(photoService.remapPhotos.bind(photoService))
-      })
+      });
     },
 
     getComponents(location, cb) {
-      var me = this,
-          callback = (data) => {
-            me.props = Object.assign({category: category}, props, data);
-            me.components = {
-              header: GalleryHeader,
-              body: Gallery
-            };
+      const
+        me = this,
+        callback = (data) => {
+          me.props = Object.assign({category}, props, data);
+          me.components = {
+            header: GalleryHeader,
+            body: Gallery
+          };
 
-            cb(null, me.components);
-          }
-        ;
+          cb(null, me.components);
+        };
 
-    Object.keys(me.state).length
+      Object.keys(me.state).length
       ? callback(me.state)
-      : me.resolve(location.params, location.routes[0].cmp).then(callback)
+      : me.resolve(location.params, location.routes[0].cmp).then(callback);
     },
 
     childRoutes: [
       photoRoute({
-        category: category
+        category
       })
     ]
   });
-}
+};
 
 const pageRoute = (page) => new CachedRoute({
   path: page.alias,
@@ -105,26 +105,26 @@ const pageRoute = (page) => new CachedRoute({
   },
 
   getComponents(location, cb) {
-    var me = this,
-        callback = (data) => {
-          me.props = {
-            page: page,
-            content: data.page.content
-          };
-          me.components = {
-            header: PageHeader,
-            body: Page
-          };
+    const
+      me = this,
+      callback = (data) => {
+        me.props = {
+          page,
+          content: data.page.content
+        };
+        me.components = {
+          header: PageHeader,
+          body: Page
+        };
 
-          cb(null, me.components);
-        }
-      ;
+        cb(null, me.components);
+      };
 
-  Object.keys(me.state).length
+    Object.keys(me.state).length
     ? callback(me.state)
-    : me.resolve(location.params, location.routes[0].cmp).then(callback)
+    : me.resolve(location.params, location.routes[0].cmp).then(callback);
   }
-})
+});
 
 class CachedRoute extends Object {
   constructor(obj) {
@@ -140,42 +140,42 @@ class CachedRoute extends Object {
               Object.assign(me.state, data);
               cmp && cmp.setState({isLoading: false});
               return data;
-            })
-        }
-      }
+            });
+        };
+      };
 
     Object.assign(me, {
       resolve: wrappedResolve(obj.resolve)
-    })
+    });
   }
 }
 
 const mainRoute = (locale) => new CachedRoute({
   path: locale ? `/${locale}` : `/`,
-  locale: locale,
+  locale,
   state: routerState[0] ? routerState[0].state : {},
 
   resolve() {
-    var me = this;
+    const me = this;
 
     return utils.fetchAll({
       categories: categoryService.fetchCategories(),
       pages: pageService.fetchPages()
-    })
+    });
   },
 
   getComponent(location, cb) {
-    var me = this,
-        callback = (data) => {
-          me.props = data;
-          me.component = Main;
-          cb(null, me.component);
-        }
-      ;
+    const me = this,
+      callback = (data) => {
+        me.props = data;
+        me.component = Main;
+        cb(null, me.component);
+      }
+    ;
 
     Object.keys(me.state).length
       ? callback(me.state)
-      : me.resolve(location.params, location.routes[0].cmp).then(callback)
+      : me.resolve(location.params, location.routes[0].cmp).then(callback);
   },
 
   getIndexRoute(location, cb) {
@@ -183,14 +183,14 @@ const mainRoute = (locale) => new CachedRoute({
       me = this,
       callback = (data) => {
         me.indexRoute = {
-            class: 'main'
-          , components: {header: HomeHeader, body: Home}
-          , props: data
+          class: 'main',
+          components: {header: HomeHeader, body: Home},
+          props: data
         };
 
         cb(null, me.indexRoute);
       }
-    ;
+      ;
 
     Object.keys(me.state).length
       ? callback(me.state)
@@ -204,10 +204,10 @@ const mainRoute = (locale) => new CachedRoute({
         me.childRoutes = [].concat(
         data.categories.filter(c => !!c.title).map(c => categryRoute(c, data))
       , data.pages.filter(p => !!p.title).map(p => pageRoute(p))
-      )
+      );
 
-      cb(null, me.childRoutes);
-    };
+        cb(null, me.childRoutes);
+      };
 
     Object.keys(me.state).length
       ? callback(me.state)

@@ -10,7 +10,7 @@ export default class CategoryLink extends React.Component {
     return {
       category: category.parent ? category.parent.name : category.name,
       subcategory: category.parent && category.name
-    }
+    };
   }
 
   static propTypes = {
@@ -20,12 +20,12 @@ export default class CategoryLink extends React.Component {
   }
 
   render() {
-    let
+    const
       props = this.props,
       {category, subcategory} = props,
-			link = subcategory
-				? category + '/' + subcategory
-				: category
+      link = subcategory
+        ? category + '/' + subcategory
+        : category;
 
     return (
         <Link to={`/${link}`} activeClassName="active" {...utils.omit(props, ['category', 'subcategory'])} />

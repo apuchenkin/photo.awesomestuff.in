@@ -7,10 +7,10 @@ import config from '../config.json';
 
 const defaults = {
   locale: 'en',
-  location: config.apiEndpoint,
-}
+  location: config.apiEndpoint
+};
 
-const CategoryService = class {
+export default class CategoryService {
 
   constructor(options = defaults) {
     this.token = options.token;
@@ -24,21 +24,21 @@ const CategoryService = class {
     // url.searchParams.append('hidden', true);
 
     return fetch(me.location + config.apiPrefix + '/category', {
-        headers: {
-          'Authorization': me.token,
-          'Accept-Language': me.locale,
-          'Content-Type': me.contentType
-        },
-      })
-      .then(response => {
-        return response.text();
-      })
-      .then(stream => {
-        return JSON.parse(stream);
-      })
-      .then(categories => {
-        return me.refineCategories(categories);
-      })
+      headers: {
+        'Authorization': me.token,
+        'Accept-Language': me.locale,
+        'Content-Type': me.contentType
+      }
+    })
+    .then(response => {
+      return response.text();
+    })
+    .then(stream => {
+      return JSON.parse(stream);
+    })
+    .then(categories => {
+      return me.refineCategories(categories);
+    });
   }
 
   refineCategories (categories) {
@@ -58,26 +58,28 @@ const CategoryService = class {
   }
 
   linkPhotos(category, photos) {
+    const me = this;
+
     return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
-        method: 'LINK',
-        headers: {
-          'Authorization': this.token,
-          'Content-Type': me.contentType
-        },
-        body: JSON.stringify(photos.map(p => p.id))
-      });
+      method: 'LINK',
+      headers: {
+        'Authorization': me.token,
+        'Content-Type': me.contentType
+      },
+      body: JSON.stringify(photos.map(p => p.id))
+    });
   }
 
   unlinkPhotos(category, photos) {
-    return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
-        method: 'UNLINK',
-        headers: {
-          'Authorization': this.token,
-          'Content-Type': me.contentType
-        },
-        body: JSON.stringify(photos.map(p => p.id))
-      });
-  }
-};
+    const me = this;
 
-export default CategoryService;
+    return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
+      method: 'UNLINK',
+      headers: {
+        'Authorization': me.token,
+        'Content-Type': me.contentType
+      },
+      body: JSON.stringify(photos.map(p => p.id))
+    });
+  }
+}

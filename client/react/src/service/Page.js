@@ -7,10 +7,10 @@ import config from '../config.json';
 
 const defaults = {
   locale: 'en',
-  location: config.apiEndpoint,
-}
+  location: config.apiEndpoint
+};
 
-const CategoryService = class {
+export default class CategoryService {
 
   constructor(options = defaults) {
     this.token = options.token;
@@ -27,37 +27,35 @@ const CategoryService = class {
     let me = this;
 
     return fetch(me.baseUrl(), {
-        headers: {
-          'Authorization': me.token,
-          'Accept-Language': me.locale,
-          'Content-Type': me.contentType
-        },
-      })
-      .then(response => {
-        return response.text();
-      })
-      .then(stream => {
-        return JSON.parse(stream);
-      })
+      headers: {
+        'Authorization': me.token,
+        'Accept-Language': me.locale,
+        'Content-Type': me.contentType
+      }
+    })
+    .then(response => {
+      return response.text();
+    })
+    .then(stream => {
+      return JSON.parse(stream);
+    });
   }
 
   fetchPage (pageId) {
     let me = this;
 
     return fetch(me.baseUrl() + '/' + pageId, {
-        headers: {
-          'Authorization': me.token,
-          'Accept-Language': me.locale,
-          'Content-Type': me.contentType
-        },
-      })
-      .then(response => {
-        return response.text();
-      })
-      .then(stream => {
-        return JSON.parse(stream);
-      })
+      headers: {
+        'Authorization': me.token,
+        'Accept-Language': me.locale,
+        'Content-Type': me.contentType
+      }
+    })
+    .then(response => {
+      return response.text();
+    })
+    .then(stream => {
+      return JSON.parse(stream);
+    });
   }
-};
-
-export default CategoryService;
+}

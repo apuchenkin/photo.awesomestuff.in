@@ -13,7 +13,7 @@ import './style/main.less';
 
 
 function createElement(Component, props) {
-  return <Component {...props} {...props.route.props} />
+  return <Component {...props} {...props.route.props} />;
 }
 
 const isBrowser = (typeof window !== 'undefined');
@@ -26,4 +26,4 @@ match({ history, routes}, (error, redirectLocation, renderProps) => {
     </IntlProvider>,
     document.getElementById('react-view')
   );
-})
+});

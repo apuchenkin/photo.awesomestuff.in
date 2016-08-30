@@ -12,8 +12,10 @@
 - different client/server layout for photo
 - metadata server/client updates
 
+
 - 404 page
 - 500, 503 page
+- promise error handling
 - route smart redirects
 
 -----------------------------

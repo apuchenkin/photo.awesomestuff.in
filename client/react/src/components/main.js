@@ -2,7 +2,7 @@ import React from 'react';
 import Link from './link';
 import Loader from './loader';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import { FormattedMessage } from 'react-intl/lib/FormattedMessage';
+import { FormattedMessage } from 'react-intl';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
@@ -11,51 +11,60 @@ const isBrowser = (typeof window !== 'undefined');
 const Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
 export default class Main extends React.Component {
-    constructor (props) {
-      super(props)
 
-      this.state = {
-        isLoading: false,
-        class: props.routes[props.routes.length - 1].class
-      }
-    }
+  static childContextTypes = {
+    locale: string
+  }
 
-    getChildContext() {
-      return {locale: this.props.route.locale};
-    }
+  static propTypes = {
+    pages: array.isRequired
+  }
 
-  	componentDidMount() {
-  		const
-        me = this,
-        props = me.props
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      isLoading: false,
+      class: props.routes[props.routes.length - 1].class
+    };
+  }
+
+  getChildContext() {
+    return {locale: this.props.route.locale};
+  }
+
+  componentDidMount() {
+    const
+      me = this,
+      props = me.props
       ;
 
-      props.route.cmp = this;
-      Ps.initialize(me.refs.content);
-  	}
+    props.route.cmp = this;
+    Ps.initialize(me.refs.content);
+  }
 
-    componentDidUpdate() {
-      const content = this.refs.content;
-      content.scrollTop = 0;
-      Ps.update(content);
-    }
+  componentDidUpdate() {
+    const content = this.refs.content;
+    content.scrollTop = 0;
+    Ps.update(content);
+  }
 
-    componentWillReceiveProps(props) {
-      this.setState({
-        class: props.routes[props.routes.length - 1].class
-      })
-    }
+  componentWillReceiveProps(props) {
+    this.setState({
+      class: props.routes[props.routes.length - 1].class
+    });
+  }
 
 
-    render() {
-      const
-        state = this.state,
-        props = this.props,
-        aboutPage = props.pages.find(p => p.alias == 'about'),
-        contactsPage = props.pages.find(p => p.alias == 'contacts')
+  render() {
+    const
+      state = this.state,
+      props = this.props,
+      aboutPage = props.pages.find(p => p.alias === 'about'),
+      contactsPage = props.pages.find(p => p.alias === 'contacts')
       ;
 
-      return (
+    return (
         <div id="main" className={state.class} ref="main">
           <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
             {this.state.isLoading && <Loader />}
@@ -74,13 +83,5 @@ export default class Main extends React.Component {
           </div>
         </div>
       );
-    }
+  }
 }
-
-Main.childContextTypes = {
-  locale: string
-};
-
-Main.propTypes = {
-  pages: array.isRequired
-};

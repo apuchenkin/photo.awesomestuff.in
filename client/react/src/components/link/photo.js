@@ -14,13 +14,13 @@ export default class PhotoLink extends React.Component {
   }
 
   render() {
-    let
-      props = this.props
-    , {category, subcategory, photoId} = props
-    , props$ = utils.omit(props, ['category', 'subcategory', 'photoId'])
-		, link = subcategory
-				? category + '/' + subcategory
-				: category
+    const
+      props = this.props,
+      {category, subcategory, photoId} = props,
+      props$ = utils.omit(props, ['category', 'subcategory', 'photoId']),
+      link = subcategory
+        ? category + '/' + subcategory
+        : category;
 
     return (
         <Link to={`/${link}/photo/${photoId}`} activeClassName="active" {...props$} />
