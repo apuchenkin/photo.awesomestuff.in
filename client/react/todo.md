@@ -5,13 +5,12 @@
 [x] componentDidMount fixes
 [x] effects
 [x] photo window onresize + debounce
+[x] localization
 
 -----------------------------
 
-- localization (60%)
 - different client/server layout for photo
 - metadata server/client updates
-
 
 - 404 page
 - 500, 503 page

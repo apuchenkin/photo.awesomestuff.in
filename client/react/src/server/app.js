@@ -7,7 +7,7 @@ import favicon from 'serve-favicon';
 import proxy from 'http-proxy-middleware';
 import Promise from 'promise';
 import { IntlProvider} from 'react-intl';
-
+import Picker from '../components/common/langs';
 import config from '../config.json';
 import routes from '../routes';
 
@@ -17,9 +17,12 @@ function createElement(Component, props) {
   return <Component {...props} {...props.route.props} />;
 }
 
-function determineLocale(req, props) {
- //TODO: determine locale
-  return config.fallbackLocale;
+function negotiateLocale(req) {
+  const locale = req.url.replace(Picker.localeURL, '$2');
+  return locale
+  || req.acceptsLanguages(config.locales)
+  || config.fallbackLocale
+  ;
 }
 
 app.use('/api', proxy({
@@ -43,7 +46,7 @@ app.use((req, res) => {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
-        locale = determineLocale(req, renderProps),
+        locale = negotiateLocale(req),
         location = req.protocol + '://' + req.get('host'),
         messages = require('../translation/' + locale + '.json'),
         initialState = {

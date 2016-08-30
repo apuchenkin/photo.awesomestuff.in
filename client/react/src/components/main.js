@@ -3,7 +3,7 @@ import Link from './link';
 import Loader from './loader';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { FormattedMessage } from 'react-intl';
-
+import Langs from './common/langs';
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
 const {array, string} = React.PropTypes;
@@ -69,6 +69,7 @@ export default class Main extends React.Component {
           <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
             {this.state.isLoading && <Loader />}
           </ReactCSSTransitionGroup>
+          <Langs location={ props.location} />
           {this.props.header}
           <div className="content" ref="content">
             {this.props.body}

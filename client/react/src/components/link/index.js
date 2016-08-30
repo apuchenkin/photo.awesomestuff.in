@@ -13,8 +13,8 @@ export default class LocaleLink extends Link {
   render() {
     const
       locale = this.context.locale,
-      to = this.props.to
-      ;
+      to = this.props.to === '/' ? '' : this.props.to;
+
     return <Link {...this.props} to={locale ? `/${locale}${to}` : to} />;
   }
 }
