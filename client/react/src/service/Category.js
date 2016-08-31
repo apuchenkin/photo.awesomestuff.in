@@ -7,16 +7,14 @@ import config from '../config.json';
 
 const defaults = {
   locale: config.fallbackLocale,
-  location: config.apiEndpoint
+  location: config.apiEndpoint,
+  contentType: 'application/json; charset=utf-8'
 };
 
 export default class CategoryService {
 
-  constructor(options = defaults) {
-    this.token = options.token;
-    this.location = options.location;
-    this.locale = options.locale;
-    this.contentType = 'application/json; charset=utf-8';
+  constructor(options = {}) {
+    Object.assign(this, defaults, options);
   }
 
   fetchCategories () {

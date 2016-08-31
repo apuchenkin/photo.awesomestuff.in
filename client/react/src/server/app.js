@@ -8,7 +8,7 @@ import proxy from 'http-proxy-middleware';
 import { IntlProvider} from 'react-intl';
 import Picker from '../components/common/langs';
 import config from '../config.json';
-import routes from '../routes';
+import createRoutes from '../routes';
 
 const app = express();
 
@@ -39,6 +39,7 @@ app.use((req, res) => {
     prefix = config.locales.find(l => l === piece),
     basename = prefix && `/${prefix}`,
     locale = prefix || negotiateLocale(req),
+    routes = createRoutes(locale),
     location = basename ? req.url.replace(basename, '') || "/" : req.url
     ;
 

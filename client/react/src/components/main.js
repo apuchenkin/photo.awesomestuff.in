@@ -69,7 +69,7 @@ export default class Main extends React.Component {
           <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
             {this.state.isLoading && <Loader />}
           </ReactCSSTransitionGroup>
-          <Langs location={ props.location} />
+
           {this.props.header}
           <div className="content" ref="content">
             {this.props.body}
@@ -80,6 +80,7 @@ export default class Main extends React.Component {
                 />
               {aboutPage && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
               {contactsPage && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
+              <Langs location={ props.location} />
             </footer>
           </div>
         </div>

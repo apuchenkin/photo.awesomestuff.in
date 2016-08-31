@@ -7,7 +7,7 @@ import { createHistory } from 'history';
 import { IntlProvider, addLocaleData }  from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
 
-import routes from './routes';
+import createRoutes from './routes';
 import config from './config';
 
 import './assets/fontello/css/fontello.css';
@@ -23,10 +23,11 @@ const
   isBrowser = (typeof window !== 'undefined'),
   initialState = isBrowser && window.__INITIAL_STATE__ || {},
   locale = initialState.locale || config.fallbackLocale,
+  routes = createRoutes(locale),
   basename = initialState.basename,
   history = useRouterHistory(createHistory)({
-    basename: basename
-  })
+    basename
+  });
 
 match({ history, routes}, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
