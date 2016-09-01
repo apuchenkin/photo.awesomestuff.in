@@ -22,14 +22,6 @@ const
   initialState = isBrowser && window.__INITIAL_STATE__ || {},
   routerState = initialState.routes || [];
 
-// class NoMatch extends React.Component {
-//   render() {
-//     return (
-//       <div>NoMatch</div>
-//     );
-//   }
-// }
-
 export default (locale) => {
   const
     categoryService = new CategoryService({locale}),
@@ -202,8 +194,8 @@ export default (locale) => {
   });
 
   return [
-    mainRoute,
     notFound,
-    (<Redirect from="*" to="/404" />)
-  ]
+    mainRoute,
+    {path: '*', onEnter: (nextState, replace) => replace('/404')}
+  ];
 };
