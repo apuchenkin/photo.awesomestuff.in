@@ -10,10 +10,12 @@ import Page from './components/page';
 import PageHeader from './components/page/header';
 import Photo from './components/photo';
 import Link from 'react-router/lib/Link';
+import Redirect from 'react-router/lib/Redirect';
 import Main from './components/main';
 import utils from './lib/utils';
 import Loader from './components/loader';
 import Route from './lib/route';
+import Error404 from './components/error/404';
 
 const
   isBrowser = (typeof window !== 'undefined'),
@@ -130,7 +132,7 @@ export default (locale) => {
     }
   });
 
-  return new Route({
+  const mainRoute = new Route({
     path: "/",
     state: routerState[0] ? routerState[0].state : {},
 
@@ -193,4 +195,15 @@ export default (locale) => {
         : me.resolve().then(callback);
     }
   });
+
+  const notFound = new Route({
+    path: "/404",
+    component: Error404
+  });
+
+  return [
+    mainRoute,
+    notFound,
+    (<Redirect from="*" to="/404" />)
+  ]
 };

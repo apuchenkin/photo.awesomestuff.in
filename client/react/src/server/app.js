@@ -49,6 +49,7 @@ app.use((req, res) => {
     if (error) {
       res.status(500).send(error.message);
     } else if (redirectLocation) {
+      console.log('redirectLocation');
       res.redirect(302, redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
@@ -91,25 +92,25 @@ const escapeHTML = x => x;
 
 function renderHTML({ componentHTML, initialState, metaData, config }) {
   return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${escapeHTML(metaData.title)}</title>
-            <meta name="description" content="${escapeHTML(metaData.description)}">
-            <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400' rel='stylesheet' type='text/css'>
-            <link rel="stylesheet" href="${config.staticEndpoint}/bundle.css">
-        </head>
-        <body>
-          <div id="react-view" class="wrapper">${componentHTML}</div>
-          <script type="application/javascript">
-            window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
-          </script>
-          <script type="application/javascript" src="${config.staticEndpoint}/bundle.js"></script>
-        </body>
-        </html>
-    `;
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${escapeHTML(metaData.title)}</title>
+        <meta name="description" content="${escapeHTML(metaData.description)}">
+        <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="${config.staticEndpoint}/bundle.css">
+    </head>
+    <body>
+      <div id="react-view" class="wrapper">${componentHTML}</div>
+      <script type="application/javascript">
+        window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
+      </script>
+      <script type="application/javascript" src="${config.staticEndpoint}/bundle.js"></script>
+    </body>
+    </html>
+  `;
 }
 
 const PORT = process.env.PORT || 3001;

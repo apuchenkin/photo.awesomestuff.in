@@ -1,5 +1,4 @@
 import React from 'react';
-import CategoryLink from '../link/category';
 import {FormattedMessage} from 'react-intl';
 import Link from '../link';
 
