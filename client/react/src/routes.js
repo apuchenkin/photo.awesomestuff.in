@@ -34,18 +34,28 @@ export default (locale) => {
       path: "photo/:photoId",
       state: routerState[2] ? routerState[2].state : {},
 
+      // onEnter(location, replace, cb) {
+      //   debugger;
+      // },
+
+      onError(error) {
+        console.log(arguments);
+      },
+
       getComponent(location, cb) {
         const me = this;
 
-        me.resolve(location.params, location.routes[0].cmp).then(data => {
+        // debugger;
+
+        me.resolve(location).then(data => {
           me.props = Object.assign(props, data, location.routes[1].state);
           cb(null, Photo);
-        });
+        }).catch(e => cb(e));
       },
 
-      resolve(params) {
+      resolve(location) {
         return utils.fetchAll({
-          photo: photoService.fetchPhoto(params.photoId)
+          photo: photoService.fetchPhoto(location.params.photoId)
         });
       }
     });
@@ -58,11 +68,11 @@ export default (locale) => {
       path,
       state: routerState[1] && routerState[1].path === path ? routerState[1].state : {},
 
-      resolve(params) {
+      resolve(location) {
         return utils.fetchAll({
           photos: photoService
               .fetchPhotos(category.name)
-              .then(p => photoService.refinePhotos(p, params.photoId))
+              .then(p => photoService.refinePhotos(p, location.params.photoId))
               .then(photoService.remapPhotos.bind(photoService))
         });
       },
@@ -82,7 +92,7 @@ export default (locale) => {
 
         Object.keys(me.state).length
           ? callback(me.state)
-          : me.resolve(location.params, location.routes[0].cmp).then(callback);
+          : me.resolve(location).then(callback);
       },
 
       childRoutes: [
@@ -120,7 +130,7 @@ export default (locale) => {
 
       Object.keys(me.state).length
         ? callback(me.state)
-        : me.resolve(location.params, location.routes[0].cmp).then(callback);
+        : me.resolve(location).then(callback);
     }
   });
 
@@ -148,7 +158,7 @@ export default (locale) => {
 
       Object.keys(me.state).length
         ? callback(me.state)
-        : me.resolve(location.params, location.routes[0].cmp).then(callback);
+        : me.resolve(location).then(callback);
     },
 
     getIndexRoute(location, cb) {
@@ -174,7 +184,7 @@ export default (locale) => {
       const
         me = this,
         callback = (data) => {
-          me.childRoutes = [].concat(
+          me.childRoutes = [notFound].concat(
           data.categories.filter(c => !!c.title).map(c => categryRoute(c, data))
         , data.pages.filter(p => !!p.title).map(p => pageRoute(p))
         );
@@ -188,14 +198,19 @@ export default (locale) => {
     }
   });
 
+  const redirect404 = {path: '*', onEnter: (nextState, replace) => replace('/404')};
+
   const notFound = new Route({
-    path: "/404",
-    component: Error404
+    path: "404",
+    components: {
+      header: HomeHeader,
+      body: Error404
+    }
   });
 
   return [
-    notFound,
+    // notFound,
     mainRoute,
-    {path: '*', onEnter: (nextState, replace) => replace('/404')}
+    redirect404
   ];
 };
