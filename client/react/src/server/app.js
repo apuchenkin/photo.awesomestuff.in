@@ -26,8 +26,8 @@ app.use('/api', proxy({
   target: config.apiProxy,
   pathRewrite: {
     '^/api/v1' : '' // rewrite path
-  },
-  changeOrigin: true
+  }
+  // changeOrigin: true
 }));
 
 app.listen(3000);
@@ -47,6 +47,7 @@ app.use((req, res) => {
   // the original request, including the query string.
   match({ routes, location, basename }, (error, redirectLocation, renderProps) => {
     if (error) {
+      console.log(renderProps);
       res.status(500).send(error.message);
     } else if (redirectLocation) {
       console.log('redirectLocation');

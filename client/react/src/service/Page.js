@@ -1,60 +1,28 @@
 import fetch from 'isomorphic-fetch';
 import config from '../config.json';
+import Service from './BaseService';
 
 // var url = require('url');
 // var url_parts = url.parse(request.url, true);
 // var query = url_parts.query;
 
-const defaults = {
-  locale: config.fallbackLocale,
-  location: config.apiEndpoint,
-  contentType: 'application/json; charset=utf-8'
-};
-
-
-export default class CategoryService {
-
-  constructor(options = {}) {
-    Object.assign(this, defaults, options);
-  }
-
-  baseUrl() {
-    return this.location + config.apiPrefix + '/page';
-  }
+export default class PageService extends Service {
 
   fetchPages () {
-    let me = this;
+    const me = this;
 
-    return fetch(me.baseUrl(), {
-      headers: {
-        'Authorization': me.token,
-        'Accept-Language': me.locale,
-        'Content-Type': me.contentType
-      }
+    return fetch(me.baseUrl() + '/page', {
+      headers: this.headers
     })
-    .then(response => {
-      return response.text();
-    })
-    .then(stream => {
-      return JSON.parse(stream);
-    });
+    .then(this.respondJSON);
   }
 
   fetchPage (pageId) {
-    let me = this;
+    const me = this;
 
-    return fetch(me.baseUrl() + '/' + pageId, {
-      headers: {
-        'Authorization': me.token,
-        'Accept-Language': me.locale,
-        'Content-Type': me.contentType
-      }
+    return fetch(me.baseUrl() + '/page/' + pageId, {
+      headers: this.headers
     })
-    .then(response => {
-      return response.text();
-    })
-    .then(stream => {
-      return JSON.parse(stream);
-    });
+    .then(this.respondJSON);
   }
 }

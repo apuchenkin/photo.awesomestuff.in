@@ -1,46 +1,30 @@
 import fetch from 'isomorphic-fetch';
 import config from '../config.json';
+import Service from './BaseService';
 
 // var url = require('url');
 // var url_parts = url.parse(request.url, true);
 // var query = url_parts.query;
 
-const defaults = {
-  locale: config.fallbackLocale,
-  location: config.apiEndpoint,
-  contentType: 'application/json; charset=utf-8'
-};
 
-export default class CategoryService {
+export default class CategoryService extends Service {
 
-  constructor(options = {}) {
-    Object.assign(this, defaults, options);
-  }
-
-  fetchCategories () {
-    let me = this;
+  fetchCategories() {
+    const me = this,
+      url = this.baseUrl() + '/category';
     // url.searchParams.append('hidden', true);
 
-    return fetch(me.location + config.apiPrefix + '/category', {
-      headers: {
-        'Authorization': me.token,
-        'Accept-Language': me.locale,
-        'Content-Type': me.contentType
-      }
+    return fetch(url, {
+      headers: me.headers
     })
-    .then(response => {
-      return response.text();
-    })
-    .then(stream => {
-      return JSON.parse(stream);
-    })
+    .then(this.respondJSON)
     .then(categories => {
       return me.refineCategories(categories);
     });
   }
 
-  refineCategories (categories) {
-    let map = new Map(categories.map(c => [c.id, c]));
+  refineCategories(categories) {
+    const map = new Map(categories.map(c => [c.id, c]));
 
     //setting parent for all categories
     map.forEach(category => {
@@ -56,27 +40,23 @@ export default class CategoryService {
   }
 
   linkPhotos(category, photos) {
-    const me = this;
+    const me = this,
+      url = this.baseUrl() + '/category/' + category.id + '/photo';
 
-    return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
+    return fetch(url, {
       method: 'LINK',
-      headers: {
-        'Authorization': me.token,
-        'Content-Type': me.contentType
-      },
+      headers: this.headers,
       body: JSON.stringify(photos.map(p => p.id))
     });
   }
 
   unlinkPhotos(category, photos) {
-    const me = this;
+    const me = this,
+      url = this.baseUrl() + '/category/' + category.id + '/photo';
 
-    return fetch(config.apiPrefix + '/category/' + category.id + '/photo', {
+    return fetch(url, {
       method: 'UNLINK',
-      headers: {
-        'Authorization': me.token,
-        'Content-Type': me.contentType
-      },
+      headers: this.headers,
       body: JSON.stringify(photos.map(p => p.id))
     });
   }

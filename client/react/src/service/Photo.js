@@ -1,28 +1,18 @@
 import fetch from 'isomorphic-fetch';
 import config from '../config.json';
+import Service from './BaseService';
 
-const defaults = {
-  locale: config.fallbackLocale,
-  location: config.apiEndpoint,
-  contentType: 'application/json; charset=utf-8'
-};
+const sizes = [
+  (config.brickWidth)
+, (config.brickWidth * 2 + config.gutter)
+, (config.brickWidth * 3 + config.gutter * 2)
+, (config.brickWidth * 4 + config.gutter * 3)
+];
 
-
-export default class PhotoService {
-
-  constructor(options = {}) {
-    Object.assign(this, defaults, options);
-
-    this.sizes = [
-      (config.brickWidth)
-    , (config.brickWidth * 2 + config.gutter)
-    , (config.brickWidth * 3 + config.gutter * 2)
-    , (config.brickWidth * 4 + config.gutter * 3)
-    ];
-  }
+export default class PhotoService extends Service {
 
   getRandomColor () {
-    let letters = '0123456789ABCDEF'.split('');
+    const letters = '0123456789ABCDEF'.split('');
     let color = '#';
     for (let i = 0; i < 6; i++ ) {
       color += letters[Math.floor(Math.random() * 16)];
@@ -31,47 +21,29 @@ export default class PhotoService {
   }
 
   fetchPhotos (category, showHidden) {
-    let me = this,
-      url = me.location + config.apiPrefix + '/category/' + category + '/photo';
+    const me = this,
+      url = me.baseUrl() + '/category/' + category + '/photo';
         // url = new URL('/api/v1/category/' + category + '/photo', location.origin);
         // url.searchParams.append('hidden', showHidden);
 
     console.log(url);
     return fetch(url, {
-      headers: {
-        'Authorization': me.token,
-        'Accept-Language': me.locale,
-        'Content-Type': me.contentType
-      }
+      headers: me.headers
     })
-      .then(response => {
-        return response.text();
-      })
-      .then(stream => {
-        return JSON.parse(stream);
-      });
+    .then(this.respondJSON);
   }
 
   fetchPhoto (photoId) {
-    let me = this;
+    const me = this;
 
-    return fetch(me.location + config.apiPrefix + '/photo/' + photoId, {
-      headers: {
-        'Authorization': me.token,
-        'Accept-Language': me.locale,
-        'Content-Type': me.contentType
-      }
+    return fetch(me.baseUrl() + '/photo/' + photoId, {
+      headers: me.headers
     })
-      .then(response => {
-        return response.text();
-      })
-      .then(stream => {
-        return JSON.parse(stream);
-      });
+    .then(this.respondJSON);
   }
 
   groupColors(photos) {
-    let
+    const
       style = {},
       groups = [...new Set(photos.map(p => p.group).filter(x => !!x))];
 
@@ -83,12 +55,9 @@ export default class PhotoService {
   patchPhoto(photo, props) {
     const me = this;
 
-    return fetch(me.location + config.apiPrefix + '/photo/' + photo.id, {
+    return fetch(me.baseUrl() + '/photo/' + photo.id, {
       method: 'PATCH',
-      headers: {
-        'Authorization': me.token,
-        'Content-Type': me.contentType
-      },
+      headers: me.headers,
       body: JSON.stringify(props)
     });
   }
@@ -108,12 +77,9 @@ export default class PhotoService {
   group(photos) {
     const me = this;
 
-    return fetch(me.location + config.apiPrefix + '/photo/group', {
+    return fetch(me.baseUrl() + '/photo/group', {
       method: 'POST',
-      headers: {
-        'Authorization': me.token,
-        'Content-Type': me.contentType
-      },
+      headers: me.headers,
       body: JSON.stringify(photos.map(p => p.id))
     });
   }
@@ -121,12 +87,9 @@ export default class PhotoService {
   appendGroup(groupId, photos) {
     const me = this;
 
-    return fetch(me.location + config.apiPrefix + '/photo/group/' + groupId, {
+    return fetch(me.baseUrl() + '/photo/group/' + groupId, {
       method: 'LINK',
-      headers: {
-        'Authorization': me.token,
-        'Content-Type': me.contentType
-      },
+      headers: me.headers,
       body: JSON.stringify(photos.map(p => p.id))
     });
   }
@@ -134,19 +97,16 @@ export default class PhotoService {
   removeGroup(groupId, photos) {
     const me = this;
 
-    return fetch(me.location + config.apiPrefix + '/photo/group/' + groupId, {
+    return fetch(me.baseUrl() + '/photo/group/' + groupId, {
       method: 'UNLINK',
-      headers: {
-        'Authorization': me.token,
-        'Content-Type': me.contentType
-      },
+      headers: me.headers,
       body: JSON.stringify(photos.map(p => p.id))
     });
   }
 
   dsmap(mode, ratio, isHorisontal) {
-    let
-      [s1,s2,s3,s4] = this.sizes,
+    const
+      [s1,s2,s3,s4] = sizes,
       modes = [
         [ratio >= 2   ? s2 : s1, s1],
         isHorisontal ? [ratio >= 3 ? s3 : s2, s1] : [s1, s2],
@@ -158,12 +118,12 @@ export default class PhotoService {
   }
 
   remapPhotos(photos) {
-    let avg = photos.reduce((sum, p) => sum + p.views, 0) / photos.length;
+    const avg = photos.reduce((sum, p) => sum + p.views, 0) / photos.length;
     return photos.map(this.remapPhoto.bind(this, avg));
   }
 
   remapPhoto(avg, photo) {
-    let
+    const
       v = photo.views,
       std = Math.sqrt(Math.pow((v - avg), 2)),
       norm = [16,8,4,1].map(i => i * (Math.floor(avg) + 1)),
@@ -183,7 +143,7 @@ export default class PhotoService {
   }
 
   weightedRandom = function (probabilities) {
-    let probabilitiesMap = probabilities.reduce((acc, v) => {
+    const probabilitiesMap = probabilities.reduce((acc, v) => {
         acc.push(v + (acc.length ? acc[acc.length - 1] : 0));
         return acc;
       }, []),
@@ -198,19 +158,19 @@ export default class PhotoService {
       return i;
     }, 0);
 
-    let
+    const
       exclude = photos.find(p => p.id === excludeId),
 
       // spread list on grouped and not grouped photos
       [init, grouped] = photos.reduce((acc, p) => {
-        let [i,r] = acc;
+        const [i,r] = acc;
         p.group ? r.push(p) : i.push(p);
         return acc;
       }, [[],[]]),
 
       groups = grouped.reduce((m,p) => {
         if (p.group) {
-          let
+          const
           v = m.get(p.group) || [];
 
           v.push(p);

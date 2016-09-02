@@ -22,6 +22,7 @@ const
   initialState = isBrowser && window.__INITIAL_STATE__ || {},
   routerState = initialState.routes || [];
 
+//TODO: use sate instead of props
 export default (locale) => {
   const
     categoryService = new CategoryService({locale}),
@@ -45,12 +46,12 @@ export default (locale) => {
       getComponent(location, cb) {
         const me = this;
 
-        // debugger;
-
-        me.resolve(location).then(data => {
-          me.props = Object.assign(props, data, location.routes[1].state);
-          cb(null, Photo);
-        }).catch(e => cb(e));
+        me.resolve(location)
+          .then(data => {
+            me.props = Object.assign(props, data, location.routes[1].state);
+            cb(null, Photo);
+          })
+          .catch(cb);
       },
 
       resolve(location) {
@@ -177,7 +178,7 @@ export default (locale) => {
 
       Object.keys(me.state).length
         ? callback(me.state)
-        : me.resolve().then(callback);
+        : me.resolve(location).then(callback);
     },
 
     getChildRoutes(location, cb) {
@@ -194,7 +195,7 @@ export default (locale) => {
 
       Object.keys(me.state).length
         ? callback(me.state)
-        : me.resolve().then(callback);
+        : me.resolve(location).then(callback);
     }
   });
 
@@ -209,7 +210,6 @@ export default (locale) => {
   });
 
   return [
-    // notFound,
     mainRoute,
     redirect404
   ];
