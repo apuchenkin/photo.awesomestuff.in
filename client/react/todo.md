@@ -8,13 +8,12 @@
 [x] localization
 [x] different client/server layout for photo
 [x] bypass locale to service
+[x] promise error handling
+[x] route smart redirects
 
 -----------------------------
 
 - 404 page
-- 500, 503 page
-- promise error handling
-- route smart redirects
 - metadata server/client updates
 
 -----------------------------
@@ -26,3 +25,4 @@
 -----------------------------
 future
 - child pages & category pages
+- 500, 503 page

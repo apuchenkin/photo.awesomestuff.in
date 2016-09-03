@@ -41,15 +41,15 @@ class Photo extends React.Component {
     return {
       width: isBrowser ? window.innerWidth - 40 : config.photo.width,
       height: isBrowser ? window.innerHeight - 40 : config.photo.height
-    }
+    };
   }
 
   componentDidMount() {
     if (this.refs.img.complete) {
       this.setState({
         isLoading: false
-      })
-    };
+      });
+    }
 
     window.addEventListener('resize', this.resize);
   }
@@ -62,8 +62,6 @@ class Photo extends React.Component {
   @bind
   @debounce(50)
   resize() {
-    const { photo } = this.props;
-
     this.setState({
       dimensions: this.getDimensions()
     });
@@ -83,21 +81,21 @@ class Photo extends React.Component {
   @bind
   close() {
     const
-      category = this.props.category,
+      {category, router} = this.props,
       url = category.parent ? category.parent.name + '/' + category.name : category.name
       ;
 
-    this.props.router.push('/' + url);
+    router.push('/' + url);
   }
 
   @bind
   goNext(next) {
     const
-      category = this.props.category,
+      {category, router} = this.props,
       url = category.parent ? category.parent.name + '/' + category.name : category.name
       ;
 
-    this.props.router.push('/' + url + '/photo/' + next.id);
+    router.push('/' + url + '/photo/' + next.id);
   }
 
   @bind

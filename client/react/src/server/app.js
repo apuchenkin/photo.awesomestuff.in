@@ -44,11 +44,9 @@ app.use((req, res) => {
   // the original request, including the query string.
   match({ routes, location, basename }, (error, redirectLocation, renderProps) => {
     if (error) {
-      console.log(renderProps);
       res.status(500).send(error.message);
     } else if (redirectLocation) {
-      console.log('redirectLocation');
-      res.redirect(302, redirectLocation.pathname + redirectLocation.search);
+      res.redirect(302, basename + redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
         location = req.protocol + '://' + req.get('host'),

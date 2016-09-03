@@ -32,22 +32,18 @@ export default (locale) => {
     pageService = new PageService({locale})
     ;
 
-  const photoRoute = (data) => {
+  const photoRoute = (category) => {
     return new Route({
       path: "photo/:photoId",
       state: routerState[2] ? routerState[2].state : {},
 
       onEnter(location, replace, cb) {
         const me = this;
+
         me.resolve(location)
-          .then(() => {
-            Object.assign(me, {component: props => <Photo {...props} photo={me.state.photo} category={data.category} />});
-            cb();
-          })
-          .catch((e) => {
-            replace("/"); //TODO: reaplce to catregory
-            cb();
-          });
+          .then(() => Object.assign(me, {component: props => <Photo {...props} photo={me.state.photo} category={category} />}))
+          .catch(() => replace("/" + category.parent ? category.parent.name + "/" + category.name : category.name))
+          .then(() => cb());
       },
 
       resolve(location) {
@@ -92,12 +88,17 @@ export default (locale) => {
       },
 
       childRoutes: [
-        photoRoute({
-          category
-        })
+        photoRoute(category)
       ]
     });
   };
+
+  const categoryRedirect = (category) => ({
+    path: category.name,
+    onEnter(location, replace) {
+      replace(`/${category.parent.name}/${category.name}`);
+    }
+  });
 
   const pageRoute = (page) => new Route({
     path: page.alias,
@@ -155,7 +156,6 @@ export default (locale) => {
     },
 
     getIndexRoute(location, cb) {
-      console.log('getIndexRoute');
       const
         me = this,
         callback = (data) => {
@@ -177,13 +177,13 @@ export default (locale) => {
     },
 
     getChildRoutes(location, cb) {
-      console.log('getChildRoutes');
       const
         me = this,
         callback = (data) => {
           me.childRoutes = [notFound].concat(
-            data.categories.filter(c => !!c.title).map(c => categoryRoute(c, data))
-            , data.pages.filter(p => !!p.title).map(p => pageRoute(p))
+            data.categories.filter(c => !!c.title).map(c => categoryRoute(c, data)),
+            data.categories.filter(c => !!c.title && !!c.parent).map(categoryRedirect),
+            data.pages.filter(p => !!p.title).map(pageRoute)
           );
 
           cb(null, me.childRoutes);
@@ -200,8 +200,8 @@ export default (locale) => {
   const notFound = new Route({
     path: "404",
     components: {
-      header: HomeHeader,
-      body: Error404
+      header: props => <HomeHeader {...props} />,
+      body: props => <Error404 {...props} />
     }
   });
 
