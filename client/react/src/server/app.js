@@ -11,10 +11,7 @@ import config from '../config.json';
 import createRoutes from '../routes';
 
 const app = express();
-
-function createElement(Component, props) {
-  return <Component {...props} {...props.route.props} />;
-}
+const createElement = (component, props) => component(props);
 
 function negotiateLocale(req) {
   return req.acceptsLanguages(config.locales)

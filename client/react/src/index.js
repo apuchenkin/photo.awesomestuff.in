@@ -15,9 +15,7 @@ import './style/main.less';
 
 addLocaleData(ruLocaleData);
 
-function createElement(Component, props) {
-  return <Component {...props} {...props.route.props} />;
-}
+const createElement = (component, props) => component(props);
 
 const
   isBrowser = (typeof window !== 'undefined'),

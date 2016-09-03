@@ -1,12 +1,15 @@
 import React from 'react';
-import Link from './link';
-import Loader from './loader';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { FormattedMessage } from 'react-intl';
+import { locationShape } from 'react-router/lib/PropTypes';
+
 import Langs from './common/langs';
+import Link from './link';
+import Loader from './loader';
+
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
-const {array, string} = React.PropTypes;
+const {array, string, element} = React.PropTypes;
 const isBrowser = (typeof window !== 'undefined');
 const Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
@@ -17,7 +20,10 @@ export default class Main extends React.Component {
   }
 
   static propTypes = {
-    pages: array.isRequired
+    pages: array.isRequired,
+    header: element.isRequired,
+    body: element.isRequired,
+    location: locationShape.isRequired
   }
 
   constructor (props) {
@@ -59,20 +65,19 @@ export default class Main extends React.Component {
   render() {
     const
       state = this.state,
-      props = this.props,
-      aboutPage = props.pages.find(p => p.alias === 'about'),
-      contactsPage = props.pages.find(p => p.alias === 'contacts')
+      {header, body, location, pages} = this.props,
+      aboutPage = pages.find(p => p.alias === 'about'),
+      contactsPage = pages.find(p => p.alias === 'contacts')
       ;
 
     return (
         <div id="main" className={state.class} ref="main">
           <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
-            {this.state.isLoading && <Loader />}
+            {state.isLoading && <Loader />}
           </ReactCSSTransitionGroup>
-
-          {this.props.header}
+          {header}
           <div className="content" ref="content">
-            {this.props.body}
+            {body}
             <footer>
               <Link to="/" >photo.awesomestuff.in</Link> | &copy; <FormattedMessage
                     id="footer"
@@ -80,7 +85,7 @@ export default class Main extends React.Component {
                 />
               {aboutPage && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
               {contactsPage && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
-              <Langs location={ props.location} />
+              <Langs location={ location} />
             </footer>
           </div>
         </div>

@@ -1,7 +1,11 @@
 import React from 'react';
+import Link from 'react-router/lib/Link';
+import Redirect from 'react-router/lib/Redirect';
+
 import CategoryService from './service/Category';
 import PhotoService from './service/Photo';
 import PageService from './service/Page';
+
 import Home from './components/home';
 import HomeHeader from './components/home/header';
 import Gallery from './components/gallery';
@@ -9,8 +13,6 @@ import GalleryHeader from './components/gallery/header';
 import Page from './components/page';
 import PageHeader from './components/page/header';
 import Photo from './components/photo';
-import Link from 'react-router/lib/Link';
-import Redirect from 'react-router/lib/Redirect';
 import Main from './components/main';
 import utils from './lib/utils';
 import Loader from './components/loader';
@@ -30,28 +32,22 @@ export default (locale) => {
     pageService = new PageService({locale})
     ;
 
-  const photoRoute = (props) => {
+  const photoRoute = (data) => {
     return new Route({
       path: "photo/:photoId",
       state: routerState[2] ? routerState[2].state : {},
 
-      // onEnter(location, replace, cb) {
-      //   debugger;
-      // },
-
-      onError(error) {
-        console.log(arguments);
-      },
-
-      getComponent(location, cb) {
+      onEnter(location, replace, cb) {
         const me = this;
-
         me.resolve(location)
-          .then(data => {
-            me.props = Object.assign(props, data, location.routes[1].state);
-            cb(null, Photo);
+          .then(() => {
+            Object.assign(me, {component: props => <Photo {...props} photo={me.state.photo} category={data.category} />});
+            cb();
           })
-          .catch(cb);
+          .catch((e) => {
+            replace("/"); //TODO: reaplce to catregory
+            cb();
+          });
       },
 
       resolve(location) {
@@ -62,38 +58,37 @@ export default (locale) => {
     });
   };
 
-  const categryRoute = (category, props) => {
+  const categoryRoute = (category, data) => {
     const path = category.parent ? category.parent.name + '/' + category.name : category.name;
 
     return new Route({
       path,
-      state: routerState[1] && routerState[1].path === path ? routerState[1].state : {},
+      state: (routerState[1] && routerState[1].path === path) ? routerState[1].state : {},
 
       resolve(location) {
         return utils.fetchAll({
           photos: photoService
-              .fetchPhotos(category.name)
-              .then(p => photoService.refinePhotos(p, location.params.photoId))
-              .then(photoService.remapPhotos.bind(photoService))
+            .fetchPhotos(category.name)
+            .then(p => photoService.refinePhotos(p, location.params.photoId))
+            .then(photoService.remapPhotos.bind(photoService))
         });
       },
 
-      getComponents(location, cb) {
-        const
-          me = this,
-          callback = (data) => {
-            me.props = Object.assign({category}, props, data);
-            me.components = {
-              header: GalleryHeader,
-              body: Gallery
-            };
-
-            cb(null, me.components);
-          };
+      onEnter(location, replace, cb) {
+        const me = this;
+        const callback = () => {
+          Object.assign(me, {components: {
+            header: props => <GalleryHeader {...props} category={category} categories={data.categories} />,
+            body: props => <Gallery {...props} category={category} photos={me.state.photos} />
+          }});
+          cb();
+        };
 
         Object.keys(me.state).length
-          ? callback(me.state)
-          : me.resolve(location).then(callback);
+          ? callback()
+          : me.resolve(location)
+              .then(callback)
+              .catch(cb);
       },
 
       childRoutes: [
@@ -107,31 +102,28 @@ export default (locale) => {
   const pageRoute = (page) => new Route({
     path: page.alias,
     state: routerState[1] && routerState[1].path === page.alias ? routerState[1].state : {},
+
     resolve() {
       return utils.fetchAll({
         page: pageService.fetchPage(page.id)
       });
     },
 
-    getComponents(location, cb) {
-      const
-        me = this,
-        callback = (data) => {
-          me.props = {
-            page,
-            content: data.page.content
-          };
-          me.components = {
-            header: PageHeader,
-            body: Page
-          };
-
-          cb(null, me.components);
-        };
+    onEnter(location, replace, cb) {
+      const me = this;
+      const callback = () => {
+        Object.assign(me, {components: {
+          header: props => <PageHeader {...props} page={me.state.page} />,
+          body: props => <Page {...props} content={me.state.page.content} />
+        }});
+        cb();
+      };
 
       Object.keys(me.state).length
-        ? callback(me.state)
-        : me.resolve(location).then(callback);
+        ? callback()
+        : me.resolve(location)
+            .then(callback)
+            .catch(cb);
     }
   });
 
@@ -148,28 +140,31 @@ export default (locale) => {
       });
     },
 
-    getComponent(location, cb) {
-      const me = this,
-        callback = (data) => {
-          me.props = data;
-          me.component = Main;
-          cb(null, me.component);
-        }
-      ;
+    onEnter(location, replace, cb) {
+      const me = this;
+      const callback = () => {
+        Object.assign(me, {component: props => <Main {...props} pages={this.state.pages} />});
+        cb();
+      };
 
-      Object.keys(me.state).length
-        ? callback(me.state)
-        : me.resolve(location).then(callback);
+      Object.keys(this.state).length
+        ? callback()
+        : this.resolve(location)
+            .then(callback)
+            .catch(cb);
     },
 
     getIndexRoute(location, cb) {
+      console.log('getIndexRoute');
       const
         me = this,
         callback = (data) => {
           me.indexRoute = {
             class: 'main',
-            components: {header: HomeHeader, body: Home},
-            props: data
+            components: {
+              header: props => <HomeHeader {...props} />,
+              body: props => <Home {...props} categories={me.state.categories} />
+            }
           };
 
           cb(null, me.indexRoute);
@@ -182,13 +177,14 @@ export default (locale) => {
     },
 
     getChildRoutes(location, cb) {
+      console.log('getChildRoutes');
       const
         me = this,
         callback = (data) => {
           me.childRoutes = [notFound].concat(
-          data.categories.filter(c => !!c.title).map(c => categryRoute(c, data))
-        , data.pages.filter(p => !!p.title).map(p => pageRoute(p))
-        );
+            data.categories.filter(c => !!c.title).map(c => categoryRoute(c, data))
+            , data.pages.filter(p => !!p.title).map(p => pageRoute(p))
+          );
 
           cb(null, me.childRoutes);
         };

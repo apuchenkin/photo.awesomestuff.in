@@ -97,7 +97,12 @@ module.exports = {
       minify: { collapseWhitespace: true }
     })
   ]).concat(ENV==='production' ? [
-    new webpack.optimize.OccurenceOrderPlugin()
+    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
+      }
+    })
   ] : []),
 
   stats: { colors: true },
