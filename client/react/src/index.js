@@ -9,6 +9,7 @@ import ruLocaleData from 'react-intl/locale-data/ru';
 
 import createRoutes from './routes';
 import config from './config';
+import utils from './lib/utils';
 
 import './assets/fontello/css/fontello.css';
 import './style/main.less';
@@ -17,20 +18,42 @@ addLocaleData(ruLocaleData);
 
 const createElement = (component, props) => component(props);
 
+
+
 const
   isBrowser = (typeof window !== 'undefined'),
   initialState = isBrowser && window.__INITIAL_STATE__ || {},
   locale = initialState.locale || config.fallbackLocale,
   routes = createRoutes(locale),
   basename = initialState.basename,
+  messages = initialState.messages,
   history = useRouterHistory(createHistory)({
     basename
   });
 
+function onUpdate() {
+  let
+    meta = utils.getMeta(this.state.routes, messages);
+
+  metaUpdate(meta);
+}
+
+function metaUpdate(meta) {
+  document.title = meta.title;
+  document.head.querySelector('meta[name=description]').content = meta.description;
+  // meta.links.map(function(data) {
+  //   var link = links[data[0]] || document.head.appendChild(document.createElement('link'));
+  //   link.href = data[1];
+  //   link.rel = "alternate";
+  //   link.hreflang = data[0];
+  //   links[data[0]] = link;
+  // })
+}
+
 match({ history, routes}, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
-    <IntlProvider locale={locale} messages={initialState.messages}>
-      <Router {...renderProps} createElement={createElement} />
+    <IntlProvider locale={locale} messages={messages}>
+      <Router {...renderProps} createElement={createElement} onUpdate={onUpdate} />
     </IntlProvider>,
     document.getElementById('react-view')
   );

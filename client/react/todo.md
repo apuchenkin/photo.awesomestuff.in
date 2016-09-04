@@ -10,13 +10,16 @@
 [x] bypass locale to service
 [x] promise error handling
 [x] route smart redirects
+[x] metadata server/client updates
 
 -----------------------------
 
+
+- meta links
+- SEO code + client update
+
+-----------------------------
 - 404 page
-- metadata server/client updates
-
------------------------------
 - encode/minify initial state
 - perfomance
 - backwards compatibility

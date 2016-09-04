@@ -83,8 +83,8 @@ export default class Main extends React.Component {
                     id="footer"
                     defaultMessage={`2016, Artem Puchenkin`}
                 />
-              {aboutPage && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
-              {contactsPage && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
+              {aboutPage && contactsPage.title && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
+              {contactsPage && contactsPage.title && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
               <Langs location={ location} />
             </footer>
           </div>

@@ -12,7 +12,8 @@ export default class Header extends React.Component {
         <h1 className="title">
           <Link to="/">{title}</Link>
           <span className="version">
-            <FormattedMessage id="alfa" defaultMessage={`alfa`}/></span>
+            &nbsp;<FormattedMessage id="alfa" defaultMessage={`alfa`}/>
+          </span>
         </h1>
         <h2 className="subtitle">
           <FormattedMessage id="description" defaultMessage={`Travel in photography`}/>

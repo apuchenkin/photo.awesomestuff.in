@@ -4,7 +4,6 @@ export default class Route extends Object {
 
     const
       me = this,
-      cachedResolve = obj.resolve,// && memoize(obj.resolve, {promise: true}),
       wrappedResolve = (promise) => {
         return (location) => {
           const cmp = location.routes && location.routes[0].cmp;
@@ -25,7 +24,7 @@ export default class Route extends Object {
       };
 
     Object.assign(me, {
-      resolve: wrappedResolve(cachedResolve)
+      resolve: wrappedResolve(obj.resolve)
     });
   }
 }

@@ -97,11 +97,12 @@ module.exports = {
       minify: { collapseWhitespace: true }
     })
   ]).concat(ENV==='production' ? [
-    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         warnings: false
-      }
+      },
+      comments: false
     })
   ] : []),
 
@@ -116,7 +117,7 @@ module.exports = {
     setImmediate: false
   },
 
-  devtool: ENV==='production' ? 'eval' : 'cheap-module-source-map',
+  devtool: ENV==='production' ? 'source-map' : 'eval',
 
   devServer: {
     port: process.env.PORT || 8080,

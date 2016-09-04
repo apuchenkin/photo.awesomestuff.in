@@ -25,7 +25,7 @@ const
   routerState = initialState.routes || [];
 
 //TODO: use sate instead of props
-export default (locale) => {
+export default (locale, messages = initialState.messages) => {
   const
     categoryService = new CategoryService({locale}),
     photoService = new PhotoService({locale}),
@@ -50,6 +50,17 @@ export default (locale) => {
         return utils.fetchAll({
           photo: photoService.fetchPhoto(location.params.photoId)
         });
+      },
+
+      getMeta() {
+        const
+          {photo} = this.state,
+          description = new IntlMessageFormat(messages['meta.description.photo']);
+
+        return photo && {
+          title: photo.caption,
+          description: description.format({author: photo.author && photo.author.name, title: photo.caption})
+        };
       }
     });
   };
@@ -89,7 +100,14 @@ export default (locale) => {
 
       childRoutes: [
         photoRoute(category)
-      ]
+      ],
+
+      getMeta() {
+        return {
+          title: category.title,
+          description: category.description || category.short_description
+        };
+      }
     });
   };
 
@@ -119,12 +137,20 @@ export default (locale) => {
         }});
         cb();
       };
+      // console.log("onEnter");
 
       Object.keys(me.state).length
         ? callback()
         : me.resolve(location)
             .then(callback)
             .catch(cb);
+    },
+
+    getMeta() {
+      return {
+        title: page.title,
+        description: page.description //TODO: create page description on BE
+      };
     }
   });
 
@@ -180,10 +206,11 @@ export default (locale) => {
       const
         me = this,
         callback = (data) => {
-          me.childRoutes = [notFound].concat(
+          me.childRoutes = [].concat(
             data.categories.filter(c => !!c.title).map(c => categoryRoute(c, data)),
             data.categories.filter(c => !!c.title && !!c.parent).map(categoryRedirect),
-            data.pages.filter(p => !!p.title).map(pageRoute)
+            data.pages.filter(p => !!p.title).map(pageRoute),
+            [notFound]
           );
 
           cb(null, me.childRoutes);
@@ -195,18 +222,19 @@ export default (locale) => {
     }
   });
 
-  const redirect404 = {path: '*', onEnter: (nextState, replace) => replace('/404')};
-
   const notFound = new Route({
-    path: "404",
+    path: "*",
     components: {
       header: props => <HomeHeader {...props} />,
       body: props => <Error404 {...props} />
+    },
+
+    getMeta() {
+      return {
+        title: '404'
+      };
     }
   });
 
-  return [
-    mainRoute,
-    redirect404
-  ];
+  return mainRoute;
 };
