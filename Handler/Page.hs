@@ -1,33 +1,51 @@
 module Handler.Page where
 
 import Import
-import Handler.Common                    (appendTranslations)
+import Handler.Common                    (getTranslations, getLangs)
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import           Database.Persist.Sql    (fromSqlKey)
-import qualified Data.HashMap.Strict     as H (union, filterWithKey)
+import qualified Data.HashMap.Strict     as H (insert, union, filterWithKey)
+import Database.Esqueleto.Internal.Sql   (veryUnsafeCoerceSqlExprValue)
+
 -- import Data.HashMap.Strict ((!))
 -- import Data.Aeson.Types (parseEither)
 -- import Control.Failure (Failure (failure))
+
+coerce :: E.SqlExpr (E.Value Int64) -> E.SqlExpr (E.Value (Key Page))
+coerce = veryUnsafeCoerceSqlExprValue
 
 getPagesR :: Handler Value
 getPagesR = do
   cacheSeconds $ 60 * 60 * 24 * 30 -- month
   addHeader "Vary" "Accept-Language, Authorization"
-  maid    <- maybeAuthId
-  pages   <- runDB
+  maid <- maybeAuthId
+  langs <- languages
+  pages <- runDB
       $ E.select
-      $ E.from $ \page -> do
+      $ E.from $ \(page `E.InnerJoin` translation) -> do
+        E.on $ page ^. PageId E.==. coerce ( translation ^. TranslationRefId )
+        E.where_ $ translation ^. TranslationLanguage E.==. E.val (pickLanguadge langs)
+        E.where_ $ translation ^. TranslationRefType  E.==. E.val PageType
+        E.where_ $ translation ^. TranslationField    E.==. E.val "title"
 
         case maid of
           Nothing -> E.where_ (page ^. PageHidden E.==. E.val False)
           Just _  -> return ()
 
-        return page
+        return (page, translation ^. TranslationValue)
 
-  results <- appendTranslations pages PageType $ Just ["title"]
-
-  returnJson results
+  returnJson $ map (updatePages maid) pages
+  where
+    expose = ["id", "alias", "parent"]
+    updatePages :: Maybe UserId -> (Entity Page, E.Value Text) -> Value
+    updatePages maid (page, title) = Object hmap'
+      where
+          (Object c) = toJSON page
+          hmap = case maid of
+            Nothing -> H.filterWithKey (\k _ -> elem k expose) c
+            Just _ -> c
+          hmap' = H.insert "title" (toJSON $ E.unValue title) hmap
 
 -- postPagesR :: Language -> Handler Value
 -- postPagesR lang = do
@@ -47,34 +65,23 @@ getPagesR = do
 --
 --       return pid
 
-
 getPageR :: PageId -> Handler Value
 getPageR pageId = do
     cacheSeconds $ 60 * 60 * 24 * 30 -- month
     addHeader "Vary" "Accept-Language"
-    langs   <- languages
     maid    <- maybeAuthId
     mpage   <- runDB $ get pageId
     page    <- maybe notFound return mpage
     _       <- when (pageHidden page && isNothing maid) notFound
 
-    mt      <- runDB $ getBy $ UniqueTranslation
-      (pickLanguadge langs)
-      PageType
-      (fromSqlKey pageId)
-      "title"
+    let entity = Entity pageId page
+    (Object translations) <- getTranslations entity PageType Nothing
+    langs <- getLangs entity PageType ["title", "content"]
 
-    mc      <- runDB $ getBy $ UniqueTranslation
-      (pickLanguadge langs)
-      PageType
-      (fromSqlKey pageId)
-      "content"
+    let expose = ["id", "alias", "parent"]
+        (Object r) = toJSON entity
+        result = H.filterWithKey (\k _ -> elem k expose) r
+        result' = H.union result translations
+        result'' = H.insert "langs" langs result'
 
-    let expose = ["id", "alias", "category", "parent"]
-        (Object r) = toJSON $ Entity pageId page
-        (Object e) = object [
-            "title"     .= fmap (translationValue . entityVal) mt,
-            "content"   .= fmap (translationValue . entityVal) mc
-          ]
-
-    return $ Object $ H.union e $ H.filterWithKey (\k _ -> elem k expose) r
+    return $ Object result''

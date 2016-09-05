@@ -5,10 +5,11 @@
 module Handler.Photo where
 
 import Import
+import Handler.Common                    (getTranslations, getLangs)
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import           Data.Aeson              (withObject, (.:?))
-import qualified Data.HashMap.Strict     as H (union, filterWithKey)
+import qualified Data.HashMap.Strict     as H (union, insert, filterWithKey)
 import           Database.Persist.Sql    (fromSqlKey)
 import           Data.Text.Read          (decimal)
 import           Data.Either.Combinators (rightToMaybe)
@@ -62,21 +63,21 @@ getPhotoR photoId = do
     photo   <- maybe notFound return mphoto
     _       <- when (photoHidden photo && isNothing maid) notFound
     ma      <- maybe (return Nothing) (runDB . get) (photoAuthor photo)
-    mt      <- runDB $ getBy $ UniqueTranslation
-      (pickLanguadge langs)
-      PhotoType
-      (fromSqlKey photoId)
-      "caption"
 
     runDB $ update photoId [PhotoViews  =. succ (photoViews photo)]
-    let expose = ["id", "name", "src", "width", "height", "views", "datetime"]
-        (Object r) = toJSON $ Entity photoId photo
-        (Object e) = object [
-            "caption"     .= fmap (translationValue . entityVal) mt,
-            "author"      .= ma
-          ]
 
-    return $ Object $ H.union e $ H.filterWithKey (\k _ -> elem k expose) r
+    let entity = Entity photoId photo
+    (Object translations) <- getTranslations entity PhotoType Nothing
+    langs <- getLangs entity PhotoType ["caption"]
+
+    let expose = ["id", "name", "src", "width", "height", "views", "datetime"]
+        (Object r) = toJSON entity
+        result = H.filterWithKey (\k _ -> elem k expose) r
+        result' = H.union result translations
+        result'' = H.insert "langs" langs result'
+        result''' = H.insert "author" (toJSON ma) result''
+
+    return $ Object result'''
 
 patchPhotoR :: PhotoId -> Handler Value
 patchPhotoR photoId = do

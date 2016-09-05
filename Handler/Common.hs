@@ -44,7 +44,8 @@ getTranslations entity typ fields = do
 
         return translation
 
-  return $ toJSON translations
+  let values = flip map translations $ \ (Entity _ t) -> (pack $ translationField t, toJSON $ translationValue t)
+  return $ Object $ H.fromList values
 
 getLangs :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => Entity record -> TranslationType -> [String] -> Handler Value
 getLangs entity typ fields = do

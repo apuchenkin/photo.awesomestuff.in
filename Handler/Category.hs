@@ -1,7 +1,7 @@
 module Handler.Category where
 
 import Import
-import Handler.Common                    (appendTranslations)
+import Handler.Common                    (getTranslations, getLangs)
 import qualified Database.Esqueleto      as E
 import           Database.Esqueleto      ((^.))
 import Database.Esqueleto.Internal.Sql   (veryUnsafeCoerceSqlExprValue)
@@ -49,38 +49,20 @@ getCategoryR name = do
   cacheSeconds $ 60 * 60 * 24 * 30 -- month
   addHeader "Vary" "Accept-Language"
   mcategory <-  runDB $ getBy $ UniqueName name
-  (Entity cid category) <- maybe notFound return mcategory
+  category <- maybe notFound return mcategory
   maid <- maybeAuthId
-  langs <- languages
-  _ <- when (categoryHidden category && isNothing maid) notFound
+  _ <- when ((categoryHidden . E.entityVal) category && isNothing maid) notFound
 
-  mt <- runDB $ getBy $ UniqueTranslation
-    (pickLanguadge langs)
-    CategoryType
-    (E.fromSqlKey cid)
-    "title"
-
-  mc <- runDB $ getBy $ UniqueTranslation
-    (pickLanguadge langs)
-    CategoryType
-    (E.fromSqlKey cid)
-    "description"
-
-  translations <- runDB $ selectList [
-      TranslationRefId ==. E.fromSqlKey cid,
-      TranslationRefType ==. CategoryType,
-      TranslationField ==. "title"
-    ] []
+  (Object translations) <- getTranslations category CategoryType Nothing
+  langs <- getLangs category CategoryType ["title", "description"]
 
   let expose = ["id", "name", "date", "parent", "image"]
-      (Object r) = toJSON $ Entity cid category
-      (Object e) = object [
-          "title" .= fmap (translationValue . entityVal) mt,
-          "description" .= fmap (translationValue . entityVal) mc,
-          "langs" .= fmap (translationLanguage . entityVal) translations
-        ]
+      (Object r) = toJSON category
+      result = H.filterWithKey (\k _ -> elem k expose) r
+      result' = H.union result translations
+      result'' = H.insert "langs" langs result'
 
-  return $ Object $ H.union e $ H.filterWithKey (\k _ -> elem k expose) r
+  return $ Object result''
 
 getCategoryPhotoR :: CategoryId -> Handler Value
 getCategoryPhotoR cid = do
