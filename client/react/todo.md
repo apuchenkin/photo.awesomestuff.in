@@ -14,12 +14,12 @@
 
 -----------------------------
 
-
 - meta links
 - SEO code + client update
+- 404 page
 
 -----------------------------
-- 404 page
+
 - encode/minify initial state
 - perfomance
 - backwards compatibility
