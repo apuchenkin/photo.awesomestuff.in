@@ -16,9 +16,10 @@
 -- /page/#Language PagesR POST
 /page/#PageId PageR GET
 
-/category                                   CategoryR GET
-!/category/#CategoryId/photo                 CategoryPhotoR GET LINK UNLINK
-!/category/#String/photo               CategoryPhoto2R GET
+/category                                   CategoriesR GET
+/category/#String                           CategoryR GET
+!/category/#CategoryId/photo                CategoryPhotoR GET LINK UNLINK
+!/category/#String/photo               			CategoryPhoto2R GET
 
 /author/#AuthorId/photo                     AuthorPhotoR GET
 

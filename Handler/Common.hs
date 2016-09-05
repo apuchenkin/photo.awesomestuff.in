@@ -28,6 +28,41 @@ getRobotsR :: Handler TypedContent
 getRobotsR = return $ TypedContent typePlain
                     $ toContent $(embedFile "config/robots.txt")
 
+getTranslations :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => Entity record -> TranslationType -> Maybe [String] -> Handler Value
+getTranslations entity typ fields = do
+  langs         <- languages
+  translations  <- runDB
+      $ E.select
+      $ E.from $ \translation -> do
+        E.where_ $ translation ^. TranslationLanguage E.==. E.val (pickLanguadge langs)
+        E.where_ $ translation ^. TranslationRefType  E.==. E.val typ
+        E.where_ $ translation ^. TranslationRefId    E.==. E.val (E.fromSqlKey $ E.entityKey entity)
+
+        case fields of
+          Nothing -> return ()
+          Just fields' -> E.where_ $ translation ^. TranslationField `E.in_` E.valList fields'
+
+        return translation
+
+  return $ toJSON translations
+
+getLangs :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => Entity record -> TranslationType -> [String] -> Handler Value
+getLangs entity typ fields = do
+  langs  <- runDB
+      $ E.select
+      $ E.from $ \translation -> do
+        E.where_ $ translation ^. TranslationRefType  E.==. E.val typ
+        E.where_ $ translation ^. TranslationRefId    E.==. E.val (E.fromSqlKey $ E.entityKey entity)
+        E.where_ $ translation ^. TranslationField   `E.in_` E.valList fields
+        E.groupBy $ translation ^. TranslationLanguage
+
+        return (translation ^. TranslationLanguage, E.countRows)
+
+  return $ parseResult langs
+    where
+      parseResult :: [(E.Value Language, E.Value Int)] -> Value
+      parseResult langs = toJSON $ map (E.unValue . fst) $ filter (\(_,c) -> E.unValue c == length fields) langs
+
 appendTranslations :: (ToJSON (Entity record), ToBackendKey SqlBackend record) => [Entity record] -> TranslationType -> Maybe [String] -> Handler Value
 appendTranslations list typ fields = do
   langs         <- languages
