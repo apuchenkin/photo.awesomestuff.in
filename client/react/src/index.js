@@ -33,7 +33,8 @@ const
 
 function onUpdate() {
   let
-    meta = utils.getMeta(this.state.routes, messages);
+    {routes, location} = this.state,
+    meta = utils.getMeta(routes, messages, location.pathname);
 
   metaUpdate(meta);
 }
@@ -41,13 +42,8 @@ function onUpdate() {
 function metaUpdate(meta) {
   document.title = meta.title;
   document.head.querySelector('meta[name=description]').content = meta.description;
-  // meta.links.map(function(data) {
-  //   var link = links[data[0]] || document.head.appendChild(document.createElement('link'));
-  //   link.href = data[1];
-  //   link.rel = "alternate";
-  //   link.hreflang = data[0];
-  //   links[data[0]] = link;
-  // })
+  document.head.querySelectorAll('link[hreflang]').forEach(node => node.remove());
+  meta.links.map(link => document.head.insertAdjacentHTML('beforeend', link));
 }
 
 match({ history, routes}, (error, redirectLocation, renderProps) => {

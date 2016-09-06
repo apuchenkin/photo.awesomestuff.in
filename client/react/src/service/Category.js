@@ -23,6 +23,16 @@ export default class CategoryService extends Service {
     });
   }
 
+  fetchCategory(name) {
+    const me = this,
+      url = this.baseUrl() + '/category/' + name;
+
+    return fetch(url, {
+      headers: me.headers
+    })
+    .then(this.respondJSON);
+  }
+
   refineCategories(categories) {
     const map = new Map(categories.map(c => [c.id, c]));
 

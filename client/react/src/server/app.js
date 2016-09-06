@@ -60,7 +60,7 @@ app.use((req, res) => {
           basename,
           messages
         },
-        meta = utils.getMeta(renderProps.routes, messages),
+        meta = utils.getMeta(renderProps.routes, messages, renderProps.location.pathname),
         componentHTML = ReactDOM.renderToString(
           <IntlProvider locale={locale} messages={messages}>
             <RouterContext {...renderProps} createElement={createElement} />
@@ -96,6 +96,7 @@ function renderHTML({ componentHTML, initialState, meta, config }) {
         <meta name="description" content="${escapeHtml(meta.description)}">
         <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="${config.staticEndpoint}/bundle.css">
+        ${meta.links.join("\n")}
     </head>
     <body>
       <div id="react-view" class="wrapper">${componentHTML}</div>

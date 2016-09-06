@@ -6,6 +6,7 @@ import { locationShape } from 'react-router/lib/PropTypes';
 import Langs from './common/langs';
 import Link from './link';
 import Loader from './loader';
+import config from '../config.json';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
@@ -65,9 +66,11 @@ export default class Main extends React.Component {
   render() {
     const
       state = this.state,
-      {header, body, location, pages} = this.props,
+      {routes, header, body, location, pages} = this.props,
+      route = routes[routes.length - 1],
       aboutPage = pages.find(p => p.alias === 'about'),
-      contactsPage = pages.find(p => p.alias === 'contacts')
+      contactsPage = pages.find(p => p.alias === 'contacts'),
+      langs = route.getLangs && route.getLangs() || config.locales
       ;
 
     return (
@@ -85,7 +88,7 @@ export default class Main extends React.Component {
                 />
               {aboutPage && contactsPage.title && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
               {contactsPage && contactsPage.title && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
-              <Langs location={ location} />
+              <Langs location={ location } langs={langs} />
             </footer>
           </div>
         </div>

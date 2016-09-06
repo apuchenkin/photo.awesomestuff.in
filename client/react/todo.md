@@ -11,11 +11,11 @@
 [x] promise error handling
 [x] route smart redirects
 [x] metadata server/client updates
+[x] meta links
 
 -----------------------------
 
-- meta links
-- SEO code + client update
+- SEO code + client updates (ga.send)
 - 404 page
 
 -----------------------------

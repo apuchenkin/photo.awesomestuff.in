@@ -1,6 +1,7 @@
 import Promise from 'promise';
 import IntlMessageFormat from 'intl-messageformat';
 import config from '../config.json';
+import Picker from '../components/common/langs';
 
 export default {
   pick(object, params) {
@@ -19,15 +20,20 @@ export default {
     });
   },
 
-  getMeta(routes = [], messages) {
+  getMeta(routes = [], messages, pathname) {
     const
       route = routes[routes.length - 1],
       meta = route.getMeta && route.getMeta() || {},
-      description = new IntlMessageFormat(messages['meta.description']);
+      description = new IntlMessageFormat(messages['meta.description']),
+      hostname = config.hostname,
+      langs = route.getLangs && route.getLangs() || config.locales;
 
     return {
       title: meta.title ? `${meta.title} - ${config.title}` : config.title,
-      description: meta.description || description.format()
+      description: meta.description || description.format(),
+      links: [
+        `<link href="${pathname.replace(Picker.localeURL, `${hostname}$3`)}" rel="alternate" hreflang="x-default" />`
+      ].concat(langs.map(lang => `<link href="${pathname.replace(Picker.localeURL, `${hostname}/${lang}$3`)}" rel="alternate" hreflang="${lang}" />`))
     };
   }
 };

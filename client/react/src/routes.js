@@ -18,6 +18,7 @@ import utils from './lib/utils';
 import Loader from './components/loader';
 import Route from './lib/route';
 import Error404 from './components/error/404';
+import IntlMessageFormat from 'intl-messageformat';
 
 const
   isBrowser = (typeof window !== 'undefined'),
@@ -61,6 +62,11 @@ export default (locale, messages = initialState.messages) => {
           title: photo.caption,
           description: description.format({author: photo.author && photo.author.name, title: photo.caption})
         };
+      },
+
+      getLangs() {
+        const {photo} = this.state;
+        return photo.langs;
       }
     });
   };
@@ -74,6 +80,7 @@ export default (locale, messages = initialState.messages) => {
 
       resolve(location) {
         return utils.fetchAll({
+          category: categoryService.fetchCategory(category.name),
           photos: photoService
             .fetchPhotos(category.name)
             .then(p => photoService.refinePhotos(p, location.params.photoId))
@@ -103,10 +110,17 @@ export default (locale, messages = initialState.messages) => {
       ],
 
       getMeta() {
+        const {category} = this.state;
+
         return {
           title: category.title,
           description: category.description || category.short_description
         };
+      },
+
+      getLangs() {
+        const {category} = this.state;
+        return category.langs;
       }
     });
   };
@@ -151,6 +165,11 @@ export default (locale, messages = initialState.messages) => {
         title: page.title,
         description: page.description //TODO: create page description on BE
       };
+    },
+
+    getLangs() {
+      const {page} = this.state;
+      return page.langs;
     }
   });
 

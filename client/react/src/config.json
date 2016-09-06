@@ -1,7 +1,8 @@
 {
+  "hostname": "http://localhost:3001",
   "apiEndpoint": "http://localhost:3001",
   "apiPrefix": "/api/v1",
-  "apiProxy": "http://localhost:3000",
+  "apiProxy": "http://192.168.138.34:3000",
   "staticEndpoint": "http://localhost:8080",
   "title": "PHOTO.AWESOMESTUFF.IN",
   "locales": ["ru", "en"],
