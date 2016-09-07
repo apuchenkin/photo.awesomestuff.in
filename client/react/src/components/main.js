@@ -1,4 +1,5 @@
 import React from 'react';
+import shallowCompare from 'react-addons-shallow-compare';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
@@ -38,6 +39,10 @@ export default class Main extends React.Component {
 
   getChildContext() {
     return {prefix: this.props.route.locale};
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   componentDidMount() {
@@ -82,7 +87,7 @@ export default class Main extends React.Component {
           <div className="content" ref="content">
             {body}
             <footer>
-              <Link to="/" >photo.awesomestuff.in</Link> | &copy; <FormattedMessage
+              <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage
                     id="footer"
                     defaultMessage={`2016, Artem Puchenkin`}
                 />

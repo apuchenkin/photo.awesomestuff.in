@@ -1,5 +1,6 @@
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
+import shallowCompare from 'react-addons-shallow-compare';
 
 import Link from '../link';
 import CategoryLink from '../link/category';
@@ -12,6 +13,10 @@ export default class Header extends React.Component {
   static propTypes = {
     category: object.isRequired,
     categories: array.isRequired
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   render() {

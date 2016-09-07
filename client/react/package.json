@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --debug --hot --output-pathinfo --watch --colors --inline --progress",
     "nodemon": "cross-env BABEL_ENV='node' nodemon src/server.js",
-    "start": "superstatic build -p ${PORT:-8080} --host 0.0.0.0 --gzip -c '{\"rewrites\": [{\"source\":\"**\",\"destination\":\"index.html\"}],\"headers\":[{\"source\":\"**\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"max-age=86400\"}]}]}'",
-    "prestart": "npm run build",
+    "start": "superstatic build -p 8080 --host 0.0.0.0 --gzip -c '{\"rewrites\": [{\"source\":\"**\",\"destination\":\"index.html\"}],\"headers\":[{\"source\":\"**\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"max-age=86400\"}]}]}'",
     "build": "cross-env NODE_ENV=production webpack -p --progress",
     "prebuild": "mkdir build && ncp src/assets build/assets",
     "test": "npm run -s lint && npm run -s test:karma",
@@ -86,6 +85,7 @@
     "perfect-scrollbar": "^0.6.12",
     "react": "^15.3.0",
     "react-addons-css-transition-group": "^15.3.1",
+    "react-addons-shallow-compare": "^15.3.1",
     "react-dom": "^15.3.0",
     "react-intl": "^2.1.4",
     "react-router": "^2.0.0"

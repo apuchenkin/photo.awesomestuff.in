@@ -1,4 +1,5 @@
 import React from 'react';
+import shallowCompare from 'react-addons-shallow-compare';
 import withRouter from 'react-router/lib/withRouter';
 import Category from '../link/category';
 import PhotoLink from '../link/photo';
@@ -26,6 +27,10 @@ class Photo extends React.Component {
     photo: object.isRequired,
     intl: intlShape.isRequired,
     router: object.isRequired
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   constructor(props) {

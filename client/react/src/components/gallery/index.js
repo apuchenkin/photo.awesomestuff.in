@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import shallowCompare from 'react-addons-shallow-compare';
 
 import CategoryLink from '../link/category';
 import PhotoLink from '../link/photo';
@@ -53,6 +54,9 @@ export default class Gallery extends React.Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
 
   createPackery(container) {
     let packery = new Packery(container, {
@@ -61,24 +65,9 @@ export default class Gallery extends React.Component {
       gutter: 10
     });
 
-    packery.defer = [];
-
-    packery.on('layoutComplete', () => {
-      packery.isLoading = false;
-      if (packery.defer.length) {
-        packery.defer.pop().apply(packery);
-      }
-    });
-
     packery.doUpdate = function() {
       packery.reloadItems();
       packery.layout();
-
-      if (!packery.isLoading) {
-        packery.isLoading = true;
-      } else {
-        packery.defer.push(packery.doUpdate);
-      }
     };
 
     return packery;
