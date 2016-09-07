@@ -17,11 +17,15 @@ class Picker extends React.Component {
   render() {
     const
       {location, langs} = this.props,
-      links = locales.map(locale => (
-        <a href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} disabled={!langs.find(l => locale === l)} hrefLang={locale} key={locale}>
-          <FormattedMessage id={locale} defaultMessage={locale} />
-        </a>
-      ));
+      links = locales.map(locale => {
+        const
+          disabled = !langs.find(l => locale === l),
+          msg = <FormattedMessage id={locale} defaultMessage={locale} />;
+
+        return disabled
+          ? msg
+          : <a href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} key={locale}>{msg}</a>;
+      });
 
     //TODO: determine is the page available
     return (

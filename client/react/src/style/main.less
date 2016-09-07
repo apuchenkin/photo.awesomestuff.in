@@ -141,7 +141,7 @@ footer {
   top:   @divisor;
   z-index: 20;
 
-  a {
+  &>a, &>span {
     margin-right: @divisor / 2;
     font-size: medium;
   }
@@ -174,7 +174,7 @@ footer {
     box-sizing: border-box;
     position: relative;
 
-    & > .gallery, .galleries, .about, .contacts {
+    & > .gallery, .galleries, .page {
       min-height: 100%;
       box-sizing: border-box;
       margin-bottom: -@footer-size;
@@ -186,13 +186,6 @@ footer {
         display: block;
       }
     }
-
-
-    //@media screen {
-    //  @media (min-width: 1000px) {
-    //    padding: @divisor / 2 @divisor;
-    //  }
-    //}
 
     & > .static {
       color: @light-grey;

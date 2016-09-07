@@ -11,9 +11,7 @@ export default class Page extends React.Component {
 
   render() {
     return (
-      <div>
         <div className="page" dangerouslySetInnerHTML={{__html: this.props.content}} ></div>
-      </div>
     );
   }
 }
