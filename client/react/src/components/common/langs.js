@@ -2,7 +2,7 @@ import React from 'react';
 import {locales} from '../../config.json';
 import {locationShape} from 'react-router/lib/PropTypes';
 import {FormattedMessage} from 'react-intl';
-
+import shallowCompare from 'react-addons-shallow-compare';
 const {array} = React.PropTypes;
 
 class Picker extends React.Component {
@@ -13,6 +13,10 @@ class Picker extends React.Component {
   }
 
   static localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
 
   render() {
     const

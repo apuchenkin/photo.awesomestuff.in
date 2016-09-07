@@ -1,5 +1,6 @@
 import React from 'react';
 import config from '../../config.json';
+import shallowCompare from 'react-addons-shallow-compare';
 
 const { object } = React.PropTypes;
 
@@ -7,6 +8,10 @@ export default class Brick extends React.Component {
 
   static propTypes = {
     photo: object.isRequired
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   render() {

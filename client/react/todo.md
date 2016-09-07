@@ -12,16 +12,16 @@
 [x] route smart redirects
 [x] metadata server/client updates
 [x] meta links
+[x] perfomance
 
 -----------------------------
 
-- SEO code + client updates (ga.send)
 - 404 page
 
 -----------------------------
 
 - encode/minify initial state
-- perfomance
+- SEO code + client updates (ga.send)
 - backwards compatibility
 - deploy & build
 
