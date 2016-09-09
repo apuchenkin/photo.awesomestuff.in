@@ -1,4 +1,4 @@
-import Promise from 'promise';
+import { Promise } from 'es6-promise';
 import IntlMessageFormat from 'intl-messageformat';
 import config from '../config.json';
 import Picker from '../components/common/langs';

@@ -11,14 +11,14 @@ import createRoutes from './routes';
 import config from './config';
 import utils from './lib/utils';
 
+require('./polyfill/find');
+
 import './assets/fontello/css/fontello.css';
 import './style/main.less';
 
 addLocaleData(ruLocaleData);
 
 const createElement = (component, props) => component(props);
-
-
 
 const
   isBrowser = (typeof window !== 'undefined'),
@@ -42,7 +42,7 @@ function onUpdate() {
 function metaUpdate(meta) {
   document.title = meta.title;
   document.head.querySelector('meta[name=description]').content = meta.description;
-  document.head.querySelectorAll('link[hreflang]').forEach(node => node.remove());
+  Array.from(document.head.querySelectorAll('link[hreflang]')).map(node => document.head.removeChild(node));
   meta.links.map(link => document.head.insertAdjacentHTML('beforeend', link));
 }
 
