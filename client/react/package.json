@@ -7,6 +7,8 @@
     "nodemon": "cross-env BABEL_ENV='node' nodemon src/server.js",
     "start": "superstatic build -p 8080 --host 0.0.0.0 --gzip -c '{\"rewrites\": [{\"source\":\"**\",\"destination\":\"index.html\"}],\"headers\":[{\"source\":\"**\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"max-age=86400\"}]}]}'",
     "build": "cross-env NODE_ENV=production webpack -p --progress",
+    "dist": "cross-env NODE_ENV=production BABEL_ENV='node' babel src -d dist",
+    "predist": "mkdir dist && ncp src/assets dist/assets",
     "prebuild": "mkdir build && ncp src/assets build/assets",
     "test": "npm run -s lint && npm run -s test:karma",
     "test:karma": "karma start test/karma.conf.js --single-run",
