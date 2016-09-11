@@ -11,8 +11,6 @@ import createRoutes from './routes';
 import config from './config';
 import utils from './lib/utils';
 
-require('./polyfill/find');
-
 import './assets/fontello/css/fontello.css';
 import './style/main.less';
 
@@ -37,6 +35,10 @@ function onUpdate() {
     meta = utils.getMeta(routes, messages, location.pathname);
 
   metaUpdate(meta);
+  ga('send', 'pageview', {
+    'title': meta.title,
+    'page': location.pathname
+  });
 }
 
 function metaUpdate(meta) {

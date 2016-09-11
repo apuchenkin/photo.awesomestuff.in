@@ -12,7 +12,7 @@ import './photo.less';
 import utils from '../../lib/utils';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import {injectIntl, intlShape, FormattedMessage} from 'react-intl';
-import { bind, memoize, debounce } from 'decko';
+import { bind, debounce } from 'decko';
 
 const
   isBrowser = (typeof window !== 'undefined'),
@@ -128,7 +128,7 @@ class Photo extends React.Component {
       figure = (
         <figure className={state.isLoading ? "content loading" : "content"} >
           <div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>{closeIcon}</Link></div>
-          <img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next);}} src={src} style={{maxWidth: w + 'px', maxHeight: (h - 120) + 'px'}} onLoad={this.onLoad} ref='img' />
+          <img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next);}} src={src} style={{maxWidth: width + 'px', maxHeight: (height - 60) + 'px'}} onLoad={this.onLoad} ref='img' />
           <figcaption className="description">
             <span className="caption">{photo.caption}</span>
             {photo.author && <div><FormattedMessage

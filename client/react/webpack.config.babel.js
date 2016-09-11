@@ -1,6 +1,6 @@
 import webpack from 'webpack';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
+// import HtmlWebpackPlugin from 'html-webpack-plugin';
 import autoprefixer from 'autoprefixer';
 import path from 'path';
 import config from './src/config.json';
@@ -91,11 +91,11 @@ module.exports = {
     new webpack.optimize.DedupePlugin(),
     new webpack.DefinePlugin({
       'process.env': JSON.stringify({ NODE_ENV: ENV })
-    }),
-    new HtmlWebpackPlugin({
-      template: './index.html',
-      minify: { collapseWhitespace: true }
     })
+    // new HtmlWebpackPlugin({
+    //   template: './index.html',
+    //   minify: { collapseWhitespace: true }
+    // })
   ]).concat(ENV==='production' ? [
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({

@@ -1,7 +1,7 @@
 import React from 'react';
 import {locales} from '../../config.json';
 import {locationShape} from 'react-router/lib/PropTypes';
-import {FormattedMessage} from 'react-intl';
+import {injectIntl, intlShape} from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 const {array} = React.PropTypes;
 
@@ -9,7 +9,8 @@ class Picker extends React.Component {
 
   static propTypes = {
     location: locationShape,
-    langs: array.isRequired
+    langs: array.isRequired,
+    intl: intlShape.isRequired
   }
 
   static localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g
@@ -20,15 +21,16 @@ class Picker extends React.Component {
 
   render() {
     const
-      {location, langs} = this.props,
+      {location, langs, intl} = this.props,
       links = locales.map(locale => {
         const
           disabled = !langs.find(l => locale === l),
-          msg = <FormattedMessage id={locale} defaultMessage={locale} />;
+          localeMsg = intl.formatMessage({id: locale, defaultMessage: locale}),
+          helpMsg = intl.formatMessage({id: 'locale.not_available', defaultMessage: "Current page content is not available in language {lang} yet"}, {lang: localeMsg});
 
         return disabled
-          ? msg
-          : <a href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} key={locale}>{msg}</a>;
+          ? <span key={locale} title={helpMsg}>{localeMsg}</span>
+          : <a key={locale} href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} key={locale}>{localeMsg}</a>;
       });
 
     //TODO: determine is the page available
@@ -40,4 +42,4 @@ class Picker extends React.Component {
   }
 }
 
-export default Picker;
+export default injectIntl(Picker);

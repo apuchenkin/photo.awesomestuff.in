@@ -243,6 +243,7 @@ export default (locale, messages = initialState.messages) => {
 
   const notFound = new Route({
     path: "*",
+    class: 'error',
     components: {
       header: props => <HomeHeader {...props} />,
       body: props => <Error404 {...props} />

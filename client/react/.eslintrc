@@ -13,7 +13,9 @@
       "jsx": true
     }
   },
-  "globals": {},
+  "globals": {
+    "ga": true
+  },
   "rules": {
     "no-empty": 0,
     "no-console": 0,

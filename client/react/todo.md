@@ -13,18 +13,12 @@
 [x] metadata server/client updates
 [x] meta links
 [x] perfomance
+[x] backwards compatibility
+[x] 404 page
+[x] SEO code + client updates (ga.send)
 
 -----------------------------
-
-- 404 page
-
------------------------------
-
-- encode/minify initial state
-- SEO code + client updates (ga.send)
-- backwards compatibility
 - deploy & build
-
 -----------------------------
 future
 - child pages & category pages
