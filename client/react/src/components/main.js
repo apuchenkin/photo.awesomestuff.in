@@ -7,7 +7,7 @@ import { locationShape } from 'react-router/lib/PropTypes';
 import Langs from './common/langs';
 import Link from './link';
 import Loader from './loader';
-import config from '../config.json';
+import config from '../config/config.json';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 

@@ -4,13 +4,12 @@ import match from 'react-router/lib/match';
 import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
 import favicon from 'serve-favicon';
-import proxy from 'http-proxy-middleware';
 import { IntlProvider } from 'react-intl';
 import escapeHtml from 'escape-html';
 
 import Picker from '../components/common/langs';
 import createRoutes from '../routes';
-import config from '../config.json';
+import config from '../config/config.json';
 import utils from '../lib/utils';
 
 const app = express();
@@ -21,13 +20,6 @@ function negotiateLocale(req) {
   || config.fallbackLocale
   ;
 }
-
-app.use('/api', proxy({
-  target: config.apiProxy,
-  pathRewrite: {
-    '^/api/v1' : '' // rewrite path
-  }
-}));
 
 app.listen(3000);
 

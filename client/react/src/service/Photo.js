@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import config from '../config.json';
+import config from '../config/config.json';
 import Service from './BaseService';
 
 const sizes = [

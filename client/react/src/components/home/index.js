@@ -1,7 +1,7 @@
 import React from 'react';
 import CategoryService from '../../service/Category';
 import CategoryLink from '../link/category';
-import config from '../../config.json';
+import config from '../../config/config.json';
 import {FormattedMessage} from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import './style.less';

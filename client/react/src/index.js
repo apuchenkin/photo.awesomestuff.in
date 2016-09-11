@@ -8,7 +8,7 @@ import { IntlProvider, addLocaleData }  from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
 
 import createRoutes from './routes';
-import config from './config';
+import config from './config/config';
 import utils from './lib/utils';
 
 import './assets/fontello/css/fontello.css';

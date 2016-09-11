@@ -1,5 +1,4 @@
 import fetch from 'isomorphic-fetch';
-import config from '../config.json';
 import Service from './BaseService';
 
 // var url = require('url');

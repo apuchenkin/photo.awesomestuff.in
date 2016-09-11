@@ -4,7 +4,6 @@ import shallowCompare from 'react-addons-shallow-compare';
 
 import CategoryLink from '../link/category';
 import PhotoLink from '../link/photo';
-import config from '../../config.json';
 import Brick from './brick';
 import Loader from '../loader';
 

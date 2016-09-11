@@ -1,5 +1,5 @@
 import React from 'react';
-import config from '../../config.json';
+import config from '../../config/config.json';
 import shallowCompare from 'react-addons-shallow-compare';
 
 const { object } = React.PropTypes;
@@ -16,7 +16,7 @@ export default class Brick extends React.Component {
 
   render() {
     const
-      photo = this.props.photo,
+      { photo } = this.props,
       { w, h, ratio } = photo,
       inc = ratio >= 1 ? ratio : 1 / ratio,
       [m1,m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w],
