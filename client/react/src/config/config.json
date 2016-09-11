@@ -1,0 +1,22 @@
+{
+  "hostname": "http://localhost:3001",
+  "apiEndpoint": "http://localhost:3001",
+  "apiPrefix": "/api/v1",
+  "apiProxy": "http://localhost:3000",
+  "staticEndpoint": "http://localhost:8080",
+  "analytics": "UA-63928795-1",
+  "title": "PHOTO.AWESOMESTUFF.IN",
+  "locales": ["ru", "en"],
+  "fallbackLocale" : "en",
+  "gutter": 10,
+  "brickWidth": 100,
+  "transition": 200,
+  "gallery": {
+    "width": 320,
+    "height": 240
+  },
+  "photo": {
+    "width": 1920,
+    "height": 1080
+  }
+}
