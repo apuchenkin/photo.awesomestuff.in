@@ -54,7 +54,7 @@ getCategoryR name = do
   _ <- when ((categoryHidden . E.entityVal) category && isNothing maid) notFound
 
   (Object translations) <- getTranslations category CategoryType Nothing
-  langs <- getLangs category CategoryType ["title", "description"]
+  langs <- getLangs category CategoryType ["title"]
 
   let expose = ["id", "name", "date", "parent", "image"]
       (Object r) = toJSON category
