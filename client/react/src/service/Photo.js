@@ -26,7 +26,6 @@ export default class PhotoService extends Service {
         // url = new URL('/api/v1/category/' + category + '/photo', location.origin);
         // url.searchParams.append('hidden', showHidden);
 
-    console.log(url);
     return fetch(url, {
       headers: me.headers
     })

@@ -218,7 +218,9 @@ export default (locale, messages = initialState.messages) => {
 
       Object.keys(me.state).length
         ? callback(me.state)
-        : me.resolve(location).then(callback);
+        : me.resolve(location)
+            .then(callback)
+            .catch(cb);
     },
 
     getChildRoutes(location, cb) {

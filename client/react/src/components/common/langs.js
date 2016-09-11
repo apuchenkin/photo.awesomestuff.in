@@ -1,4 +1,5 @@
 import React from 'react';
+import {locales} from '../../config/config.json';
 import {locationShape} from 'react-router/lib/PropTypes';
 import {injectIntl, intlShape} from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';

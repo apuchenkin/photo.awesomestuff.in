@@ -21,8 +21,6 @@ function negotiateLocale(req) {
   ;
 }
 
-app.listen(3000);
-
 app.use(favicon(__dirname + '/../assets/favicon.ico'));
 app.use((req, res) => {
   const
