@@ -10,41 +10,34 @@ import Loader from '../loader';
 import './gallery.less';
 
 const
-  { object, array } = React.PropTypes,
+  { shape, arrayOf, element } = React.PropTypes,
   isBrowser = (typeof window !== 'undefined'),
-  Packery = isBrowser ? window.Packery || require('packery') : null;
+  Packery = isBrowser ? require('packery') : null;
 
 export default class Gallery extends React.Component {
+
+  static propTypes = {
+    children: element,
+    category: shape().isRequired,
+    photos: arrayOf(shape()).isRequired,
+  };
+
   constructor(props) {
     super(props);
 
     this.state = {
-      isLoading: true
+      isLoading: true,
     };
   }
 
-  static propTypes = {
-    category: object.isRequired,
-    photos: array.isRequired
-  };
-
   componentDidMount() {
-    const
-      me = this
-    ;
-
-    me.setState({isLoading: false});
-    me.props.route.cmp = me;
-    me.packery = me.createPackery(me.refs.packery);
+    this.setState({ isLoading: false });
+    this.props.route.cmp = this;
+    this.packery = this.createPackery(this.packeryCmp);
   }
 
-  componentWillUnmount() {
-    const
-      me = this
-    ;
-
-    me.packery.destroy();
-    me.packery = null;
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   componentDidUpdate() {
@@ -53,18 +46,19 @@ export default class Gallery extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
+  componentWillUnmount() {
+    this.packery.destroy();
+    this.packery = null;
   }
 
   createPackery(container) {
-    let packery = new Packery(container, {
+    const packery = new Packery(container, {
       columnWidth: 100,
       itemSelector: 'li',
-      gutter: 10
+      gutter: 10,
     });
 
-    packery.doUpdate = function() {
+    packery.doUpdate = () => {
       packery.reloadItems();
       packery.layout();
     };
@@ -74,10 +68,9 @@ export default class Gallery extends React.Component {
 
   render() {
     const
-      props = this.props,
-      state = this.state,
-      category = props.category,
-      photos = props.photos.map(p => (
+      { isLoading } = this.state,
+      { category, photos } = this.props,
+      gallery = photos.map(p => (
         <li className="photo" key={p.id} >
           <PhotoLink photoId={p.id} {...CategoryLink.fromCategory(category)}>
             <Brick photo={p} />
@@ -85,20 +78,21 @@ export default class Gallery extends React.Component {
         </li>
       )),
       hasNav = !!(category.parent || category).childs.length,
-      childrens = props.photos && !!props.photos.length && React.Children.map(this.props.children, c => React.cloneElement(c, {
-        photos: props.photos
-      }));
+      childrens = !!photos.length && React.Children.map(this.props.children, c =>
+        React.cloneElement(c, {
+          photos,
+        }));
 
     return (
-        <div className={hasNav ? 'gallery nav' : 'gallery'} >
-          <ReactCSSTransitionGroup transitionName="loader" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
-            {state.isLoading && <Loader />}
-          </ReactCSSTransitionGroup>
-          <ReactCSSTransitionGroup transitionName="photo" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
-            {childrens}
-          </ReactCSSTransitionGroup>
-          <ul ref="packery" className={state.isLoading ? 'loading' : ''}>{photos}</ul>
-        </div>
+      <div className={hasNav ? 'gallery nav' : 'gallery'} >
+        <ReactCSSTransitionGroup transitionName="loader" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
+          {isLoading && <Loader />}
+        </ReactCSSTransitionGroup>
+        <ReactCSSTransitionGroup transitionName="photo" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
+          {childrens}
+        </ReactCSSTransitionGroup>
+        <ul ref={(c) => { this.packeryCmp = c; }} className={isLoading ? 'loading' : ''}>{gallery}</ul>
+      </div>
     );
   }
 }

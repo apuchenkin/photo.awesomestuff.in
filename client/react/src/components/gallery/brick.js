@@ -1,13 +1,17 @@
 import React from 'react';
-import config from '../../config/config.json';
 import shallowCompare from 'react-addons-shallow-compare';
 
-const { object } = React.PropTypes;
+import config from '../../config/config.json';
+
+const { int, string, shape } = React.PropTypes;
 
 export default class Brick extends React.Component {
 
   static propTypes = {
-    photo: object.isRequired
+    photo: shape({
+      id: int.isRequired,
+      src: string.isRequired,
+    }),
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -19,13 +23,13 @@ export default class Brick extends React.Component {
       { photo } = this.props,
       { w, h, ratio } = photo,
       inc = ratio >= 1 ? ratio : 1 / ratio,
-      [m1,m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w],
+      [m1, m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w],
       s = Math.max(m1, m2),
       filename = photo.src.split('/').pop(),
       src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, s, s, filename].join('/');
 
     return (
-      <div className="brick" style={{width: w + 'px', height: h + 'px', backgroundImage: `url(${src})`}} />
+      <div className="brick" style={{ width: `${w}px`, height: `${h}px`, backgroundImage: `url(${src})` }} />
     );
   }
 }

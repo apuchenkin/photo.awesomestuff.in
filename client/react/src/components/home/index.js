@@ -1,17 +1,18 @@
 import React from 'react';
-import CategoryService from '../../service/Category';
+import { FormattedMessage } from 'react-intl';
+import shallowCompare from 'react-addons-shallow-compare';
+
 import CategoryLink from '../link/category';
 import config from '../../config/config.json';
-import {FormattedMessage} from 'react-intl';
-import shallowCompare from 'react-addons-shallow-compare';
+
 import './style.less';
 
-const {array, object} = React.PropTypes;
+const { array, object } = React.PropTypes;
 
 class Gallery extends React.Component {
   static propTypes = {
     category: object.isRequired,
-    childs: array.isRequired
+    childs: array.isRequired,
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -20,12 +21,13 @@ class Gallery extends React.Component {
 
   render() {
     const
-      {category, childs} = this.props;
+      { category, childs } = this.props;
 
     return (
       <div className="gallery">
         <CategoryLink category={category.name} className="cover">
-          <img src={config.apiEndpoint + config.apiPrefix + '/' + category.image} width={config.gallery.width} title={category.title} alt={category.title}/> {category.date && <span className="sub">{category.date}</span>}
+          <img src={`${config.apiEndpoint}${config.apiPrefix}/${category.image}`} width={config.gallery.width} title={category.title} alt={category.title} />
+          {category.date && <span className="sub">{category.date}</span>}
         </CategoryLink>
         <aside>
           <h3>
@@ -46,11 +48,10 @@ class Gallery extends React.Component {
   }
 }
 
-
 export default class Home extends React.Component {
 
   static propTypes = {
-    categories: array.isRequired
+    categories: array.isRequired,
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -72,7 +73,7 @@ export default class Home extends React.Component {
     return (
       <div className="galleries">
         <h2>
-          <FormattedMessage id="galleries" defaultMessage={`Galleries`}/>
+          <FormattedMessage id="galleries" defaultMessage={'Galleries'} />
         </h2>
         <ul>{galleries}</ul>
       </div>

@@ -18,12 +18,17 @@
 [x] SEO code + client updates (ga.send)
 [x] serve static from separate nginx location (8080 port?)
 [x] deploy & build
+[x] separate client/server webpack build
 
 -----------------------------
-- separate client/server webpack build
+
+- propTypes
+- better wire-up isLoading state
 - isomorphic styles
-- styles
+- style chunks
 - cache control policy (node)
+- sitemap
+
 -----------------------------
 future
 - child pages & category pages

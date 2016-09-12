@@ -1,16 +1,17 @@
 import React from 'react';
-import {locales} from '../../config/config.json';
-import {locationShape} from 'react-router/lib/PropTypes';
-import {injectIntl, intlShape} from 'react-intl';
+import { locationShape } from 'react-router/lib/PropTypes';
+import { injectIntl, intlShape } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
-const {array} = React.PropTypes;
+import { locales } from '../../config/config.json';
+
+const { arrayOf, string } = React.PropTypes;
 
 class Picker extends React.Component {
 
   static propTypes = {
     location: locationShape,
-    langs: array.isRequired,
-    intl: intlShape.isRequired
+    langs: arrayOf(string).isRequired,
+    intl: intlShape.isRequired,
   }
 
   static localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g
@@ -20,20 +21,19 @@ class Picker extends React.Component {
   }
 
   render() {
-    const
-      {location, langs, intl} = this.props,
-      links = locales.map(locale => {
+    const { location, langs, intl } = this.props,
+      links = locales.map((locale) => {
         const
           disabled = !langs.find(l => locale === l),
-          localeMsg = intl.formatMessage({id: locale, defaultMessage: locale}),
-          helpMsg = intl.formatMessage({id: 'locale.not_available', defaultMessage: "Current page content is not available in language {lang} yet"}, {lang: localeMsg});
+          localeMsg = intl.formatMessage({ id: locale, defaultMessage: locale }),
+          helpMsg = intl.formatMessage({ id: 'locale.not_available', defaultMessage: 'Current page content is not available in language {lang} yet' }, { lang: localeMsg });
 
         return disabled
           ? <span key={locale} title={helpMsg}>{localeMsg}</span>
-          : <a key={locale} href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} key={locale}>{localeMsg}</a>;
+          : <a key={locale} href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
       });
 
-    //TODO: determine is the page available
+    // TODO: determine is the page available
     return (
       <div className="language">
         {links}
