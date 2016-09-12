@@ -16,9 +16,14 @@
 [x] backwards compatibility
 [x] 404 page
 [x] SEO code + client updates (ga.send)
+[x] serve static from separate nginx location (8080 port?)
+[x] deploy & build
 
 -----------------------------
-- deploy & build
+- separate client/server webpack build
+- isomorphic styles
+- styles
+- cache control policy (node)
 -----------------------------
 future
 - child pages & category pages

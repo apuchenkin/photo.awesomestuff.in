@@ -22,7 +22,6 @@ function negotiateLocale(req) {
 }
 
 app.use(favicon(__dirname + '/../assets/favicon.ico'));
-app.use('/static', express.static('build'));
 app.use((req, res) => {
   const
     piece = req.url.split('/')[1],
