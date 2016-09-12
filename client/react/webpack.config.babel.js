@@ -1,13 +1,14 @@
 import webpack from 'webpack';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 // import HtmlWebpackPlugin from 'html-webpack-plugin';
+import AssetsPlugin from 'assets-webpack-plugin';
 import autoprefixer from 'autoprefixer';
 import path from 'path';
 import config from './src/config/config.json';
 
 const ENV = process.env.NODE_ENV || 'development';
-
-const CSS_MAPS = ENV !== 'production';
+const DEBUG = ENV !== 'production';
+console.log(DEBUG);
 
 module.exports = {
   context: path.resolve(__dirname, "src"),
@@ -44,25 +45,54 @@ module.exports = {
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel'
+        loader: 'babel',
+        query: {
+          // https://github.com/babel/babel-loader#options
+          cacheDirectory: DEBUG,
+
+          // https://babeljs.io/docs/usage/options/
+          babelrc: false,
+          presets: [
+            'react',
+            'es2015-minimal'
+          ],
+          plugins: [
+            'transform-runtime',
+            "transform-class-properties",
+            "transform-decorators-legacy",
+            "transform-object-rest-spread",
+            ...DEBUG ? [] : [
+              'transform-react-remove-prop-types',
+              'transform-react-constant-elements',
+              'transform-react-inline-elements'
+            ]
+          ]
+        }
       },
       {
-        test: /\.(less|css)$/,
-        include: /src\/components\//,
-        loader: ExtractTextPlugin.extract('style?singleton', [
-          `css?sourceMap=${CSS_MAPS}&modules&importLoaders=1&localIdentName=[local]${process.env.CSS_MODULES_IDENT || '_[hash:base64:5]'}`,
-          'postcss',
-          `less?sourceMap=${CSS_MAPS}`
-        ].join('!'))
+        test: /\.css$/,
+        loader: ExtractTextPlugin.extract('style-loader', [
+          `css-loader?${JSON.stringify({
+            sourceMap: DEBUG,
+            importLoaders: 1,
+            // CSS Modules https://github.com/css-modules/css-modules
+            // modules: true,
+            localIdentName: DEBUG ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
+            // CSS Nano http://cssnano.co/options/
+            minimize: !DEBUG
+          })}`,
+          'postcss-loader'
+        ].join('!')
+        )
       },
       {
-        test: /\.(less|css)$/,
-        exclude: /src\/components\//,
-        loader: ExtractTextPlugin.extract('style?singleton', [
-          `css?sourceMap=${CSS_MAPS}`,
-          `postcss`,
-          `less?sourceMap=${CSS_MAPS}`
-        ].join('!'))
+        test: /\.less$/,
+        loader: ExtractTextPlugin.extract('style-loader', [
+          `css-loader?${JSON.stringify({ sourceMap: DEBUG, minimize: !DEBUG, importLoaders: 1})}`,
+          'postcss-loader',
+          `less-loader?${JSON.stringify({ sourceMap: DEBUG})}`
+        ].join('!')
+        )
       },
       {
         test: /\.json$/,
@@ -73,8 +103,19 @@ module.exports = {
         loader: 'raw'
       },
       {
-        test: /\.(svg|woff2?|ttf|eot|jpe?g|png|gif)(\?.*)?$/i,
-        loader: ENV==='production' ? 'file?name=[path][name]_[hash:base64:5].[ext]' : 'url'
+        test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)(\?.*)?$/i,
+        loader: 'url',
+        query: {
+          name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',
+          limit: 10000
+        }
+      },
+      {
+        test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
+        loader: 'file',
+        query: {
+          name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]'
+        }
       }
     ]
   },
@@ -91,11 +132,14 @@ module.exports = {
     new webpack.optimize.DedupePlugin(),
     new webpack.DefinePlugin({
       'process.env': JSON.stringify({ NODE_ENV: ENV })
+    }),
+    // Emit a file with assets paths
+    // https://github.com/sporto/assets-webpack-plugin#options
+    new AssetsPlugin({
+      path: path.resolve(__dirname, './build')
+      // filename: 'assets.js',
+      // processOutput: x => `module.exports = ${JSON.stringify(x)};`
     })
-    // new HtmlWebpackPlugin({
-    //   template: './index.html',
-    //   minify: { collapseWhitespace: true }
-    // })
   ]).concat(ENV==='production' ? [
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({
