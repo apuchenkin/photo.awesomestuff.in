@@ -3,13 +3,13 @@ import shallowCompare from 'react-addons-shallow-compare';
 
 import config from '../../config/config.json';
 
-const { int, string, shape } = React.PropTypes;
+const { number, string, shape } = React.PropTypes;
 
 export default class Brick extends React.Component {
 
   static propTypes = {
     photo: shape({
-      id: int.isRequired,
+      id: number.isRequired,
       src: string.isRequired,
     }),
   }

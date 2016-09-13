@@ -33,7 +33,6 @@ class Picker extends React.Component {
           : <a key={locale} href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
       });
 
-    // TODO: determine is the page available
     return (
       <div className="language">
         {links}

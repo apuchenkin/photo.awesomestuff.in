@@ -3,7 +3,7 @@
   "version": "3.0.0",
   "description": "Ready-to-go Preact starter project powered by webpack.",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --debug --hot --output-pathinfo --watch --colors --inline --progress",
+    "dev": "webpack-dev-server --debug --hot --inline --history-api-fallback --config etc/webpack.config.client.babel.js",
     "nodemon": "cross-env BABEL_ENV='node' nodemon src/server.js",
     "start": "superstatic build -p 8080 --host 0.0.0.0 --gzip -c '{\"rewrites\": [{\"source\":\"**\",\"destination\":\"index.html\"}],\"headers\":[{\"source\":\"**\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"max-age=86400\"}]}]}'",
     "build": "webpack --config etc/webpack.config.client.babel.js --release",

@@ -17,8 +17,8 @@ module.exports = Object.assign(base, {
   output: {
     path: path.resolve(__dirname, '../build'),
     publicPath: '/',
-    filename: DEBUG ? '[name].js?[chunkhash]' : '[name].[chunkhash].js',
-    chunkFilename: DEBUG ? '[name].[id].js?[chunkhash]' : '[name].[id].[chunkhash].js',
+    filename: DEBUG ? '[name].js?[hash]' : '[name].[hash].js',
+    chunkFilename: DEBUG ? '[name].[id].js?[hash]' : '[name].[id].[hash].js',
   },
 
   target: 'web',
@@ -32,7 +32,7 @@ module.exports = Object.assign(base, {
     // https://github.com/sporto/assets-webpack-plugin#options
     new AssetsPlugin({
       path: path.resolve(__dirname, '../build'),
-      // filename: 'assets.js',
+      filename: 'assets.json',
       // processOutput: x => `module.exports = ${JSON.stringify(x)};`,
     }),
 

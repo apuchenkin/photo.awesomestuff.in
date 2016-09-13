@@ -11,6 +11,7 @@ import Picker from '../components/common/langs';
 import createRoutes from '../routes';
 import config from '../config/config.json';
 import utils from '../lib/utils';
+import assets from '../../build/assets.json';
 
 const app = express();
 const createElement = (component, props) => component(props);
@@ -86,7 +87,7 @@ function renderHTML({ componentHTML, initialState, meta, config }) {
         <meta name="description" content="${escapeHtml(meta.description)}">
         <meta name="viewport" content="width=device-width">
         <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="${config.staticEndpoint}/bundle.css">
+        <link rel="stylesheet" href="${config.staticEndpoint}/${assets.main.css}">
         ${meta.links.join("\n")}
     </head>
     <body>
@@ -104,7 +105,7 @@ function renderHTML({ componentHTML, initialState, meta, config }) {
         window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
       </script>
       <script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Array.prototype.find,Array.prototype.findIndex,Intl"></script>
-      <script type="application/javascript" src="${config.staticEndpoint}/bundle.js"></script>
+      <script type="application/javascript" src="${config.staticEndpoint}/${assets.main.js}"></script>
     </body>
     </html>
   `;

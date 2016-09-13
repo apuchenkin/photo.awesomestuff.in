@@ -7,13 +7,13 @@ import CategoryLink from '../link/category';
 import './navigation.less';
 
 const
-  { int, string, shape, arrayOf } = React.PropTypes,
+  { number, string, shape, arrayOf } = React.PropTypes,
   categoryBase = {
-    id: int.isRequired(),
-    name: string.isRequired(),
-    title: string.isRequired(),
+    id: number.isRequired,
+    name: string.isRequired,
+    title: string.isRequired,
   },
-  categoryShape = shape(Object.assing(categoryBase, {
+  categoryShape = shape(Object.assign({}, categoryBase, {
     parent: shape(categoryBase),
   }));
 

@@ -6,25 +6,25 @@ export default class Route extends Object {
       me = this,
       wrappedResolve = (promise) => {
         return (location) => {
-          const cmp = location.routes && location.routes[0].cmp;
-
-          cmp && cmp.setState({
-            isLoading: true
-          });
+          // const cmp = location.routes && location.routes[0].cmp;
+          //
+          // cmp && cmp.setState({
+          //   isLoading: true
+          // });
 
           return promise(location)
-            .then(data => {
+            .then((data) => {
               Object.assign(me.state, data);
-              cmp && cmp.setState({
-                isLoading: false
-              });
+              // cmp && cmp.setState({
+              //   isLoading: false
+              // });
               return data;
             });
         };
       };
 
     Object.assign(me, {
-      resolve: wrappedResolve(obj.resolve)
+      resolve: wrappedResolve(obj.resolve),
     });
   }
 }
