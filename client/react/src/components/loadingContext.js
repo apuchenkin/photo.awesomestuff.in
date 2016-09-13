@@ -38,11 +38,13 @@ export default class LoadingContext extends React.Component {
 
   @bind
   startLoading() {
+    console.log("startLoading");
     this.setState({ isLoading: true });
   }
 
   @bind
   stopLoading() {
+    console.log("stopLoading");
     this.setState({ isLoading: false });
   }
 

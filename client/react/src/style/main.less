@@ -14,6 +14,7 @@ html, body, body > .wrapper {
 
 .hidden {
   display: none !important;
+  opacity: 0.1;
 }
 
 .loader {
@@ -27,6 +28,7 @@ html, body, body > .wrapper {
   background: #0b0b0b;
   opacity: 0.8;
   filter: alpha(opacity=80);
+  transition: opacity 200ms ease-out;
 
   &.loader-enter, &.loader-appear {
     opacity: 0.01;
@@ -34,7 +36,7 @@ html, body, body > .wrapper {
 
   &.loader-enter.loader-enter-active, &.loader-appear.loader-appear-active {
     opacity: 0.8;
-    transition: opacity 100ms ease-out;
+    // transition: opacity 100ms ease-out;
   }
 
   &.loader-leave {
@@ -43,7 +45,7 @@ html, body, body > .wrapper {
 
   &.loader-leave.loader-leave-active {
     opacity: 0.01;
-    transition: opacity 200ms ease-out;
+    // transition: opacity 200ms ease-out;
   }
 
   .accent {

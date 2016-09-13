@@ -11,10 +11,10 @@ export default class Route extends Object {
           // cmp && cmp.setState({
           //   isLoading: true
           // });
-          console.log('startLoading');
+          // console.log('startLoading');
           return promise(location)
             .then((data) => {
-              console.log('stopLoading');
+              // console.log('stopLoading');
               Object.assign(me.state, data);
               // cmp && cmp.setState({
               //   isLoading: false

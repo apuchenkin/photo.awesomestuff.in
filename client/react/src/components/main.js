@@ -1,6 +1,6 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import Animate from 'rc-animate';
 import { FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
 import withRouter from 'react-router/lib/withRouter';
@@ -82,12 +82,20 @@ class Main extends React.Component {
       contactsPage = pages.find(p => p.alias === 'contacts'),
       langs = route.getLangs && route.getLangs() || config.locales
       ;
-
+      // <ReactCSSTransitionGroup transitionName="loader" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
+      //   {state.isLoading && <Loader key="loader" />}
+      // </ReactCSSTransitionGroup>
     return (
         <div id="main" className={state.class} ref="main">
-          <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
-            {state.isLoading && <Loader />}
-          </ReactCSSTransitionGroup>
+          <Animate
+            component=""
+            transitionName="loader"
+            showProp="visible"
+            onEnter={(k) => console.log('enter', k)}
+            onLeave={(k) => console.log('leave', k)}
+          >
+          <Loader key="loader" visible={state.isLoading} />
+          </Animate>
           {header}
           <div className="content" ref="content">
             {body}
