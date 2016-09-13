@@ -3,6 +3,7 @@ import shallowCompare from 'react-addons-shallow-compare';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
+import withRouter from 'react-router/lib/withRouter';
 
 import Langs from './common/langs';
 import Link from './link';
@@ -11,15 +12,19 @@ import config from '../config/config.json';
 
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
-const {array, string, element} = React.PropTypes;
+const {bool, array, string, element} = React.PropTypes;
 const isBrowser = (typeof window !== 'undefined');
 const Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
 
-export default class Main extends React.Component {
+class Main extends React.Component {
 
   static childContextTypes = {
     prefix: string
   }
+
+  static contextTypes = {
+    isLoading: bool
+  };
 
   static propTypes = {
     pages: array.isRequired,
@@ -28,11 +33,11 @@ export default class Main extends React.Component {
     location: locationShape.isRequired
   }
 
-  constructor (props) {
-    super(props);
+  constructor (props, context) {
+    super(props, context);
 
     this.state = {
-      isLoading: false,
+      isLoading: context.isLoading,
       class: props.routes[props.routes.length - 1].class
     };
   }
@@ -61,12 +66,12 @@ export default class Main extends React.Component {
     Ps.update(content);
   }
 
-  componentWillReceiveProps(props) {
+  componentWillReceiveProps(props, context) {
     this.setState({
+      isLoading: context.isLoading,
       class: props.routes[props.routes.length - 1].class
     });
   }
-
 
   render() {
     const
@@ -100,3 +105,5 @@ export default class Main extends React.Component {
       );
   }
 }
+
+export default withRouter(Main);
