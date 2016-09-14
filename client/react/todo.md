@@ -19,13 +19,14 @@
 [x] serve static from separate nginx location (8080 port?)
 [x] deploy & build
 [x] separate client/server webpack build
+[x] propTypes
+[x] better wire-up isLoading state
 
 -----------------------------
 
-- propTypes
-- better wire-up isLoading state
-- isomorphic styles
-- style chunks
+- last warnings/lint errors
+- isomorphic styles / style chunks
+- build sctripts
 - cache control policy (node)
 - sitemap
 
