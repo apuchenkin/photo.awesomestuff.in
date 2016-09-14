@@ -7,20 +7,16 @@ import Service from './BaseService';
 
 export default class PageService extends Service {
 
-  fetchPages () {
-    const me = this;
-
-    return fetch(me.baseUrl() + '/page', {
-      headers: this.headers
+  fetchPages() {
+    return fetch(`${this.baseUrl()}/page`, {
+      headers: this.headers,
     })
     .then(this.respondJSON);
   }
 
-  fetchPage (pageId) {
-    const me = this;
-
-    return fetch(me.baseUrl() + '/page/' + pageId, {
-      headers: this.headers
+  fetchPage(pageId) {
+    return fetch(`${this.baseUrl()}/page/${pageId}`, {
+      headers: this.headers,
     })
     .then(this.respondJSON);
   }

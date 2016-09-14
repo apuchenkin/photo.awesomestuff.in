@@ -8,13 +8,15 @@
      "import"
   ],
   "globals": {
+    "ga": true, # google analytics
     "__DEV__": true
   },
   "env": {
     "browser": true
   },
   "rules": {
-    "one-var": ["error", "always"],
+    "one-var": "off",
+    "no-underscore-dangle": ["error", { "allow": ["__INITIAL_STATE__"] }],
     "class-methods-use-this": "off",
     # "generator-star-spacing": "off",
     # "import/no-extraneous-dependencies": "off",

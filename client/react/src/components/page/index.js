@@ -1,13 +1,12 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import Loader from '../loader';
 
 const { string } = React.PropTypes;
 
 export default class Page extends React.Component {
 
   static propTypes = {
-    content: string.isRequired
+    content: string.isRequired,
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -16,7 +15,7 @@ export default class Page extends React.Component {
 
   render() {
     return (
-        <div className="page" dangerouslySetInnerHTML={{__html: this.props.content}} ></div>
+      <div className="page" dangerouslySetInnerHTML={{ __html: this.props.content }} />
     );
   }
 }

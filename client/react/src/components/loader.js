@@ -1,4 +1,11 @@
 import React from 'react';
+import shallowCompare from 'react-addons-shallow-compare';
+
+const
+  CLASS_NAME = 'loader',
+  CLASS_NAME_TRANSITION = 'loader-enter',
+  CLASS_NAME_HIDDEN = 'hidden',
+  TRANSITION_DURATION = 200;
 
 export default class Loader extends React.Component {
 
@@ -6,37 +13,43 @@ export default class Loader extends React.Component {
     super(props);
 
     this.state = {
-      visible: true,
-      class: null
+      visible: false,
+      className: null,
+    };
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.visible) {
+      this.setState({
+        visible: true,
+        className: CLASS_NAME_TRANSITION,
+      }, () => this.setState({
+        className: null,
+      }));
+    } else {
+      this.setState({
+        className: CLASS_NAME_TRANSITION,
+      }, () => setTimeout(() => this.setState({
+        visible: false,
+        className: null,
+      }), TRANSITION_DURATION));
     }
   }
 
-  // componentWillEnter(cb) {
-  //   console.log("componentWillEnter");
-  //   this.setState({ class: 'loader-enter', visible: true }, cb);
-  //   //  cb()
-  // }
-  //
-  // componentWillLeave(cb) {
-  //   console.log("componentWillLeave");
-  //   this.setState({ class: 'loader-enter', visible: true }, () => setTimeout(cb, 200));
-  // }
-  //
-  // componentDidEnter() {
-  //   console.log("componentDidEnter");
-  //   this.setState({ class: null, visible: true });
-  // }
-  //
-  // componentDidLeave() {
-  //   console.log("componentDidLeave");
-  //   this.setState({ class: null, visible: false });
-  // }
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
 
   render() {
-    const className = ["loader", this.props.visible ? '' : 'hidden'].join(" ");
+    const
+      { visible, className } = this.state,
+      className$ = [
+        CLASS_NAME,
+        visible ? className : CLASS_NAME_HIDDEN,
+      ].filter(x => !!x).join(' ');
 
     return (
-      <div className={className} key="loader"><div className="accent" /></div>
+      <div className={className$} key="loader"><div className="accent" /></div>
     );
   }
 }

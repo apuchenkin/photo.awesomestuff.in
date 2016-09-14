@@ -1,36 +1,42 @@
 import React from 'react';
+import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import withRouter from 'react-router/lib/withRouter';
-import Category from '../link/category';
+import { routerShape } from 'react-router/lib/PropTypes';
+import { bind, debounce } from 'decko';
+
 import PhotoLink from '../link/photo';
 import CategoryLink from '../link/category';
-import resolutions from '../../config/resolution.json';
-import config from '../../config/config.json';
 import Link from '../link';
 import Loader from '../loader';
+
+import resolutions from '../../config/resolution.json';
+import config from '../../config/config.json';
+
 import './photo.less';
-import utils from '../../lib/utils';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import {injectIntl, intlShape, FormattedMessage} from 'react-intl';
-import { bind, debounce } from 'decko';
 
 const
   isBrowser = (typeof window !== 'undefined'),
-  { object, array } = React.PropTypes
+  { number, string, object, shape, arrayOf } = React.PropTypes
   ;
+
+const photoShape = shape({
+  id: number.isRequired,
+  src: string.isRequired,
+  width: number.isRequired,
+  height: number.isRequired,
+  caption: string.isRequired,
+  author: object,
+});
 
 class Photo extends React.Component {
 
   static propTypes = {
-    category: object.isRequired,
-    photos: array.isRequired,
-    photo: object.isRequired,
+    category: shape({ name: string.isRequired }).isRequired,
+    photos: arrayOf(shape({ id: number.isRequired })).isRequired,
+    photo: photoShape.isRequired,
     intl: intlShape.isRequired,
-    router: object.isRequired
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
+    router: routerShape.isRequired,
   }
 
   constructor(props) {
@@ -38,44 +44,48 @@ class Photo extends React.Component {
 
     this.state = {
       isLoading: true,
-      dimensions: this.getDimensions()
-    };
-  }
-
-  getDimensions() {
-    return {
-      width: isBrowser ? window.innerWidth - 40 : config.photo.width,
-      height: isBrowser ? window.innerHeight - 40 : config.photo.height
+      dimensions: this.getDimensions(),
     };
   }
 
   componentDidMount() {
-    if (this.refs.img.complete) {
-      this.setState({
-        isLoading: false
+    if (this.img.complete) {
+      // in the case, when photo is loaded faster than JS code
+      // it is already complete on componentDidMount
+      this.onMount(function callback() {
+        this.setState({
+          isLoading: false,
+        });
       });
     }
 
     window.addEventListener('resize', this.resize);
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
   componentWillUnmount() {
     window.removeEventListener('resize', this.resize);
   }
 
-
   @bind
-  @debounce(50)
-  resize() {
-    this.setState({
-      dimensions: this.getDimensions()
-    });
+  onLoad() {
+    this.setState({ isLoading: false });
+  }
+
+  getDimensions() {
+    return {
+      width: isBrowser ? window.innerWidth - 40 : config.photo.width,
+      height: isBrowser ? window.innerHeight - 40 : config.photo.height,
+    };
   }
 
   @bind
-  adjust (w, h) {
+  adjust(w, h) {
     const
-      norms = resolutions.map(([w$,h$]) => Math.pow(w$ - w, 2) + Math.pow(h$ - h, 2)),
+      norms = resolutions.map(([w$, h$]) => Math.pow(w$ - w, 2) + Math.pow(h$ - h, 2)),
       min = Math.min(...norms),
       idx = norms.findIndex(n => n === min)
       ;
@@ -84,82 +94,98 @@ class Photo extends React.Component {
   }
 
   @bind
-  close() {
-    const
-      {category, router} = this.props,
-      url = category.parent ? category.parent.name + '/' + category.name : category.name
-      ;
-
-    router.push('/' + url);
+  @debounce(50)
+  resize() {
+    this.setState({
+      dimensions: this.getDimensions(),
+    });
   }
 
   @bind
   goNext(next) {
     const
-      {category, router} = this.props,
-      url = category.parent ? category.parent.name + '/' + category.name : category.name
+      { category, router } = this.props,
+      url = category.parent ? `${category.parent.name}/${category.name}` : category.name
       ;
 
-    router.push('/' + url + '/photo/' + next.id);
+    router.push(`/${url}/photo/${next.id}`);
   }
 
   @bind
-  onLoad() {
-    this.setState({isLoading: false});
+  close() {
+    const
+      { category, router } = this.props,
+      url = category.parent ? `${category.parent.name}/${category.name}` : category.name
+      ;
+
+    router.push(`/${url}`);
   }
 
   render() {
     const
-      state = this.state,
-      {intl, photo, category, photos} = this.props,
+      { isLoading, dimensions } = this.state,
+      { intl, photo, category, photos } = this.props,
       pidx = photos.findIndex(p => p.id === photo.id),
       prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
       next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
-      {width, height} = state.dimensions,
+      { width, height } = dimensions,
       [w, h] = this.adjust(width, height),
       filename = photo.src.split('/').pop(),
       src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/'),
-      url = '/' + (category.parent ? category.parent.name + '/' + category.name : category.name),
-      closeIcon = <FormattedMessage
+      url = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`,
+      closeIcon = (<FormattedMessage
         id="icon.close"
-        defaultMessage={`Close {icon}`}
-        values={{icon: (<i className="icon-cancel"></i>)}}
-      />,
+        defaultMessage={'Close {icon}'}
+        values={{ icon: (<i className="icon-cancel" />) }}
+      />),
       figure = (
-        <figure className={state.isLoading ? "content loading" : "content"} >
+        <figure className={isLoading ? 'content loading' : 'content'} >
           <div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>{closeIcon}</Link></div>
-          <img className="photo" onClick={e => {e.stopPropagation(); this.goNext(next);}} src={src} style={{maxWidth: width + 'px', maxHeight: (height - 60) + 'px'}} onLoad={this.onLoad} ref='img' />
+          {
+            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+            <img
+              className="photo"
+              alt={photo.caption}
+              onClick={(e) => { e.stopPropagation(); this.goNext(next); }}
+              onLoad={this.onLoad}
+              src={src}
+              style={{ maxWidth: `${width}px`, maxHeight: `${height - 60}px` }}
+              ref={(c) => { this.img = c; }}
+            />
+          }
           <figcaption className="description">
             <span className="caption">{photo.caption}</span>
             {photo.author && <div><FormattedMessage
               id="photo.author"
-              defaultMessage={`Author: {author}`}
-              values={{author: (<span className="author">{photo.author.name}</span>)}}
-              /></div>}
+              defaultMessage={'Author: {author}'}
+              values={{ author: (<span className="author">{photo.author.name}</span>) }}
+            /></div>}
           </figcaption>
         </figure>
       )
       ;
 
     return (
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <div className="photo-widget" onClick={this.close}>
-        <ReactCSSTransitionGroup transitionName="loader" transitionAppearTimeout={200} transitionEnterTimeout={200} transitionLeaveTimeout={200} transitionAppear={false}>
-          {this.state.isLoading && <Loader />}
-        </ReactCSSTransitionGroup>
+        <Loader visible={isLoading} />
         {figure}
         <PhotoLink
-          onClick={e => e.stopPropagation()}
           {...CategoryLink.fromCategory(category)}
+          onClick={e => e.stopPropagation()}
           photoId={prev && prev.id}
           className="nav prev"
-          title={intl.formatMessage({id: 'prev'})}>
+          title={intl.formatMessage({ id: 'prev' })}
+        >
           <i className="icon-left-open" />
         </PhotoLink>
-        <PhotoLink onClick={e => e.stopPropagation()}
+        <PhotoLink
           {...CategoryLink.fromCategory(category)}
+          onClick={e => e.stopPropagation()}
           photoId={next && next.id}
           className="nav next"
-          title={intl.formatMessage({id: 'next'})}>
+          title={intl.formatMessage({ id: 'next' })}
+        >
           <i className="icon-right-open" />
         </PhotoLink>
       </div>

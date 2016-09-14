@@ -2,33 +2,31 @@ import React from 'react';
 import Link from './index';
 import utils from '../../lib/utils';
 
-const {any, string} = React.PropTypes;
+const { string } = React.PropTypes;
 
 export default class CategoryLink extends React.Component {
 
   static fromCategory(category) {
     return {
       category: category.parent ? category.parent.name : category.name,
-      subcategory: category.parent && category.name
+      subcategory: category.parent && category.name,
     };
   }
 
   static propTypes = {
-    children: any.isRequired,
     category: string.isRequired,
-    subcategory: string
+    subcategory: string,
   }
 
   render() {
     const
-      props = this.props,
-      {category, subcategory} = props,
+      { category, subcategory } = this.props,
       link = subcategory
-        ? category + '/' + subcategory
+        ? `${category}/${subcategory}`
         : category;
 
     return (
-        <Link to={`/${link}`} activeClassName="active" {...utils.omit(props, ['category', 'subcategory'])} />
-      );
+      <Link to={`/${link}`} activeClassName="active" {...utils.omit(this.props, ['category', 'subcategory'])} />
+    );
   }
 }

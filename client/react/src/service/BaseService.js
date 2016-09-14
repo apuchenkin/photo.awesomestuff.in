@@ -3,7 +3,7 @@ import config from '../config/config.json';
 const defaults = {
   locale: config.fallbackLocale,
   location: config.apiEndpoint,
-  contentType: 'application/json'
+  contentType: 'application/json',
 };
 
 export default class BaseService {
@@ -26,10 +26,10 @@ export default class BaseService {
     Object.assign(this, defaults, options);
 
     this.headers = new Headers({
-      "Content-Type": this.contentType,
-      "Accept-Language": this.locale,
-      "Authorization": this.token,
-      "Accept": this.contentType
+      'Content-Type': this.contentType,
+      'Accept-Language': this.locale,
+      Authorization: this.token,
+      Accept: this.contentType,
     });
   }
 }

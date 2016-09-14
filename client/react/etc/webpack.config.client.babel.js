@@ -66,7 +66,7 @@ module.exports = Object.assign(base, {
 
   // Choose a developer tool to enhance debugging
   // http://webpack.github.io/docs/configuration.html#devtool
-  devtool: DEBUG ? 'cheap-module-eval-source-map' : false,
+  devtool: DEBUG ? 'eval' : false,
 
   // devServer: {
   //   port: process.env.PORT || 8080,

@@ -1,116 +1,92 @@
 import fetch from 'isomorphic-fetch';
-import config from '../config/config.json';
+import { brickWidth, gutter } from '../config/config.json';
 import Service from './BaseService';
 
 const sizes = [
-  (config.brickWidth)
-, (config.brickWidth * 2 + config.gutter)
-, (config.brickWidth * 3 + config.gutter * 2)
-, (config.brickWidth * 4 + config.gutter * 3)
+  (brickWidth)
+, ((brickWidth * 2) + (gutter))
+, ((brickWidth * 3) + (gutter * 2))
+, ((brickWidth * 4) + (gutter * 3)),
 ];
 
 export default class PhotoService extends Service {
 
-  getRandomColor () {
+  getRandomColor() {
     const letters = '0123456789ABCDEF'.split('');
-    let color = '#';
-    for (let i = 0; i < 6; i++ ) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    return Array(6).reduce(color => color + letters[Math.floor(Math.random() * 16)], '#');
   }
 
-  fetchPhotos (category, showHidden) {
-    const me = this,
-      url = me.baseUrl() + '/category/' + category + '/photo';
-        // url = new URL('/api/v1/category/' + category + '/photo', location.origin);
-        // url.searchParams.append('hidden', showHidden);
+  fetchPhotos(category) {
+    const url = `${this.baseUrl()}/category/${category}/photo`;
 
     return fetch(url, {
-      headers: me.headers
+      headers: this.headers,
     })
     .then(this.respondJSON);
   }
 
-  fetchPhoto (photoId) {
-    const me = this;
-
-    return fetch(me.baseUrl() + '/photo/' + photoId, {
-      headers: me.headers
+  fetchPhoto(photoId) {
+    return fetch(`${this.baseUrl()}/photo/${photoId}`, {
+      headers: this.headers,
     })
     .then(this.respondJSON);
   }
 
   groupColors(photos) {
-    const
-      style = {},
-      groups = [...new Set(photos.map(p => p.group).filter(x => !!x))];
+    const groups = [...new Set(photos.map(p => p.group).filter(x => !!x))];
 
-    groups.map(g => style[g] = this.getRandomColor());
-
-    return style;
+    return groups.reduce((style, g) => Object.assign(style, { [g]: this.getRandomColor() }), {});
   }
 
   patchPhoto(photo, props) {
-    const me = this;
-
-    return fetch(me.baseUrl() + '/photo/' + photo.id, {
+    return fetch(`${this.baseUrl()}/photo/${photo.id}`, {
       method: 'PATCH',
-      headers: me.headers,
-      body: JSON.stringify(props)
+      headers: this.headers,
+      body: JSON.stringify(props),
     });
   }
 
   updateParents(photos, parent, showHidden) {
-    const me = this;
-
     return this.fetchPhotos(parent, showHidden)
-      .then(parents => {
-        return photos.map(photo => {
-          photo.hasParent = parents.find(p => p.id === photo.id);
-          return photo;
-        });
-      });
+      .then(parents => photos.map(photo => Object.assign(photo, {
+        hasParent: parents.find(p => p.id === photo.id),
+      })));
   }
 
   group(photos) {
     const me = this;
 
-    return fetch(me.baseUrl() + '/photo/group', {
+    return fetch(`${this.baseUrl()}/photo/group`, {
       method: 'POST',
       headers: me.headers,
-      body: JSON.stringify(photos.map(p => p.id))
+      body: JSON.stringify(photos.map(p => p.id)),
     });
   }
 
   appendGroup(groupId, photos) {
-    const me = this;
-
-    return fetch(me.baseUrl() + '/photo/group/' + groupId, {
+    return fetch(`${this.baseUrl()}/photo/group/${groupId}`, {
       method: 'LINK',
-      headers: me.headers,
-      body: JSON.stringify(photos.map(p => p.id))
+      headers: this.headers,
+      body: JSON.stringify(photos.map(p => p.id)),
     });
   }
 
   removeGroup(groupId, photos) {
-    const me = this;
-
-    return fetch(me.baseUrl() + '/photo/group/' + groupId, {
+    return fetch(`${this.baseUrl()}/photo/group/${groupId}`, {
       method: 'UNLINK',
-      headers: me.headers,
-      body: JSON.stringify(photos.map(p => p.id))
+      headers: this.headers,
+      body: JSON.stringify(photos.map(p => p.id)),
     });
   }
 
   dsmap(mode, ratio, isHorisontal) {
     const
-      [s1,s2,s3,s4] = sizes,
+      [s1, s2, s3, s4] = sizes,
       modes = [
-        [ratio >= 2   ? s2 : s1, s1],
+        [ratio >= 2 ? s2 : s1, s1],
         isHorisontal ? [ratio >= 3 ? s3 : s2, s1] : [s1, s2],
-        ratio >= 4   ? [s4, s1] : [ratio >= 2 ? s3 : s2, s2],
-        isHorisontal ? [ratio >= 2 ? s4 : s3, s2] : [s2, s3]
+        ratio >= 4 ? [s4, s1] : [ratio >= 2 ? s3 : s2, s2],
+        isHorisontal ? [ratio >= 2 ? s4 : s3, s2] : [s2, s3],
       ];
 
     return modes[mode];
@@ -125,9 +101,9 @@ export default class PhotoService extends Service {
     const
       v = photo.views,
       std = Math.sqrt(Math.pow((v - avg), 2)),
-      norm = [16,8,4,1].map(i => i * (Math.floor(avg) + 1)),
-      norm$ = [1,2,3,4].map(i => Math.floor(i * std * v / avg) + 1),
-      probs = norm.map((n,i) => n + norm$[i]),
+      norm = [16, 8, 4, 1].map(i => i * (Math.floor(avg) + 1)),
+      norm$ = [1, 2, 3, 4].map(i => Math.floor((i * std * v) / avg) + 1),
+      probs = norm.map((n, i) => n + norm$[i]),
       mode = this.weightedRandom(probs),
       isHorisontal = (photo.width > photo.height),
       ratio = photo.width / photo.height,
@@ -137,37 +113,34 @@ export default class PhotoService extends Service {
     return Object.assign(photo, {
       w,
       h,
-      ratio
+      ratio,
     });
   }
 
-  weightedRandom = function (probabilities) {
+  weightedRandom(probabilities) {
     const probabilitiesMap = probabilities.reduce((acc, v) => {
         acc.push(v + (acc.length ? acc[acc.length - 1] : 0));
         return acc;
       }, []),
       pointer = Math.floor(Math.random() * probabilitiesMap[probabilitiesMap.length - 1]);
 
-    return probabilitiesMap.reduce((acc, v) => pointer <= v ? acc : ++acc, 0);
+    return probabilitiesMap.reduce((acc, v) => (pointer <= v ? acc : acc + 1), 0);
   }
 
   refinePhotos(photos, excludeId) {
-    photos.reduce((i,p) => {
-      p.order = i++;
-      return i;
-    }, 0);
+    photos.map((p, k) => Object.assign(p, { order: k }));
 
     const
       exclude = photos.find(p => p.id === excludeId),
 
       // spread list on grouped and not grouped photos
       [init, grouped] = photos.reduce((acc, p) => {
-        const [i,r] = acc;
-        p.group ? r.push(p) : i.push(p);
+        const [i, r] = acc;
+        Object.assign(p, { group: p.group ? r.push(p) : i.push(p) });
         return acc;
-      }, [[],[]]),
+      }, [[], []]),
 
-      groups = grouped.reduce((m,p) => {
+      groups = grouped.reduce((m, p) => {
         if (p.group) {
           const
           v = m.get(p.group) || [];
@@ -192,6 +165,6 @@ export default class PhotoService extends Service {
       init.push(item);
     });
 
-    return init.sort((a,b) => a.order - b.order);
+    return init.sort((a, b) => a.order - b.order);
   }
 }

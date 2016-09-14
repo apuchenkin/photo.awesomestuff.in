@@ -4,7 +4,7 @@ import Router from 'react-router/lib/Router';
 import match from 'react-router/lib/match';
 import RouterContext from 'react-router/lib/RouterContext';
 import useRouterHistory from 'react-router/lib/useRouterHistory';
-import { createHistory } from 'history';
+import createHistory from 'history/lib/createBrowserHistory';
 import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
 
@@ -46,8 +46,8 @@ function onUpdate() {
 
   metaUpdate(meta);
   ga('send', 'pageview', {
-    'title': meta.title,
-    'page': location.pathname,
+    title: meta.title,
+    page: location.pathname,
   });
 
   this.props.stopLoading();

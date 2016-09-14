@@ -31,8 +31,12 @@ export default class Gallery extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ isLoading: false });
-    this.props.route.cmp = this;
+    // this.onMount(function callback() {
+    this.setState({
+      isLoading: false,
+    });
+    // });
+
     this.packery = this.createPackery(this.packeryCmp);
   }
 
@@ -85,9 +89,7 @@ export default class Gallery extends React.Component {
 
     return (
       <div className={hasNav ? 'gallery nav' : 'gallery'} >
-        <ReactCSSTransitionGroup transitionName="loader" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
-          {isLoading && <Loader />}
-        </ReactCSSTransitionGroup>
+        <Loader visible={isLoading} />
         <ReactCSSTransitionGroup transitionName="photo" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
           {childrens}
         </ReactCSSTransitionGroup>

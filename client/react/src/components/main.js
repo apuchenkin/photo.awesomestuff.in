@@ -1,116 +1,87 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import Animate from 'rc-animate';
 import { FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
 import withRouter from 'react-router/lib/withRouter';
+
+import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
 import Langs from './common/langs';
 import Link from './link';
 import Loader from './loader';
 import config from '../config/config.json';
 
-import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
-
-const {bool, array, string, element} = React.PropTypes;
-const isBrowser = (typeof window !== 'undefined');
-const Ps = isBrowser ? window.Ps || require('perfect-scrollbar') : null;
+const
+  { bool, string, func, element, arrayOf, shape } = React.PropTypes,
+  isBrowser = (typeof window !== 'undefined'),
+  Ps = isBrowser ? require('perfect-scrollbar') : null
+  ;
 
 class Main extends React.Component {
 
-  static childContextTypes = {
-    prefix: string
-  }
-
   static contextTypes = {
-    isLoading: bool
+    isLoading: bool,
   };
 
   static propTypes = {
-    pages: array.isRequired,
+    routes: arrayOf(shape({
+      class: string,
+      getLangs: func,
+    })).isRequired,
+
+    pages: arrayOf(shape({
+      alias: string.isRequired,
+      title: string,
+    })).isRequired,
+
     header: element.isRequired,
     body: element.isRequired,
-    location: locationShape.isRequired
+    location: locationShape.isRequired,
   }
 
-  constructor (props, context) {
-    super(props, context);
+  componentDidMount() {
+    const me = this;
 
-    this.state = {
-      isLoading: context.isLoading,
-      class: props.routes[props.routes.length - 1].class
-    };
-  }
-
-  getChildContext() {
-    return {prefix: this.props.route.locale};
+    Ps.initialize(me.content);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
 
-  componentDidMount() {
-    const
-      me = this,
-      props = me.props
-      ;
-
-    props.route.cmp = this;
-    Ps.initialize(me.refs.content);
-  }
-
   componentDidUpdate() {
-    const content = this.refs.content;
-    content.scrollTop = 0;
-    Ps.update(content);
-  }
-
-  componentWillReceiveProps(props, context) {
-    this.setState({
-      isLoading: context.isLoading,
-      class: props.routes[props.routes.length - 1].class
-    });
+    this.content.scrollTop = 0;
+    Ps.update(this.content);
   }
 
   render() {
     const
-      state = this.state,
-      {routes, header, body, location, pages} = this.props,
+      { isLoading } = this.context,
+      { routes, header, body, location, pages } = this.props,
       route = routes[routes.length - 1],
       aboutPage = pages.find(p => p.alias === 'about'),
       contactsPage = pages.find(p => p.alias === 'contacts'),
-      langs = route.getLangs && route.getLangs() || config.locales
+      langs = route.getLangs && route.getLangs()
       ;
-      // <ReactCSSTransitionGroup transitionName="loader" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
-      //   {state.isLoading && <Loader key="loader" />}
-      // </ReactCSSTransitionGroup>
+
     return (
-        <div id="main" className={state.class} ref="main">
-          <Animate
-            component=""
-            transitionName="loader"
-            showProp="visible"
-            onEnter={(k) => console.log('enter', k)}
-            onLeave={(k) => console.log('leave', k)}
-          >
-          <Loader key="loader" visible={state.isLoading} />
-          </Animate>
-          {header}
-          <div className="content" ref="content">
-            {body}
-            <footer>
-              <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage
-                    id="footer"
-                    defaultMessage={`2016, Artem Puchenkin`}
-                />
-              {aboutPage && contactsPage.title && [" | ", <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
-              {contactsPage && contactsPage.title && [" | ", <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
-              <Langs location={ location } langs={langs} />
-            </footer>
-          </div>
+      <div id="main" className={route.class}>
+        {header}
+        <div className="content" ref={(c) => { this.content = c; }}>
+          {body}
+          <footer>
+            <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage
+              id="footer"
+              defaultMessage={'2016, Artem Puchenkin'}
+            />
+            {aboutPage && contactsPage.title && [' | ', <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
+            {contactsPage && contactsPage.title && [' | ', <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
+            <Langs location={location} langs={langs || config.locales} />
+          </footer>
         </div>
-      );
+        <Loader key="loader" visible={isLoading} />
+      </div>
+    );
   }
 }
 

@@ -1,8 +1,5 @@
 import React from 'react';
-// import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { bind } from 'decko';
-
-// import Loader from './loader';
 
 const { bool, shape, func, element } = React.PropTypes;
 
@@ -38,13 +35,13 @@ export default class LoadingContext extends React.Component {
 
   @bind
   startLoading() {
-    console.log("startLoading");
+    console.log('startLoading');
     this.setState({ isLoading: true });
   }
 
   @bind
   stopLoading() {
-    console.log("stopLoading");
+    console.log('stopLoading');
     this.setState({ isLoading: false });
   }
 
