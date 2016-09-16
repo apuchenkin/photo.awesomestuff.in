@@ -11,6 +11,13 @@ const GLOBALS = {
   __DEV__: DEBUG,
 };
 
+base.module.loaders[0].query.plugins.push([
+  "babel-plugin-transform-require-ignore",
+  {
+    "extensions": [".less", ".sass", "css"]
+  }
+]);
+
 module.exports = Object.assign(base, {
   entry: './server.js',
 
@@ -23,10 +30,10 @@ module.exports = Object.assign(base, {
 
   target: 'node',
 
-  externals: [
-    /^\.\/assets$/,
-    /^[@a-z][a-z\/\.\-0-9]*$/i,
-  ],
+  // externals: [
+  //   /^\.\/assets$/,
+  //   /^[@a-z][a-z\/\.\-0-9]*$/i,
+  // ],
 
   plugins: [
 

@@ -2,26 +2,28 @@ import React from 'react';
 import Link from './index';
 import utils from '../../lib/utils';
 
-const { string, number } = React.PropTypes;
+const { string, number, node } = React.PropTypes;
 
-export default class PhotoLink extends React.Component {
+const PhotoLink = function PhotoLink(props) {
+  const
+    { category, subcategory, photoId, children } = props,
+    props$ = utils.omit(props, ['category', 'subcategory', 'photoId']),
+    link = subcategory
+      ? `${category}/${subcategory}`
+      : category;
 
-  static propTypes = {
-    photoId: number.isRequired,
-    category: string.isRequired,
-    subcategory: string,
-  }
+  return (
+    <Link to={`/${link}/photo/${photoId}`} activeClassName="active" {...props$} >
+      {children}
+    </Link>
+  );
+};
 
-  render() {
-    const
-      { category, subcategory, photoId } = this.props,
-      props$ = utils.omit(this.props, ['category', 'subcategory', 'photoId']),
-      link = subcategory
-        ? `${category}/${subcategory}`
-        : category;
+PhotoLink.propTypes = {
+  children: node.isRequired,
+  photoId: number.isRequired,
+  category: string.isRequired,
+  subcategory: string,
+};
 
-    return (
-      <Link to={`/${link}/photo/${photoId}`} activeClassName="active" {...props$} />
-    );
-  }
-}
+export default PhotoLink;

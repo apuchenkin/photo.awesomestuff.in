@@ -31,13 +31,11 @@ export default class Gallery extends React.Component {
   }
 
   componentDidMount() {
-    // this.onMount(function callback() {
-    this.setState({
-      isLoading: false,
+    this.packery = this.createPackery(this.packeryCmp, () => {
+      this.setState({
+        isLoading: false,
+      });
     });
-    // });
-
-    this.packery = this.createPackery(this.packeryCmp);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -55,7 +53,7 @@ export default class Gallery extends React.Component {
     this.packery = null;
   }
 
-  createPackery(container) {
+  createPackery(container, callback) {
     const packery = new Packery(container, {
       columnWidth: 100,
       itemSelector: 'li',
@@ -67,6 +65,7 @@ export default class Gallery extends React.Component {
       packery.layout();
     };
 
+    callback();
     return packery;
   }
 

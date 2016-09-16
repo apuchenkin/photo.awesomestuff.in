@@ -12,6 +12,8 @@ import createRoutes from '../routes';
 import config from '../config/config.json';
 import utils from '../lib/utils';
 
+import icon from '../assets/favicon.ico';
+
 const app = express();
 const createElement = (component, props) => component(props);
 
@@ -21,7 +23,7 @@ function negotiateLocale(req) {
   ;
 }
 
-app.use(favicon(path.resolve(__dirname, '../assets/favicon.ico')));
+app.use(favicon(icon));
 app.use((req, res) => {
   const
     piece = req.url.split('/')[1],

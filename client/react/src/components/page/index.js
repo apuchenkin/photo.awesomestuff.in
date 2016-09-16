@@ -15,6 +15,7 @@ export default class Page extends React.Component {
 
   render() {
     return (
+      // eslint-disable-next-line react/no-danger
       <div className="page" dangerouslySetInnerHTML={{ __html: this.props.content }} />
     );
   }

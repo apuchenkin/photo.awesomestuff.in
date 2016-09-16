@@ -9,8 +9,6 @@ const VERBOSE = process.argv.includes('--verbose');
 module.exports = {
   context: path.resolve(__dirname, '../src'),
 
-
-
   resolve: {
     root: path.resolve(__dirname, '../src'),
     extensions: ['', '.jsx', '.js', '.json', '.less'],
@@ -109,7 +107,7 @@ module.exports = {
         },
       },
       {
-        test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
+        test: /\.(eot|ttf|wav|mp3|ico)(\?.*)?$/,
         loader: 'file',
         query: {
           name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',

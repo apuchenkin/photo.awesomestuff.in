@@ -2,6 +2,7 @@ import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 
 const
+  { bool } = React.PropTypes,
   CLASS_NAME = 'loader',
   CLASS_NAME_TRANSITION = 'loader-enter',
   CLASS_NAME_HIDDEN = 'hidden',
@@ -9,11 +10,15 @@ const
 
 export default class Loader extends React.Component {
 
+  static propTypes = {
+    visible: bool.isRequired,
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
-      visible: false,
+      visible: props.visible,
       className: null,
     };
   }

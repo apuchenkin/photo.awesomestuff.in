@@ -52,7 +52,7 @@ class Photo extends React.Component {
     if (this.img.complete) {
       // in the case, when photo is loaded faster than JS code
       // it is already complete on componentDidMount
-      this.onMount(function callback() {
+      this.onMount(() => {
         this.setState({
           isLoading: false,
         });
@@ -68,6 +68,10 @@ class Photo extends React.Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.resize);
+  }
+
+  onMount(callback) {
+    callback();
   }
 
   @bind

@@ -19,7 +19,6 @@ export default class LoadingContext extends React.Component {
   constructor(props) {
     super(props);
 
-    this.unlisten = props.history.listen(() => this.startLoading());
     this.state = {
       isLoading: false,
     };
@@ -29,19 +28,21 @@ export default class LoadingContext extends React.Component {
     return { isLoading: this.state.isLoading };
   }
 
+  componentDidMount() {
+    this.unlisten = this.props.history.listen(() => this.startLoading());
+  }
+
   componentWillUnmount() {
     this.unlisten();
   }
 
   @bind
   startLoading() {
-    console.log('startLoading');
     this.setState({ isLoading: true });
   }
 
   @bind
   stopLoading() {
-    console.log('stopLoading');
     this.setState({ isLoading: false });
   }
 

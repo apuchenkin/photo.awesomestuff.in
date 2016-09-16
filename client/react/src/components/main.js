@@ -79,7 +79,7 @@ class Main extends React.Component {
             <Langs location={location} langs={langs || config.locales} />
           </footer>
         </div>
-        <Loader key="loader" visible={isLoading} />
+        <Loader key="loader" visible={isLoading || false} />
       </div>
     );
   }
