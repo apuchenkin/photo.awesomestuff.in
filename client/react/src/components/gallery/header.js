@@ -1,10 +1,13 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import Link from '../link';
 import CategoryLink from '../link/category';
-import './navigation.less';
+
+import style from '../../style/header.less';
+import navStyle from './navigation.less';
 
 const
   { number, string, shape, arrayOf } = React.PropTypes,
@@ -17,7 +20,7 @@ const
     parent: shape(categoryBase),
   }));
 
-export default class Header extends React.Component {
+class Header extends React.Component {
 
   static propTypes = {
     category: categoryShape.isRequired,
@@ -35,7 +38,7 @@ export default class Header extends React.Component {
       childrens = categories
         .filter(c => c.parent && c.parent.name === parent.name)
         .map(c => (
-          <li className="item" key={c.id} >
+          <li key={c.id} >
             <CategoryLink category={c.parent.name} subcategory={c.name}>{c.title}</CategoryLink>
           </li>
           )
@@ -43,16 +46,18 @@ export default class Header extends React.Component {
       ;
 
     return (
-      <header className="main">
-        <h1 className="title">
+      <header className={style.main}>
+        <h1 className={style.title}>
         {[
           <Link to="/" activeClassName="active" key="page.home"><FormattedMessage id="home" defaultMessage={'Home'} /></Link>,
           ' / ',
           <CategoryLink category={parent.name} key="page.category" >{parent.title}</CategoryLink>,
         ]}
         </h1>
-        {childrens && <nav className="categories"><ul>{childrens}</ul></nav>}
+        {childrens && <nav className={navStyle.categories}><ul>{childrens}</ul></nav>}
       </header>
     );
   }
 }
+
+export default withStyles(style, navStyle)(Header);

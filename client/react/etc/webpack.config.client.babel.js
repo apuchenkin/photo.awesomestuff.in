@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+// import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import AssetsPlugin from 'assets-webpack-plugin';
 import path from 'path';
 
@@ -17,8 +17,8 @@ module.exports = Object.assign(base, {
   output: {
     path: path.resolve(__dirname, '../build'),
     publicPath: '/',
-    filename: DEBUG ? '[name].js?[hash]' : '[name].[hash].js',
-    chunkFilename: DEBUG ? '[name].[id].js?[hash]' : '[name].[id].[hash].js',
+    filename: DEBUG ? '[name].js' : '[name].[hash].js',
+    chunkFilename: DEBUG ? '[name].[id].js' : '[name].[id].[chunkhash].js',
   },
 
   target: 'web',
@@ -42,9 +42,9 @@ module.exports = Object.assign(base, {
     new webpack.optimize.OccurrenceOrderPlugin(true),
 
     new webpack.NoErrorsPlugin(),
-    new ExtractTextPlugin('bundle.css', {
-      allChunks: true
-    }),
+    // new ExtractTextPlugin('bundle.css', {
+    //   allChunks: true
+    // }),
   ]).concat(DEBUG ? [] : [
     // Search for equal or similar files and deduplicate them in the output
     // https://webpack.github.io/docs/list-of-plugins.html#dedupeplugin
@@ -54,6 +54,7 @@ module.exports = Object.assign(base, {
     // https://github.com/mishoo/UglifyJS2#compressor-options
     new webpack.optimize.UglifyJsPlugin({
       compress: {
+        screw_ie8: true, // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
         warnings: false
       },
       comments: false
@@ -67,23 +68,4 @@ module.exports = Object.assign(base, {
   // Choose a developer tool to enhance debugging
   // http://webpack.github.io/docs/configuration.html#devtool
   devtool: DEBUG ? 'eval' : false,
-
-  // devServer: {
-  //   port: process.env.PORT || 8080,
-  //   host: '0.0.0.0',
-  //   colors: true,
-  //   publicPath: '/',
-  //   contentBase: './src',
-  //   historyApiFallback: true,
-  //   proxy: {
-  //     '/api/v1*': {
-  //       target: config.apiProxy,
-  //       rewrite(req) {
-  //         req.url = req.url.replace(/^\/api\/v1/, '');
-  //       },
-  //       changeOrigin: true,
-  //       secure: false
-  //     }
-  //   }
-  // }
 });

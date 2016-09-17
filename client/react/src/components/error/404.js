@@ -2,9 +2,12 @@ import React from 'react';
 import { locationShape } from 'react-router/lib/PropTypes';
 import { FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
-import Link from '../link';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-export default class Header extends React.Component {
+import Link from '../link';
+import style from './style.less';
+
+class Header extends React.Component {
 
   static propTypes = {
     location: locationShape,
@@ -18,7 +21,7 @@ export default class Header extends React.Component {
     const { location } = this.props;
 
     return (
-      <div className="error-404">
+      <div className={style['error-404']}>
         <h2>
           <b><FormattedMessage id="error.title" defaultMessage={'Error {error}'} values={{ error: 404 }} /></b>
           &nbsp;-&nbsp;<FormattedMessage id="error.404.description" defaultMessage={'Page not found'} />
@@ -39,3 +42,5 @@ export default class Header extends React.Component {
     );
   }
 }
+
+export default withStyles(style)(Header);

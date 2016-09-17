@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+// import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import autoprefixer from 'autoprefixer';
 import path from 'path';
 
@@ -13,10 +13,6 @@ module.exports = {
     root: path.resolve(__dirname, '../src'),
     extensions: ['', '.jsx', '.js', '.json', '.less'],
     modulesDirectories: ['node_modules'],
-    // alias: {
-    //   components: path.resolve(__dirname, 'src/components'),    // used for tests
-    //   style: path.resolve(__dirname, 'src/style'),
-    // },
   },
 
   cache: DEBUG,
@@ -50,12 +46,14 @@ module.exports = {
           babelrc: false,
           presets: [
             'react',
-            'es2015-minimal',
+            'es2015',
+            'stage-0',
           ],
           plugins: [
             'transform-runtime',
-            'transform-class-properties',
             'transform-decorators-legacy',
+            // 'transform-class-properties',
+
             // 'transform-object-rest-spread',
             ...DEBUG ? [] : [
               'transform-react-remove-prop-types',
@@ -67,28 +65,34 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style', [
+        loaders: [
+          'isomorphic-style',
           `css?${JSON.stringify({
             sourceMap: DEBUG,
             importLoaders: true,
             // CSS Modules https://github.com/css-modules/css-modules
-            // modules: true,
+            modules: true,
             localIdentName: DEBUG ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
             // CSS Nano http://cssnano.co/options/
             minimize: !DEBUG,
           })}`,
           'postcss',
-        ].join('!')
-        ),
+        ]
       },
       {
         test: /\.less$/,
-        loader: ExtractTextPlugin.extract('style', [
-          `css?${JSON.stringify({ sourceMap: DEBUG, minimize: !DEBUG, importLoaders: 1 })}`,
+        loaders: [
+          'isomorphic-style',
+          `css?${JSON.stringify({
+            sourceMap: DEBUG,
+            minimize: !DEBUG,
+            modules: true,
+            localIdentName: DEBUG ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
+            importLoaders: true
+          })}`,
           'postcss',
           `less?${JSON.stringify({ sourceMap: DEBUG })}`,
-        ].join('!')
-        ),
+        ]
       },
       {
         test: /\.json$/,
@@ -102,7 +106,7 @@ module.exports = {
         test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)(\?.*)?$/i,
         loader: 'url',
         query: {
-          name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',
+          name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
           limit: 10000,
         },
       },
@@ -110,7 +114,7 @@ module.exports = {
         test: /\.(eot|ttf|wav|mp3|ico)(\?.*)?$/,
         loader: 'file',
         query: {
-          name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',
+          name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
         },
       },
     ],

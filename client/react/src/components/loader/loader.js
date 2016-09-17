@@ -1,14 +1,17 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
+import style from './style.less';
 
 const
   { bool } = React.PropTypes,
-  CLASS_NAME = 'loader',
-  CLASS_NAME_TRANSITION = 'loader-enter',
-  CLASS_NAME_HIDDEN = 'hidden',
+  CLASS_NAME = style.loader,
+  CLASS_NAME_TRANSITION = style.fade,
+  CLASS_NAME_HIDDEN = style.hidden,
   TRANSITION_DURATION = 200;
 
-export default class Loader extends React.Component {
+class Loader extends React.Component {
 
   static propTypes = {
     visible: bool.isRequired,
@@ -54,7 +57,9 @@ export default class Loader extends React.Component {
       ].filter(x => !!x).join(' ');
 
     return (
-      <div className={className$} key="loader"><div className="accent" /></div>
+      <div className={className$} key="loader"><div className={style.accent} /></div>
     );
   }
 }
+
+export default withStyles(style)(Loader);

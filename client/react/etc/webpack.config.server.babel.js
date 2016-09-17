@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+// import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import AssetsPlugin from 'assets-webpack-plugin';
 import path from 'path';
 
@@ -11,29 +11,23 @@ const GLOBALS = {
   __DEV__: DEBUG,
 };
 
-base.module.loaders[0].query.plugins.push([
-  "babel-plugin-transform-require-ignore",
-  {
-    "extensions": [".less", ".sass", "css"]
-  }
-]);
-
 module.exports = Object.assign(base, {
+
   entry: './server.js',
+  target: 'node',
 
   output: {
     path: path.resolve(__dirname, '../dist'),
+    publicPath: './dist/',
     filename: 'server.js',
     chunkFilename: 'server.[name].js',
     libraryTarget: 'commonjs2',
   },
 
-  target: 'node',
-
-  // externals: [
-  //   /^\.\/assets$/,
-  //   /^[@a-z][a-z\/\.\-0-9]*$/i,
-  // ],
+  externals: [
+    /^\.\/assets$/,
+    /^[@a-z][a-z\/\.\-0-9]*$/i,
+  ],
 
   plugins: [
 
@@ -45,10 +39,6 @@ module.exports = Object.assign(base, {
     // https://webpack.github.io/docs/list-of-plugins.html#bannerplugin
     new webpack.BannerPlugin('require("source-map-support").install();',
       { raw: true, entryOnly: false }),
-
-    new ExtractTextPlugin('bundle.css', {
-      allChunks: true
-    }),
   ],
 
   node: {
@@ -62,11 +52,3 @@ module.exports = Object.assign(base, {
 
   devtool: 'source-map',
 });
-  // node: {
-  //   global: true,
-  //   process: false,
-  //   Buffer: false,
-  //   __filename: false,
-  //   __dirname: false,
-  //   setImmediate: false
-  // },

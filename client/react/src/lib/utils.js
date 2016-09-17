@@ -1,3 +1,4 @@
+import React from 'react';
 import { Promise } from 'es6-promise';
 import IntlMessageFormat from 'intl-messageformat';
 
@@ -35,8 +36,10 @@ export default {
       title: meta.title ? `${meta.title} - ${config.title}` : config.title,
       description: meta.description || description.format(),
       links: [
-        `<link href="${pathname.replace(Picker.localeURL, `${hostname}$3`)}" rel="alternate" hreflang="x-default" />`,
-      ].concat(langs.map(lang => `<link href="${pathname.replace(Picker.localeURL, `${hostname}/${lang}$3`)}" rel="alternate" hreflang="${lang}" />`)),
+        <link href={pathname.replace(Picker.localeURL, `${hostname}$3`)} rel="alternate" hrefLang="x-default" key="x-default" />,
+      ].concat(langs.map(lang =>
+        <link href={pathname.replace(Picker.localeURL, `${hostname}/${lang}$3`)} rel="alternate" hrefLang={lang} key={lang} />
+      )),
     };
   },
 };

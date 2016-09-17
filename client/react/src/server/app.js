@@ -5,12 +5,12 @@ import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
 import favicon from 'serve-favicon';
 import { IntlProvider } from 'react-intl';
-import path from 'path';
 
-import renderHTML from './renderHTML';
+import HTML from './renderHTML';
 import createRoutes from '../routes';
 import config from '../config/config.json';
 import utils from '../lib/utils';
+import WithStylesContext from '../components/WithStylesContext';
 
 import icon from '../assets/favicon.ico';
 
@@ -33,7 +33,10 @@ app.use((req, res) => {
     // eslint-disable-next-line global-require
     messages = locale ? require(`../translation/${locale}.json`) : {},
     routes = createRoutes(locale, messages),
-    location = basename ? req.url.replace(basename, '') || '/' : req.url
+    location = basename ? req.url.replace(basename, '') || '/' : req.url,
+    css = new Set(), // CSS for all rendered React components
+    // eslint-disable-next-line no-underscore-dangle
+    onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()))
     ;
 
   // Note that req.url here should be the full URL path from
@@ -56,16 +59,24 @@ app.use((req, res) => {
         meta = utils.getMeta(renderProps.routes, messages, renderProps.location.pathname),
         componentHTML = ReactDOM.renderToString(
           <IntlProvider locale={locale} messages={messages}>
-            <RouterContext {...renderProps} createElement={createElement} />
+            <WithStylesContext onInsertCss={onInsertCss}>
+              <RouterContext {...renderProps} createElement={createElement} />
+            </WithStylesContext>
           </IntlProvider>,
+        ),
+        styles = [...css].join(''),
+        html = ReactDOM.renderToString(
+          <WithStylesContext onInsertCss={onInsertCss}>
+            <HTML
+              componentHTML={componentHTML}
+              initialState={initialState}
+              meta={meta}
+              styles={styles}
+            />
+          </WithStylesContext>
         );
 
-      res.status(200).send(renderHTML({
-        componentHTML,
-        initialState,
-        meta,
-        config,
-      }));
+      res.status(200).send(`<!DOCTYPE html>${html}`);
 
       // You can also check renderProps.components or renderProps.routes for
       // your "not found" component or route respectively, and send a 404 as

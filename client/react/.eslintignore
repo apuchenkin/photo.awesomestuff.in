@@ -1,2 +1,4 @@
 test/*
 etc/*
+build/*
+dist/*

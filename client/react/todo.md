@@ -21,12 +21,12 @@
 [x] separate client/server webpack build
 [x] propTypes
 [x] better wire-up isLoading state
+[x] last warnings/lint errors
+[x] build scripts
 
 -----------------------------
 
-- last warnings/lint errors
 - isomorphic styles / style chunks
-- build sctripts
 - cache control policy (node)
 - sitemap
 

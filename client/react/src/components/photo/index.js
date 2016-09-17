@@ -8,7 +8,7 @@ import { bind, debounce } from 'decko';
 import PhotoLink from '../link/photo';
 import CategoryLink from '../link/category';
 import Link from '../link';
-import Loader from '../loader';
+import Loader from '../loader/loader';
 
 import resolutions from '../../config/resolution.json';
 import config from '../../config/config.json';

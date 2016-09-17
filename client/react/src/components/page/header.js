@@ -1,11 +1,14 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import { FormattedMessage } from 'react-intl';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
 import Link from '../link';
+import style from '../../style/header.less';
 
 const { string, shape } = React.PropTypes;
 
-export default class Header extends React.Component {
+class Header extends React.Component {
 
   static propTypes = {
     page: shape({ title: string.isRequired }).isRequired,
@@ -17,8 +20,8 @@ export default class Header extends React.Component {
 
   render() {
     return (
-      <header className="main">
-        <h1 className="title">
+      <header className={style.main}>
+        <h1 className={style.title}>
           <Link to="/" activeClassName="active"><FormattedMessage
             id="home"
             defaultMessage={'Home'}
@@ -28,3 +31,5 @@ export default class Header extends React.Component {
     );
   }
 }
+
+export default withStyles(style)(Header);

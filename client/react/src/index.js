@@ -12,6 +12,7 @@ import createRoutes from './routes';
 import config from './config/config';
 import utils from './lib/utils';
 import LoadingContext from './components/loadingContext';
+import WithStylesContext from './components/WithStylesContext';
 
 import './assets/fontello/css/fontello.css';
 import './style/main.less';
@@ -57,18 +58,24 @@ function doRender(props) {
   return <RouterContext {...props} />;
 }
 
+function onInsertCss(styles) {
+  // eslint-disable-next-line no-underscore-dangle
+  return styles._insertCss();
+}
 
 match({ history, routes: createRoutes(locale) }, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
     <IntlProvider locale={locale} messages={messages}>
-      <LoadingContext history={history}>
-        <Router
-          {...renderProps}
-          createElement={createElement}
-          render={doRender}
-          onUpdate={onUpdate}
-        />
-      </LoadingContext>
+      <WithStylesContext onInsertCss={onInsertCss}>
+        <LoadingContext history={history}>
+          <Router
+            {...renderProps}
+            createElement={createElement}
+            render={doRender}
+            onUpdate={onUpdate}
+          />
+        </LoadingContext>
+      </WithStylesContext>
     </IntlProvider>,
     document.getElementById('react-view')
   );

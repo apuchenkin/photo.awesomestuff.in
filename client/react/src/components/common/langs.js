@@ -2,7 +2,10 @@ import React from 'react';
 import { locationShape } from 'react-router/lib/PropTypes';
 import { injectIntl, intlShape } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
 import { locales } from '../../config/config.json';
+import style from './style.less';
 
 const { arrayOf, string } = React.PropTypes;
 
@@ -34,11 +37,11 @@ class Picker extends React.Component {
       });
 
     return (
-      <div className="language">
+      <div className={style.language}>
         {links}
       </div>
     );
   }
 }
 
-export default injectIntl(Picker);
+export default withStyles(style)(injectIntl(Picker));

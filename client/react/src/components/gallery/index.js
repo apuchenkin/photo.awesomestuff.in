@@ -1,20 +1,21 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import CategoryLink from '../link/category';
 import PhotoLink from '../link/photo';
 import Brick from './brick';
-import Loader from '../loader';
+import Loader from '../loader/loader';
 
-import './gallery.less';
+import style from './gallery.less';
 
 const
   { shape, arrayOf, element } = React.PropTypes,
   isBrowser = (typeof window !== 'undefined'),
   Packery = isBrowser ? require('packery') : null;
 
-export default class Gallery extends React.Component {
+class Gallery extends React.Component {
 
   static propTypes = {
     children: element,
@@ -74,7 +75,7 @@ export default class Gallery extends React.Component {
       { isLoading } = this.state,
       { category, photos } = this.props,
       gallery = photos.map(p => (
-        <li className="photo" key={p.id} >
+        <li key={p.id} >
           <PhotoLink photoId={p.id} {...CategoryLink.fromCategory(category)}>
             <Brick photo={p} />
           </PhotoLink>
@@ -87,13 +88,15 @@ export default class Gallery extends React.Component {
         }));
 
     return (
-      <div className={hasNav ? 'gallery nav' : 'gallery'} >
+      <div className={hasNav ? `${style.gallery} ${style.nav}` : `${style.gallery}`} >
         <Loader visible={isLoading} />
         <ReactCSSTransitionGroup transitionName="photo" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
           {childrens}
         </ReactCSSTransitionGroup>
-        <ul ref={(c) => { this.packeryCmp = c; }} className={isLoading ? 'loading' : ''}>{gallery}</ul>
+        <ul ref={(c) => { this.packeryCmp = c; }} className={isLoading ? style.loading : ''}>{gallery}</ul>
       </div>
     );
   }
 }
+
+export default withStyles(style)(Gallery);

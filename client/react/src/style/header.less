@@ -1,0 +1,35 @@
+@import "var";
+
+header.main {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+
+  padding: @divisor;
+  background: @grey-light;
+  border-bottom: solid 1px lighten(@grey-light, 10%);
+  box-sizing: border-box;
+
+  h1, h2 {
+    font-size: 1.6em;
+    margin: 0;
+    font-weight: 300;
+    color: darken(@light-grey, 20%);
+
+    .version {
+      color: @light;
+      font-size: small;
+    }
+
+    a {
+      font-weight: 300;
+    }
+  }
+
+  h2 {
+    font-size: 1.4em;
+    color: @accent;
+  }
+}

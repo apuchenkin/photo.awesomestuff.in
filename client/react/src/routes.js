@@ -25,7 +25,7 @@ const
 
 const notFound = new Route({
   path: '*',
-  class: 'error',
+  class: 'not-found',
   components: {
     header: props => <HomeHeader {...props} />,
     body: props => <Error404 {...props} />,

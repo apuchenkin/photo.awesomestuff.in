@@ -1,14 +1,15 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import Gallery from './gallery';
 
-import './style.less';
+import style from './style.less';
 
 const { array, arrayOf, shape, number } = React.PropTypes;
 
-export default class Home extends React.Component {
+class Home extends React.Component {
 
   static propTypes = {
     categories: arrayOf(shape({
@@ -37,7 +38,7 @@ export default class Home extends React.Component {
       ;
 
     return (
-      <div className="galleries">
+      <div className={style.galleries}>
         <h2>
           <FormattedMessage id="galleries" defaultMessage={'Galleries'} />
         </h2>
@@ -46,3 +47,6 @@ export default class Home extends React.Component {
     );
   }
 }
+
+// export default Home;
+export default withStyles(style)(Home);

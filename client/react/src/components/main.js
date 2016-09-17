@@ -3,12 +3,16 @@ import shallowCompare from 'react-addons-shallow-compare';
 import { FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
 import withRouter from 'react-router/lib/withRouter';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
+// TODO: include PS styles
+// import ps from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
+import baseStyle from '../style/style.less';
+import style from '../style/main.less';
 
 import Langs from './common/langs';
 import Link from './link';
-import Loader from './loader';
+import Loader from './loader/loader';
 import config from '../config/config.json';
 
 const
@@ -65,9 +69,9 @@ class Main extends React.Component {
       ;
 
     return (
-      <div id="main" className={route.class}>
+      <div className={[style.main, style[route.class]].join(' ')}>
         {header}
-        <div className="content" ref={(c) => { this.content = c; }}>
+        <div className={style.content} ref={(c) => { this.content = c; }}>
           {body}
           <footer>
             <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage
@@ -85,4 +89,4 @@ class Main extends React.Component {
   }
 }
 
-export default withRouter(Main);
+export default withStyles(style, baseStyle)(withRouter(Main));
