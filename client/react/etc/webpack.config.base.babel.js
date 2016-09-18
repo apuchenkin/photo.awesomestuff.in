@@ -66,13 +66,13 @@ module.exports = {
       {
         test: /\.css$/,
         loaders: [
-          'isomorphic-style',
+          'style',
           `css?${JSON.stringify({
             sourceMap: DEBUG,
             importLoaders: true,
             // CSS Modules https://github.com/css-modules/css-modules
-            modules: true,
-            localIdentName: DEBUG ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
+            // modules: true,
+            // localIdentName: DEBUG ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
             // CSS Nano http://cssnano.co/options/
             minimize: !DEBUG,
           })}`,
@@ -81,6 +81,9 @@ module.exports = {
       },
       {
         test: /\.less$/,
+        include: [
+          path.resolve(__dirname, '../src'),
+        ],
         loaders: [
           'isomorphic-style',
           `css?${JSON.stringify({

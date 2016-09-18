@@ -39,7 +39,11 @@ class Header extends React.Component {
         .filter(c => c.parent && c.parent.name === parent.name)
         .map(c => (
           <li key={c.id} >
-            <CategoryLink category={c.parent.name} subcategory={c.name}>{c.title}</CategoryLink>
+            <CategoryLink
+              activeClassName={navStyle.active}
+              category={c.parent.name}
+              subcategory={c.name}
+            >{c.title}</CategoryLink>
           </li>
           )
         )
@@ -49,7 +53,7 @@ class Header extends React.Component {
       <header className={style.main}>
         <h1 className={style.title}>
         {[
-          <Link to="/" activeClassName="active" key="page.home"><FormattedMessage id="home" defaultMessage={'Home'} /></Link>,
+          <Link to="/" key="page.home"><FormattedMessage id="home" defaultMessage={'Home'} /></Link>,
           ' / ',
           <CategoryLink category={parent.name} key="page.category" >{parent.title}</CategoryLink>,
         ]}
@@ -60,4 +64,4 @@ class Header extends React.Component {
   }
 }
 
-export default withStyles(style, navStyle)(Header);
+export default withStyles(navStyle, style)(Header);

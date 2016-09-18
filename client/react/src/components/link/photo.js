@@ -1,6 +1,10 @@
 import React from 'react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
 import Link from './index';
 import utils from '../../lib/utils';
+
+import baseStyle from '../../style/style.less';
 
 const { string, number, node } = React.PropTypes;
 
@@ -13,7 +17,7 @@ const PhotoLink = function PhotoLink(props) {
       : category;
 
   return (
-    <Link to={`/${link}/photo/${photoId}`} activeClassName="active" {...props$} >
+    <Link to={`/${link}/photo/${photoId}`} activeClassName={baseStyle.active} {...props$} >
       {children}
     </Link>
   );
@@ -26,4 +30,4 @@ PhotoLink.propTypes = {
   subcategory: string,
 };
 
-export default PhotoLink;
+export default withStyles(baseStyle)(PhotoLink);

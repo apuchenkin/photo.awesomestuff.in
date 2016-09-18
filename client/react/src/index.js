@@ -7,6 +7,7 @@ import useRouterHistory from 'react-router/lib/useRouterHistory';
 import createHistory from 'history/lib/createBrowserHistory';
 import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
+import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
 import createRoutes from './routes';
 import config from './config/config';
@@ -15,7 +16,7 @@ import LoadingContext from './components/loadingContext';
 import WithStylesContext from './components/WithStylesContext';
 
 import './assets/fontello/css/fontello.css';
-import './style/main.less';
+import './style/style.css';
 
 addLocaleData(ruLocaleData);
 
@@ -36,8 +37,9 @@ function createElement(component, props) {
 function metaUpdate(meta) {
   document.title = meta.title;
   document.head.querySelector('meta[name=description]').content = meta.description;
-  Array.from(document.head.querySelectorAll('link[hreflang]')).map(node => document.head.removeChild(node));
-  meta.links.map(link => document.head.insertAdjacentHTML('beforeend', link));
+  // TODO: meta-links
+  // Array.from(document.head.querySelectorAll('link[hreflang]')).map(node => document.head.removeChild(node));
+  // meta.links.map(link => document.head.insertAdjacentHTML('beforeend', link));
 }
 
 function onUpdate() {

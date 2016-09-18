@@ -1,0 +1,17 @@
+.ps-container .ps-scrollbar-y-rail {
+  border-radius: 0 !important;
+}
+
+.ps-container .ps-scrollbar-y-rail .ps-scrollbar-y {
+  border-radius: 0 !important;
+}
+
+.contacts {
+  .details {
+    margin-bottom: @divisor;
+    b {
+      color: @accent;
+      font-weight: normal;
+    }
+  }
+}

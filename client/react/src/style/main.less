@@ -1,14 +1,12 @@
 @import "var";
 
-@footer-size: 2.5 * @divisor;
-
 .main {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
   padding-top: 71px;
 
-  &.main {
+  &.home {
     padding-top: 98px;
   }
 
@@ -25,33 +23,9 @@
     padding: @divisor / 2 @divisor 0 @divisor;
     color: @light-grey;
     width: 100%;
-    min-height: 100%;
+    height: 100%;
     overflow: auto;
     box-sizing: border-box;
-    margin-bottom: -@footer-size;
     position: relative;
-
-    // & > .gallery, .galleries, .page {
-    //   min-height: 100%;
-    //   box-sizing: border-box;
-    //   margin-bottom: -@footer-size;
-    //   overflow: hidden;
-    //
-    //   &:after {
-    //     content: "";
-    //     height: @footer-size;
-    //     display: block;
-    //   }
-    // }
-
-    &:after {
-      content: "";
-      height: @footer-size;
-      display: block;
-    }
-
-    & > .static {
-      color: @light-grey;
-    }
   }
 }

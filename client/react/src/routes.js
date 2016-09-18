@@ -217,7 +217,7 @@ export default (locale, messages = initialState.messages) => {
         me = this,
         callback = () => {
           me.indexRoute = {
-            class: 'main',
+            class: 'home',
             components: {
               header: props => <HomeHeader {...props} />,
               body: props => <Home {...props} categories={me.state.categories} />,

@@ -3,7 +3,17 @@
 .gallery {
   padding-top: @divisor / 4;
   position: relative;
-  overflow: visible !important;
+  overflow: hidden;
+
+  min-height: 100%;
+  box-sizing: border-box;
+  margin-bottom: -@footer-size;
+
+  &:after {
+    content: "";
+    height: @footer-size;
+    display: block;
+  }
 
   & > ul {
     opacity: 1;
@@ -24,9 +34,9 @@
     cursor: pointer;
     display: block;
     float: left;
-    height: 100%;
     outline: 2px solid rgba(0, 0, 0, 0);
     transition: outline-color 0.2s ease-out;
+    position: relative;
 
     &:hover {
       outline-color: @accent;

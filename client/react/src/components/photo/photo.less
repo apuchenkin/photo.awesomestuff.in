@@ -8,7 +8,7 @@ figure, img {
     margin: 0;
 }
 
-.photo-widget {
+.photo {
   top: 0;
   left: 0;
   width: 100%;
@@ -21,24 +21,6 @@ figure, img {
   box-sizing: border-box;
   text-align: center;
   line-height: 100%;
-
-  &.photo-enter, &.photo-appear {
-    opacity: 0.01;
-  }
-
-  &.photo-enter.photo-enter-active, &.photo-appear.photo-appear-active {
-    opacity: 1;
-    transition: opacity @transition ease-out;
-  }
-
-  &.photo-leave {
-    opacity: 1;
-  }
-
-  &.photo-leave.photo-leave-active {
-    opacity: 0.01;
-    transition: opacity @transition ease-out;
-  }
 
   &:before {
     content: '';
@@ -86,7 +68,7 @@ figure, img {
       opacity: 0.1;
     }
 
-    .photo {
+    .image {
       max-width: 100%;
     }
 

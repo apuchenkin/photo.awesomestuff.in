@@ -1,11 +1,13 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import config from '../../config/config.json';
+import style from './gallery.less';
 
 const { number, string, shape } = React.PropTypes;
 
-export default class Brick extends React.Component {
+class Brick extends React.Component {
 
   static propTypes = {
     photo: shape({
@@ -29,7 +31,9 @@ export default class Brick extends React.Component {
       src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, s, s, filename].join('/');
 
     return (
-      <div className="brick" style={{ width: `${w}px`, height: `${h}px`, backgroundImage: `url(${src})` }} />
+      <div className={style.brick} style={{ width: `${w}px`, height: `${h}px`, backgroundImage: `url(${src})` }} />
     );
   }
 }
+
+export default withStyles(style)(Brick);

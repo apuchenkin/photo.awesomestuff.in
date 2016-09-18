@@ -4,6 +4,17 @@
   clear: both;
   padding-top: @divisor / 2;
 
+  min-height: 100%;
+  box-sizing: border-box;
+  margin-bottom: -@footer-size;
+  overflow: hidden;
+
+  &:after {
+    content: "";
+    height: @footer-size;
+    display: block;
+  }
+
   h2 {
     color: @light;
     margin: 0 0 @divisor / 2 0;

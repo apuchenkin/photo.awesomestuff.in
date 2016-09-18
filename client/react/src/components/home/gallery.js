@@ -2,10 +2,11 @@ import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import CategoryLink from '../link/category';
+import CategoryLink, { fromCategory } from '../link/category';
 import config from '../../config/config.json';
 
 import style from './style.less';
+import baseStyle from '../../style/style.less';
 
 const
   { shape, arrayOf, string, number } = React.PropTypes,
@@ -17,6 +18,7 @@ const
   });
 
 class Gallery extends React.Component {
+
   static propTypes = {
     category: categoryShape.isRequired,
     childs: arrayOf(shape({
@@ -42,14 +44,14 @@ class Gallery extends React.Component {
         </CategoryLink>
         <aside>
           <h3>
-            <CategoryLink {...CategoryLink.fromCategory(category)} className="active">
+            <CategoryLink {...fromCategory(category)} className={baseStyle.active}>
               {category.title}
             </CategoryLink>
           </h3>
           {childs && !!childs.length && <ul>
             {childs.map(c => (
               <li key={c.id}>
-                <CategoryLink {...CategoryLink.fromCategory(c)}>{c.title}</CategoryLink>
+                <CategoryLink {...fromCategory(c)}>{c.title}</CategoryLink>
               </li>
             ))}
           </ul>}
@@ -59,4 +61,4 @@ class Gallery extends React.Component {
   }
 }
 
-export default withStyles(style)(Gallery);
+export default withStyles(style, baseStyle)(Gallery);

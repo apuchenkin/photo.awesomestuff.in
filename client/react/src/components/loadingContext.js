@@ -14,6 +14,8 @@ export default class LoadingContext extends React.Component {
 
   static childContextTypes = {
     isLoading: bool,
+    startLoading: func,
+    stopLoading: func,
   };
 
   constructor(props) {
@@ -24,8 +26,13 @@ export default class LoadingContext extends React.Component {
     };
   }
 
+  @bind
   getChildContext() {
-    return { isLoading: this.state.isLoading };
+    return {
+      isLoading: this.state.isLoading,
+      startLoading: this.startLoading,
+      stopLoading: this.stopLoading,
+    };
   }
 
   componentDidMount() {

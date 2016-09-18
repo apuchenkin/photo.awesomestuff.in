@@ -11,6 +11,7 @@ import createRoutes from '../routes';
 import config from '../config/config.json';
 import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
+import LoadingContext from '../components/loadingContext';
 
 import icon from '../assets/favicon.ico';
 
@@ -60,7 +61,9 @@ app.use((req, res) => {
         componentHTML = ReactDOM.renderToString(
           <IntlProvider locale={locale} messages={messages}>
             <WithStylesContext onInsertCss={onInsertCss}>
-              <RouterContext {...renderProps} createElement={createElement} />
+              <LoadingContext>
+                <RouterContext {...renderProps} createElement={createElement} />
+              </LoadingContext>
             </WithStylesContext>
           </IntlProvider>,
         ),

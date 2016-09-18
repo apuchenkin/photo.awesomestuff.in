@@ -3,12 +3,13 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import CategoryLink from '../link/category';
+import { fromCategory } from '../link/category';
 import PhotoLink from '../link/photo';
 import Brick from './brick';
 import Loader from '../loader/loader';
 
 import style from './gallery.less';
+import transitionStyle from '../../style/transition.less';
 
 const
   { shape, arrayOf, element } = React.PropTypes,
@@ -76,7 +77,7 @@ class Gallery extends React.Component {
       { category, photos } = this.props,
       gallery = photos.map(p => (
         <li key={p.id} >
-          <PhotoLink photoId={p.id} {...CategoryLink.fromCategory(category)}>
+          <PhotoLink photoId={p.id} {...fromCategory(category)}>
             <Brick photo={p} />
           </PhotoLink>
         </li>
@@ -90,7 +91,16 @@ class Gallery extends React.Component {
     return (
       <div className={hasNav ? `${style.gallery} ${style.nav}` : `${style.gallery}`} >
         <Loader visible={isLoading} />
-        <ReactCSSTransitionGroup transitionName="photo" transitionEnterTimeout={200} transitionLeaveTimeout={200}>
+        <ReactCSSTransitionGroup
+          transitionName={{
+            enter: transitionStyle['fade-enter'],
+            enterActive: transitionStyle['fade-enter-active'],
+            leave: transitionStyle['fade-leave'],
+            leaveActive: transitionStyle['fade-leave-active'],
+          }}
+          transitionEnterTimeout={200}
+          transitionLeaveTimeout={200}
+        >
           {childrens}
         </ReactCSSTransitionGroup>
         <ul ref={(c) => { this.packeryCmp = c; }} className={isLoading ? style.loading : ''}>{gallery}</ul>
@@ -99,4 +109,4 @@ class Gallery extends React.Component {
   }
 }
 
-export default withStyles(style)(Gallery);
+export default withStyles(style, transitionStyle)(Gallery);

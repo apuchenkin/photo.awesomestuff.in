@@ -1,9 +1,12 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
+import style from './style.less';
 
 const { string } = React.PropTypes;
 
-export default class Page extends React.Component {
+class Page extends React.Component {
 
   static propTypes = {
     content: string.isRequired,
@@ -16,7 +19,9 @@ export default class Page extends React.Component {
   render() {
     return (
       // eslint-disable-next-line react/no-danger
-      <div className="page" dangerouslySetInnerHTML={{ __html: this.props.content }} />
+      <div className={style.page} dangerouslySetInnerHTML={{ __html: this.props.content }} />
     );
   }
 }
+
+export default withStyles(style)(Page);

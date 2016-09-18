@@ -2,18 +2,18 @@ import React from 'react';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import withRouter from 'react-router/lib/withRouter';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { routerShape } from 'react-router/lib/PropTypes';
 import { bind, debounce } from 'decko';
 
 import PhotoLink from '../link/photo';
-import CategoryLink from '../link/category';
+import { fromCategory } from '../link/category';
 import Link from '../link';
 import Loader from '../loader/loader';
 
 import resolutions from '../../config/resolution.json';
 import config from '../../config/config.json';
-
-import './photo.less';
+import style from './photo.less';
 
 const
   isBrowser = (typeof window !== 'undefined'),
@@ -143,12 +143,14 @@ class Photo extends React.Component {
         values={{ icon: (<i className="icon-cancel" />) }}
       />),
       figure = (
-        <figure className={isLoading ? 'content loading' : 'content'} >
-          <div className="tools"><Link onClick={e => e.stopPropagation()} to={url}>{closeIcon}</Link></div>
+        <figure className={isLoading ? `${style.content} ${style.loading}` : style.content} >
+          <div className={style.tools}>
+            <Link onClick={e => e.stopPropagation()} to={url}>{closeIcon}</Link>
+          </div>
           {
             // eslint-disable-next-line jsx-a11y/no-static-element-interactions
             <img
-              className="photo"
+              className={style.image}
               alt={photo.caption}
               onClick={(e) => { e.stopPropagation(); this.goNext(next); }}
               onLoad={this.onLoad}
@@ -157,12 +159,12 @@ class Photo extends React.Component {
               ref={(c) => { this.img = c; }}
             />
           }
-          <figcaption className="description">
-            <span className="caption">{photo.caption}</span>
+          <figcaption className={style.description}>
+            <span className={style.caption}>{photo.caption}</span>
             {photo.author && <div><FormattedMessage
               id="photo.author"
               defaultMessage={'Author: {author}'}
-              values={{ author: (<span className="author">{photo.author.name}</span>) }}
+              values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
             /></div>}
           </figcaption>
         </figure>
@@ -171,23 +173,23 @@ class Photo extends React.Component {
 
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-      <div className="photo-widget" onClick={this.close}>
+      <div className={style.photo} onClick={this.close}>
         <Loader visible={isLoading} />
         {figure}
         <PhotoLink
-          {...CategoryLink.fromCategory(category)}
+          {...fromCategory(category)}
           onClick={e => e.stopPropagation()}
           photoId={prev && prev.id}
-          className="nav prev"
+          className={`${style.nav} ${style.prev}`}
           title={intl.formatMessage({ id: 'prev' })}
         >
           <i className="icon-left-open" />
         </PhotoLink>
         <PhotoLink
-          {...CategoryLink.fromCategory(category)}
+          {...fromCategory(category)}
           onClick={e => e.stopPropagation()}
           photoId={next && next.id}
-          className="nav next"
+          className={`${style.nav} ${style.next}`}
           title={intl.formatMessage({ id: 'next' })}
         >
           <i className="icon-right-open" />
@@ -197,4 +199,4 @@ class Photo extends React.Component {
   }
 }
 
-export default withRouter(injectIntl(Photo));
+export default withStyles(style)(withRouter(injectIntl(Photo)));

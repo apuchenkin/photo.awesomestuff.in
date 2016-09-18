@@ -23,10 +23,10 @@
 [x] better wire-up isLoading state
 [x] last warnings/lint errors
 [x] build scripts
+[x] isomorphic styles / style chunks
 
 -----------------------------
 
-- isomorphic styles / style chunks
 - cache control policy (node)
 - sitemap
 
