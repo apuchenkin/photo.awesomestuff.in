@@ -18,7 +18,7 @@ module.exports = Object.assign(base, {
 
   output: {
     path: path.resolve(__dirname, '../dist'),
-    publicPath: './dist/',
+    publicPath: '/assets/',
     filename: 'server.js',
     chunkFilename: 'server.[name].js',
     libraryTarget: 'commonjs2',

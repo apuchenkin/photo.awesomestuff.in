@@ -106,7 +106,7 @@ module.exports = {
         loader: 'raw',
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)(\?.*)?$/i,
+        test: /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2)(\?.*)?$/i,
         loader: 'url',
         query: {
           name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
@@ -114,7 +114,7 @@ module.exports = {
         },
       },
       {
-        test: /\.(eot|ttf|wav|mp3|ico)(\?.*)?$/,
+        test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
         loader: 'file',
         query: {
           name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',

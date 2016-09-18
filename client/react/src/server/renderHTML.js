@@ -27,7 +27,6 @@ GoogleAnalytics.propTypes = {
 };
 
 function renderHTML({ componentHTML, initialState, meta, styles }) {
-  // console.log(style);
   return (
     <html lang={initialState.locale}>
       <head>
@@ -45,7 +44,6 @@ function renderHTML({ componentHTML, initialState, meta, styles }) {
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
         <script type="application/javascript" src={`${config.staticEndpoint}${assets.main.js}`} />
-        <script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Array.prototype.find,Array.prototype.findIndex,Intl" />
       </body>
     </html>
   );

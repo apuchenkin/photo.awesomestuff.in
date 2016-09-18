@@ -15,7 +15,7 @@ module.exports = Object.assign(base, {
   entry: './index.js',
 
   output: {
-    path: path.resolve(__dirname, '../build'),
+    path: path.resolve(__dirname, '../dist/assets'),
     publicPath: '/',
     filename: DEBUG ? '[name].js' : '[name].[hash].js',
     chunkFilename: DEBUG ? '[name].[id].js' : '[name].[id].[chunkhash].js',

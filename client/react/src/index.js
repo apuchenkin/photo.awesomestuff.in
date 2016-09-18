@@ -21,6 +21,7 @@ import './style/style.css';
 addLocaleData(ruLocaleData);
 
 const
+  span = document.createElement('span'),
   isBrowser = (typeof window !== 'undefined'),
   initialState = isBrowser && (window.__INITIAL_STATE__ || {}),
   locale = initialState.locale || config.fallbackLocale,
@@ -37,9 +38,16 @@ function createElement(component, props) {
 function metaUpdate(meta) {
   document.title = meta.title;
   document.head.querySelector('meta[name=description]').content = meta.description;
-  // TODO: meta-links
-  // Array.from(document.head.querySelectorAll('link[hreflang]')).map(node => document.head.removeChild(node));
-  // meta.links.map(link => document.head.insertAdjacentHTML('beforeend', link));
+  Array.from(document.head.querySelectorAll('link[hreflang]')).map((node) => {
+    ReactDOM.unmountComponentAtNode(node);
+    document.head.removeChild(node);
+    return false;
+  });
+  const links = meta.links.reduce((acc, link) => {
+    ReactDOM.render(link, span);
+    return acc.concat(span.innerHTML);
+  }, []);
+  document.head.insertAdjacentHTML('beforeend', links.join('\n'));
 }
 
 function onUpdate() {
@@ -60,9 +68,11 @@ function doRender(props) {
   return <RouterContext {...props} />;
 }
 
-function onInsertCss(styles) {
-  // eslint-disable-next-line no-underscore-dangle
-  return styles._insertCss();
+function onInsertCss(...styles) {
+  const removeCss = styles.map(style => style._insertCss()); // eslint-disable-line no-underscore-dangle, max-len
+  return () => {
+    removeCss.forEach(f => f());
+  };
 }
 
 match({ history, routes: createRoutes(locale) }, (error, redirectLocation, renderProps) => {

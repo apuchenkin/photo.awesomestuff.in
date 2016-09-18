@@ -5,6 +5,7 @@ import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
 import favicon from 'serve-favicon';
 import { IntlProvider } from 'react-intl';
+import path from 'path';
 
 import HTML from './renderHTML';
 import createRoutes from '../routes';
@@ -13,7 +14,7 @@ import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
 import LoadingContext from '../components/loadingContext';
 
-import icon from '../assets/favicon.ico';
+// import icon from '../assets/favicon.ico';
 
 const app = express();
 const createElement = (component, props) => component(props);
@@ -24,7 +25,8 @@ function negotiateLocale(req) {
   ;
 }
 
-app.use(favicon(icon));
+app.use(express.static(path.join(__dirname, 'assets')));
+app.use(favicon(path.join(__dirname, 'assets/favicon.ico')));
 app.use((req, res) => {
   const
     piece = req.url.split('/')[1],
