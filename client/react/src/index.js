@@ -86,7 +86,7 @@ function onInsertCss(...styles) {
   };
 }
 
-match({ history, routes: createRoutes(locale) }, (error, redirectLocation, renderProps) => {
+match({ history, routes: createRoutes(locale, store) }, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
     <Provider store={store}>
       <IntlProvider locale={locale} messages={messages}>

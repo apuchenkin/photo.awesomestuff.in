@@ -31,7 +31,7 @@ module.exports = Object.assign(base, {
     // Emit a file with assets paths
     // https://github.com/sporto/assets-webpack-plugin#options
     new AssetsPlugin({
-      path: path.resolve(__dirname, '../build'),
+      path: path.resolve(__dirname, '../dist'),
       filename: 'assets.json',
       // processOutput: x => `module.exports = ${JSON.stringify(x)};`,
     }),

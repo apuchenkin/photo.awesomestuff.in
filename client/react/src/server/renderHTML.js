@@ -3,7 +3,7 @@ import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import escapeHtml from 'escape-html';
-import assets from '../../build/assets.json';
+import assets from '../../dist/assets.json';
 import config from '../config/config.json';
 
 import style from '../style/style.less';

@@ -1,17 +1,12 @@
-export default class Route extends Object {
-  constructor(obj) {
-    super(obj);
+export default (props) => {
+  const
+    wrappedResolve = promise => location => promise(location)
+      .then((data) => {
+        Object.assign(props.state, data);
+        return data;
+      });
 
-    const
-      me = this,
-      wrappedResolve = promise => location => promise(location)
-        .then((data) => {
-          Object.assign(me.state, data);
-          return data;
-        });
-
-    Object.assign(me, {
-      resolve: wrappedResolve(obj.resolve),
-    });
-  }
-}
+  return Object.assign(props, {
+    resolve: wrappedResolve(props.resolve),
+  });
+};

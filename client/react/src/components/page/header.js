@@ -15,7 +15,7 @@ const messages = defineMessages({
   },
 });
 
-class Header extends React.Component {
+class PageHeader extends React.Component {
 
   static propTypes = {
     page: shape({ title: string.isRequired }).isRequired,
@@ -38,4 +38,4 @@ class Header extends React.Component {
   }
 }
 
-export default withStyles(style)(Header);
+export default withStyles(style)(PageHeader);

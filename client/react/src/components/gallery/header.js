@@ -27,7 +27,7 @@ const messages = defineMessages({
   },
 });
 
-class Header extends React.Component {
+class GalleryHeader extends React.Component {
 
   static propTypes = {
     category: categoryShape.isRequired,
@@ -71,4 +71,4 @@ class Header extends React.Component {
   }
 }
 
-export default withStyles(navStyle, style)(Header);
+export default withStyles(navStyle, style)(GalleryHeader);

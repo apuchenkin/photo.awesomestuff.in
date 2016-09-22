@@ -17,6 +17,7 @@ import PageHeader from './components/page/header';
 import Photo from './components/photo';
 import Main from './components/main';
 import Error404 from './components/error/404';
+import { startLoading } from './actions/loader';
 
 const
   isBrowser = (typeof window !== 'undefined'),
@@ -38,7 +39,7 @@ const notFound = new Route({
   },
 });
 
-export default (locale, messages = initialState.messages) => {
+export default (locale, store, messages = initialState.messages) => {
   const
     categoryService = new CategoryService({ locale }),
     photoService = new PhotoService({ locale }),
@@ -50,11 +51,10 @@ export default (locale, messages = initialState.messages) => {
     state: routerState[2] ? routerState[2].state : {},
 
     onEnter(location, replace, cb) {
-      const me = this;
-
-      me.resolve(location)
-        .then(() => Object.assign(me, {
-          component: props => <Photo {...props} photo={me.state.photo} category={category} />,
+      store.dispatch(startLoading());
+      this.resolve(location)
+        .then(() => Object.assign(this, {
+          component: props => <Photo {...props} photo={this.state.photo} category={category} />,
         }))
         .catch(() => replace(`/${category.parent}` ? `${category.parent.name}/${category.name}` : category.name))
         .then(() => cb());
@@ -104,20 +104,20 @@ export default (locale, messages = initialState.messages) => {
       },
 
       onEnter(location, replace, cb) {
-        const me = this;
+        store.dispatch(startLoading());
         const callback = () => {
-          Object.assign(me, { components: {
+          Object.assign(this, { components: {
             header: props => <GalleryHeader
               {...props} category={category} categories={data.categories}
             />,
-            body: props => <Gallery {...props} category={category} photos={me.state.photos} />,
+            body: props => <Gallery {...props} category={category} photos={this.state.photos} />,
           } });
           cb();
         };
 
-        return Object.keys(me.state).length
+        return Object.keys(this.state).length
           ? callback()
-          : me.resolve(location)
+          : this.resolve(location)
               .then(callback)
               .catch(cb);
       },

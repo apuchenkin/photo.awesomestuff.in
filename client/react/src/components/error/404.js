@@ -46,7 +46,7 @@ const messages = defineMessages({
   },
 });
 
-class Header extends React.Component {
+class NotFound extends React.Component {
 
   static propTypes = {
     location: locationShape,
@@ -65,7 +65,7 @@ class Header extends React.Component {
     return (
       <div className={style['error-404']}>
         <h2>
-          <b><FormattedMessage {...messages.error} values={{ error: 404 }} /></b>
+          <b><FormattedMessage {...messages.title} values={{ error: 404 }} /></b>
           &nbsp;-&nbsp;<FormattedMessage {...messages.description} />
         </h2>
         <p><FormattedMessage {...messages.text} values={{ url: location.pathname }} /></p>
@@ -81,4 +81,4 @@ class Header extends React.Component {
   }
 }
 
-export default withStyles(style)(Header);
+export default withStyles(style)(NotFound);

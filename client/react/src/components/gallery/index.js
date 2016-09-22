@@ -23,19 +23,19 @@ class Gallery extends React.Component {
     children: element,
     category: shape().isRequired,
     photos: arrayOf(shape()).isRequired,
-    startLoading: func.isRequired,
     stopLoading: func.isRequired,
     isLoading: bool.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-    props.startLoading();
-  }
-
   componentDidMount() {
     this.packery = this.createPackery(this.packeryCmp);
     this.props.stopLoading();
+  }
+
+  componentWillReceiveProps(props) {
+    if (!props.children) {
+      props.stopLoading();
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {

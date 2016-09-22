@@ -5,7 +5,6 @@ import ReactDOM from 'react-dom/server';
 import match from 'react-router/lib/match';
 import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
-// import favicon from 'serve-favicon';
 import { IntlProvider } from 'react-intl';
 import path from 'path';
 
@@ -15,8 +14,6 @@ import config from '../config/config.json';
 import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
 import loadingReducer from '../reducers/loader';
-
-// import icon from '../assets/favicon.ico';
 
 const app = express();
 const createElement = (component, props) => component(props);
@@ -28,21 +25,24 @@ function negotiateLocale(req) {
 }
 
 app.use(express.static(path.join(__dirname, 'assets')));
-// app.use(favicon(path.join(__dirname, 'assets/favicon.ico')));
 app.use((req, res) => {
   const
+    store = createStore(
+      combineReducers({
+        isLoading: loadingReducer,
+      })
+    ),
     piece = req.url.split('/')[1],
     prefix = config.locales.find(l => l === piece),
     basename = prefix && `/${prefix}`,
     locale = prefix || negotiateLocale(req),
     // eslint-disable-next-line global-require
     messages = locale ? require(`../translation/${locale}.json`) : {},
-    routes = createRoutes(locale, messages),
+    routes = createRoutes(locale, store, messages),
     location = basename ? req.url.replace(basename, '') || '/' : req.url,
     css = new Set(), // CSS for all rendered React components
     // eslint-disable-next-line no-underscore-dangle
-    onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()))
-    ;
+    onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
 
   // Note that req.url here should be the full URL path from
   // the original request, including the query string.
@@ -62,11 +62,6 @@ app.use((req, res) => {
           messages,
         },
         meta = utils.getMeta(renderProps.routes, messages, renderProps.location.pathname),
-        store = createStore(
-          combineReducers({
-            isLoading: loadingReducer,
-          })
-        ),
         componentHTML = ReactDOM.renderToString(
           <Provider store={store}>
             <IntlProvider locale={locale} messages={messages}>

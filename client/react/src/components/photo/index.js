@@ -65,10 +65,11 @@ class Photo extends React.Component {
   constructor(props) {
     super(props);
 
+    const dimensions = this.getDimensions();
     this.state = {
-      dimensions: this.getDimensions(),
+      dimensions,
+      src: this.getSrc(props, dimensions),
     };
-    props.startLoading();
   }
 
   componentDidMount() {
@@ -76,16 +77,15 @@ class Photo extends React.Component {
       // in the case, when photo is loaded faster than JS code
       // it is already complete on componentDidMount
       this.props.stopLoading();
-      console.log('extra stop');
     }
 
     window.addEventListener('resize', this.resize);
   }
 
   componentWillReceiveProps(props) {
-    console.log('componentWillReceiveProps');
-    if (props.photo.id !== this.props.photo.id) {
-      props.startLoading();
+    const src = this.getSrc(props, this.state.dimensions);
+    if (src !== this.state.src) {
+      this.setState({ src }, () => this.props.startLoading);
     }
   }
 
@@ -104,7 +104,6 @@ class Photo extends React.Component {
   @bind
   onLoad() {
     this.props.stopLoading();
-    console.log('stop');
   }
 
   getDimensions() {
@@ -112,6 +111,18 @@ class Photo extends React.Component {
       width: isBrowser ? window.innerWidth - 40 : config.photo.width,
       height: isBrowser ? window.innerHeight - 40 : config.photo.height,
     };
+  }
+
+  @bind
+  getSrc(props, dimensions) {
+    const
+      { width, height } = dimensions,
+      { photo } = props,
+      [w, h] = this.adjust(width, height),
+      filename = photo.src.split('/').pop(),
+      src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/');
+
+    return src;
   }
 
   @bind
@@ -130,7 +141,7 @@ class Photo extends React.Component {
   resize() {
     this.setState({
       dimensions: this.getDimensions(),
-    });
+    }, () => this.componentWillReceiveProps(this.props));
   }
 
   @bind
@@ -155,15 +166,12 @@ class Photo extends React.Component {
 
   render() {
     const
-      { dimensions } = this.state,
+      { dimensions, src } = this.state,
       { intl, photo, category, photos, isLoading } = this.props,
       pidx = photos.findIndex(p => p.id === photo.id),
       prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
       next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
       { width, height } = dimensions,
-      [w, h] = this.adjust(width, height),
-      filename = photo.src.split('/').pop(),
-      src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/'),
       url = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`,
       closeIcon = (<FormattedMessage
         {...messages.close}

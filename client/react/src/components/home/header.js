@@ -18,7 +18,7 @@ const messages = defineMessages({
   },
 });
 
-class Header extends React.Component {
+class HomeHeader extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
@@ -41,4 +41,4 @@ class Header extends React.Component {
   }
 }
 
-export default withStyles(style)(Header);
+export default withStyles(style)(HomeHeader);

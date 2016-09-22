@@ -45,9 +45,9 @@ class Loader extends React.Component {
     }
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return shallowCompare(this, nextProps, nextState);
-  // }
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
 
   render() {
     const
@@ -64,5 +64,5 @@ class Loader extends React.Component {
 }
 
 export default connect(
-  state => {console.log(state); return { isLoading: state.isLoading.count > 0 }}
+  state => ({ isLoading: state.isLoading.count > 0 })
 )(withStyles(style)(Loader));
