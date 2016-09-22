@@ -1,6 +1,6 @@
 import React from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import { FormattedMessage } from 'react-intl';
+import { defineMessages, FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
 import withRouter from 'react-router/lib/withRouter';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
@@ -10,22 +10,25 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 
-import Langs from './common/langs';
+import LanguageSwitcher from './common/LanguageSwitcher';
 import Link from './link';
 import Loader from './loader/loader';
 import config from '../config/config.json';
 
 const
-  { bool, string, func, element, arrayOf, shape } = React.PropTypes,
+  { string, func, element, arrayOf, shape } = React.PropTypes,
   isBrowser = (typeof window !== 'undefined'),
   Ps = isBrowser ? require('perfect-scrollbar') : null
   ;
 
-class Main extends React.Component {
+const messages = defineMessages({
+  footer: {
+    id: 'footer',
+    defaultMessage: '2016, Artem Puchenkin',
+  },
+});
 
-  static contextTypes = {
-    isLoading: bool,
-  };
+class Main extends React.Component {
 
   static propTypes = {
     routes: arrayOf(shape({
@@ -60,7 +63,6 @@ class Main extends React.Component {
 
   render() {
     const
-      { isLoading } = this.context,
       { routes, header, body, location, pages } = this.props,
       route = routes[routes.length - 1],
       aboutPage = pages.find(p => p.alias === 'about'),
@@ -74,16 +76,13 @@ class Main extends React.Component {
         <div className={style.content} ref={(c) => { this.content = c; }}>
           {body}
           <footer>
-            <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage
-              id="footer"
-              defaultMessage={'2016, Artem Puchenkin'}
-            />
+            <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage {...messages.footer} />
             {aboutPage && contactsPage.title && [' | ', <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
             {contactsPage && contactsPage.title && [' | ', <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
-            <Langs location={location} langs={langs || config.locales} />
+            <LanguageSwitcher location={location} langs={langs || config.locales} />
           </footer>
         </div>
-        <Loader key="loader" visible={isLoading || false} />
+        <Loader key="loader" />
       </div>
     );
   }

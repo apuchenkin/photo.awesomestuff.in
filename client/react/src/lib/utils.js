@@ -3,7 +3,7 @@ import { Promise } from 'es6-promise';
 import IntlMessageFormat from 'intl-messageformat';
 
 import config from '../config/config.json';
-import Picker from '../components/common/langs';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 export default {
   pick(object, params) {
@@ -36,9 +36,9 @@ export default {
       title: meta.title ? `${meta.title} - ${config.title}` : config.title,
       description: meta.description || description.format(),
       links: [
-        <link href={pathname.replace(Picker.localeURL, `${hostname}$3`)} rel="alternate" hrefLang="x-default" key="x-default" />,
+        <link href={pathname.replace(LanguageSwitcher.localeURL, `${hostname}$3`)} rel="alternate" hrefLang="x-default" key="x-default" />,
       ].concat(langs.map(lang =>
-        <link href={pathname.replace(Picker.localeURL, `${hostname}/${lang}$3`)} rel="alternate" hrefLang={lang} key={lang} />
+        <link href={pathname.replace(LanguageSwitcher.localeURL, `${hostname}/${lang}$3`)} rel="alternate" hrefLang={lang} key={lang} />
       )),
     };
   },

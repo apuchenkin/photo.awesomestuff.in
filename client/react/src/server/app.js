@@ -1,9 +1,11 @@
 import React from 'react';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
 import match from 'react-router/lib/match';
 import RouterContext from 'react-router/lib/RouterContext';
 import express from 'express';
-import favicon from 'serve-favicon';
+// import favicon from 'serve-favicon';
 import { IntlProvider } from 'react-intl';
 import path from 'path';
 
@@ -12,7 +14,7 @@ import createRoutes from '../routes';
 import config from '../config/config.json';
 import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
-import LoadingContext from '../components/loadingContext';
+import loadingReducer from '../reducers/loader';
 
 // import icon from '../assets/favicon.ico';
 
@@ -26,7 +28,7 @@ function negotiateLocale(req) {
 }
 
 app.use(express.static(path.join(__dirname, 'assets')));
-app.use(favicon(path.join(__dirname, 'assets/favicon.ico')));
+// app.use(favicon(path.join(__dirname, 'assets/favicon.ico')));
 app.use((req, res) => {
   const
     piece = req.url.split('/')[1],
@@ -60,14 +62,19 @@ app.use((req, res) => {
           messages,
         },
         meta = utils.getMeta(renderProps.routes, messages, renderProps.location.pathname),
+        store = createStore(
+          combineReducers({
+            isLoading: loadingReducer,
+          })
+        ),
         componentHTML = ReactDOM.renderToString(
-          <IntlProvider locale={locale} messages={messages}>
-            <WithStylesContext onInsertCss={onInsertCss}>
-              <LoadingContext>
+          <Provider store={store}>
+            <IntlProvider locale={locale} messages={messages}>
+              <WithStylesContext onInsertCss={onInsertCss}>
                 <RouterContext {...renderProps} createElement={createElement} />
-              </LoadingContext>
-            </WithStylesContext>
-          </IntlProvider>,
+              </WithStylesContext>
+            </IntlProvider>
+          </Provider>
         ),
         styles = [...css].join(''),
         html = ReactDOM.renderToString(

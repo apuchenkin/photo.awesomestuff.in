@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { defineMessages, FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -19,6 +19,13 @@ const
   categoryShape = shape(Object.assign({}, categoryBase, {
     parent: shape(categoryBase),
   }));
+
+const messages = defineMessages({
+  home: {
+    id: 'home',
+    defaultMessage: 'Home',
+  },
+});
 
 class Header extends React.Component {
 
@@ -53,7 +60,7 @@ class Header extends React.Component {
       <header className={style.main}>
         <h1 className={style.title}>
         {[
-          <Link to="/" key="page.home"><FormattedMessage id="home" defaultMessage={'Home'} /></Link>,
+          <Link to="/" key="page.home"><FormattedMessage {...messages.home} /></Link>,
           ' / ',
           <CategoryLink category={parent.name} key="page.category" >{parent.title}</CategoryLink>,
         ]}

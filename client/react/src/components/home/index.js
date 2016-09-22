@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { defineMessages, FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -8,6 +8,13 @@ import Gallery from './gallery';
 import style from './style.less';
 
 const { array, arrayOf, shape, number } = React.PropTypes;
+
+const messages = defineMessages({
+  galleries: {
+    id: 'galleries',
+    defaultMessage: 'Galleries',
+  },
+});
 
 class Home extends React.Component {
 
@@ -40,7 +47,7 @@ class Home extends React.Component {
     return (
       <div className={style.galleries}>
         <h2>
-          <FormattedMessage id="galleries" defaultMessage={'Galleries'} />
+          <FormattedMessage {...messages.galleries} />
         </h2>
         <ul>{galleries}</ul>
       </div>

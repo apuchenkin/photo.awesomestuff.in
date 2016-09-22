@@ -1,9 +1,11 @@
 import React from 'react';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import Router from 'react-router/lib/Router';
 import match from 'react-router/lib/match';
-import RouterContext from 'react-router/lib/RouterContext';
 import useRouterHistory from 'react-router/lib/useRouterHistory';
+// import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
 import createHistory from 'history/lib/createBrowserHistory';
 import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
@@ -12,8 +14,9 @@ import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 import createRoutes from './routes';
 import config from './config/config';
 import utils from './lib/utils';
-import LoadingContext from './components/loadingContext';
 import WithStylesContext from './components/WithStylesContext';
+import loadingReducer from './reducers/loader';
+import { startLoading, stopLoading } from './actions/loader';
 
 import './assets/fontello/css/fontello.css';
 import './style/style.css';
@@ -26,14 +29,26 @@ const
   initialState = isBrowser && (window.__INITIAL_STATE__ || {}),
   locale = initialState.locale || config.fallbackLocale,
   basename = initialState.basename,
-  messages = initialState.messages,
-  history = useRouterHistory(createHistory)({
-    basename,
-  });
+  messages = initialState.messages;
 
 function createElement(component, props) {
   return component(props);
 }
+
+// Add the reducer to your store on the `routing` key
+const store = createStore(
+  combineReducers({
+    isLoading: loadingReducer,
+  })
+);
+
+const history = useRouterHistory(createHistory)({
+  basename,
+});
+
+history.listen(() => store.dispatch(startLoading()));
+// Create an enhanced history that syncs navigation events with the store
+// const history = syncHistoryWithStore(browserHistory, store);
 
 function metaUpdate(meta) {
   document.title = meta.title;
@@ -61,11 +76,7 @@ function onUpdate() {
     page: location.pathname,
   });
 
-  this.props.stopLoading();
-}
-
-function doRender(props) {
-  return <RouterContext {...props} />;
+  store.dispatch(stopLoading());
 }
 
 function onInsertCss(...styles) {
@@ -77,18 +88,17 @@ function onInsertCss(...styles) {
 
 match({ history, routes: createRoutes(locale) }, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
-    <IntlProvider locale={locale} messages={messages}>
-      <WithStylesContext onInsertCss={onInsertCss}>
-        <LoadingContext history={history}>
+    <Provider store={store}>
+      <IntlProvider locale={locale} messages={messages}>
+        <WithStylesContext onInsertCss={onInsertCss}>
           <Router
             {...renderProps}
             createElement={createElement}
-            render={doRender}
             onUpdate={onUpdate}
           />
-        </LoadingContext>
-      </WithStylesContext>
-    </IntlProvider>,
+        </WithStylesContext>
+      </IntlProvider>
+    </Provider>,
     document.getElementById('react-view')
   );
 });

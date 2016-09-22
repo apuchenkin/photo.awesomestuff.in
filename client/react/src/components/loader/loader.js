@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -14,20 +15,20 @@ const
 class Loader extends React.Component {
 
   static propTypes = {
-    visible: bool.isRequired,
+    isLoading: bool.isRequired,
   }
 
   constructor(props) {
     super(props);
 
     this.state = {
-      visible: props.visible,
+      visible: props.isLoading,
       className: null,
     };
   }
 
   componentWillReceiveProps(props) {
-    if (props.visible) {
+    if (props.isLoading) {
       this.setState({
         visible: true,
         className: CLASS_NAME_TRANSITION,
@@ -44,9 +45,9 @@ class Loader extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return shallowCompare(this, nextProps, nextState);
+  // }
 
   render() {
     const
@@ -62,4 +63,6 @@ class Loader extends React.Component {
   }
 }
 
-export default withStyles(style)(Loader);
+export default connect(
+  state => {console.log(state); return { isLoading: state.isLoading.count > 0 }}
+)(withStyles(style)(Loader));

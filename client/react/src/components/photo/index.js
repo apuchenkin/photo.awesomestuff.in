@@ -1,15 +1,16 @@
 import React from 'react';
-import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
+import { connect } from 'react-redux';
+import { injectIntl, intlShape, defineMessages, FormattedMessage } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import withRouter from 'react-router/lib/withRouter';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { routerShape } from 'react-router/lib/PropTypes';
 import { bind, debounce } from 'decko';
 
+import { startLoading, stopLoading } from '../../actions/loader';
 import PhotoLink from '../link/photo';
 import { fromCategory } from '../link/category';
 import Link from '../link';
-import Loader from '../loader/loader';
 
 import resolutions from '../../config/resolution.json';
 import config from '../../config/config.json';
@@ -17,7 +18,7 @@ import style from './photo.less';
 
 const
   isBrowser = (typeof window !== 'undefined'),
-  { number, string, object, shape, arrayOf } = React.PropTypes
+  { number, string, object, shape, arrayOf, func, bool } = React.PropTypes
   ;
 
 const photoShape = shape({
@@ -29,6 +30,25 @@ const photoShape = shape({
   author: object,
 });
 
+const messages = defineMessages({
+  close: {
+    id: 'icon.close',
+    defaultMessage: 'Close {icon}',
+  },
+  author: {
+    id: 'photo.author',
+    defaultMessage: 'Author: {author}',
+  },
+  prev: {
+    id: 'prev',
+    defaultMessage: 'Prev',
+  },
+  next: {
+    id: 'next',
+    defaultMessage: 'Next',
+  },
+});
+
 class Photo extends React.Component {
 
   static propTypes = {
@@ -37,29 +57,36 @@ class Photo extends React.Component {
     photo: photoShape.isRequired,
     intl: intlShape.isRequired,
     router: routerShape.isRequired,
+    startLoading: func.isRequired,
+    stopLoading: func.isRequired,
+    isLoading: bool.isRequired,
   }
 
   constructor(props) {
     super(props);
 
     this.state = {
-      isLoading: true,
       dimensions: this.getDimensions(),
     };
+    props.startLoading();
   }
 
   componentDidMount() {
     if (this.img.complete) {
       // in the case, when photo is loaded faster than JS code
       // it is already complete on componentDidMount
-      this.onMount(() => {
-        this.setState({
-          isLoading: false,
-        });
-      });
+      this.props.stopLoading();
+      console.log('extra stop');
     }
 
     window.addEventListener('resize', this.resize);
+  }
+
+  componentWillReceiveProps(props) {
+    console.log('componentWillReceiveProps');
+    if (props.photo.id !== this.props.photo.id) {
+      props.startLoading();
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -76,7 +103,8 @@ class Photo extends React.Component {
 
   @bind
   onLoad() {
-    this.setState({ isLoading: false });
+    this.props.stopLoading();
+    console.log('stop');
   }
 
   getDimensions() {
@@ -127,8 +155,8 @@ class Photo extends React.Component {
 
   render() {
     const
-      { isLoading, dimensions } = this.state,
-      { intl, photo, category, photos } = this.props,
+      { dimensions } = this.state,
+      { intl, photo, category, photos, isLoading } = this.props,
       pidx = photos.findIndex(p => p.id === photo.id),
       prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
       next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
@@ -138,8 +166,7 @@ class Photo extends React.Component {
       src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/'),
       url = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`,
       closeIcon = (<FormattedMessage
-        id="icon.close"
-        defaultMessage={'Close {icon}'}
+        {...messages.close}
         values={{ icon: (<i className="icon-cancel" />) }}
       />),
       figure = (
@@ -162,8 +189,7 @@ class Photo extends React.Component {
           <figcaption className={style.description}>
             <span className={style.caption}>{photo.caption}</span>
             {photo.author && <div><FormattedMessage
-              id="photo.author"
-              defaultMessage={'Author: {author}'}
+              {...messages.author}
               values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
             /></div>}
           </figcaption>
@@ -174,14 +200,13 @@ class Photo extends React.Component {
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <div className={style.photo} onClick={this.close}>
-        <Loader visible={isLoading} />
         {figure}
         <PhotoLink
           {...fromCategory(category)}
           onClick={e => e.stopPropagation()}
           photoId={prev && prev.id}
           className={`${style.nav} ${style.prev}`}
-          title={intl.formatMessage({ id: 'prev' })}
+          title={intl.formatMessage(messages.prev)}
         >
           <i className="icon-left-open" />
         </PhotoLink>
@@ -190,7 +215,7 @@ class Photo extends React.Component {
           onClick={e => e.stopPropagation()}
           photoId={next && next.id}
           className={`${style.nav} ${style.next}`}
-          title={intl.formatMessage({ id: 'next' })}
+          title={intl.formatMessage(messages.next)}
         >
           <i className="icon-right-open" />
         </PhotoLink>
@@ -199,4 +224,10 @@ class Photo extends React.Component {
   }
 }
 
-export default withStyles(style)(withRouter(injectIntl(Photo)));
+export default connect(
+  state => ({ isLoading: state.isLoading.count > 0 }),
+  dispatch => ({
+    startLoading: () => dispatch(startLoading()),
+    stopLoading: () => dispatch(stopLoading()),
+  })
+)(withStyles(style)(withRouter(injectIntl(Photo))));

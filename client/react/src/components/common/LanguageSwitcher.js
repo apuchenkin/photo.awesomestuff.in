@@ -1,6 +1,6 @@
 import React from 'react';
 import { locationShape } from 'react-router/lib/PropTypes';
-import { injectIntl, intlShape } from 'react-intl';
+import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -9,7 +9,14 @@ import style from './style.less';
 
 const { arrayOf, string } = React.PropTypes;
 
-class Picker extends React.Component {
+const messages = defineMessages({
+  not_available: {
+    id: 'locale.not_available',
+    defaultMessage: 'Current page content is not available in language {lang} yet',
+  },
+});
+
+class LanguageSwitcher extends React.Component {
 
   static propTypes = {
     location: locationShape,
@@ -29,11 +36,11 @@ class Picker extends React.Component {
         const
           disabled = !langs.find(l => locale === l),
           localeMsg = intl.formatMessage({ id: locale, defaultMessage: locale }),
-          helpMsg = intl.formatMessage({ id: 'locale.not_available', defaultMessage: 'Current page content is not available in language {lang} yet' }, { lang: localeMsg });
+          helpMsg = intl.formatMessage(messages.not_available, { lang: localeMsg });
 
         return disabled
           ? <span key={locale} title={helpMsg}>{localeMsg}</span>
-          : <a key={locale} href={location.pathname.replace(Picker.localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
+          : <a key={locale} href={location.pathname.replace(LanguageSwitcher.localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
       });
 
     return (
@@ -44,4 +51,4 @@ class Picker extends React.Component {
   }
 }
 
-export default withStyles(style)(injectIntl(Picker));
+export default withStyles(style)(injectIntl(LanguageSwitcher));
