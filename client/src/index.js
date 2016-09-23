@@ -1,102 +1,104 @@
-'use strict';
+import React from 'react';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import ReactDOM from 'react-dom';
+import Router from 'react-router/lib/Router';
+import match from 'react-router/lib/match';
+import useRouterHistory from 'react-router/lib/useRouterHistory';
+// import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
+import createHistory from 'history/lib/createBrowserHistory';
+import { IntlProvider, addLocaleData } from 'react-intl';
+import ruLocaleData from 'react-intl/locale-data/ru';
+import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
-require('./index.html');
-require('./polyfill/scope.js');
+import createRoutes from './routes';
+import config from './config/config';
+import utils from './lib/utils';
+import WithStylesContext from './components/WithStylesContext';
+import loadingReducer from './reducers/loader';
+import { startLoading, stopLoading } from './actions/loader';
 
-var Elm = require('./Main');
-var css = require("../assets/styles/main.less");
-var fontello = require('../assets/fontello/css/fontello.css');
-var Ps = require('perfect-scrollbar');
-var pscss = require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
-var Packery = require('packery');
+import './assets/fontello/css/fontello.css';
+import './style/style.css';
 
-var wrapper = document.body.querySelector('.wrapper');
-while (wrapper.firstChild) {
-    wrapper.removeChild(wrapper.firstChild);
+addLocaleData(ruLocaleData);
+
+const
+  span = document.createElement('span'),
+  isBrowser = (typeof window !== 'undefined'),
+  initialState = isBrowser && (window.__INITIAL_STATE__ || {}),
+  locale = initialState.locale || config.fallbackLocale,
+  basename = initialState.basename,
+  messages = initialState.messages;
+
+function createElement(component, props) {
+  return component(props);
 }
-var Main = Elm.Main.embed(wrapper, {
-  locale: window.navigator.userLanguage || window.navigator.language,
-  time: Date.now()
+
+// Add the reducer to your store on the `routing` key
+const store = createStore(
+  combineReducers({
+    isLoading: loadingReducer,
+  })
+);
+
+const history = useRouterHistory(createHistory)({
+  basename,
 });
 
-Main.ports.meta.subscribe(metaUpdate);
-Main.ports.photos.subscribe(onPhotosLoad);
-Main.ports.transition.subscribe(onTransition);
-
-var links = {};
+history.listen(() => store.dispatch(startLoading()));
+// Create an enhanced history that syncs navigation events with the store
+// const history = syncHistoryWithStore(browserHistory, store);
 
 function metaUpdate(meta) {
   document.title = meta.title;
   document.head.querySelector('meta[name=description]').content = meta.description;
-  meta.links.map(function(data) {
-    var link = links[data[0]] || document.head.appendChild(document.createElement('link'));
-    link.href = data[1];
-    link.rel = "alternate";
-    link.hreflang = data[0];
-    links[data[0]] = link;
-  })
+  Array.from(document.head.querySelectorAll('link[hreflang]')).map((node) => {
+    ReactDOM.unmountComponentAtNode(node);
+    document.head.removeChild(node);
+    return false;
+  });
+  const links = meta.links.reduce((acc, link) => {
+    ReactDOM.render(link, span);
+    return acc.concat(span.innerHTML);
+  }, []);
+  document.head.insertAdjacentHTML('beforeend', links.join('\n'));
 }
 
-var packery;
+function onUpdate() {
+  const
+    { routes, location } = this.state,
+    meta = utils.getMeta(routes, messages, location.pathname);
 
-function onTransition(title) {
-  var main = wrapper.querySelector(':scope > #main');
-  var content = main.querySelector(':scope > .content');
-  var gallery = content.querySelector(':scope > .gallery > ul');
-
-  content.scrollTop = 0;
-  Ps.initialize(content);
-
-  // clean up packery if gallery is hidden
-  if (packery && !gallery) {
-      packery.destroy();
-      packery = null;
-  }
-
+  metaUpdate(meta);
   ga('send', 'pageview', {
-    'page':  window.location.pathname
-  });
-}
-
-function createPackery(container) {
-  var packery = new Packery(container, {
-    columnWidth: 100,
-    itemSelector: 'li',
-    gutter: 10,
-    initLayout: false,
+    title: meta.title,
+    page: location.pathname,
   });
 
-  packery.defer = [];
-
-  packery.on('layoutComplete', function() {
-    packery.isLoading = false;
-    if (packery.defer.length) {
-      packery.defer.pop().apply(packery);
-    }
-  });
-
-  packery.doUpdate = function() {
-    packery.reloadItems();
-    packery.layout();
-
-    if (!packery.isLoading) {
-      packery.isLoading = true;
-    } else {
-      packery.defer.push(packery.doUpdate);
-    }
-  }
-
-  return packery;
+  store.dispatch(stopLoading());
 }
 
-function onPhotosLoad() {
-    var main = wrapper.querySelector(':scope > #main');
-    var content = main.querySelector(':scope > .content');
-    var gallery = content.querySelector(':scope > .gallery > ul');
-
-    if (!packery) {
-      packery = createPackery(gallery);
-    }
-
-    packery.doUpdate();
+function onInsertCss(...styles) {
+  const removeCss = styles.map(style => style._insertCss()); // eslint-disable-line no-underscore-dangle, max-len
+  return () => {
+    removeCss.forEach(f => f());
+  };
 }
+
+match({ history, routes: createRoutes(locale, store) }, (error, redirectLocation, renderProps) => {
+  ReactDOM.render(
+    <Provider store={store}>
+      <IntlProvider locale={locale} messages={messages}>
+        <WithStylesContext onInsertCss={onInsertCss}>
+          <Router
+            {...renderProps}
+            createElement={createElement}
+            onUpdate={onUpdate}
+          />
+        </WithStylesContext>
+      </IntlProvider>
+    </Provider>,
+    document.getElementById('react-view')
+  );
+});
