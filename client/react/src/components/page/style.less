@@ -1,0 +1,14 @@
+@import '~style/var';
+
+.page {
+  min-height: 100%;
+  box-sizing: border-box;
+  margin-bottom: -@footer-size;
+  overflow: hidden;
+
+  &:after {
+    content: "";
+    height: @footer-size;
+    display: block;
+  }
+}

@@ -1,0 +1,75 @@
+@import '~style/var';
+
+.galleries {
+  clear: both;
+  padding-top: @divisor / 2;
+
+  min-height: 100%;
+  box-sizing: border-box;
+  margin-bottom: -@footer-size;
+  overflow: hidden;
+
+  &:after {
+    content: "";
+    height: @footer-size;
+    display: block;
+  }
+
+  h2 {
+    color: @light;
+    margin: 0 0 @divisor / 2 0;
+    font-weight: 400;
+  }
+
+  & > ul {
+    & > li {
+      overflow: hidden;
+      display: block;
+      padding: 0 @divisor @divisor 0;
+
+      .gallery {
+        overflow: hidden;
+        padding: 2px;
+      }
+
+      a.cover {
+        float: left;
+        display: block;
+        outline: 2px solid rgba(0, 0, 0, 0);
+        cursor: pointer;
+        transition: outline-color 0.2s ease-out;
+        position: relative;
+        margin-bottom: 0.5em;
+
+        span.sub {
+          width: 100%;
+          color: @light;
+          padding: @divisor / 4;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          background: fade(@grey, 60%);
+          box-sizing: border-box;
+        }
+
+        &:hover {
+          outline-color: @accent;
+        }
+      }
+
+      aside {
+        float: left;
+        padding: 0 @divisor / 2;
+        color: @light-grey;
+
+        h3 {
+          margin: 0 0 @divisor /4 0;
+        }
+
+        li a {
+          line-height: @divisor;
+        }
+      }
+    }
+  }
+}

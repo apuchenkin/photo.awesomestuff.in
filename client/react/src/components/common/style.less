@@ -1,0 +1,13 @@
+@import '~style/var';
+
+.language {
+  position: fixed;
+  right: @divisor;
+  top:   @divisor;
+  z-index: 20;
+
+  &>a, &>span {
+    margin-right: @divisor / 2;
+    font-size: medium;
+  }
+}

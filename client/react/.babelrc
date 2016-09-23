@@ -1,0 +1,14 @@
+{
+  "sourceMaps": true,
+  "presets": [
+    "react",
+    "node6",
+    "es2015-minimal"
+  ],
+  "plugins": [
+    "transform-runtime",
+    "transform-decorators-legacy",
+    "transform-class-properties",
+    "transform-object-rest-spread"
+  ]
+}

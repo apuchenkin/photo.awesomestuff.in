@@ -1,0 +1,137 @@
+@import "../../../assets/styles/main";
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+.admin {
+  width: 100%;
+  height:100%;
+  margin: auto;
+  position:relative;
+  overflow: auto;
+
+  h1.title {
+    .tools {
+      float: right;
+      font-size: 18px;
+    }
+    span.show-hidden {
+      cursor: pointer;
+      margin-left: @divisor;
+      font-size: 14pt;
+      &.active {
+        background: black;
+      }
+    }
+  }
+
+  .content {
+    padding-top: 50px;
+    width: 100%;
+    overflow: auto;
+    height: 100%;
+  }
+
+  nav.aside {
+    float: left;
+    padding: @divisor 0;
+    background: @grey-light;
+    color: @light-grey;
+    height: 100%;
+    position: fixed;
+    width: 160px;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li {
+        padding: 0.2em @divisor;
+        cursor: pointer;
+
+        .category--hovered {
+          background: greenyellow;
+          cursor: pointer;
+        }
+
+        .isHidden {
+          opacity: 0.5;
+        }
+
+        &:hover {
+          background: lighten(@grey-light, 10%);
+        }
+
+        &.active {
+          color: black;
+          background: @light-grey;
+        }
+      }
+    }
+  }
+
+  .photos {
+    margin-left: 160px;
+    padding: 10px;
+    overflow: auto;
+
+    .photo {
+      float: left;
+      margin: 0 @divisor / 2 @divisor / 2 0;
+      position: relative;
+
+      &.dragging {
+        opacity: 0.5;
+      }
+
+      &.photo--hovered {
+        outline: 2px solid greenyellow;
+      }
+
+      &.selected {
+        outline: 2px solid rgba(255,255,255,1);
+      }
+
+      &.isHidden {
+        img { opacity: 0.3; }
+      }
+      .views {
+        position: absolute;
+        top: @divisor / 2;
+        left: @divisor / 2;
+        width: @divisor / 2;
+        height: @divisor / 2;
+        color: white;
+        text-shadow:
+          -1px -1px 0 black,
+          1px -1px 0 black,
+          -1px 1px 0 black,
+          1px 1px 0 black;
+      }
+
+      .parent {
+        position: absolute;
+        top: @divisor / 2;
+        right: @divisor / 2;
+        width: @divisor / 2;
+        height: @divisor / 2;
+        outline: 1px solid @accent;
+        background: yellow;
+      }
+      .group {
+        position: absolute;
+        bottom: @divisor / 2;
+        left: @divisor / 2;
+        width: @divisor;
+        height: @divisor;
+        outline: 1px solid rgba(255,255,255,1);
+
+        &:hover {
+          outline: 2px solid rgba(255,255,255,1);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+@accent: #ff762e;
+
+@grey: lighten(#000000, 10%);
+@grey-light:  lighten(@grey, 10%);
+
+@white: #ffffff;
+@light: darken(@white, 10%);
+@light-grey: darken(@light, 10%);
+
+.gradient (@color: @grey) {
+  background-color: @color;
+  background: linear-gradient(to top, fade(@color, 0%), @color 90%);
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, fade(@color, 0%)), color-stop(0.9, @color));
+  background: -webkit-linear-gradient(bottom, color-stop(0, fade(@color, 0%)), color-stop(0.9, @color));
+  background: -moz-linear-gradient(bottom, fade(@color, 0%), @color);
+  background: -ms-linear-gradient(bottom, fade(@color, 0%), @color);
+  background: -o-linear-gradient(bottom, fade(@color, 0%), @color);
+}
+
+.box-shadow (@x: 0px, @y: 3px, @blur: 5px, @alpha: 0.5) {
+  -webkit-box-shadow: @x @y @blur rgba(0, 0, 0, @alpha);
+  -moz-box-shadow: @x @y @blur rgba(0, 0, 0, @alpha);
+  box-shadow: @x @y @blur rgba(0, 0, 0, @alpha);
+}
+
+@divisor: 20px;
+@font-default: 'Roboto Condensed', sans-serif;
+@transition: 200ms;
+
+@footer-size: 2.5 * @divisor;

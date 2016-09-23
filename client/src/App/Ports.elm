@@ -11,7 +11,7 @@ port meta : App.Model.Meta -> Cmd msg
 
 port photos : Bool -> Cmd msg
 
-port transition :  Maybe String  -> Cmd msg
+port transition :  String  -> Cmd msg
 
 portCmd : Cmd msg -> Cmd (Action State)
 portCmd cmd = Cmd.map (always doNothing) cmd

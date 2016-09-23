@@ -1,0 +1,45 @@
+@import '~style/var';
+
+.gallery {
+  padding-top: @divisor / 4;
+  position: relative;
+  overflow: hidden;
+
+  min-height: 100%;
+  box-sizing: border-box;
+  margin-bottom: -@footer-size;
+
+  &:after {
+    content: "";
+    height: @footer-size;
+    display: block;
+  }
+
+  & > ul {
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
+
+    &.loading {
+      opacity: 0.01;
+    }
+  }
+
+  &.nav {
+    padding-top: 2 * @divisor + @divisor / 4;
+  }
+
+  .brick {
+    background-position: center;
+    background-size: cover;
+    cursor: pointer;
+    display: block;
+    float: left;
+    outline: 2px solid rgba(0, 0, 0, 0);
+    transition: outline-color 0.2s ease-out;
+    position: relative;
+
+    &:hover {
+      outline-color: @accent;
+    }
+  }
+}
