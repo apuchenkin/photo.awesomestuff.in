@@ -72,6 +72,10 @@ class Photo extends React.Component {
     };
   }
 
+  componentWillMount() {
+    this.props.startLoading();
+  }
+
   componentDidMount() {
     if (this.img.complete) {
       // in the case, when photo is loaded faster than JS code

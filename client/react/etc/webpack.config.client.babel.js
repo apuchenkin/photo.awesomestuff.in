@@ -11,7 +11,7 @@ const GLOBALS = {
   __DEV__: DEBUG,
 };
 
-module.exports = Object.assign(base, {
+module.exports = Object.assign({}, base, {
   entry: './index.js',
 
   output: {
