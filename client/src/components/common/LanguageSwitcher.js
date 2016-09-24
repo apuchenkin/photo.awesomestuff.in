@@ -5,6 +5,7 @@ import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import { locales } from '../../config/config.json';
+import { localeURL } from '../../lib/utils';
 import style from './style.less';
 
 const { arrayOf, string } = React.PropTypes;
@@ -24,8 +25,6 @@ class LanguageSwitcher extends React.Component {
     intl: intlShape.isRequired,
   }
 
-  static localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g
-
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
@@ -40,7 +39,7 @@ class LanguageSwitcher extends React.Component {
 
         return disabled
           ? <span key={locale} title={helpMsg}>{localeMsg}</span>
-          : <a key={locale} href={location.pathname.replace(LanguageSwitcher.localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
+          : <a key={locale} href={location.pathname.replace(localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
       });
 
     return (

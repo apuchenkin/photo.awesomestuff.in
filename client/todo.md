@@ -24,11 +24,12 @@
 [x] last warnings/lint errors
 [x] build scripts
 [x] isomorphic styles / style chunks
+[x] sitemap
 
 -----------------------------
 
+- accept-language node header for x-default lang
 - cache control policy (node)
-- sitemap
 
 -----------------------------
 future

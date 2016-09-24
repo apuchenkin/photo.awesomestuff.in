@@ -82,6 +82,7 @@
     "raw-loader": "^0.5.1",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
+    "sitemap": "^1.8.1",
     "source-map-loader": "^0.1.5",
     "style-loader": "^0.13.0",
     "superstatic": "^4.0.2",
