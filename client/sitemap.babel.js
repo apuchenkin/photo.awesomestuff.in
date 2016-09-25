@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import sitemap from 'sitemap';
 import { Promise } from 'es6-promise';
 
@@ -64,7 +65,7 @@ const pages = config.locales.map((locale) => {
   });
 });
 
-Promise
+export default () => Promise
   .all(pages)
   .then(langs => langs.reduce((links, lang) => {
     const
@@ -101,6 +102,4 @@ Promise
   }, []))
   .then(merge)
   .then(createLinks)
-  .then(createSitemap)
-  .then(console.log)
-  .catch(console.log);
+  .then(createSitemap);

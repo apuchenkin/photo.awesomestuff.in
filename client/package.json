@@ -1,25 +1,14 @@
 {
   "name": "photo-client",
   "version": "3.0.0",
-  "description": "Ready-to-go Preact starter project powered by webpack.",
+  "description": "Isomorphic clent/server react photo gallery",
   "scripts": {
-    "dev": "webpack-dev-server --debug --hot --inline --history-api-fallback --config etc/webpack.config.client.babel.js",
-    "watch": "webpack --watch --config etc/webpack.config.server.babel.js",
-    "nodemon": "nodemon ./dist/server",
-    "start": "superstatic build -p 8080 --host 0.0.0.0 --gzip -c '{\"rewrites\": [{\"source\":\"**\",\"destination\":\"index.html\"}],\"headers\":[{\"source\":\"**\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"max-age=86400\"}]}]}'",
-    "build": "webpack --config etc/webpack.config.client.babel.js --release",
-    "predist": "ncp src/assets dist/assets",
-    "dist": "webpack --config etc/webpack.config.server.babel.js --release",
     "test": "npm run -s lint && npm run -s test:karma",
-    "test:karma": "karma start test/karma.conf.js --single-run",
-    "lint": "eslint src"
+    "test:karma": "karma start test/karma.conf.js --single-run"
   },
-  "keywords": [
-    "boilerplate",
-    "webpack"
-  ],
+  "keywords": [],
   "license": "MIT",
-  "author": "Jason Miller <jason@developit.ca>",
+  "author": "Puchenkin Artem <apuchenkin@gmail.com>",
   "devDependencies": {
     "assets-webpack-plugin": "^3.4.0",
     "autoprefixer": "^6.4.0",
@@ -57,6 +46,8 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.9.0",
     "gulp": "^3.9.1",
+    "gulp-eslint": "^3.0.1",
+    "gulp-file": "^0.3.0",
     "gulp-nodemon": "^2.1.0",
     "html-webpack-plugin": "^2.14.0",
     "http-proxy-middleware": "^0.17.1",

@@ -59,11 +59,11 @@ class GalleryHeader extends React.Component {
     return (
       <header className={style.main}>
         <h1 className={style.title}>
-        {[
-          <Link to="/" key="page.home"><FormattedMessage {...messages.home} /></Link>,
-          ' / ',
-          <CategoryLink category={parent.name} key="page.category" >{parent.title}</CategoryLink>,
-        ]}
+          {[
+            <Link to="/" key="page.home"><FormattedMessage {...messages.home} /></Link>,
+            ' / ',
+            <CategoryLink category={parent.name} key="page.category" >{parent.title}</CategoryLink>,
+          ]}
         </h1>
         {childrens && <nav className={navStyle.categories}><ul>{childrens}</ul></nav>}
       </header>
