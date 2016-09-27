@@ -1,12 +1,14 @@
 @import '~style/var';
 
 .gallery {
-  padding-top: @divisor / 4;
   position: relative;
   overflow: hidden;
 
   min-height: 100%;
   box-sizing: border-box;
+  margin: -2px;
+  padding: 2px;
+  padding-top: @divisor / 4;
   margin-bottom: -@footer-size;
 
   &:after {
@@ -18,14 +20,14 @@
   & > ul {
     opacity: 1;
     transition: opacity 0.2s ease-out;
-
-    &.loading {
-      opacity: 0.01;
-    }
   }
 
   &.nav {
     padding-top: 2 * @divisor + @divisor / 4;
+  }
+
+  &.loading > ul {
+    opacity: 0.01;
   }
 
   .brick {

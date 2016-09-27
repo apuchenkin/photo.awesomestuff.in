@@ -1,12 +1,10 @@
 import React from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
 import withRouter from 'react-router/lib/withRouter';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-// TODO: include PS styles
-// import ps from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
+import Component from '../lib/PureComponent';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 
@@ -16,7 +14,7 @@ import Loader from './loader/loader';
 import config from '../config/config.json';
 
 const
-  { string, func, element, arrayOf, shape } = React.PropTypes,
+  { string, func, element, arrayOf, shape, object } = React.PropTypes,
   isBrowser = (typeof window !== 'undefined'),
   Ps = isBrowser ? require('perfect-scrollbar') : null
   ;
@@ -28,7 +26,26 @@ const messages = defineMessages({
   },
 });
 
-class Main extends React.Component {
+const Footer = ({ aboutPage, contactsPage, langs, location }) =>
+  <footer>
+    <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage {...messages.footer} />
+    {aboutPage && contactsPage.title && [' | ', <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
+    {contactsPage && contactsPage.title && [' | ', <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
+    <LanguageSwitcher location={location} langs={langs || config.locales} />
+  </footer>
+;
+
+Footer.propTypes = {
+  aboutPage: shape({ title: string.isRequired }),
+  contactsPage: shape({ title: string.isRequired }),
+  langs: arrayOf(object),
+  location: locationShape.isRequired,
+};
+
+
+@withStyles(style, baseStyle)
+@withRouter
+export default class Main extends Component {
 
   static propTypes = {
     routes: arrayOf(shape({
@@ -52,16 +69,13 @@ class Main extends React.Component {
     Ps.initialize(me.content);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
-
   componentDidUpdate() {
     this.content.scrollTop = 0;
     Ps.update(this.content);
   }
 
   render() {
+    console.log('render: main');
     const
       { routes, header, body, location, pages } = this.props,
       route = routes[routes.length - 1],
@@ -75,17 +89,15 @@ class Main extends React.Component {
         {header}
         <div className={style.content} ref={(c) => { this.content = c; }}>
           {body}
-          <footer>
-            <Link to="/" >{config.title}</Link> | &copy; <FormattedMessage {...messages.footer} />
-            {aboutPage && contactsPage.title && [' | ', <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
-            {contactsPage && contactsPage.title && [' | ', <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
-            <LanguageSwitcher location={location} langs={langs || config.locales} />
-          </footer>
+          <Footer
+            aboutPage={aboutPage}
+            contactsPage={contactsPage}
+            langs={langs}
+            location={location}
+          />
         </div>
         <Loader key="loader" />
       </div>
     );
   }
 }
-
-export default withStyles(style, baseStyle)(withRouter(Main));

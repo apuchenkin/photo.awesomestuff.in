@@ -47,6 +47,7 @@ export default (locale, store, messages = initialState.messages) => {
     ;
 
   const photoRoute = category => new Route({
+    store,
     path: 'photo/:photoId',
     state: routerState[2] ? routerState[2].state : {},
 
@@ -91,6 +92,7 @@ export default (locale, store, messages = initialState.messages) => {
 
     return new Route({
       path,
+      store,
       state: (routerState[1] && routerState[1].path === path) ? routerState[1].state : {},
 
       resolve(location) {
@@ -149,6 +151,7 @@ export default (locale, store, messages = initialState.messages) => {
   });
 
   const pageRoute = page => new Route({
+    store,
     path: page.alias,
     state: routerState[1] && routerState[1].path === page.alias ? routerState[1].state : {},
 
@@ -188,6 +191,7 @@ export default (locale, store, messages = initialState.messages) => {
   });
 
   const mainRoute = new Route({
+    store,
     path: '/',
     state: routerState[0] ? routerState[0].state : {},
 

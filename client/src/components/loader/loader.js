@@ -1,7 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import shallowCompare from 'react-addons-shallow-compare';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
+import Component from '../../lib/PureComponent';
 
 import style from './style.less';
 
@@ -12,7 +13,7 @@ const
   CLASS_NAME_HIDDEN = style.hidden,
   TRANSITION_DURATION = 200;
 
-class Loader extends React.Component {
+class Loader extends Component {
 
   static propTypes = {
     isLoading: bool.isRequired,
@@ -45,11 +46,8 @@ class Loader extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
-
   render() {
+    console.log('render: loader');
     const
       { visible, className } = this.state,
       className$ = [

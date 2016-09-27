@@ -1,4 +1,6 @@
 import fetch from 'isomorphic-fetch';
+import { memoize } from 'decko';
+
 import { brickWidth, gutter } from '../config/config.json';
 import Service from './BaseService';
 
@@ -113,7 +115,6 @@ export default class PhotoService extends Service {
     return Object.assign(photo, {
       w,
       h,
-      ratio,
     });
   }
 
@@ -125,6 +126,16 @@ export default class PhotoService extends Service {
       pointer = Math.floor(Math.random() * probabilitiesMap[probabilitiesMap.length - 1]);
 
     return probabilitiesMap.reduce((acc, v) => (pointer <= v ? acc : acc + 1), 0);
+  }
+
+  @memoize
+  static getSize(w, h) {
+    const
+      ratio = w / h,
+      inc = ratio >= 1 ? ratio : 1 / ratio,
+      [m1, m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w];
+
+    return Math.max(m1, m2);
   }
 
   refinePhotos(photos, excludeId) {

@@ -8,7 +8,7 @@ import baseStyle from '../../style/style.less';
 
 const { string, number, node } = React.PropTypes;
 
-const PhotoLink = function PhotoLink(props) {
+const PhotoLink = (props) => {
   const
     { category, subcategory, photoId, children } = props,
     props$ = utils.omit(props, ['category', 'subcategory', 'photoId']),

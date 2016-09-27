@@ -16,7 +16,7 @@ import serverConfig from './etc/webpack.config.server.babel';
 const SRC = 'src';
 const DIST = 'dist';
 
-gulp.task('webpack-dev-server', () => {
+gulp.task('watch', () => {
     // Start a webpack-dev-server
   new WebpackDevServer(webpack(clientConfig), {
     debug: true,
@@ -27,22 +27,22 @@ gulp.task('webpack-dev-server', () => {
     if (err) throw new gutil.PluginError('webpack-dev-server', err);
     // Server listening
     gutil.log('[webpack-dev-server]', 'http://localhost:8080');
-
+    gulp.start('serve');
     // keep the server alive or continue?
     // callback();
   });
 });
 
 // Rerun the task when a file changes
-gulp.task('serve', ['build-server'], () => nodemon({
+gulp.task('serve', ['build-client', 'build-server'], () => nodemon({
   script: `${DIST}/server.js`,
   watch: SRC,
-  tasks: ['build'],
+  tasks: ['build-client', 'build-server'],
 }));
 
-gulp.task('watch', ['webpack-dev-server', 'serve']);
+// gulp.task('watch', ['webpack-dev-server', 'serve']);
 
-gulp.task('build-server', () => gulp
+gulp.task('build-server', ['build-client'], () => gulp
   .src(`${SRC}/server.js`)
   .pipe(runWebpack(serverConfig, webpack))
   .pipe(gulp.dest(`${DIST}/`))

@@ -16,7 +16,6 @@ import config from './config/config';
 import utils from './lib/utils';
 import WithStylesContext from './components/WithStylesContext';
 import loadingReducer from './reducers/loader';
-import { startLoading, stopLoading } from './actions/loader';
 
 import './assets/fontello/css/fontello.css';
 import './style/style.css';
@@ -46,10 +45,6 @@ const history = useRouterHistory(createHistory)({
   basename,
 });
 
-history.listen(() => store.dispatch(startLoading()));
-// Create an enhanced history that syncs navigation events with the store
-// const history = syncHistoryWithStore(browserHistory, store);
-
 function metaUpdate(meta) {
   document.title = meta.title;
   document.head.querySelector('meta[name=description]').content = meta.description;
@@ -71,12 +66,13 @@ function onUpdate() {
     meta = utils.getMeta(routes, messages, location.pathname);
 
   metaUpdate(meta);
-  ga('send', 'pageview', {
-    title: meta.title,
-    page: location.pathname,
-  });
 
-  store.dispatch(stopLoading());
+  if (typeof ga !== 'undefined') {
+    ga('send', 'pageview', {
+      title: meta.title,
+      page: location.pathname,
+    });
+  }
 }
 
 function onInsertCss(...styles) {

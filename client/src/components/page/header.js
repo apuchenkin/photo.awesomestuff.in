@@ -1,5 +1,4 @@
 import React from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -15,27 +14,18 @@ const messages = defineMessages({
   },
 });
 
-class PageHeader extends React.Component {
+const PageHeader = props =>
+  <header className={style.main}>
+    <h1 className={style.title}>
+      <Link to="/" activeClassName="active">
+        <FormattedMessage {...messages.home} />
+      </Link> / {props.page.title}
+    </h1>
+  </header>
+;
 
-  static propTypes = {
-    page: shape({ title: string.isRequired }).isRequired,
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
-
-  render() {
-    return (
-      <header className={style.main}>
-        <h1 className={style.title}>
-          <Link to="/" activeClassName="active">
-            <FormattedMessage {...messages.home} />
-          </Link> / {this.props.page.title}
-        </h1>
-      </header>
-    );
-  }
-}
+PageHeader.propTypes = {
+  page: shape({ title: string.isRequired }).isRequired,
+};
 
 export default withStyles(style)(PageHeader);
