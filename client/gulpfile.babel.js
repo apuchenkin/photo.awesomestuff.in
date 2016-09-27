@@ -82,10 +82,6 @@ gulp.task('lint', () =>
     .pipe(eslint.failAfterError())
 );
 
-gulp.task('build', ['clean', 'copy', 'build-client'], () => {
+gulp.task('build', ['clean', 'copy', 'build-client', 'build-server'], () => {
   gulp.start('lint');
-  gulp.start('build-server');
-  if (process.argv.includes('--release')) {
-    gulp.start('sitemap');
-  }
 });

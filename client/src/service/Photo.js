@@ -1,8 +1,9 @@
 import fetch from 'isomorphic-fetch';
-import { memoize } from 'decko';
-
-import { brickWidth, gutter } from '../config/config.json';
+import memoize from 'memoizee';
+import { apiEndpoint, apiPrefix, brickWidth, gutter } from '../config/config.json';
 import Service from './BaseService';
+
+import resolutions from '../config/resolution.json';
 
 const sizes = [
   (brickWidth)
@@ -106,7 +107,7 @@ export default class PhotoService extends Service {
       norm = [16, 8, 4, 1].map(i => i * (Math.floor(avg) + 1)),
       norm$ = [1, 2, 3, 4].map(i => Math.floor((i * std * v) / avg) + 1),
       probs = norm.map((n, i) => n + norm$[i]),
-      mode = this.weightedRandom(probs),
+      mode = PhotoService.weightedRandom(probs),
       isHorisontal = (photo.width > photo.height),
       ratio = photo.width / photo.height,
       [w, h] = this.dsmap(mode, ratio, isHorisontal)
@@ -118,7 +119,8 @@ export default class PhotoService extends Service {
     });
   }
 
-  weightedRandom(probabilities) {
+  @memoize
+  static weightedRandom(probabilities) {
     const probabilitiesMap = probabilities.reduce((acc, v) => {
         acc.push(v + (acc.length ? acc[acc.length - 1] : 0));
         return acc;
@@ -129,13 +131,35 @@ export default class PhotoService extends Service {
   }
 
   @memoize
-  static getSize(w, h) {
+  static getSize(photo) {
     const
-      ratio = w / h,
+      { w, h, width, height } = photo,
+      ratio = width / height,
       inc = ratio >= 1 ? ratio : 1 / ratio,
       [m1, m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w];
 
     return Math.max(m1, m2);
+  }
+
+  @memoize
+  static getSrc(photo, dimensions) {
+    const
+      { width, height } = dimensions,
+      [w, h] = this.adjust(width, height),
+      filename = photo.src.split('/').pop();
+
+    return [apiEndpoint + apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/');
+  }
+
+  @memoize
+  static adjust(w, h) {
+    const
+      norms = resolutions.map(([w$, h$]) => Math.pow(w$ - w, 2) + Math.pow(h$ - h, 2)),
+      min = Math.min(...norms),
+      idx = norms.findIndex(n => n === min)
+      ;
+
+    return resolutions[idx];
   }
 
   refinePhotos(photos, excludeId) {

@@ -12,7 +12,7 @@ const Brick = (props) => {
   const
     { photo } = props,
     { w, h } = photo,
-    s = PhotoService.getSize(w, h),
+    s = PhotoService.getSize(photo),
     filename = photo.src.split('/').pop(),
     src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, s, s, filename].join('/');
 

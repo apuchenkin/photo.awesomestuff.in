@@ -1,13 +1,13 @@
 import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { bind, debounce, memoize } from 'decko';
+import { bind, debounce } from 'decko';
 
+import PhotoService from '../../service/Photo';
 import Component from '../../lib/PureComponent';
 import Link from '../link';
 
 import Img from './img';
-import resolutions from '../../config/resolution.json';
 import config from '../../config/config.json';
 
 import style from './photo.less';
@@ -73,30 +73,6 @@ class Figure extends Component {
     };
   }
 
-
-  @bind
-  // @memoize --bug??
-  getSrc(id, src, dimensions) {
-    const
-      { width, height } = dimensions,
-      [w, h] = this.adjust(width, height),
-      filename = src.split('/').pop();
-
-    return [config.apiEndpoint + config.apiPrefix, 'hs/photo', id, w, h, filename].join('/');
-  }
-
-  @bind
-  @memoize
-  adjust(w, h) {
-    const
-      norms = resolutions.map(([w$, h$]) => Math.pow(w$ - w, 2) + Math.pow(h$ - h, 2)),
-      min = Math.min(...norms),
-      idx = norms.findIndex(n => n === min)
-      ;
-
-    return resolutions[idx];
-  }
-
   @bind
   @debounce(50)
   resize() {
@@ -110,7 +86,7 @@ class Figure extends Component {
       { dimensions } = this.state,
       { photo, backUrl, onClick } = this.props,
       { width, height } = dimensions,
-      src = this.getSrc(photo.id, photo.src, dimensions);
+      src = PhotoService.getSrc(photo, dimensions);
 
     return (
       <figure className={style.content} >
