@@ -29,6 +29,8 @@
 -----------------------------
 
 - accept-language node header for x-default lang
+- re-use rendered photo on photo request
+- photo transitions and styles
 - cache control policy (node)
 
 -----------------------------

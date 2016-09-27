@@ -1,17 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { injectIntl, intlShape, defineMessages } from 'react-intl';
-import shallowCompare from 'react-addons-shallow-compare';
 import withRouter from 'react-router/lib/withRouter';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { routerShape } from 'react-router/lib/PropTypes';
 import { bind } from 'decko';
 
+import Figure from './figure';
 import { stopLoading } from '../../actions/loader';
 import Component from '../../lib/PureComponent';
 import PhotoLink from '../link/photo';
 import { fromCategory } from '../link/category';
-import Figure from './figure';
 
 import style from './photo.less';
 
@@ -39,7 +38,7 @@ class Photo extends Component {
     intl: intlShape.isRequired,
     router: routerShape.isRequired,
     isLoading: bool.isRequired,
-    stopLoading: func.isReuired,
+    stopLoading: func.isRequired,
   }
 
   componentDidMount() {
@@ -48,10 +47,6 @@ class Photo extends Component {
 
   componentWillReceiveProps(props) {
     props.stopLoading();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   @bind
@@ -80,7 +75,8 @@ class Photo extends Component {
       pidx = photos.findIndex(p => p.id === photo.id),
       prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
       next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
-      backUrl = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`;
+      backUrl = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`,
+      onClick = this.goNext(next);
 
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -88,7 +84,7 @@ class Photo extends Component {
         <Figure
           photo={photo}
           backUrl={backUrl}
-          onClick={this.goNext(next)}
+          onClick={onClick}
         />
         <PhotoLink
           {...fromCategory(category)}

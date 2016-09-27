@@ -1,13 +1,12 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { bind, debounce, memoize } from 'decko';
 
 import Component from '../../lib/PureComponent';
-import { startLoading, stopLoading } from '../../actions/loader';
 import Link from '../link';
 
+import Img from './img';
 import resolutions from '../../config/resolution.json';
 import config from '../../config/config.json';
 
@@ -40,7 +39,7 @@ const messages = defineMessages({
 
 const closeIcon = (<FormattedMessage
   {...messages.close}
-  values={{ icon: (<i className="icon-cancel" />) }}
+  values={{ icon: <i className="icon-cancel" /> }}
 />);
 
 class Figure extends Component {
@@ -48,9 +47,7 @@ class Figure extends Component {
   static propTypes = {
     photo: photoShape.isRequired,
     backUrl: string.isRequired,
-    onClick: func.isRequied,
-    startLoading: func.isRequired,
-    stopLoading: func.isRequired,
+    onClick: func.isRequired,
   }
 
   constructor(props) {
@@ -61,34 +58,12 @@ class Figure extends Component {
     };
   }
 
-  componentWillMount() {
-    this.props.startLoading();
-  }
-
   componentDidMount() {
-    if (this.img.complete) {
-      // in the case, when photo is loaded faster than JS code
-      // it is already complete on componentDidMount
-      this.props.stopLoading();
-    }
-
     window.addEventListener('resize', this.resize);
   }
 
-  // componentWillReceiveProps(props) {
-    // const src = this.getSrc(props, this.state.dimensions);
-    // if (src !== this.state.src) {
-    //   this.setState({ src }, () => this.props.startLoading);
-    // }
-  // }
-
   componentWillUnmount() {
     window.removeEventListener('resize', this.resize);
-  }
-
-  @bind
-  onLoad() {
-    this.props.stopLoading();
   }
 
   getDimensions() {
@@ -98,20 +73,20 @@ class Figure extends Component {
     };
   }
 
-  @memoize
+
   @bind
-  getSrc(photo, dimensions) {
+  // @memoize --bug??
+  getSrc(id, src, dimensions) {
     const
       { width, height } = dimensions,
       [w, h] = this.adjust(width, height),
-      filename = photo.src.split('/').pop(),
-      src = [config.apiEndpoint + config.apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/');
+      filename = src.split('/').pop();
 
-    return src;
+    return [config.apiEndpoint + config.apiPrefix, 'hs/photo', id, w, h, filename].join('/');
   }
 
-  @memoize
   @bind
+  @memoize
   adjust(w, h) {
     const
       norms = resolutions.map(([w$, h$]) => Math.pow(w$ - w, 2) + Math.pow(h$ - h, 2)),
@@ -128,7 +103,6 @@ class Figure extends Component {
     this.setState({
       dimensions: this.getDimensions(),
     });
-    // , () => this.componentWillReceiveProps(this.props));
   }
 
   render() {
@@ -136,25 +110,21 @@ class Figure extends Component {
       { dimensions } = this.state,
       { photo, backUrl, onClick } = this.props,
       { width, height } = dimensions,
-      src = this.getSrc(photo, dimensions);
+      src = this.getSrc(photo.id, photo.src, dimensions);
 
     return (
       <figure className={style.content} >
         <div className={style.tools}>
           <Link onClick={e => e.stopPropagation()} to={backUrl}>{closeIcon}</Link>
         </div>
-        {
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-          <img
-            className={style.image}
-            alt={photo.caption}
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            onLoad={this.onLoad}
-            src={src}
-            style={{ maxWidth: `${width}px`, maxHeight: `${height - 60}px` }}
-            ref={(c) => { this.img = c; }}
-          />
-        }
+        <Img
+          className={style.image}
+          alt={photo.caption}
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          src={src}
+          width={width}
+          height={height - 60}
+        />
         <figcaption className={style.description}>
           <span className={style.caption}>{photo.caption}</span>
           {photo.author && <div><FormattedMessage
@@ -167,10 +137,4 @@ class Figure extends Component {
   }
 }
 
-export default connect(
-  state => ({ isLoading: state.isLoading.count > 0 }),
-  dispatch => ({
-    startLoading: () => dispatch(startLoading()),
-    stopLoading: () => dispatch(stopLoading()),
-  })
-)(withStyles(style)(Figure));
+export default withStyles(style)(Figure);

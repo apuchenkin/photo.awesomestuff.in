@@ -47,7 +47,6 @@ class Loader extends Component {
   }
 
   render() {
-    console.log('render: loader');
     const
       { visible, className } = this.state,
       className$ = [

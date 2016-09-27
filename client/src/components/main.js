@@ -14,7 +14,7 @@ import Loader from './loader/loader';
 import config from '../config/config.json';
 
 const
-  { string, func, element, arrayOf, shape, object } = React.PropTypes,
+  { string, func, element, arrayOf, shape } = React.PropTypes,
   isBrowser = (typeof window !== 'undefined'),
   Ps = isBrowser ? require('perfect-scrollbar') : null
   ;
@@ -38,7 +38,7 @@ const Footer = ({ aboutPage, contactsPage, langs, location }) =>
 Footer.propTypes = {
   aboutPage: shape({ title: string.isRequired }),
   contactsPage: shape({ title: string.isRequired }),
-  langs: arrayOf(object),
+  langs: arrayOf(string),
   location: locationShape.isRequired,
 };
 
@@ -75,7 +75,6 @@ export default class Main extends Component {
   }
 
   render() {
-    console.log('render: main');
     const
       { routes, header, body, location, pages } = this.props,
       route = routes[routes.length - 1],
