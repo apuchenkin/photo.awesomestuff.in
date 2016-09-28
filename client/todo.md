@@ -25,12 +25,12 @@
 [x] build scripts
 [x] isomorphic styles / style chunks
 [x] sitemap
+[x] photo transitions and styles
 
 -----------------------------
 
 - accept-language node header for x-default lang
 - re-use rendered photo on photo request
-- photo transitions and styles
 - cache control policy (node)
 
 -----------------------------

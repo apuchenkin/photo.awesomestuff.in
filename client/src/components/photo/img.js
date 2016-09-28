@@ -4,14 +4,15 @@ import { bind } from 'decko';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import Component from '../../lib/PureComponent';
-import style from '../loader/style.less';
+import style from './photo.less';
+import loaderStyle from '../loader/style.less';
 import utils from '../../lib/utils';
 
 const
   isBrowser = (typeof window !== 'undefined'),
-  { string, number } = React.PropTypes;
+  { string, number, element } = React.PropTypes;
 
-@withStyles(style)
+@withStyles(style, loaderStyle)
 export default class Img extends Component {
 
   static propTypes = {
@@ -19,6 +20,8 @@ export default class Img extends Component {
     alt: string.isRequired,
     width: number.isRequired,
     height: number.isRequired,
+    tools: element,
+    caption: element,
   }
 
   constructor(props) {
@@ -55,18 +58,12 @@ export default class Img extends Component {
 
     this.img = new Image();
     this.img.onload = this.handleLoad;
-    this.img.onerror = this.handleError;
+    this.img.onerror = this.handleLoad;
     this.img.src = this.props.src;
   }
 
   @bind
   handleLoad() {
-    this.destroyLoader();
-    this.setState({ isLoading: false });
-  }
-
-  @bind
-  handleError() {
     this.destroyLoader();
     this.setState({ isLoading: false });
   }
@@ -82,20 +79,25 @@ export default class Img extends Component {
 
   renderImg() {
     const
-      { alt, width, height } = this.props,
-      props$ = utils.omit(this.props, ['width', 'height']);
+      { alt, width, height, tools, caption } = this.props,
+      props$ = utils.omit(this.props, ['width', 'height', 'tools', 'caption']);
 
     return (
-      <img
-        {...props$}
-        style={{ maxWidth: `${width}px`, maxHeight: `${height}px` }}
-        alt={alt}
-      />
+      <figure className={style.content} >
+        {tools}
+        <img
+          {...props$}
+          className={style.image}
+          style={{ maxWidth: `${width}px`, maxHeight: `${height}px` }}
+          alt={alt}
+        />
+        {caption}
+      </figure>
     );
   }
 
   renderPreloader() {
-    return <div className={style.loader} ><div className={style.accent} /></div>;
+    return <div className={loaderStyle.loader} ><div className={loaderStyle.accent} /></div>;
   }
 
   render() {

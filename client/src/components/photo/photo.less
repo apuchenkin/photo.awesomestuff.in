@@ -51,6 +51,10 @@ figure, img {
     }
   }
 
+  &.loading > .content {
+    opacity: 0.01;
+  }
+
   & > .content {
     display: inline-block;
     vertical-align: middle;
@@ -63,10 +67,6 @@ figure, img {
     text-align: left;
     opacity: 1;
     transition: opacity 0.2s ease-out;
-
-    &.loading {
-      opacity: 0.01;
-    }
 
     .image {
       max-width: 100%;

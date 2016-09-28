@@ -81,34 +81,47 @@ class Figure extends Component {
     });
   }
 
+  renderTools() {
+    const { backUrl } = this.props;
+
+    return (
+      <div className={style.tools}>
+        <Link onClick={e => e.stopPropagation()} to={backUrl}>{closeIcon}</Link>
+      </div>
+    );
+  }
+
+  renderCaption() {
+    const { photo } = this.props;
+
+    return (
+      <figcaption className={style.description}>
+        <span className={style.caption}>{photo.caption}</span>
+        {photo.author && <div><FormattedMessage
+          {...messages.author}
+          values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
+        /></div>}
+      </figcaption>
+    );
+  }
+
   render() {
     const
       { dimensions } = this.state,
-      { photo, backUrl, onClick } = this.props,
+      { photo, onClick } = this.props,
       { width, height } = dimensions,
       src = PhotoService.getSrc(photo, dimensions);
 
     return (
-      <figure className={style.content} >
-        <div className={style.tools}>
-          <Link onClick={e => e.stopPropagation()} to={backUrl}>{closeIcon}</Link>
-        </div>
-        <Img
-          className={style.image}
-          alt={photo.caption}
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          src={src}
-          width={width}
-          height={height - 60}
-        />
-        <figcaption className={style.description}>
-          <span className={style.caption}>{photo.caption}</span>
-          {photo.author && <div><FormattedMessage
-            {...messages.author}
-            values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
-          /></div>}
-        </figcaption>
-      </figure>
+      <Img
+        alt={photo.caption}
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        src={src}
+        width={width}
+        height={height - 60}
+        tools={this.renderTools()}
+        caption={this.renderCaption()}
+      />
     );
   }
 }
