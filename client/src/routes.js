@@ -100,8 +100,8 @@ export default (locale, store, messages = initialState.messages) => {
           category: categoryService.fetchCategory(category.name),
           photos: photoService
             .fetchPhotos(category.name)
-            .then(p => photoService.refinePhotos(p, location.params.photoId))
-            .then(photoService.remapPhotos.bind(photoService)),
+            .then(photos => PhotoService.refinePhotos(photos, location.params.photoId))
+            .then(PhotoService.remapPhotos),
         });
       },
 

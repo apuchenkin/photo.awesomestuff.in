@@ -25,6 +25,7 @@ const createPackery = (container) => {
 };
 
 export default class Gallery extends Component {
+
   static propTypes = {
     category: shape().isRequired,
     photos: arrayOf(shape()).isRequired,
@@ -56,8 +57,10 @@ export default class Gallery extends Component {
         </li>
       ));
 
-    return (<ul ref={(c) => { this.packeryCmp = c; }}>
-      {bricks}
-    </ul>);
+    return (
+      <ul ref={(c) => { this.packeryCmp = c; }}>
+        {bricks}
+      </ul>
+    );
   }
 }
