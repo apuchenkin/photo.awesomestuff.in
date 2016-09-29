@@ -48,7 +48,7 @@ gulp.task('build-server', ['build-client'], () => gulp
   .pipe(gulp.dest(`${DIST}/`))
 );
 
-gulp.task('build-client', ['copy'], () => gulp
+gulp.task('build-client', () => gulp
   .src(`${SRC}/index.js`)
   .pipe(runWebpack(clientConfig, webpack))
   .pipe(gulp.dest(`${DIST}/assets`))
@@ -56,7 +56,7 @@ gulp.task('build-client', ['copy'], () => gulp
 
 gulp.task('clean', () => del(DIST));
 
-gulp.task('copy', ['clean'], () => gulp
+gulp.task('copy', () => gulp
   .src(`${SRC}/assets/**/*`)
   .pipe(gulp.dest(`${DIST}/assets`))
 );
@@ -82,6 +82,6 @@ gulp.task('lint', () =>
     .pipe(eslint.failAfterError())
 );
 
-gulp.task('build', ['clean', 'copy', 'build-client', 'build-server'], () => {
+gulp.task('build', ['copy', 'build-client', 'build-server'], () => {
   gulp.start('lint');
 });

@@ -1,5 +1,4 @@
 import React from 'react';
-import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import Router from 'react-router/lib/Router';
@@ -11,11 +10,11 @@ import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
+import createStore from './createStore';
 import createRoutes from './routes';
 import config from './config/config';
 import utils from './lib/utils';
 import WithStylesContext from './components/WithStylesContext';
-import loadingReducer from './reducers/loader';
 
 import './assets/fontello/css/fontello.css';
 import './style/style.css';
@@ -35,11 +34,7 @@ function createElement(component, props) {
 }
 
 // Add the reducer to your store on the `routing` key
-const store = createStore(
-  combineReducers({
-    isLoading: loadingReducer,
-  })
-);
+const store = createStore();
 
 const history = useRouterHistory(createHistory)({
   basename,

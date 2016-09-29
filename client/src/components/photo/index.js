@@ -46,7 +46,9 @@ class Photo extends Component {
   }
 
   componentWillReceiveProps(props) {
-    props.stopLoading();
+    if (props.photo !== this.props.photo) {
+      props.stopLoading();
+    }
   }
 
   @bind

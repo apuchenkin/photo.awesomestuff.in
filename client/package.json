@@ -71,6 +71,7 @@
     "postcss": "^5.2.0",
     "postcss-loader": "^0.10.0",
     "raw-loader": "^0.5.1",
+    "redux-logger": "^2.6.1",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "sitemap": "^1.8.1",

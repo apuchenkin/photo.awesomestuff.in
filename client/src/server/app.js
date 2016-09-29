@@ -1,5 +1,4 @@
 import React from 'react';
-import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
 import match from 'react-router/lib/match';
@@ -9,11 +8,11 @@ import { IntlProvider } from 'react-intl';
 import path from 'path';
 
 import HTML from './renderHTML';
+import createStore from '../createStore';
 import createRoutes from '../routes';
 import config from '../config/config.json';
 import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
-import loadingReducer from '../reducers/loader';
 
 const app = express();
 const createElement = (component, props) => component(props);
@@ -27,11 +26,7 @@ function negotiateLocale(req) {
 app.use(express.static(path.join(__dirname, 'assets')));
 app.use((req, res) => {
   const
-    store = createStore(
-      combineReducers({
-        isLoading: loadingReducer,
-      })
-    ),
+    store = createStore(),
     piece = req.url.split('/')[1],
     prefix = config.locales.find(l => l === piece),
     basename = prefix && `/${prefix}`,

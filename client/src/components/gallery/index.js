@@ -28,7 +28,7 @@ class GalleryPage extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (!props.children) {
+    if (props.category !== this.props.category) {
       props.stopLoading();
     }
   }
