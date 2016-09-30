@@ -6,7 +6,6 @@ import Brick from './brick';
 
 const
   { shape, arrayOf } = React.PropTypes,
-  isBrowser = (typeof window !== 'undefined'),
   Packery = isBrowser ? require('packery') : null;
 
 const createPackery = (container) => {

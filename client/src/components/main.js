@@ -15,7 +15,6 @@ import config from '../config/config.json';
 
 const
   { string, func, element, arrayOf, shape } = React.PropTypes,
-  isBrowser = (typeof window !== 'undefined'),
   Ps = isBrowser ? require('perfect-scrollbar') : null
   ;
 

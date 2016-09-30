@@ -28,7 +28,7 @@ GoogleAnalytics.propTypes = {
 
 function renderHTML({ componentHTML, initialState, meta, styles }) {
   return (
-    <html lang={initialState.locale}>
+    <html lang={initialState.runtime.locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width initial-scale=1.0" />
@@ -52,7 +52,9 @@ function renderHTML({ componentHTML, initialState, meta, styles }) {
 renderHTML.propTypes = {
   componentHTML: string.isRequired,
   initialState: shape({
-    locale: string.isRequired,
+    runtime: shape({
+      locale: string.isRequired,
+    }),
   }).isRequired,
   meta: shape({
     title: string.isRequired,

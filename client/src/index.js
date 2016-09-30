@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom';
 import Router from 'react-router/lib/Router';
 import match from 'react-router/lib/match';
 import useRouterHistory from 'react-router/lib/useRouterHistory';
-// import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
 import createHistory from 'history/lib/createBrowserHistory';
 import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
@@ -12,7 +11,6 @@ import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
 import createStore from './createStore';
 import createRoutes from './routes';
-import config from './config/config';
 import utils from './lib/utils';
 import WithStylesContext from './components/WithStylesContext';
 
@@ -23,18 +21,9 @@ addLocaleData(ruLocaleData);
 
 const
   span = document.createElement('span'),
-  isBrowser = (typeof window !== 'undefined'),
   initialState = isBrowser && (window.__INITIAL_STATE__ || {}),
-  locale = initialState.locale || config.fallbackLocale,
-  basename = initialState.basename,
-  messages = initialState.messages;
-
-function createElement(component, props) {
-  return component(props);
-}
-
-// Add the reducer to your store on the `routing` key
-const store = createStore();
+  store = createStore(initialState),
+  { locale, basename, messages } = store.getState().runtime;
 
 const history = useRouterHistory(createHistory)({
   basename,
@@ -71,22 +60,19 @@ function onUpdate() {
 }
 
 function onInsertCss(...styles) {
-  const removeCss = styles.map(style => style._insertCss()); // eslint-disable-line no-underscore-dangle, max-len
+  // eslint-disable-next-line no-underscore-dangle, max-len
+  const removeCss = styles.map(style => style._insertCss());
   return () => {
     removeCss.forEach(f => f());
   };
 }
 
-match({ history, routes: createRoutes(locale, store) }, (error, redirectLocation, renderProps) => {
+match({ history, routes: createRoutes(store) }, (error, redirectLocation, renderProps) => {
   ReactDOM.render(
     <Provider store={store}>
       <IntlProvider locale={locale} messages={messages}>
         <WithStylesContext onInsertCss={onInsertCss}>
-          <Router
-            {...renderProps}
-            createElement={createElement}
-            onUpdate={onUpdate}
-          />
+          <Router {...renderProps} onUpdate={onUpdate} />
         </WithStylesContext>
       </IntlProvider>
     </Provider>,

@@ -9,7 +9,8 @@
   ],
   "globals": {
     "ga": true, # google analytics
-    "__DEV__": true
+    "__DEV__": true,
+    "isBrowser": true,
   },
   "env": {
     "browser": true

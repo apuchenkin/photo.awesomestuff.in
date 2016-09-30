@@ -1,8 +1,10 @@
+import memoize from 'memoizee';
 import { startLoading, stopLoading } from '../actions/loader';
 
 export default (props) => {
   const
-    { store } = props,
+    { store, resolve } = props,
+    resolve$ = memoize(resolve.bind(props), { promise: 'then' }),
     wrappedResolve = promise => (location) => {
       store.dispatch(startLoading());
       return promise(location)
@@ -14,6 +16,6 @@ export default (props) => {
     };
 
   return Object.assign(props, {
-    resolve: wrappedResolve(props.resolve),
+    resolve: memoize(wrappedResolve(resolve$).bind(props), { promise: 'then' }),
   });
 };

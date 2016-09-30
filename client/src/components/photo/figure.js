@@ -13,7 +13,6 @@ import config from '../../config/config.json';
 import style from './photo.less';
 
 const
-  isBrowser = (typeof window !== 'undefined'),
   { number, string, object, shape, func } = React.PropTypes
   ;
 

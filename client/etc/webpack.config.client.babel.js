@@ -9,6 +9,7 @@ const DEBUG = base.debug;
 const GLOBALS = {
   'process.env.NODE_ENV': DEBUG ? '"development"' : '"production"',
   __DEV__: DEBUG,
+  isBrowser: true,
 };
 
 module.exports = Object.assign({}, base, {

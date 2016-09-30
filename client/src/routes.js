@@ -20,11 +20,10 @@ import Error404 from './components/error/404';
 import { startLoading } from './actions/loader';
 
 const
-  isBrowser = (typeof window !== 'undefined'),
   initialState = isBrowser ? window.__INITIAL_STATE__ || {} : {},
   routerState = initialState.routes || [];
 
-const notFound = new Route({
+const notFound = {
   path: '*',
   class: 'not-found',
   components: {
@@ -37,10 +36,11 @@ const notFound = new Route({
       title: '404',
     };
   },
-});
+};
 
-export default (locale, store, messages = initialState.messages) => {
+export default (store) => {
   const
+    { locale, messages } = store.getState().runtime,
     categoryService = new CategoryService({ locale }),
     photoService = new PhotoService({ locale }),
     pageService = new PageService({ locale })
@@ -52,7 +52,10 @@ export default (locale, store, messages = initialState.messages) => {
     state: routerState[2] ? routerState[2].state : {},
 
     onEnter(location, replace, cb) {
-      store.dispatch(startLoading());
+      if (!isBrowser) {
+        store.dispatch(startLoading());
+      }
+
       this.resolve(location)
         .then(() => Object.assign(this, {
           component: props => <Photo {...props} photo={this.state.photo} category={category} />,
@@ -96,6 +99,9 @@ export default (locale, store, messages = initialState.messages) => {
       state: (routerState[1] && routerState[1].path === path) ? routerState[1].state : {},
 
       resolve(location) {
+        if (!isBrowser) {
+          store.dispatch(startLoading());
+        }
         return utils.fetchAll({
           category: categoryService.fetchCategory(category.name),
           photos: photoService
@@ -106,7 +112,6 @@ export default (locale, store, messages = initialState.messages) => {
       },
 
       onEnter(location, replace, cb) {
-        store.dispatch(startLoading());
         const callback = () => {
           Object.assign(this, { components: {
             header: props => <GalleryHeader

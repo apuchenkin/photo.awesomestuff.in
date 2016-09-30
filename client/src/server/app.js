@@ -15,25 +15,23 @@ import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
 
 const app = express();
-const createElement = (component, props) => component(props);
 
-function negotiateLocale(req) {
-  return req.acceptsLanguages(config.locales)
+const negotiateLocale = req =>
+  req.acceptsLanguages(config.locales)
   || config.fallbackLocale
-  ;
-}
+;
 
 app.use(express.static(path.join(__dirname, 'assets')));
 app.use((req, res) => {
   const
-    store = createStore(),
     piece = req.url.split('/')[1],
     prefix = config.locales.find(l => l === piece),
     basename = prefix && `/${prefix}`,
     locale = prefix || negotiateLocale(req),
     // eslint-disable-next-line global-require
     messages = locale ? require(`../translation/${locale}.json`) : {},
-    routes = createRoutes(locale, store, messages),
+    store = createStore({ runtime: { locale, basename, messages } }),
+    routes = createRoutes(store),
     location = basename ? req.url.replace(basename, '') || '/' : req.url,
     css = new Set(), // CSS for all rendered React components
     // eslint-disable-next-line no-underscore-dangle
@@ -50,28 +48,22 @@ app.use((req, res) => {
       res.redirect(301, basename + redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
-        initialState = {
-          routes: renderProps.routes,
-          locale,
-          basename,
-          messages,
-        },
         meta = utils.getMeta(renderProps.routes, messages, renderProps.location.pathname),
         componentHTML = ReactDOM.renderToString(
           <Provider store={store}>
             <IntlProvider locale={locale} messages={messages}>
               <WithStylesContext onInsertCss={onInsertCss}>
-                <RouterContext {...renderProps} createElement={createElement} />
+                <RouterContext {...renderProps} />
               </WithStylesContext>
             </IntlProvider>
           </Provider>
         ),
         styles = [...css].join(''),
-        html = ReactDOM.renderToString(
+        html = ReactDOM.renderToStaticMarkup(
           <WithStylesContext onInsertCss={onInsertCss}>
             <HTML
               componentHTML={componentHTML}
-              initialState={initialState}
+              initialState={store.getState()}
               meta={meta}
               styles={styles}
             />
@@ -85,7 +77,7 @@ app.use((req, res) => {
       // below, if you're using a catch-all route.
     } else {
       // TODO: 404 page should have proper status and content page
-      res.status(404).send('Not found1');
+      res.status(404).send('Not found');
     }
   });
 });

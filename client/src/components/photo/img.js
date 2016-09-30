@@ -9,7 +9,6 @@ import loaderStyle from '../loader/style.less';
 import utils from '../../lib/utils';
 
 const
-  isBrowser = (typeof window !== 'undefined'),
   { string, number, element } = React.PropTypes;
 
 @withStyles(style, loaderStyle)

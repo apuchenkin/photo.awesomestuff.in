@@ -41,13 +41,10 @@ class Photo extends Component {
     stopLoading: func.isRequired,
   }
 
-  componentDidMount() {
-    this.props.stopLoading();
-  }
-
-  componentWillReceiveProps(props) {
-    if (props.photo !== this.props.photo) {
-      props.stopLoading();
+  componentWillMount() {
+    if (isBrowser) {
+      // stops the loading initiated by server
+      this.props.stopLoading();
     }
   }
 

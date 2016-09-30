@@ -23,8 +23,8 @@ const Locale = (props) => {
     helpMsg = intl.formatMessage(messages.not_available, { lang: localeMsg });
 
   return disabled
-    ? <span key={locale} title={helpMsg}>{localeMsg}</span>
-    : <a key={locale} href={location.pathname.replace(localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
+    ? <span title={helpMsg}>{localeMsg}</span>
+    : <a href={location.pathname.replace(localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
 };
 
 Locale.propTypes = {
@@ -37,7 +37,7 @@ Locale.propTypes = {
 const LanguageSwitcher = (props) => {
   const { langs } = props,
     links = locales.map(locale =>
-      <Locale {...props} locale={locale} disabled={!langs.find(l => locale === l)} />
+      <Locale {...props} locale={locale} disabled={!langs.find(l => locale === l)} key={locale} />
     );
 
   return (

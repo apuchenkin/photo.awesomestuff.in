@@ -4,7 +4,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import Component from '../../lib/PureComponent';
-import { stopLoading } from '../../actions/loader';
+import { startLoading, stopLoading } from '../../actions/loader';
 import Gallery from './gallery';
 
 import style from './gallery.less';
@@ -23,13 +23,10 @@ class GalleryPage extends Component {
     isLoading: bool.isRequired,
   };
 
-  componentDidMount() {
-    this.props.stopLoading();
-  }
-
-  componentWillReceiveProps(props) {
-    if (props.category !== this.props.category) {
-      props.stopLoading();
+  componentWillMount() {
+    if (isBrowser) {
+      // stops the loading initiated by server
+      this.props.stopLoading();
     }
   }
 
@@ -73,6 +70,7 @@ class GalleryPage extends Component {
 export default connect(
   state => ({ isLoading: state.isLoading.count > 0 }),
   dispatch => ({
+    startLoading: () => dispatch(startLoading()),
     stopLoading: () => dispatch(stopLoading()),
   })
 )(withStyles(style, transitionStyle)(GalleryPage));
