@@ -1,10 +1,10 @@
-import memoize from 'memoizee';
+// import memoize from 'memoizee';
 import { startLoading, stopLoading } from '../actions/loader';
 
 export default (props) => {
   const
     { store, resolve } = props,
-    resolve$ = memoize(resolve.bind(props), { promise: 'then' }),
+    // resolve$ = memoize(resolve.bind(props), { promise: 'then' }),
     wrappedResolve = promise => (location) => {
       store.dispatch(startLoading());
       return promise(location)

@@ -9,7 +9,6 @@ import file from 'gulp-file';
 import eslint from 'gulp-eslint';
 import WebpackDevServer from 'webpack-dev-server';
 
-import sitemap from './sitemap.babel.js';
 import clientConfig from './etc/webpack.config.client.babel';
 import serverConfig from './etc/webpack.config.server.babel';
 
@@ -61,12 +60,16 @@ gulp.task('copy', () => gulp
   .pipe(gulp.dest(`${DIST}/assets`))
 );
 
-gulp.task('sitemap', cb =>
-  sitemap()
+gulp.task('sitemap', (cb) => {
+  const sitemap = require('./sitemap.babel.js');
+
+  return sitemap()
     .catch(cb)
     .then(stream => file('sitemap.xml', stream, { src: true })
       .pipe(gulp.dest(`${DIST}/assets`))
-    )
+    );
+}
+
 );
 
 gulp.task('lint', () =>

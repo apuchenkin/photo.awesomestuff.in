@@ -1,4 +1,6 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import promiseMiddleware from 'redux-promise';
+
 import reducers from './reducers';
 
 export default function configureStore(initialState) {
@@ -26,7 +28,7 @@ export default function configureStore(initialState) {
     }
 
     const enhancer = compose(
-      applyMiddleware(logger),
+      applyMiddleware([promiseMiddleware, logger]),
       devToolsExtension,
     );
 
