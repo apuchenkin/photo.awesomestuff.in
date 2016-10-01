@@ -13,7 +13,7 @@ import Photo from './components/photo';
 import Main from './components/main';
 import Error404 from './components/error/404';
 import { startLoading } from './actions/loader';
-import { getCategories, getCategory, getPages, getPage, getPhotos, getPhoto } from './actions/api';
+import createActions from './actions/api';
 
 const notFound = {
   path: '*',
@@ -32,7 +32,8 @@ const notFound = {
 
 export default (store) => {
   const
-    { messages } = store.getState().runtime;
+    { messages } = store.getState().runtime,
+    { getCategories, getCategory, getPages, getPage, getPhotos, getPhoto } = createActions(store);
 
   const photoRoute = new Route({
     store,
