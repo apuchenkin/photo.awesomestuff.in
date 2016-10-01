@@ -4,7 +4,7 @@ const initialState = {
   count: 0,
 };
 
-function loading(state = initialState, action) {
+export default function loading(state = initialState, action) {
   switch (action.type) {
     case START_LOADING:
       return { count: state.count + 1 };
@@ -14,5 +14,3 @@ function loading(state = initialState, action) {
       return state;
   }
 }
-
-export default loading;

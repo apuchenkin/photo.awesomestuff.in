@@ -1,8 +1,10 @@
 import { combineReducers } from 'redux';
-import loader from './loader';
+import isLoading from './loader';
 import runtime from './runtime';
+import api from './api';
 
 export default combineReducers({
   runtime,
-  isLoading: loader,
+  isLoading,
+  api,
 });

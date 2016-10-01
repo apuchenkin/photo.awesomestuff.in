@@ -18,6 +18,7 @@ import Photo from './components/photo';
 import Main from './components/main';
 import Error404 from './components/error/404';
 import { startLoading } from './actions/loader';
+import { getCategories, getPages } from './actions/api';
 
 const
   initialState = isBrowser ? window.__INITIAL_STATE__ || {} : {},
@@ -198,69 +199,30 @@ export default (store) => {
   const mainRoute = new Route({
     store,
     path: '/',
-    state: routerState[0] ? routerState[0].state : {},
+    actions: [getCategories, getPages],
+    component: Main,
 
-    resolve() {
-      return utils.fetchAll({
-        categories: categoryService.fetchCategories(),
-        pages: pageService.fetchPages(),
-      });
-    },
-
-    onEnter(location, replace, cb) {
-      const me = this;
-      const callback = () => {
-        Object.assign(me, { component: props => <Main {...props} pages={this.state.pages} /> });
-        cb();
-      };
-
-      return Object.keys(this.state).length
-        ? callback()
-        : this.resolve(location)
-            .then(callback)
-            .catch(cb);
-    },
-
-    getIndexRoute(location, cb) {
-      const
-        me = this,
-        callback = () => {
-          me.indexRoute = {
-            class: 'home',
-            components: {
-              header: props => <HomeHeader {...props} />,
-              body: props => <Home {...props} categories={me.state.categories} />,
-            },
-          };
-
-          cb(null, me.indexRoute);
-        }
-        ;
-
-      return Object.keys(me.state).length
-        ? callback(me.state)
-        : me.resolve(location)
-            .then(callback)
-            .catch(cb);
+    indexRoute: {
+      class: 'home',
+      components: {
+        header: HomeHeader,
+        body: Home,
+      },
     },
 
     getChildRoutes(location, cb) {
-      const
-        me = this,
-        callback = (data) => {
-          me.childRoutes = [].concat(
-            data.categories.filter(c => !!c.title).map(c => categoryRoute(c, data)),
-            data.categories.filter(c => !!c.title && !!c.parent).map(categoryRedirect),
-            data.pages.filter(p => !!p.title).map(pageRoute),
-            [notFound]
-          );
+      this.resolve(location).then(() => {
+        const data = store.getState().api;
 
-          cb(null, me.childRoutes);
-        };
+        this.childRoutes = [].concat(
+          data.categories.filter(c => !!c.title).map(c => categoryRoute(c, data)),
+          data.categories.filter(c => !!c.title && !!c.parent).map(categoryRedirect),
+          data.pages.filter(p => !!p.title).map(pageRoute),
+          [notFound]
+        );
 
-      return Object.keys(me.state).length
-        ? callback(me.state)
-        : me.resolve(location).then(callback);
+        cb(null, this.childRoutes);
+      });
     },
   });
 

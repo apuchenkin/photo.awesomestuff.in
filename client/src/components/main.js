@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { locationShape } from 'react-router/lib/PropTypes';
 import withRouter from 'react-router/lib/withRouter';
@@ -42,9 +43,7 @@ Footer.propTypes = {
 };
 
 
-@withStyles(style, baseStyle)
-@withRouter
-export default class Main extends Component {
+class Main extends Component {
 
   static propTypes = {
     routes: arrayOf(shape({
@@ -99,3 +98,11 @@ export default class Main extends Component {
     );
   }
 }
+
+export default connect(
+  state => ({ pages: state.api.pages })
+)(
+  withStyles(style, baseStyle)(
+    withRouter(Main)
+  )
+);

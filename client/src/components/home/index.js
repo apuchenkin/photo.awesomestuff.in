@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -47,4 +48,8 @@ Home.propTypes = {
   })).isRequired,
 };
 
-export default withStyles(style)(Home);
+export default connect(
+  state => ({ categories: state.api.categories })
+)(
+  withStyles(style)(Home)
+);

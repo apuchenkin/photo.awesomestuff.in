@@ -28,13 +28,13 @@ export default function configureStore(initialState) {
     }
 
     const enhancer = compose(
-      applyMiddleware([promiseMiddleware, logger]),
+      applyMiddleware(...[promiseMiddleware, logger]),
       devToolsExtension,
     );
 
     store = createStore(reducers, initialState, enhancer);
   } else {
-    store = createStore(reducers, initialState);
+    store = createStore(reducers, initialState, applyMiddleware(promiseMiddleware));
   }
 
   return store;
