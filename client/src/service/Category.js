@@ -15,7 +15,7 @@ export default class CategoryService extends Service {
       headers: this.headers,
     })
     .then(this.respondJSON)
-    .then(this.refineCategories);
+    .then(CategoryService.refineCategories);
   }
 
   fetchCategory(name) {
@@ -27,7 +27,7 @@ export default class CategoryService extends Service {
     .then(this.respondJSON);
   }
 
-  refineCategories(categories) {
+  static refineCategories(categories) {
     const map = new Map(categories.map(c => [c.id, c]));
 
     // setting parent for all categories
@@ -41,6 +41,17 @@ export default class CategoryService extends Service {
     }));
 
     return categories;
+  }
+
+  static attachParent(category, categories) {
+    return category.parent
+      ? Object.assign(category, {
+        parent: categories.find(c => c.id === category.parent),
+      })
+      : Object.assign(category, {
+        childs: categories.filter(c => c.parent && c.parent.id === category.id).map(c => c.id),
+      })
+      ;
   }
 
   linkPhotos(category, photos) {

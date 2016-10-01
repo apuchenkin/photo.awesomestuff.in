@@ -32,17 +32,13 @@ class GalleryPage extends Component {
 
   render() {
     const
-      { category, photos, isLoading } = this.props,
+      { category, photos, isLoading, children } = this.props,
       hasNav = !!(category.parent || category).childs.length,
       className = [
         style.gallery,
         hasNav ? style.nav : '',
         isLoading ? style.loading : '',
-      ].filter(x => !!x).join(' '),
-      childrens = !!photos.length && React.Children.map(this.props.children, c =>
-        React.cloneElement(c, {
-          photos,
-        }));
+      ].filter(x => !!x).join(' ');
 
     return (
       <div className={className} >
@@ -56,7 +52,7 @@ class GalleryPage extends Component {
           transitionEnterTimeout={200}
           transitionLeaveTimeout={200}
         >
-          {childrens}
+          {children}
         </ReactCSSTransitionGroup>
         <Gallery
           photos={photos}
@@ -68,7 +64,11 @@ class GalleryPage extends Component {
 }
 
 export default connect(
-  state => ({ isLoading: state.isLoading.count > 0 }),
+  state => ({
+    isLoading: state.isLoading.count > 0,
+    category: state.api.category,
+    photos: state.api.photos,
+  }),
   dispatch => ({
     startLoading: () => dispatch(startLoading()),
     stopLoading: () => dispatch(stopLoading()),

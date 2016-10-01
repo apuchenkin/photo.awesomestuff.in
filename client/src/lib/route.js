@@ -5,14 +5,14 @@ import { startLoading, stopLoading } from '../actions/loader';
 export default (props) => {
   const
     { store, actions } = props,
-    resolve = () => {
+    resolve = (location) => {
       let promise;
 
       if (actions && actions.length) {
         store.dispatch(startLoading());
 
         const promises = actions.map((fn) => {
-          const action = fn();
+          const action = fn(location);
           store.dispatch(action);
           return action.payload;
         });
@@ -25,12 +25,12 @@ export default (props) => {
       return promise;
     };
 
-  const onEnter = (location, replace, cb) => resolve()
+  const onEnter = (location, replace, cb) => resolve(location)
     .catch(cb)
     .then(() => cb());
 
-  return Object.assign(props, {
-    resolve,
-    onEnter,
-  });
+  return Object.assign(props,
+    props.resolve ? {} : { resolve },
+    props.onEnter ? {} : { onEnter },
+  );
 };

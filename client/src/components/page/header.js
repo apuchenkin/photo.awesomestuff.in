@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -28,4 +29,8 @@ PageHeader.propTypes = {
   page: shape({ title: string.isRequired }).isRequired,
 };
 
-export default withStyles(style)(PageHeader);
+export default connect(
+  state => ({ page: state.api.page })
+)(
+  withStyles(style)(PageHeader)
+);

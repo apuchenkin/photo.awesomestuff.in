@@ -45,7 +45,7 @@ app.use((req, res) => {
       res.status(500).send(error.message);
     } else if (redirectLocation) {
       // moved permanently
-      res.redirect(301, basename + redirectLocation.pathname + redirectLocation.search);
+      res.redirect(301, (basename || '') + redirectLocation.pathname + redirectLocation.search);
     } else if (renderProps) {
       const
         meta = utils.getMeta(renderProps.routes, messages, renderProps.location.pathname),

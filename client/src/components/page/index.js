@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import style from './style.less';
@@ -14,4 +15,8 @@ Page.propTypes = {
   content: string.isRequired,
 };
 
-export default withStyles(style)(Page);
+export default connect(
+  state => ({ content: state.api.page.content })
+)(
+  withStyles(style)(Page)
+);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -63,4 +64,12 @@ GalleryHeader.propTypes = {
   categories: arrayOf(categoryShape).isRequired,
 };
 
-export default withStyles(navStyle, style)(GalleryHeader);
+export default connect(
+  state => ({
+    isLoading: state.isLoading.count > 0,
+    category: state.api.category,
+    categories: state.api.categories,
+  })
+)(
+  withStyles(navStyle, style)(GalleryHeader)
+);

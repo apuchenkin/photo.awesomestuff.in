@@ -109,7 +109,12 @@ class Photo extends Component {
 }
 
 export default connect(
-  state => ({ isLoading: state.isLoading.count > 0 }),
+  state => ({
+    isLoading: state.isLoading.count > 0,
+    photo: state.api.photo,
+    photos: state.api.photos,
+    category: state.api.category,
+  }),
   dispatch => ({
     stopLoading: () => dispatch(stopLoading()),
   })
