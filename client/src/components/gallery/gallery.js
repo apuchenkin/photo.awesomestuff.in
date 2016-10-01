@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import Component from '../../lib/PureComponent';
 import { fromCategory } from '../link/category';
 import PhotoLink from '../link/photo';
@@ -23,7 +24,7 @@ const createPackery = (container) => {
   return packery;
 };
 
-export default class Gallery extends Component {
+class Gallery extends Component {
 
   static propTypes = {
     category: shape().isRequired,
@@ -63,3 +64,9 @@ export default class Gallery extends Component {
     );
   }
 }
+
+export default connect(
+  state => ({
+    isLoading: state.isLoading.count > 0,
+    photos: state.api.photos,
+  }))(Gallery);

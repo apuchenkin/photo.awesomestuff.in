@@ -26,14 +26,13 @@
 [x] isomorphic styles / style chunks
 [x] sitemap
 [x] photo transitions and styles
+[x] default lang page should have Vary: Accept-Language tag
 
 -----------------------------
 
-- accept-language node header for x-default lang
-- re-use rendered photo on photo request
 - cache control policy (node)
+- 500, 503 page
 
 -----------------------------
 future
 - child pages & category pages
-- 500, 503 page

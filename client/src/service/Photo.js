@@ -1,10 +1,8 @@
 import fetch from 'isomorphic-fetch';
-// import memoize from 'memoizee';
+import memoize from 'memoizee';
 import Service from './BaseService';
 
 import { weightedRandom, getSize, getSrc, adjust, refinePhotos, remapPhotos } from './PhotoUtils';
-
-const memoize = !isBrowser ? require('memoizee') : null;
 
 export default class PhotoService extends Service {
   getRandomColor() {
@@ -76,9 +74,9 @@ export default class PhotoService extends Service {
   }
 
   static weightedRandom = weightedRandom;
-  static getSize = isBrowser ? getSize : memoize(getSize, { length: 3 });
-  static getSrc = isBrowser ? getSrc : memoize(getSrc, { length: 2 });
-  static adjust = isBrowser ? getSrc : memoize(adjust, { length: 2 });
+  static getSize = memoize(getSize, { length: 3 });
+  static getSrc = memoize(getSrc, { length: 2 });
+  static adjust = memoize(adjust, { length: 2 });
   static refinePhotos = refinePhotos;
   static remapPhotos = remapPhotos;
 }

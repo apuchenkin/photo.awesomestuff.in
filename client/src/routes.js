@@ -82,11 +82,11 @@ export default (store) => {
       (location) => {
         const action = getPhotos(category.name);
 
-        action.payload
-          .then(photos => PhotoService.refinePhotos(photos, location.params.photoId))
-          .then(PhotoService.remapPhotos);
-
-        return action;
+        return action && Object.assign({}, action, {
+          payload: action.payload
+            .then(photos => PhotoService.refinePhotos(photos, location.params.photoId))
+            .then(PhotoService.remapPhotos),
+        });
       },
     ],
 

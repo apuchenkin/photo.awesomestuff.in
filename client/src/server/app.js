@@ -37,6 +37,10 @@ app.use((req, res) => {
     // eslint-disable-next-line no-underscore-dangle
     onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
 
+  if (!basename) {
+    res.vary('Accept-Language');
+  }
+
   // Note that req.url here should be the full URL path from
   // the original request, including the query string.
   match({ routes, location, basename }, (error, redirectLocation, renderProps) => {

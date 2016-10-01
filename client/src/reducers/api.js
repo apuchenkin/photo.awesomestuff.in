@@ -14,19 +14,19 @@ export default function loading(state = intial, action) {
 
   switch (action.type) {
     case GET_CATEGORIES:
-      return Object.assign(state, { categories: action.payload.filter(c => !!c.title) });
+      return { ...state, categories: action.payload.filter(c => !!c.title) };
     case GET_CATEGORY:
-      return Object.assign(state, { category:
-         CategoryService.attachParent(action.payload, state.categories),
-       });
+      return { ...state,
+        category: CategoryService.attachParent(action.payload, state.categories),
+       };
     case GET_PAGES:
-      return Object.assign(state, { pages: action.payload.filter(c => !!c.title) });
+      return { ...state, pages: action.payload.filter(c => !!c.title) };
     case GET_PAGE:
-      return Object.assign(state, { page: action.payload });
+      return { ...state, page: action.payload };
     case GET_PHOTOS:
-      return Object.assign(state, { photos: action.payload });
+      return { ...state, photos: action.payload };
     case GET_PHOTO:
-      return Object.assign(state, { photo: action.payload });
+      return { ...state, photo: action.payload };
     default:
       return state;
   }

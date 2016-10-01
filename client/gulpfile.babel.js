@@ -61,6 +61,7 @@ gulp.task('copy', () => gulp
 );
 
 gulp.task('sitemap', (cb) => {
+  // eslint-disable-next-line global-require
   const sitemap = require('./sitemap.babel.js');
 
   return sitemap()

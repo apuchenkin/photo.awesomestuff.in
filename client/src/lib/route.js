@@ -1,4 +1,3 @@
-// import memoize from 'memoizee';
 import { Promise } from 'es6-promise';
 import { startLoading, stopLoading } from '../actions/loader';
 
@@ -6,23 +5,24 @@ export default (props) => {
   const
     { store, actions } = props,
     resolve = (location) => {
-      let promise;
-
       if (actions && actions.length) {
-        store.dispatch(startLoading());
+        const promises = actions
+          .map(fn => fn(location))
+          .filter(x => !!x)
+          .map((action) => {
+            store.dispatch(action);
 
-        const promises = actions.map((fn) => {
-          const action = fn(location);
-          store.dispatch(action);
-          return action.payload;
-        });
+            return action.payload;
+          });
 
-        promise = Promise.all(promises)
-          .then(() => store.dispatch(stopLoading()));
-      } else {
-        promise = Promise.resolve();
+        if (promises.length) {
+          store.dispatch(startLoading());
+          return Promise.all(promises)
+            .then(() => store.dispatch(stopLoading()));
+        }
       }
-      return promise;
+
+      return Promise.resolve();
     };
 
   const onEnter = (location, replace, cb) => resolve(location)

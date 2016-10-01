@@ -11,14 +11,13 @@ import style from './gallery.less';
 import transitionStyle from '../../style/transition.less';
 
 const
-  { shape, arrayOf, element, bool, func } = React.PropTypes;
+  { shape, element, bool, func } = React.PropTypes;
 
 class GalleryPage extends Component {
 
   static propTypes = {
     children: element,
     category: shape().isRequired,
-    photos: arrayOf(shape()).isRequired,
     stopLoading: func.isRequired,
     isLoading: bool.isRequired,
   };
@@ -32,7 +31,7 @@ class GalleryPage extends Component {
 
   render() {
     const
-      { category, photos, isLoading, children } = this.props,
+      { category, isLoading, children } = this.props,
       hasNav = !!(category.parent || category).childs.length,
       className = [
         style.gallery,
@@ -55,7 +54,6 @@ class GalleryPage extends Component {
           {children}
         </ReactCSSTransitionGroup>
         <Gallery
-          photos={photos}
           category={category}
         />
       </div>
@@ -67,7 +65,6 @@ export default connect(
   state => ({
     isLoading: state.isLoading.count > 0,
     category: state.api.category,
-    photos: state.api.photos,
   }),
   dispatch => ({
     startLoading: () => dispatch(startLoading()),
