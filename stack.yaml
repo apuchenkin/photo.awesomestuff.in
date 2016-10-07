@@ -1,19 +1,24 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
 
 # Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: lts-6.12
+resolver: lts-7.2
 
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
 - location:
-    git: https://github.com/acowley/HOpenCV.git
-    commit: 4c0e5d3e93ae80937fd54eb5aeaa09b709b45632
+    git: https://github.com/k-bx/mysql.git
+    commit: 3db1145900e9dde6a74f3348164f9e91068bf479
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
-- HOpenCV-0.4.0
 - failure-0.2.0.3
+- esqueleto-2.4.3
+- mysql-0.1.1.8
+- mysql-simple-0.2.2.5
+- persistent-2.2.4.1
+- persistent-mysql-2.3.0.2
+- persistent-template-2.1.8.1
 
 # Override default flag values for local packages and extra-deps
 flags:

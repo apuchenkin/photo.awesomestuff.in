@@ -25,7 +25,6 @@ library
                      Handler.Common
                      Handler.Photo
                      Handler.Category
-                     Handler.Static
                      Handler.PhotoGroup
                      Handler.Author
                      Handler.Page
@@ -80,7 +79,7 @@ library
                  , conduit                       >= 1.0        && < 2.0
                  , monad-logger                  >= 0.3        && < 0.4
                  , fast-logger                   >= 2.2        && < 2.5
-                 , wai-logger                    >= 2.2        && < 2.3
+                 , wai-logger                    >= 2.2        && < 2.4
                  , file-embed
                  , safe
                  , unordered-containers
@@ -90,7 +89,6 @@ library
                  , case-insensitive
                  , esqueleto
                  , wai-cors
-                 , HOpenCV
                  , base64-bytestring
                  , utf8-string
                  , filepath
@@ -100,6 +98,7 @@ library
                  , word8
                  , either
                  , failure
+                 , foreign-store
 
 executable         aws-photo-service
     if flag(library-only)

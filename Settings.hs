@@ -9,7 +9,7 @@
 module Settings where
 
 import ClassyPrelude.Yesod
-import Control.Exception           (throw)
+import qualified Control.Exception as Exception
 import Data.Aeson                  (Result (..), fromJSON, withObject, (.!=),
                                     (.:?))
 import Data.FileEmbed              (embedFile)
@@ -58,6 +58,7 @@ data AppSettings = AppSettings
     -- ^ Sha1 secret key
     , cachePath                 :: String
     -- ^ path to the cache folder
+    , useCors                   :: Maybe Bool
     }
 
 instance FromJSON AppSettings where
@@ -84,6 +85,7 @@ instance FromJSON AppSettings where
         appCopyright              <- o .: "copyright"
         secret                    <- o .: "secret"
         cachePath                 <- o .: "cache-path"
+        useCors                   <- o .:? "use-cors"
 
         return AppSettings {..}
 
@@ -115,7 +117,8 @@ configSettingsYmlBS = $(embedFile configSettingsYml)
 
 -- | @config/settings.yml@, parsed to a @Value@.
 configSettingsYmlValue :: Value
-configSettingsYmlValue = either throw id $ decodeEither' configSettingsYmlBS
+configSettingsYmlValue = either Exception.throw id
+                       $ decodeEither' configSettingsYmlBS
 
 -- | A version of @AppSettings@ parsed at compile time from @config/settings.yml@.
 compileTimeAppSettings :: AppSettings
