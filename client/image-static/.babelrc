@@ -1,0 +1,10 @@
+{
+  "sourceMaps": true,
+  "presets": [
+    "node6",
+    "es2015-minimal"
+  ],
+  "plugins": [
+    "transform-runtime"
+  ]
+}
