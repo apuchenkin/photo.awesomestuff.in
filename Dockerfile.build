@@ -1,0 +1,9 @@
+FROM pritunl/archlinux
+
+RUN pacman -S --noconfirm \
+	base-devel \
+	mysql \
+	stack
+
+WORKDIR /srv
+ADD . /srv
