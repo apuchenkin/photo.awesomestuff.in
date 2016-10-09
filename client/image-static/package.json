@@ -4,7 +4,8 @@
   "description": "Static image server'",
   "main": "src/index.js",
   "scripts": {
-    "serve": "nodemon --exec babel-node src/index.js"
+    "serve": "nodemon --exec babel-node src/index.js",
+    "build": "webpack"
   },
   "author": "",
   "license": "MIT",
@@ -16,9 +17,13 @@
     "babel-preset-node6": "^11.0.0",
     "express": "^4.14.0",
     "express-validator": "^2.20.10",
+    "memoizee": "^0.4.1",
     "sharp": "^0.16.0"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "babel-loader": "^6.2.5",
+    "json-loader": "^0.5.4",
+    "nodemon": "^1.11.0",
+    "webpack": "^1.13.2"
   }
 }

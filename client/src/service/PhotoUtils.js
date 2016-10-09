@@ -1,5 +1,5 @@
 import resolutions from '../config/resolution.json';
-import { apiEndpoint, apiPrefix, brickWidth, gutter } from '../config/config.json';
+import { staticEndpoint, brickWidth, gutter } from '../config/config.json';
 
 export const weightedRandom = (probabilities) => {
   const probabilitiesMap = probabilities.reduce((acc, v) => {
@@ -9,14 +9,6 @@ export const weightedRandom = (probabilities) => {
     pointer = Math.floor(Math.random() * probabilitiesMap[probabilitiesMap.length - 1]);
 
   return probabilitiesMap.reduce((acc, v) => (pointer <= v ? acc : acc + 1), 0);
-};
-
-export const getSize = (w, h, ratio) => {
-  const
-    inc = ratio >= 1 ? ratio : 1 / ratio,
-    [m1, m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w];
-
-  return Math.max(m1, m2);
 };
 
 export const adjust = (w, h) => {
@@ -29,13 +21,13 @@ export const adjust = (w, h) => {
   return resolutions[idx];
 };
 
-export const getSrc = (photo, dimensions) => {
+export const getSrc = (photo, dimensions, thumb = false, doAdjust = false) => {
   const
     { width, height } = dimensions,
-    [w, h] = adjust(width, height),
-    filename = photo.src.split('/').pop();
+    [w, h] = doAdjust ? adjust(width, height) : [width, height],
+    path = photo.src;
 
-  return [apiEndpoint + apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/');
+  return [staticEndpoint, thumb ? 'rt' : 'r', w, h, path].join('/');
 };
 
 export const refinePhotos = (photos, excludeId) => {

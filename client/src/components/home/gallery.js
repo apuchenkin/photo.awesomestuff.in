@@ -19,7 +19,7 @@ const
 const Gallery = ({ category, childs }) =>
   <div className={style.gallery}>
     <CategoryLink category={category.name} className={style.cover}>
-      <img src={`${config.staticEndpoint}${config.apiPrefix}/${category.image}`} width={config.gallery.width} title={category.title} alt={category.title} />
+      <img src={`${config.staticEndpoint}/${category.image}`} width={config.gallery.width} title={category.title} alt={category.title} />
       {category.date && <span className={style.sub}>{category.date}</span>}
     </CategoryLink>
     <aside>
