@@ -21,13 +21,12 @@ export const adjust = (w, h) => {
   return resolutions[idx];
 };
 
-export const getSrc = (photo, dimensions, thumb = false, doAdjust = false) => {
+export const getSrc = (src, dimensions, thumb = false, doAdjust = false) => {
   const
     { width, height } = dimensions,
-    [w, h] = doAdjust ? adjust(width, height) : [width, height],
-    path = photo.src;
+    [w, h] = doAdjust ? adjust(width, height) : [width, height];
 
-  return [staticEndpoint, thumb ? 'rt' : 'r', w, h, path].join('/');
+  return [staticEndpoint, thumb ? 'rt' : 'r', w, h, src].join('/');
 };
 
 export const refinePhotos = (photos, excludeId) => {

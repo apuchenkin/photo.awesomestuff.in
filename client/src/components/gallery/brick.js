@@ -10,13 +10,13 @@ const { number, string, shape } = React.PropTypes;
 const Brick = (props) => {
   const
     { photo } = props,
-    { w, h } = photo,
+    { w, h, src } = photo,
     size = Math.max(w, h),
-    src = PhotoService.getSrc(photo, { width: size, height: size }, true),
+    url = PhotoService.getSrc(src, { width: size, height: size }, true),
     brickStyle = {
       width: `${w}px`,
       height: `${h}px`,
-      backgroundImage: `url(${src})`,
+      backgroundImage: `url(${url})`,
     };
 
   return (

@@ -109,7 +109,7 @@ class Figure extends Component {
       { dimensions } = this.state,
       { photo, onClick } = this.props,
       { width, height } = dimensions,
-      src = PhotoService.getSrc(photo, dimensions);
+      src = PhotoService.getSrc(photo.src, dimensions);
 
     return (
       <Img

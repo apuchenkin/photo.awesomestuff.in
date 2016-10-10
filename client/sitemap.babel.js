@@ -8,18 +8,10 @@ import PhotoService from './src/service/Photo';
 import PageService from './src/service/Page';
 import utils from './src/lib/utils';
 
-const getSrc = photo =>
-  [
-    `${config.apiEndpoint}${config.apiPrefix}`,
-    'hs/photo',
-    photo.id,
-    config.photo.width,
-    config.photo.height,
-    photo.src.split('/').pop(),
-  ]
-  .filter(x => !!x)
-  .join('/');
-
+const getSrc = photo => PhotoService.getSrc(photo.src, {
+  width: config.photo.width,
+  height: config.photo.height,
+}, true);
 
 const merge = urls => urls.reduce((acc, location) => {
   const exist = acc.find(a => a.url === location.url);
