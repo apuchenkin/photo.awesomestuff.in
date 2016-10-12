@@ -18,9 +18,21 @@ module.exports = {
 
   resolve: {
     root: path.resolve(__dirname, './src'),
-    extensions: ['', '.jsx', '.js', '.json', '.less'],
-    modulesDirectories: ['node_modules'],
+    extensions: ['', '.jsx', '.js', '.json'],
+    alias: {
+      etc: path.resolve(__dirname, './etc'),
+    },
+    modulesDirectories: ['node_modules', 'lib'],
   },
+
+  externals: [
+    {
+      etc: false,
+      photo: false,
+      resolution: false,
+    },
+    /^[a-z\-0-9]+$/,
+  ],
 
   cache: DEBUG,
   debug: DEBUG,
@@ -42,14 +54,20 @@ module.exports = {
       {
         test: /\.jsx?$/,
         include: [
-          path.resolve(__dirname, './src'),
-          path.resolve(__dirname, '../src'),
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, '..', 'lib'),
         ],
         loader: 'babel',
+        query: {
+          cacheDirectory: true,
+          babelrc: false,
+          presets: ['babel-preset-node6', 'babel-preset-es2015-minimal'].map(require.resolve),
+          plugins: ['babel-plugin-transform-runtime'].map(require.resolve)
+        }
       },
       {
         test: /\.json$/,
-        loader: 'json',
+        loader: require.resolve('json-loader'),
       },
       {
         test: /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2)(\?.*)?$/i,
@@ -76,11 +94,6 @@ module.exports = {
     chunkFilename: 'index.[name].js',
     libraryTarget: 'commonjs2',
   },
-
-  externals: [
-    /^\.\/assets$/,
-    /^[@a-z][a-z\/\.\-0-9]*$/i,
-  ],
 
   plugins: [
     // new webpack.DefinePlugin({ ...GLOBALS }),

@@ -4,11 +4,14 @@ import path from 'path';
 import fs from 'fs';
 import url from 'url';
 import sharp from 'sharp';
-import PhotoService from '../../src/service/Photo';
-import config from '../etc/config.json';
+import { adjust } from 'photo';
+import memoize from 'memoizee';
+
+import config from 'etc/config.json';
 
 const app = express();
 const basePath = path.join(__dirname, '..', 'static');
+const adjust$ = memoize(adjust);
 
 console.log(sharp.cache(config.cache));
 console.log(sharp.concurrency());
@@ -48,7 +51,7 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
   }
 
   const
-    [width, height] = PhotoService.adjust(
+    [width, height] = adjust$(
       parseInt(req.params.width, 10),
       parseInt(req.params.height, 10)
     ),
