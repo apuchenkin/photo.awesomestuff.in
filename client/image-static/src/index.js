@@ -4,14 +4,12 @@ import path from 'path';
 import fs from 'fs';
 import url from 'url';
 import sharp from 'sharp';
-import { adjust } from 'photo';
-import memoize from 'memoizee';
+import { adjust } from '../../lib/util/photo/memoize';
 
-import config from 'etc/config.json';
+import config from '../etc/config.json';
 
 const app = express();
 const basePath = path.join(__dirname, '..', 'static');
-const adjust$ = memoize(adjust);
 
 console.log(sharp.cache(config.cache));
 console.log(sharp.concurrency());

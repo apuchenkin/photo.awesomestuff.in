@@ -19,18 +19,10 @@ module.exports = {
   resolve: {
     root: path.resolve(__dirname, './src'),
     extensions: ['', '.jsx', '.js', '.json'],
-    alias: {
-      etc: path.resolve(__dirname, './etc'),
-    },
-    modulesDirectories: ['node_modules', 'lib'],
+    modulesDirectories: ['node_modules'],
   },
 
   externals: [
-    {
-      etc: false,
-      photo: false,
-      resolution: false,
-    },
     /^[a-z\-0-9]+$/,
   ],
 
