@@ -1,8 +1,7 @@
 import fetch from 'isomorphic-fetch';
-import memoize from 'memoizee';
 import Service from './BaseService';
 
-import { weightedRandom, getSrc, adjust, refinePhotos, remapPhotos } from './PhotoUtils';
+import { weightedRandom, refinePhotos, remapPhotos } from '../util/photo';
 
 export default class PhotoService extends Service {
   getRandomColor() {
@@ -74,8 +73,6 @@ export default class PhotoService extends Service {
   }
 
   static weightedRandom = weightedRandom;
-  static getSrc = memoize(getSrc);
-  static adjust = memoize(adjust, { length: 2 });
   static refinePhotos = refinePhotos;
   static remapPhotos = remapPhotos;
 }

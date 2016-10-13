@@ -1,20 +1,15 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import CategoryLink, { fromCategory } from '../link/category';
-import config from '../../config/config.json';
-import PhotoService from '../../service/Photo';
+import { getSrc } from '../../lib/utils';
 
 import style from './style.less';
 import baseStyle from '../../style/style.less';
 
 const
   { shape, arrayOf, string, number } = React.PropTypes,
-  getSrc = category => PhotoService.getSrc(
-    category.image,
-    { width: config.gallery.width, height: config.gallery.height },
-    true
-  ),
   categoryShape = shape({
     name: string.isRequired,
     title: string.isRequired,
@@ -22,12 +17,12 @@ const
     image: string,
   });
 
-const Gallery = ({ category, childs }) =>
+const Gallery = ({ category, childs, width, height }) =>
   <div className={style.gallery}>
     <CategoryLink category={category.name} className={style.cover}>
       <img
-        src={getSrc(category)}
-        width={config.gallery.width}
+        src={getSrc(category.image, width, height, true)}
+        width={width}
         title={category.title}
         alt={category.title}
       />
@@ -51,6 +46,8 @@ const Gallery = ({ category, childs }) =>
 ;
 
 Gallery.propTypes = {
+  width: number.isRequired,
+  height: number.isRequired,
   category: categoryShape.isRequired,
   childs: arrayOf(shape({
     id: number.isRequired,
@@ -59,6 +56,11 @@ Gallery.propTypes = {
   })).isRequired,
 };
 
-export default withStyles(style, baseStyle)(
-  Gallery
+export default connect(
+  state => ({
+    width: state.runtime.config.gallery.width,
+    height: state.runtime.config.gallery.height,
+  })
+)(
+  withStyles(style, baseStyle)(Gallery)
 );

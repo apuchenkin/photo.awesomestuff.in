@@ -1,4 +1,14 @@
-import { staticEndpoint, brickWidth, gutter } from '../config/config.json';
+import resolutions from './resolution.json';
+
+export const adjust = (w, h) => {
+  const
+    norms = resolutions.map(([w$, h$]) => Math.pow(w$ - w, 2) + Math.pow(h$ - h, 2)),
+    min = Math.min(...norms),
+    idx = norms.findIndex(n => n === min)
+    ;
+
+  return resolutions[idx];
+};
 
 export const weightedRandom = (probabilities) => {
   const probabilitiesMap = probabilities.reduce((acc, v) => {
@@ -10,13 +20,8 @@ export const weightedRandom = (probabilities) => {
   return probabilitiesMap.reduce((acc, v) => (pointer <= v ? acc : acc + 1), 0);
 };
 
-export const getSrc = (src, dimensions, thumb = false, doAdjust = false) => {
-  const
-    { width, height } = dimensions,
-    [w, h] = doAdjust ? adjust(width, height) : [width, height];
-
-  return [staticEndpoint, thumb ? 'rt' : 'r', w, h, src].join('/');
-};
+export const getSrc = (src, w, h, thumb = false) =>
+  [thumb ? 'rt' : 'r', w, h, src].join('/');
 
 export const refinePhotos = (photos, excludeId) => {
   photos.map((p, k) => Object.assign(p, { order: k }));
@@ -59,16 +64,17 @@ export const refinePhotos = (photos, excludeId) => {
   return init.sort((a, b) => a.order - b.order);
 };
 
-const sizes = [
-  (brickWidth)
-, ((brickWidth * 2) + (gutter))
-, ((brickWidth * 3) + (gutter * 2))
-, ((brickWidth * 4) + (gutter * 3)),
+const sizes = (width, gutter) => [
+  (width)
+, ((width * 2) + (gutter))
+, ((width * 3) + (gutter * 2))
+, ((width * 4) + (gutter * 3)),
 ];
 
-const dsmap = (mode, ratio, isHorisontal) => {
+const dsmap = (mode, ratio, isHorisontal, config) => {
   const
-    [s1, s2, s3, s4] = sizes,
+    { width, gutter } = config,
+    [s1, s2, s3, s4] = sizes(width, gutter),
     modes = [
       [ratio >= 2 ? s2 : s1, s1],
       isHorisontal ? [ratio >= 3 ? s3 : s2, s1] : [s1, s2],

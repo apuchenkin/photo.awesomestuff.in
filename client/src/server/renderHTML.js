@@ -4,11 +4,10 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import escapeHtml from 'escape-html';
 import assets from '../../dist/assets.json';
-import config from '../config/config.json';
 
 import style from '../style/style.less';
 
-const { string, shape, array } = React.PropTypes;
+const { string, shape, array, object } = React.PropTypes;
 
 const GoogleAnalytics = ({ id }) => (
   <script
@@ -27,8 +26,10 @@ GoogleAnalytics.propTypes = {
 };
 
 function renderHTML({ componentHTML, initialState, meta, styles }) {
+  const { config, locale } = initialState.runtime;
+
   return (
-    <html lang={initialState.runtime.locale}>
+    <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width initial-scale=1.0" />
@@ -54,6 +55,7 @@ renderHTML.propTypes = {
   initialState: shape({
     runtime: shape({
       locale: string.isRequired,
+      config: object.isRequired,
     }),
   }).isRequired,
   meta: shape({

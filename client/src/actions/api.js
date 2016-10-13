@@ -1,6 +1,6 @@
-import CategoryService from '../service/Category';
-import PageService from '../service/Page';
-import PhotoService from '../service/Photo';
+import CategoryService from '../../lib/service/Category';
+import PageService from '../../lib/service/Page';
+import PhotoService from '../../lib/service/Photo';
 
 export const GET_CATEGORIES = 'GET_CATEGORIES';
 export const GET_CATEGORY = 'GET_CATEGORY';
@@ -12,11 +12,15 @@ export const GET_PHOTOS = 'GET_PHOTOS';
 export const GET_PHOTO = 'GET_PHOTO';
 
 export default (store) => {
-  const { locale } = store.getState().runtime;
+  const
+    { locale } = store.getState().runtime,
+    { apiEndpoint } = store.getState().runtime.config,
+    defaults = { locale, apiEndpoint }
+    ;
 
-  const categoryService = new CategoryService({ locale });
-  const pageService = new PageService({ locale });
-  const photoService = new PhotoService({ locale });
+  const categoryService = new CategoryService(defaults);
+  const pageService = new PageService(defaults);
+  const photoService = new PhotoService(defaults);
 
   return {
     getCategories() {

@@ -1,7 +1,7 @@
 import React from 'react';
 import IntlMessageFormat from 'intl-messageformat';
 
-import PhotoService from './service/Photo';
+import PhotoService from '../lib/service/Photo';
 import Route from './lib/route';
 import Home from './components/home';
 import HomeHeader from './components/home/header';

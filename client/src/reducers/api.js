@@ -1,5 +1,5 @@
 import { GET_CATEGORIES, GET_CATEGORY, GET_PAGES, GET_PAGE, GET_PHOTOS, GET_PHOTO } from '../actions/api';
-import CategoryService from '../service/Category';
+import CategoryService from '../../lib/service/Category';
 
 const intial = {
   categories: [],

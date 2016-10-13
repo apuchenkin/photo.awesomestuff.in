@@ -1,14 +1,15 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { bind, debounce } from 'decko';
 
-import PhotoService from '../../service/Photo';
+import { getSrc } from '../../lib/utils';
+
 import Component from '../../lib/PureComponent';
 import Link from '../link';
 
 import Img from './img';
-import config from '../../config/config.json';
 
 import style from './photo.less';
 
@@ -44,6 +45,8 @@ const closeIcon = (<FormattedMessage
 class Figure extends Component {
 
   static propTypes = {
+    width: number.isRequired,
+    height: number.isRequired,
     photo: photoShape.isRequired,
     backUrl: string.isRequired,
     onClick: func.isRequired,
@@ -52,6 +55,8 @@ class Figure extends Component {
   constructor(props) {
     super(props);
 
+    this.width = props.width;
+    this.height = props.height;
     this.state = {
       dimensions: this.getDimensions(),
     };
@@ -67,8 +72,8 @@ class Figure extends Component {
 
   getDimensions() {
     return {
-      width: isBrowser ? window.innerWidth - 40 : config.photo.width,
-      height: isBrowser ? window.innerHeight - 40 : config.photo.height,
+      width: isBrowser ? window.innerWidth - 40 : this.width,
+      height: isBrowser ? window.innerHeight - 40 : this.height,
     };
   }
 
@@ -109,7 +114,7 @@ class Figure extends Component {
       { dimensions } = this.state,
       { photo, onClick } = this.props,
       { width, height } = dimensions,
-      src = PhotoService.getSrc(photo.src, dimensions);
+      src = getSrc(photo.src, width, height);
 
     return (
       <Img
@@ -125,4 +130,11 @@ class Figure extends Component {
   }
 }
 
-export default withStyles(style)(Figure);
+export default connect(
+  state => ({
+    width: state.runtime.config.photo.width,
+    height: state.runtime.config.photo.height,
+  })
+)(
+  withStyles(style)(Figure)
+);

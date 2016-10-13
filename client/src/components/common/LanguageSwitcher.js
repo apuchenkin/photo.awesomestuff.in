@@ -1,9 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { locationShape } from 'react-router/lib/PropTypes';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import { locales } from '../../config/config.json';
 import { localeURL } from '../../lib/utils';
 import style from './style.less';
 
@@ -35,7 +35,7 @@ Locale.propTypes = {
 };
 
 const LanguageSwitcher = (props) => {
-  const { langs } = props,
+  const { langs, locales } = props,
     links = locales.map(locale =>
       <Locale {...props} locale={locale} disabled={!langs.find(l => locale === l)} key={locale} />
     );
@@ -49,6 +49,11 @@ const LanguageSwitcher = (props) => {
 
 LanguageSwitcher.propTypes = {
   langs: arrayOf(string).isRequired,
+  locales: arrayOf(string).isRequired,
 };
 
-export default withStyles(style)(injectIntl(LanguageSwitcher));
+export default connect(
+  state => ({ locales: state.runtime.config.locales })
+)(
+  withStyles(style)(injectIntl(LanguageSwitcher))
+);
