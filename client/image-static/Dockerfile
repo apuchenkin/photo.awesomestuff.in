@@ -9,7 +9,8 @@ RUN apk add --no-cache make gcc g++ python nodejs
 
 RUN npm i pm2 -g
 
-ADD . /srv
+ADD lib /srv/lib
+ADD image-static /srv/image-static
 WORKDIR /srv/image-static
 
 RUN npm install
