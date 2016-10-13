@@ -32,8 +32,9 @@ const notFound = {
 
 export default (store) => {
   const
-    { messages } = store.getState().runtime,
-    { getCategories, getCategory, getPages, getPage, getPhotos, getPhoto } = createActions(store);
+    { messages, config } = store.getState().runtime,
+    { getCategories, getCategory, getPages, getPage, getPhotos, getPhoto } = createActions(store),
+    remapPhotos = PhotoService.remapPhotos({ width: config.brickWidth, gutter: config.gutter });
 
   const photoRoute = new Route({
     store,
@@ -85,7 +86,7 @@ export default (store) => {
         return action && Object.assign({}, action, {
           payload: action.payload
             .then(photos => PhotoService.refinePhotos(photos, location.params.photoId))
-            .then(PhotoService.remapPhotos),
+            .then(remapPhotos),
         });
       },
     ],

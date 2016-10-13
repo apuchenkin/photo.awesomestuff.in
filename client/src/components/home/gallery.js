@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import CategoryLink, { fromCategory } from '../link/category';
-import { getSrc } from '../../lib/utils';
+import utils from '../../lib/utils';
 
 import style from './style.less';
 import baseStyle from '../../style/style.less';
@@ -21,7 +21,7 @@ const Gallery = ({ category, childs, width, height }) =>
   <div className={style.gallery}>
     <CategoryLink category={category.name} className={style.cover}>
       <img
-        src={getSrc(category.image, width, height, true)}
+        src={utils.getSrc(category.image, width, height, true)}
         width={width}
         title={category.title}
         alt={category.title}

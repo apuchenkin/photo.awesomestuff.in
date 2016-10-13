@@ -2,7 +2,7 @@ import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import style from './gallery.less';
-import { getSrc } from '../../lib/utils';
+import utils from '../../lib/utils';
 
 const { number, string, shape } = React.PropTypes;
 
@@ -11,7 +11,7 @@ const Brick = (props) => {
     { photo } = props,
     { w, h, src } = photo,
     size = Math.max(w, h),
-    url = getSrc(src, size, size, true),
+    url = utils.getSrc(src, size, size, true),
     brickStyle = {
       width: `${w}px`,
       height: `${h}px`,

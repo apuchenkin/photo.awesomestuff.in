@@ -85,7 +85,7 @@ const dsmap = (mode, ratio, isHorisontal, config) => {
   return modes[mode];
 };
 
-const remapPhoto = (avg, photo) => {
+const remapPhoto = (avg, photo, config) => {
   const
     v = photo.views,
     std = Math.sqrt(Math.pow((v - avg), 2)),
@@ -95,7 +95,7 @@ const remapPhoto = (avg, photo) => {
     mode = weightedRandom(probs),
     isHorisontal = (photo.width > photo.height),
     ratio = photo.width / photo.height,
-    [w, h] = dsmap(mode, ratio, isHorisontal)
+    [w, h] = dsmap(mode, ratio, isHorisontal, config)
     ;
 
   return Object.assign(photo, {
@@ -105,7 +105,7 @@ const remapPhoto = (avg, photo) => {
   });
 };
 
-export const remapPhotos = (photos) => {
+export const remapPhotos = config => (photos) => {
   const avg = photos.reduce((sum, p) => sum + p.views, 0) / photos.length;
-  return photos.map(p => remapPhoto(avg, p));
+  return photos.map(p => remapPhoto(avg, p, config));
 };

@@ -4,7 +4,7 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { bind, debounce } from 'decko';
 
-import { getSrc } from '../../lib/utils';
+import utils from '../../lib/utils';
 
 import Component from '../../lib/PureComponent';
 import Link from '../link';
@@ -114,7 +114,7 @@ class Figure extends Component {
       { dimensions } = this.state,
       { photo, onClick } = this.props,
       { width, height } = dimensions,
-      src = getSrc(photo.src, width, height);
+      src = utils.getSrc(photo.src, width, height);
 
     return (
       <Img
