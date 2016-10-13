@@ -49,7 +49,7 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
   }
 
   const
-    [width, height] = adjust$(
+    [width, height] = adjust(
       parseInt(req.params.width, 10),
       parseInt(req.params.height, 10)
     ),

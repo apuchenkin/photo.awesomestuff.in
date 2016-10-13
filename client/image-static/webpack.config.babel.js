@@ -12,14 +12,21 @@ const GLOBALS = {
 
 module.exports = {
   target: 'node',
-  entry: './index.js',
+  entry: 'index.js',
 
-  context: path.resolve(__dirname, './src'),
+  context: path.resolve(__dirname, 'src'),
 
   resolve: {
-    root: path.resolve(__dirname, './src'),
+    root: [
+      path.resolve(__dirname, 'src'),
+      path.resolve(__dirname, '..', 'lib'),
+    ],
     extensions: ['', '.jsx', '.js', '.json'],
     modulesDirectories: ['node_modules'],
+  },
+
+  resolveLoader: {
+    root: path.resolve(__dirname, 'node_modules')
   },
 
   externals: [
@@ -53,13 +60,15 @@ module.exports = {
         query: {
           cacheDirectory: true,
           babelrc: false,
-          presets: ['babel-preset-node6', 'babel-preset-es2015-minimal'].map(require.resolve),
-          plugins: ['babel-plugin-transform-runtime'].map(require.resolve)
+          presets: [
+            'babel-preset-node6',
+            'babel-preset-es2015-minimal'
+          ].map(require.resolve),
         }
       },
       {
         test: /\.json$/,
-        loader: require.resolve('json-loader'),
+        loader: 'json',
       },
       {
         test: /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2)(\?.*)?$/i,
