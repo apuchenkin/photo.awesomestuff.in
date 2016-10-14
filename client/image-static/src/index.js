@@ -58,23 +58,26 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
       kernel: sharp.kernel[conf.kernel],
       interpolator: sharp.interpolator[conf.interpolator],
     },
-    filename = path.join(basePath, req.params[0]);
+    pathParam = req.params[0],
+    ext = path.extname(pathParam),
+    basename = path.basename(pathParam),
+    fullpath = path.join(basePath, pathParam).replace('.webp', '');
 
-  fs.stat(filename, (err) => {
+  fs.stat(fullpath, (err) => {
     if (err) {
       return res.status(404).send(err);
     }
 
     res.status(200);
-    res.type(thumb ? 'webp' : 'jpg');
+    res.type(ext.replace('.', ''));
 
     if (!thumb) {
       res.set({
-        'Content-Disposition': `inline; filename=${path.basename(req.params[0])}`,
+        'Content-Disposition': `inline; filename=${basename}`,
       });
     }
 
-    const trans = sharp(filename)
+    const trans = sharp(fullpath)
       .on('error', (sharpErr) => {
         res.status(500).send(sharpErr);
         next(new Error(err));
@@ -86,6 +89,7 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
     ;
 
     const trans$ = thumb ? trans.min().webp() : trans.max().withMetadata();
+    trans = ext === '.webp' ? trans.webp() : trans;
 
     return trans$.pipe(res);
   });
