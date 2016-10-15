@@ -6,7 +6,6 @@ const VERBOSE = process.argv.includes('--verbose');
 
 const GLOBALS = {
   'process.env.NODE_ENV': DEBUG ? '"development"' : '"production"',
-  'process.env.BROWSER': false,
   __DEV__: DEBUG,
 };
 
@@ -26,7 +25,7 @@ module.exports = {
   },
 
   resolveLoader: {
-    root: path.resolve(__dirname, 'node_modules')
+    root: path.resolve(__dirname, 'node_modules'),
   },
 
   externals: [
@@ -62,9 +61,9 @@ module.exports = {
           babelrc: false,
           presets: [
             'babel-preset-node6',
-            'babel-preset-es2015-minimal'
+            'babel-preset-es2015-minimal',
           ].map(require.resolve),
-        }
+        },
       },
       {
         test: /\.json$/,
@@ -97,7 +96,7 @@ module.exports = {
   },
 
   plugins: [
-    // new webpack.DefinePlugin({ ...GLOBALS }),
+    new webpack.DefinePlugin({ ...GLOBALS }),
   ],
 
   node: {

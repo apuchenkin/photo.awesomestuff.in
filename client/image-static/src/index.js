@@ -88,10 +88,17 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
       .normalize()
     ;
 
-    const trans$ = thumb ? trans.min().webp() : trans.max().withMetadata();
-    trans = ext === '.webp' ? trans.webp() : trans;
+    if (thumb) {
+      trans.min();
+    } else {
+      trans.max();
+    }
 
-    return trans$.pipe(res);
+    if (ext === '.webp') {
+      trans.webp();
+    }
+
+    return trans.pipe(res);
   });
 
   return res;

@@ -15,6 +15,10 @@ WORKDIR /srv/image-static
 VOLUME /srv/image-static/static
 
 RUN npm install
-RUN npm run build 
+RUN npm run build
+ENV NODE_ENV production
+RUN npm prune
+RUN apk cache clean
+RUN rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["pm2-docker", "dist/index.js"]
