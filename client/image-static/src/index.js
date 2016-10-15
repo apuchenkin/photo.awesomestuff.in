@@ -34,6 +34,7 @@ app.use(expressValidator({
 
 app.get('/rt?/:width/:height/*', (req, res, next) => {
   const thumb = req.url.split('/').filter(x => !!x)[0] === 'rt';
+  const webp = !!req.accepts('image/webp');
 
   req.checkParams('height').isInt();
   req.checkParams('width').isInt();
@@ -61,19 +62,19 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
     pathParam = req.params[0],
     ext = path.extname(pathParam),
     basename = path.basename(pathParam),
-    fullpath = path.join(basePath, pathParam).replace('.webp', '');
+    fullpath = path.join(basePath, pathParam);
 
   fs.stat(fullpath, (err) => {
     if (err) {
-      return res.status(404).send(err);
+      return res.status(404).send('Not found');
     }
 
     res.status(200);
-    res.type(ext.replace('.', ''));
+    res.type(webp ? 'webp' : ext.replace('.', ''));
 
     if (!thumb) {
       res.set({
-        'Content-Disposition': `inline; filename=${basename}`,
+        'Content-Disposition': `inline; filename=${basename + webp ? '.webp' : ''}`,
       });
     }
 
@@ -94,7 +95,7 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
       trans.max();
     }
 
-    if (ext === '.webp') {
+    if (webp) {
       trans.webp();
     }
 

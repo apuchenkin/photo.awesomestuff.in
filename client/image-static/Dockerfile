@@ -1,13 +1,11 @@
 FROM alpine:edge
 
 RUN apk add vips-dev  \
-	--update-cache \
+	--no-cache \
 	--repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
 	--allow-untrusted
 
 RUN apk add --no-cache make gcc g++ python nodejs
-RUN apk cache clean
-RUN rm -rf /var/cache/apk/*
 
 ADD lib /srv/lib
 ADD image-static /srv/image-static
