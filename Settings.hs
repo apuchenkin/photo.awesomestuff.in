@@ -56,8 +56,6 @@ data AppSettings = AppSettings
     -- ^ Copyright text to appear in the footer of the page
     , secret                    :: String
     -- ^ Sha1 secret key
-    , cachePath                 :: String
-    -- ^ path to the cache folder
     , useCors                   :: Maybe Bool
     }
 
@@ -84,7 +82,6 @@ instance FromJSON AppSettings where
 
         appCopyright              <- o .: "copyright"
         secret                    <- o .: "secret"
-        cachePath                 <- o .: "cache-path"
         useCors                   <- o .:? "use-cors"
 
         return AppSettings {..}
