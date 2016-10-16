@@ -4,8 +4,8 @@ RUN pacman -S --noconfirm libmariadbclient
 
 WORKDIR /srv
 
-ADD ./build /srv
+ADD ./dist /srv
 ADD ./config /srv/config
-ADD ./static /srv/static
+VOLUME /srv/static
 
 ENTRYPOINT ./aws-photo-service
