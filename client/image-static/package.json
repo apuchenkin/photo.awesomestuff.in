@@ -14,7 +14,8 @@
     "express": "^4.14.0",
     "express-validator": "^2.20.10",
     "memoizee": "^0.4.1",
-    "sharp": "^0.16.0"
+    "sharp": "^0.16.0",
+    "vary": "^1.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",

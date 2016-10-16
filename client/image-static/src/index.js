@@ -4,16 +4,15 @@ import path from 'path';
 import fs from 'fs';
 import url from 'url';
 import sharp from 'sharp';
+import vary from 'vary';
+
 import { adjust } from '../../lib/util/photo/memoize';
 
 import config from '../etc/config.json';
 
 const app = express();
 const basePath = path.join(__dirname, '..', 'static');
-
-console.log(sharp.cache(config.cache));
-console.log(sharp.concurrency());
-console.log(sharp.simd(true));
+const extensions = ['jpg', 'png', 'jpeg'];
 
 app.use(express.static(basePath));
 
@@ -27,14 +26,17 @@ app.use(expressValidator({
       if (u.protocol || u.host || !u.path) {
         return false;
       }
+      const ext = path.extname(u.path);
+      if (!extensions.find(x => `.${x}` === ext)) {
+        return false;
+      }
       return true;
     },
   },
 }));
 
-app.get('/rt?/:width/:height/*', (req, res, next) => {
-  const thumb = req.url.split('/').filter(x => !!x)[0] === 'rt';
-  const webp = !!req.accepts('image/webp');
+const checkParams = (req, res, next) => {
+  const pathParam = req.params[0];
 
   req.checkParams('height').isInt();
   req.checkParams('width').isInt();
@@ -49,65 +51,98 @@ app.get('/rt?/:width/:height/*', (req, res, next) => {
     return res.sendStatus(304);
   }
 
+  Object.assign(req.params, {
+    width: parseInt(req.params.width, 10),
+    height: parseInt(req.params.height, 10),
+    thumb: req.url.split('/').filter(x => !!x)[0] === 'rt',
+  });
+
+  Object.assign(req, {
+    url: path.join(basePath, pathParam),
+  });
+
+  fs.stat(req.url, (err) => {
+    if (err) {
+      return res.sendStatus(404);
+    }
+
+    next();
+    return false;
+  });
+
+  return false;
+};
+
+const acceptWebp = (req, res, next) => {
+  if (req.headers.accept
+    && req.headers.accept.indexOf('image/webp') !== -1) {
+    vary(res, 'Accept');
+    Object.assign(req.params, {
+      webp: true,
+    });
+  }
+
+  next();
+};
+
+const serveImage = (req, res, next) => {
   const
-    [width, height] = adjust(
-      parseInt(req.params.width, 10),
-      parseInt(req.params.height, 10)
-    ),
+    { width, height, thumb, webp } = req.params,
+    [w, h] = adjust(width, height),
     conf = thumb ? (config.thumb && config.thumb.opts) : config.opts,
     opts = conf && {
       kernel: sharp.kernel[conf.kernel],
       interpolator: sharp.interpolator[conf.interpolator],
     },
-    pathParam = req.params[0],
-    ext = path.extname(pathParam),
-    basename = path.basename(pathParam),
-    fullpath = path.join(basePath, pathParam);
+    ext = path.extname(req.url),
+    basename = path.basename(req.url);
 
-  fs.stat(fullpath, (err) => {
-    if (err) {
-      return res.status(404).send('Not found');
-    }
 
-    res.status(200);
-    res.type(webp ? 'webp' : ext.replace('.', ''));
+  res.status(200);
+  res.type(webp ? 'webp' : ext.replace('.', ''));
 
-    if (!thumb) {
-      res.set({
-        'Content-Disposition': `inline; filename=${basename + webp ? '.webp' : ''}`,
-      });
-    }
+  if (!thumb) {
+    res.set({
+      'Content-Disposition': `inline; filename=${basename + webp ? '.webp' : ''}`,
+    });
+  }
 
-    const trans = sharp(fullpath)
-      .on('error', (sharpErr) => {
-        res.status(500).send(sharpErr);
-        next(new Error(err));
-      })
-      .resize(width, height, opts)
-      .withoutEnlargement()
-      .flatten()
-      .normalize()
-    ;
+  const trans = sharp(req.url)
+    .on('error', (sharpErr) => {
+      res.sendStatus(500);
+      next(new Error(sharpErr));
+    })
+    .resize(w, h, opts)
+    .withoutEnlargement()
+    .flatten()
+    .normalize()
+  ;
 
-    if (thumb) {
-      trans.min();
-    } else {
-      trans.max();
-    }
+  if (thumb) {
+    trans.min();
+  } else {
+    trans.max();
+  }
 
-    if (webp) {
-      trans.webp();
-    }
+  if (webp) {
+    trans.webp();
+  }
 
-    return trans.pipe(res);
-  });
+  return trans.pipe(res);
+};
 
-  return res;
-});
+app.get('/rt?/:width/:height/*', [
+  checkParams,
+  acceptWebp,
+  serveImage,
+]);
 
 const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on: ${PORT}`);
+  console.log(`Server listening on: ${PORT}`); // eslint-disable-line no-console
+
+  console.log(sharp.cache(config.cache)); // eslint-disable-line no-console
+  console.log(sharp.concurrency()); // eslint-disable-line no-console
+  console.log(sharp.simd(true)); // eslint-disable-line no-console
 });

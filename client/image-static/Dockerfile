@@ -12,7 +12,6 @@ ADD image-static /srv/image-static
 WORKDIR /srv/image-static
 VOLUME /srv/image-static/static
 
-RUN ls -la
 RUN npm install
 RUN npm run build
 ENV NODE_ENV production
