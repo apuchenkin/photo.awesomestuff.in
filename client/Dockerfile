@@ -9,5 +9,9 @@ WORKDIR /srv
 
 RUN npm install
 RUN gulp build --release
+ENV NODE_ENV production
+RUN npm prune
+
+RUN npm uninstall -g gulp
 
 ENTRYPOINT ["pm2-docker", "dist/server.js"]
