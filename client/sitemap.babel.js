@@ -2,24 +2,12 @@
 import sitemap from 'sitemap';
 import { Promise } from 'es6-promise';
 
-import config from './src/config/config';
-import CategoryService from './src/service/Category';
-import PhotoService from './src/service/Photo';
-import PageService from './src/service/Page';
+import config from './src/etc/config';
+import CategoryService from './lib/service/Category';
+import PhotoService from './lib/service/Photo';
+import PageService from './lib/service/Page';
 import utils from './src/lib/utils';
-
-const getSrc = photo =>
-  [
-    `${config.apiEndpoint}${config.apiPrefix}`,
-    'hs/photo',
-    photo.id,
-    config.photo.width,
-    config.photo.height,
-    photo.src.split('/').pop(),
-  ]
-  .filter(x => !!x)
-  .join('/');
-
+import { getSrc } from './lib/util/photo';
 
 const merge = urls => urls.reduce((acc, location) => {
   const exist = acc.find(a => a.url === location.url);
@@ -48,9 +36,10 @@ const createSitemap = urls => sitemap.createSitemap({
 
 const pages = config.locales.map((locale) => {
   const
-    categoryService = new CategoryService({ locale }),
-    photoService = new PhotoService({ locale }),
-    pageService = new PageService({ locale });
+    defaults = { locale, apiEndpoint: config.apiEndpoint },
+    categoryService = new CategoryService(defaults),
+    photoService = new PhotoService(defaults),
+    pageService = new PageService(defaults);
 
   return utils.fetchAll({
     locale: Promise.resolve(locale),
@@ -82,7 +71,7 @@ export default () => Promise
             url: `${url}/photo/${photo.id}`,
             changefreq: 'monthly',
             priority: 0.5,
-            img: getSrc(photo), //TODO: add caption
+            img: [config.staticEndpoint, getSrc(photo.src, config.photo.width, config.photo.height)].join('/'),
           }));
 
         return acc.concat([{

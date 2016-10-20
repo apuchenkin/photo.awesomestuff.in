@@ -1,0 +1,11 @@
+FROM pritunl/archlinux
+
+RUN pacman -S --noconfirm libmariadbclient
+
+WORKDIR /srv
+
+ADD ./dist /srv
+ADD ./config /srv/config
+VOLUME /srv/static
+
+ENTRYPOINT ./aws-photo-service

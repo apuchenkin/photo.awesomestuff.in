@@ -1,8 +1,4 @@
-import config from '../config/config.json';
-
 const defaults = {
-  locale: config.fallbackLocale,
-  location: config.apiEndpoint,
   contentType: 'application/json',
 };
 
@@ -19,7 +15,7 @@ export default class BaseService {
   }
 
   baseUrl() {
-    return this.location + config.apiPrefix;
+    return this.apiEndpoint;
   }
 
   constructor(options = {}) {

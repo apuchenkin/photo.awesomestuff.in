@@ -4,11 +4,10 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import escapeHtml from 'escape-html';
 import assets from '../../dist/assets.json';
-import config from '../config/config.json';
 
 import style from '../style/style.less';
 
-const { string, shape, array } = React.PropTypes;
+const { string, shape, array, object } = React.PropTypes;
 
 const GoogleAnalytics = ({ id }) => (
   <script
@@ -27,8 +26,10 @@ GoogleAnalytics.propTypes = {
 };
 
 function renderHTML({ componentHTML, initialState, meta, styles }) {
+  const { config, locale } = initialState.runtime;
+
   return (
-    <html lang={initialState.runtime.locale}>
+    <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width initial-scale=1.0" />
@@ -43,7 +44,7 @@ function renderHTML({ componentHTML, initialState, meta, styles }) {
         <div id="react-view" className={style.wrapper} dangerouslySetInnerHTML={{ __html: componentHTML }} />
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
-        <script type="application/javascript" src={`${config.staticEndpoint}${assets.main.js}`} />
+        <script type="application/javascript" src={`${config.hostname}${assets.main.js}`} />
       </body>
     </html>
   );
@@ -54,6 +55,7 @@ renderHTML.propTypes = {
   initialState: shape({
     runtime: shape({
       locale: string.isRequired,
+      config: object.isRequired,
     }),
   }).isRequired,
   meta: shape({

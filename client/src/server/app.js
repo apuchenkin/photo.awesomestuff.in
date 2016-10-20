@@ -10,7 +10,7 @@ import path from 'path';
 import HTML from './renderHTML';
 import createStore from '../createStore';
 import createRoutes from '../routes';
-import config from '../config/config.json';
+import config from '../etc/config.json';
 import utils from '../lib/utils';
 import WithStylesContext from '../components/WithStylesContext';
 
@@ -30,7 +30,7 @@ app.use((req, res) => {
     locale = prefix || negotiateLocale(req),
     // eslint-disable-next-line global-require
     messages = locale ? require(`../translation/${locale}.json`) : {},
-    store = createStore({ runtime: { locale, basename, messages } }),
+    store = createStore({ runtime: { locale, basename, messages, config } }),
     routes = createRoutes(store),
     location = basename ? req.url.replace(basename, '') || '/' : req.url,
     css = new Set(), // CSS for all rendered React components

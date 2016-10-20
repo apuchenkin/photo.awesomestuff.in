@@ -1,23 +1,4 @@
-import resolutions from '../config/resolution.json';
-import { apiEndpoint, apiPrefix, brickWidth, gutter } from '../config/config.json';
-
-export const weightedRandom = (probabilities) => {
-  const probabilitiesMap = probabilities.reduce((acc, v) => {
-      acc.push(v + (acc.length ? acc[acc.length - 1] : 0));
-      return acc;
-    }, []),
-    pointer = Math.floor(Math.random() * probabilitiesMap[probabilitiesMap.length - 1]);
-
-  return probabilitiesMap.reduce((acc, v) => (pointer <= v ? acc : acc + 1), 0);
-};
-
-export const getSize = (w, h, ratio) => {
-  const
-    inc = ratio >= 1 ? ratio : 1 / ratio,
-    [m1, m2] = w < h ? [Math.ceil(w * inc), h] : [Math.ceil(h * inc), w];
-
-  return Math.max(m1, m2);
-};
+import resolutions from './resolution.json';
 
 export const adjust = (w, h) => {
   const
@@ -29,14 +10,18 @@ export const adjust = (w, h) => {
   return resolutions[idx];
 };
 
-export const getSrc = (photo, dimensions) => {
-  const
-    { width, height } = dimensions,
-    [w, h] = adjust(width, height),
-    filename = photo.src.split('/').pop();
+export const weightedRandom = (probabilities) => {
+  const probabilitiesMap = probabilities.reduce((acc, v) => {
+      acc.push(v + (acc.length ? acc[acc.length - 1] : 0));
+      return acc;
+    }, []),
+    pointer = Math.floor(Math.random() * probabilitiesMap[probabilitiesMap.length - 1]);
 
-  return [apiEndpoint + apiPrefix, 'hs/photo', photo.id, w, h, filename].join('/');
+  return probabilitiesMap.reduce((acc, v) => (pointer <= v ? acc : acc + 1), 0);
 };
+
+export const getSrc = (src, w, h, thumb = false) =>
+  [thumb ? 'rt' : 'r', w, h, src].join('/');
 
 export const refinePhotos = (photos, excludeId) => {
   photos.map((p, k) => Object.assign(p, { order: k }));
@@ -79,16 +64,17 @@ export const refinePhotos = (photos, excludeId) => {
   return init.sort((a, b) => a.order - b.order);
 };
 
-const sizes = [
-  (brickWidth)
-, ((brickWidth * 2) + (gutter))
-, ((brickWidth * 3) + (gutter * 2))
-, ((brickWidth * 4) + (gutter * 3)),
+const sizes = (width, gutter) => [
+  (width)
+, ((width * 2) + (gutter))
+, ((width * 3) + (gutter * 2))
+, ((width * 4) + (gutter * 3)),
 ];
 
-const dsmap = (mode, ratio, isHorisontal) => {
+const dsmap = (mode, ratio, isHorisontal, config) => {
   const
-    [s1, s2, s3, s4] = sizes,
+    { width, gutter } = config,
+    [s1, s2, s3, s4] = sizes(width, gutter),
     modes = [
       [ratio >= 2 ? s2 : s1, s1],
       isHorisontal ? [ratio >= 3 ? s3 : s2, s1] : [s1, s2],
@@ -99,7 +85,7 @@ const dsmap = (mode, ratio, isHorisontal) => {
   return modes[mode];
 };
 
-const remapPhoto = (avg, photo) => {
+const remapPhoto = (avg, photo, config) => {
   const
     v = photo.views,
     std = Math.sqrt(Math.pow((v - avg), 2)),
@@ -109,7 +95,7 @@ const remapPhoto = (avg, photo) => {
     mode = weightedRandom(probs),
     isHorisontal = (photo.width > photo.height),
     ratio = photo.width / photo.height,
-    [w, h] = dsmap(mode, ratio, isHorisontal)
+    [w, h] = dsmap(mode, ratio, isHorisontal, config)
     ;
 
   return Object.assign(photo, {
@@ -119,7 +105,7 @@ const remapPhoto = (avg, photo) => {
   });
 };
 
-export const remapPhotos = (photos) => {
+export const remapPhotos = config => (photos) => {
   const avg = photos.reduce((sum, p) => sum + p.views, 0) / photos.length;
-  return photos.map(p => remapPhoto(avg, p));
+  return photos.map(p => remapPhoto(avg, p, config));
 };

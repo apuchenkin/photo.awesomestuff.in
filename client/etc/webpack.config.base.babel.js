@@ -36,6 +36,7 @@ module.exports = {
         test: /\.jsx?$/,
         include: [
           path.resolve(__dirname, '../src'),
+          path.resolve(__dirname, '../lib'),
         ],
         loader: 'babel',
         query: {

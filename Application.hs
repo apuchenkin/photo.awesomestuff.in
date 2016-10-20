@@ -36,7 +36,6 @@ import Network.Wai.Middleware.Cors          (cors, CorsResourcePolicy (..))
 import Handler.Common
 import Handler.Photo
 import Handler.Category
-import Handler.Static
 import Handler.PhotoGroup
 import Handler.Author
 import Handler.Page
@@ -120,6 +119,17 @@ warpSettings foundation =
             (toLogStr $ "Exception from Warp: " ++ show e))
       defaultSettings
 
+corsResourcePolicy = CorsResourcePolicy
+  { corsOrigins = Nothing
+  , corsMethods = [ "GET", "HEAD", "POST", "PATCH", "LINK", "UNLINK" ]
+  , corsRequestHeaders = ["Accept", "Authorization", "Content-Type"]
+  , corsExposedHeaders = Nothing
+  , corsMaxAge = Nothing
+  , corsVaryOrigin = False
+  , corsRequireOrigin = False
+  , corsIgnoreFailures = False
+  }
+
 -- | For yesod devel, return the Warp settings and WAI Application.
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
@@ -127,16 +137,6 @@ getApplicationDev = do
     foundation <- makeFoundation settings
     wsettings <- getDevSettings $ warpSettings foundation
     app <- makeApplication foundation
-    let corsResourcePolicy = CorsResourcePolicy
-            { corsOrigins = Nothing
-            , corsMethods = [ "GET", "HEAD", "POST", "PATCH", "LINK", "UNLINK" ]
-            , corsRequestHeaders = ["Accept", "Authorization", "Content-Type"]
-            , corsExposedHeaders = Nothing
-            , corsMaxAge = Nothing
-            , corsVaryOrigin = False
-            , corsRequireOrigin = False
-            , corsIgnoreFailures = False
-            }
     return (wsettings, cors (const $ Just corsResourcePolicy) app)
 
 getAppSettings :: IO AppSettings
@@ -159,8 +159,9 @@ appMain = do
     app <- makeApplication foundation
 
     -- Run the application with Warp
-    runSettings (warpSettings foundation) app
-
+    runSettings (warpSettings foundation) $ case (useCors settings) of
+      Just True -> cors (const $ Just corsResourcePolicy) app
+      _ -> app
 
 --------------------------------------------------------------
 -- Functions for DevelMain.hs (a way to run the app from GHCi)

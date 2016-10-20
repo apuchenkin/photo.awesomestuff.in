@@ -64,7 +64,7 @@ gulp.task('sitemap', (cb) => {
   // eslint-disable-next-line global-require
   const sitemap = require('./sitemap.babel.js');
 
-  return sitemap()
+  return sitemap.default()
     .catch(cb)
     .then(stream => file('sitemap.xml', stream, { src: true })
       .pipe(gulp.dest(`${DIST}/assets`))

@@ -1,9 +1,8 @@
 {
   "hostname": "http://localhost:3001",
-  "apiEndpoint": "http://192.168.138.34:3000",
-  "apiPrefix": "",
-  "staticEndpoint": "http://localhost:8080",
-  "analytics": "UA-63928795-1",
+  "apiEndpoint": "http://localhost:3000",
+  "staticEndpoint": "http://localhost:3002",
+  "analytics": false,
   "title": "PHOTO.AWESOMESTUFF.IN",
   "locales": ["ru", "en"],
   "fallbackLocale" : "en",

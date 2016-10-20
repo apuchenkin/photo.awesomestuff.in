@@ -22,7 +22,3 @@
 !/category/#String/photo               			CategoryPhoto2R GET
 
 /author/#AuthorId/photo                     AuthorPhotoR GET
-
--- static image server
-/hs/image/#String/#Int/#Int/#String         StaticImageR  GET
-/hs/photo/#PhotoId/#Int/#Int/#String        StaticPhotoR  GET

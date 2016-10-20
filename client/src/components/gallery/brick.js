@@ -1,23 +1,21 @@
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import PhotoService from '../../service/Photo';
-import { apiEndpoint, apiPrefix } from '../../config/config.json';
 import style from './gallery.less';
+import utils from '../../lib/utils';
 
 const { number, string, shape } = React.PropTypes;
 
 const Brick = (props) => {
   const
     { photo } = props,
-    { w, h, ratio } = photo,
-    size = PhotoService.getSize(w, h, ratio),
-    filename = photo.src.split('/').pop(),
-    src = [apiEndpoint + apiPrefix, 'hs/photo', photo.id, size, size, filename].join('/'),
+    { w, h, src } = photo,
+    size = Math.max(w, h),
+    url = utils.getSrc(src, size, size, true),
     brickStyle = {
       width: `${w}px`,
       height: `${h}px`,
-      backgroundImage: `url(${src})`,
+      backgroundImage: `url(${url})`,
     };
 
   return (

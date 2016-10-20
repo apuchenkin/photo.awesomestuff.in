@@ -1,0 +1,5 @@
+test/*
+etc/*
+build/*
+dist/*
+sitemap.js

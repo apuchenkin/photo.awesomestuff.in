@@ -1,8 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import CategoryLink, { fromCategory } from '../link/category';
-import config from '../../config/config.json';
+import utils from '../../lib/utils';
 
 import style from './style.less';
 import baseStyle from '../../style/style.less';
@@ -16,10 +17,15 @@ const
     image: string,
   });
 
-const Gallery = ({ category, childs }) =>
+const Gallery = ({ category, childs, width, height }) =>
   <div className={style.gallery}>
     <CategoryLink category={category.name} className={style.cover}>
-      <img src={`${config.staticEndpoint}${config.apiPrefix}/${category.image}`} width={config.gallery.width} title={category.title} alt={category.title} />
+      <img
+        src={utils.getSrc(category.image, width, height, true)}
+        width={width}
+        title={category.title}
+        alt={category.title}
+      />
       {category.date && <span className={style.sub}>{category.date}</span>}
     </CategoryLink>
     <aside>
@@ -40,6 +46,8 @@ const Gallery = ({ category, childs }) =>
 ;
 
 Gallery.propTypes = {
+  width: number.isRequired,
+  height: number.isRequired,
   category: categoryShape.isRequired,
   childs: arrayOf(shape({
     id: number.isRequired,
@@ -48,6 +56,11 @@ Gallery.propTypes = {
   })).isRequired,
 };
 
-export default withStyles(style, baseStyle)(
-  Gallery
+export default connect(
+  state => ({
+    width: state.runtime.config.gallery.width,
+    height: state.runtime.config.gallery.height,
+  })
+)(
+  withStyles(style, baseStyle)(Gallery)
 );

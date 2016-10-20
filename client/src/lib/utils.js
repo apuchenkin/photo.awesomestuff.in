@@ -2,7 +2,8 @@ import React from 'react';
 import { Promise } from 'es6-promise';
 import IntlMessageFormat from 'intl-messageformat';
 
-import config from '../config/config.json';
+import { getSrc } from '../../lib/util/photo/memoize';
+import config from '../etc/config.json';
 
 export const localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g;
 
@@ -23,6 +24,10 @@ export default {
     return Promise
       .all(keys.map(k => object[k]))
       .then(data => keys.reduce((acc, k, idx) => Object.assign(acc, { [k]: data[idx] }), {}));
+  },
+
+  getSrc(...args) {
+    return [config.staticEndpoint, getSrc(...args)].join('/');
   },
 
   getMeta(routes = [], messages, pathname) {
