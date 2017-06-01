@@ -1,5 +1,4 @@
-require('normalize.css/normalize.css');
-require('styles/app.less');
+// require('normalize.css/normalize.css');
 
 import React from 'react';
 import { Router, Route, Link, browserHistory, IndexRoute, withRouter } from 'react-router';
@@ -7,8 +6,12 @@ import { DragSource, DropTarget, DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import Auth from './Auth';
-import PhotoService from '../service/Photo';
-import CategoryService from '../service/Category';
+
+import config from '../../../src/etc/config.json';
+import PhotoService from '../../../lib/service/Photo';
+import CategoryService from '../../../lib/service/Category';
+
+require('../styles/app.less');
 
 // let yeomanImage = require('../images/yeoman.png');
 
@@ -40,7 +43,9 @@ const Admin = withRouter(React.createClass({
 
   fetchCategories () {
     let me = this,
-        categoryService = new CategoryService(me.state.token);
+        categoryService = new CategoryService({
+          apiEndpoint: config.apiEndpoint,
+        });
 
     categoryService.fetchCategories()
       .then(categories => me.setState({categories: categories}));
