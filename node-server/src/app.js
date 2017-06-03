@@ -1,11 +1,33 @@
 import Koa from 'koa';
+import Router from 'koa-router';
 import db from './db';
 import User from './model/user';
-import Photo from './model/photo';
-import Page from './model/page';
-import Translation from './model/translation';
+import authorRouter from './handler/author';
+import categoryRouter from './handler/category';
 
 const app = new Koa();
+const router = Router();
+
+router.get('/', async (ctx) => {
+  try {
+    await ctx.db.authenticate();
+    const users = await User.findAll();
+    ctx.body = users;
+  } catch (err) {
+    ctx.body = 'Unable to connect to the database:';
+    console.error(err);
+  }
+});
+
+router.use('/author', authorRouter.routes());
+router.use('/author', authorRouter.allowedMethods());
+
+router.use('/category', categoryRouter.routes());
+router.use('/category', categoryRouter.allowedMethods());
+
+app
+  .use(router.routes())
+  .use(router.allowedMethods());
 
 db.sync({ force: true }).then(() => User.create({
   email: 'apuchenkin@gmail.com',
@@ -15,7 +37,6 @@ db.sync({ force: true }).then(() => User.create({
 app.context.db = db;
 
 // x-response-time
-
 app.use(async (ctx, next) => {
   const start = new Date();
   await next();
@@ -24,25 +45,12 @@ app.use(async (ctx, next) => {
 });
 
 // logger
-
 app.use(async (ctx, next) => {
   const start = new Date();
   await next();
   const ms = new Date() - start;
 
   console.log(`${ctx.method} ${ctx.url} - ${ms}`);
-});
-
-// response
-app.use(async (ctx) => {
-  try {
-    await ctx.db.authenticate();
-    const users = await User.findAll();
-    ctx.body = users;
-  } catch (err) {
-    ctx.body = 'Unable to connect to the database:';
-    console.error(err);
-  }
 });
 
 app.listen(3000);

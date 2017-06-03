@@ -4,6 +4,7 @@ import db from '../db';
 const Author = db.define('author', {
   name: {
     type: Sequelize.STRING,
+    allowNull: false,
     unique: true,
   },
 });
