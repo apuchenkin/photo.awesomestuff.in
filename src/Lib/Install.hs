@@ -1,4 +1,14 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE EmptyDataDecls             #-}
+{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GADTs                      #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE NoImplicitPrelude          #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DataKinds #-}
 
 module Lib.Install where
 
@@ -43,7 +53,7 @@ doInstall :: SqlPersistT IO ()
 doInstall = do
     print "read: exif.json"
     exifFile <- liftIO $ readFile "exif.json"
-    let eresult = eitherDecode exifFile :: Either String [Value]
+    let eresult = eitherDecode (fromStrict exifFile) :: Either String [Value]
     case eresult of
         Left err -> liftIO $ putStrLn $ pack err
         Right objects -> do

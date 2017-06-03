@@ -1,9 +1,8 @@
-FROM pritunl/archlinux
+FROM fpco/stack-build
 
-RUN pacman -S --noconfirm \
-	base-devel \
-	mysql \
-	stack
+RUN apt-get update
+RUN apt-get install -y mysql-client
 
 WORKDIR /srv
 ADD . /srv
+RUN stack setup

@@ -1,8 +1,9 @@
+{-# LANGUAGE CPP #-}
 module Import.NoFoundation
     ( module Import
     ) where
 
-import ClassyPrelude.Yesod   as Import hiding (Handler)
+import ClassyPrelude.Yesod   as Import
 import Model                 as Import
 import Settings              as Import
 import Settings.StaticFiles  as Import
