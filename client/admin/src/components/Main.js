@@ -12,6 +12,8 @@ import HTML5Backend from 'react-dnd-html5-backend';
 
 import Auth from './Auth';
 import App from './App';
+import Upload from './Upload';
+import Header from './Header';
 
 require('../../../src/style/style.less');
 require('../styles/app.less');
@@ -28,9 +30,11 @@ const NoMatch = () => <div>NoMatch</div>;
 const AppComponent = () => (
   <Router>
     <div>
+      <Header />
       <Switch>
         <Route exact path="/" component={App} />
         <Route path="/auth" component={Auth} />
+        <Route path="/upload" component={Upload} />
         <Route component={NoMatch} />
       </Switch>
     </div>

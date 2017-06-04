@@ -4,6 +4,7 @@ import db from './db';
 import User from './model/user';
 import authorRouter from './handler/author';
 import categoryRouter from './handler/category';
+import photoRouter from './handler/photo';
 
 const app = new Koa();
 const router = Router();
@@ -24,6 +25,9 @@ router.use('/author', authorRouter.allowedMethods());
 
 router.use('/category', categoryRouter.routes());
 router.use('/category', categoryRouter.allowedMethods());
+
+router.use('/photo', photoRouter.routes());
+router.use('/photo', photoRouter.allowedMethods());
 
 app
   .use(router.routes())
