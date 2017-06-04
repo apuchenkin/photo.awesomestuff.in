@@ -1,4 +1,3 @@
-const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -9,7 +8,6 @@ module.exports = {
     publicPath: '/',
   },
   resolve: {
-    // modules: [path.resolve(__dirname, '..', '..', 'src'), 'node_modules'],
     extensions: ['.js', '.jsx'],
   },
   module: {
@@ -42,9 +40,10 @@ module.exports = {
   devtool: 'inline-source-map',
   devServer: {
     port: 9000,
+    historyApiFallback: true,
     proxy: {
       '/api/v1': {
-        target: 'http://photo.awesomestuff.in:3000',
+        target: 'http://localhost:3000',
         pathRewrite: { '^/api/v1': '' },
       },
     },
