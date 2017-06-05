@@ -2,6 +2,7 @@ import Koa from 'koa';
 import Router from 'koa-router';
 import db from './db';
 import User from './model/user';
+import Category from './model/category';
 import authorRouter from './handler/author';
 import categoryRouter from './handler/category';
 import photoRouter from './handler/photo';
@@ -33,10 +34,15 @@ app
   .use(router.routes())
   .use(router.allowedMethods());
 
-db.sync({ force: true }).then(() => User.create({
-  email: 'apuchenkin@gmail.com',
-  password: 'root',
-}));
+db.sync({ force: true })
+  .then(() => User.create({
+    email: 'apuchenkin@gmail.com',
+    password: 'root',
+  }))
+  .then(() => Category.create({
+    name: 'test',
+  }))
+;
 
 app.context.db = db;
 

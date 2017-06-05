@@ -14,9 +14,6 @@ const Photo = db.define('photo', {
     allowNull: false,
     unique: true,
   },
-  thumb: {
-    type: Sequelize.STRING,
-  },
   width: {
     type: Sequelize.INTEGER,
     allowNull: false,
@@ -31,6 +28,7 @@ const Photo = db.define('photo', {
   },
   views: {
     type: Sequelize.INTEGER,
+    defaultValue: 0,
     allowNull: false,
   },
   datetime: {

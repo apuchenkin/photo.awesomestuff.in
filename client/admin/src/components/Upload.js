@@ -3,11 +3,19 @@ import { List, Map } from 'immutable';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 
+import config from '../../../src/etc/config.json';
+import CategoryService from '../../../lib/service/Category';
+
 const fileTarget = {
   drop(props, monitor, cmp) {
     cmp.onDropFiles(monitor.getItem().files);
   },
 };
+
+
+const categoryService = new CategoryService({
+  apiEndpoint: config.apiEndpoint,
+});
 
 const collectDrop = (connect, monitor) => ({
   dropTarget: connect.dropTarget(),
@@ -21,19 +29,26 @@ class Upload extends React.Component {
     super(props);
 
     this.state = {
+      categories: List(),
       files: List(),
     };
   }
 
+  componentWillMount() {
+    this.fetchCategories();
+  }
+
   onDropFiles(files) {
     const files$ = files.map((file) => {
-      fetch('/api/v1/photo', {
+      fetch(`/api/v1/photo/${this.select.value}`, {
         method: 'POST',
+        headers: new Headers({
+          'Content-Disposition': `attachment; filename="${file.name}"`,
+        }),
         body: file,
       }).then((response) => {
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
-        // const chunks = [];
 
         const pump = () => reader.read().then(({ value, done }) => {
           if (done) {
@@ -59,16 +74,32 @@ class Upload extends React.Component {
     this.setState({ files: List(files$) });
   }
 
+  fetchCategories() {
+    categoryService.fetchCategories()
+      .then(List)
+      .then(categories => this.setState({ categories }));
+  }
+
   render() {
     const { dropTarget } = this.props;
-    const { files } = this.state;
+    const { files, categories } = this.state;
+    const options = categories.map(category => (
+      <option key={category.name} value={category.name}>
+        { category.title || category.name }
+      </option>
+    ));
 
-    return dropTarget(
-      <div className="upload">
-        <ul>
-          {files.map(file => <li key={file.get('file').name}>{file.get('file').name}, {file.get('loaded')}</li>)}
-        </ul>
-      </div>,
+    return (
+      <div>
+        <select ref={(select) => { this.select = select; }}>{options}</select>
+        {dropTarget(
+          <div className="upload">
+            <ul>
+              {files.map(file => <li key={file.get('file').name}>{file.get('file').name}, {file.get('loaded')}</li>)}
+            </ul>
+          </div>,
+        )}
+      </div>
     );
   }
 }
