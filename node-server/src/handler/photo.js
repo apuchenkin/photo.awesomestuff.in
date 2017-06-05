@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import body from 'koa-body';
+import { PassThrough } from 'stream';
 
 import Photo from '../model/photo';
 
@@ -9,33 +9,26 @@ router
   .get('/', async (ctx) => {
     ctx.body = await Photo.findAll();
   })
-  // .use(body())
-  .post('/', async (ctx) => {
-    const promise = new Promise((resolve, reject) => {
-      const stream = ctx.req;
-      const data = [];
-      stream.on('error', (e) => {
-        console.log('error');
-        reject(e);
-      });
-      stream.on('close', (e) => {
-        console.log('close');
-      });
-      stream.on('data', (chunk) => {
-        data.push(chunk);
-        console.log('push');
-      });
-      stream.on('end', () => {
-        const result = Buffer.concat(data).toString();
-        console.log('ok');
+  .post('/', (ctx) => {
+    const stream = ctx.req;
+    const resp = PassThrough();
 
-        resolve(result);
-      });
-    })
-    const res = await promise;
+    const data = [];
+    stream.on('error', ctx.onerror);
+    // stream.on('close', () => {
+    //   console.log('close');
+    // });
+    stream.on('data', (chunk) => {
+      data.push(chunk);
+      resp.write(`${(Buffer.concat(data).length * 100) / ctx.request.length}\n`);
+    });
+    stream.on('end', () => {
+      const result = Buffer.concat(data).toString();
+      resp.write('done');
+      resp.end();
+    });
 
-    // const category = await Photo.create(ctx.request.body, { validate: true });
-    ctx.body = 'ok';
+    ctx.body = resp;
   });
 
 export default router;

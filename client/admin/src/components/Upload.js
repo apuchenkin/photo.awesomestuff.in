@@ -1,4 +1,5 @@
 import React from 'react';
+import { List, Map } from 'immutable';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 
@@ -20,7 +21,7 @@ class Upload extends React.Component {
     super(props);
 
     this.state = {
-      files: [],
+      files: List(),
     };
   }
 
@@ -29,12 +30,33 @@ class Upload extends React.Component {
       fetch('/api/v1/photo', {
         method: 'POST',
         body: file,
+      }).then((response) => {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        // const chunks = [];
+
+        const pump = () => reader.read().then(({ value, done }) => {
+          if (done) {
+            return true;
+          }
+
+          const status = decoder.decode(value).trim().split('\n').pop();
+          this.setState(state => ({
+            files: state.files.update(
+              state.files.findIndex(f => f.get('file') === file),
+              f => f.set('loaded', status),
+            ),
+          }));
+          return pump();
+        });
+
+        return pump();
       });
 
-      return Object.assign(file, { loaded: false });
+      return Map({ file, loaded: 'pending' });
     });
 
-    this.setState({ files: files$ });
+    this.setState({ files: List(files$) });
   }
 
   render() {
@@ -44,7 +66,7 @@ class Upload extends React.Component {
     return dropTarget(
       <div className="upload">
         <ul>
-          {files.map(file => <li key={file.name}>{file.name}, {file.loaded ? 'yes' : 'no'}</li>)}
+          {files.map(file => <li key={file.get('file').name}>{file.get('file').name}, {file.get('loaded')}</li>)}
         </ul>
       </div>,
     );
