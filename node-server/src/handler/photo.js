@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import mkdirp from 'mkdirp';
 import Photo from '../model/photo';
+import Category from '../model/category';
 
 const router = Router();
 
@@ -49,11 +50,11 @@ const writeFile = (fullName, buffer) => new Promise(
   },
 );
 
-const readBody = (ctx, progressStream) => {
+const readBody = async (ctx, progressStream) => {
   const stream = ctx.req;
   const data = [];
 
-  const promise = new Promise((resolve, reject) => {
+  const promise = await new Promise((resolve, reject) => {
     stream.on('error', (e) => {
       ctx.onerror(e);
       reject(e);
@@ -82,27 +83,36 @@ router
     const stream = PassThrough();
 
     ctx.body = stream;
-    readBody(ctx, stream).then((buffer) => {
-      const exifData = exif.create(buffer).parse();
-      const src = path.join(ctx.params.category, filename);
-      const fullName = path.resolve(process.cwd(), 'static', src);
+    readBody(ctx, stream)
+      .then(async (buffer) => {
+        const exifData = exif.create(buffer).parse();
+        const src = path.join(ctx.params.category, filename);
+        const fullName = path.resolve(process.cwd(), 'static', src);
+        const category = await Category.findOne({
+          where: { name: ctx.params.category },
+        });
 
-      const photo = {
-        name: filename,
-        width: exifData.imageSize.width,
-        height: exifData.imageSize.height,
-        exif: JSON.stringify(exifData),
-        datetime: new Date(exifData.tags.CreateDate * 1000),
-        src,
-      };
+        const photoData = {
+          name: filename,
+          width: exifData.imageSize.width,
+          height: exifData.imageSize.height,
+          exif: JSON.stringify(exifData),
+          datetime: new Date(exifData.tags.CreateDate * 1000),
+          src,
+        };
 
-      writeFile(fullName, buffer)
-        .catch(ctx.onerror)
-        .then(() => Photo.create(photo, { validate: true }))
-        .then(() => stream.end())
+        await writeFile(fullName, buffer);
+        await ctx.db.transaction(async (t) => {
+          const photo = await Photo.create(photoData, {
+            validate: true,
+            transaction: t,
+          });
 
-      ;
-    });
+          await photo.addCategory(category, { transaction: t });
+        });
+
+        stream.end();
+      });
   });
 
 export default router;

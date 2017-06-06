@@ -56,6 +56,7 @@ class Upload extends React.Component {
           }
 
           const status = decoder.decode(value).trim().split('\n').pop();
+          console.log(status);
           this.setState(state => ({
             files: state.files.update(
               state.files.findIndex(f => f.get('file') === file),
