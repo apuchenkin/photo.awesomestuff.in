@@ -3,6 +3,12 @@ import Service from './BaseService';
 
 import { weightedRandom, refinePhotos, remapPhotos } from '../util/photo';
 
+// export weightedRandom;
+// export refinePhotos;
+// export remapPhotos;
+
+export { weightedRandom, refinePhotos, remapPhotos };
+
 export default class PhotoService extends Service {
   getRandomColor() {
     const letters = '0123456789ABCDEF'.split('');
@@ -71,8 +77,4 @@ export default class PhotoService extends Service {
       body: JSON.stringify(photos.map(p => p.id)),
     });
   }
-
-  static weightedRandom = weightedRandom;
-  static refinePhotos = refinePhotos;
-  static remapPhotos = remapPhotos;
 }

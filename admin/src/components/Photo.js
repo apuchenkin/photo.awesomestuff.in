@@ -2,6 +2,9 @@ import React from 'react';
 import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 
+import config from '../../../client/src/etc/config.json';
+import utils from '../../../client/src/lib/utils';
+
 export const PHOTO = 'photo';
 
 const photoSource = {
@@ -64,7 +67,7 @@ class Photo extends React.Component {
         <div className="views">{photo.views}</div>
         {photo.hasParent && <div className="parent" />}
         {photo.group && <div className="group" style={{background: admin.state.groups[photo.group]}} onClick={admin.ungroup.bind(admin, photo)}></div>}
-        <img src={`/api/v1/${photo.thumb}`} height="160" />
+        <img src={utils.getSrc(photo.src, 200, 200, true)} />
       </div>,
     ));
   }

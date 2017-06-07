@@ -3,15 +3,14 @@ import { List, Map } from 'immutable';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 
-import config from '../../../src/etc/config.json';
-import CategoryService from '../../../lib/service/Category';
+import config from '../../../client/src/etc/config.json';
+import CategoryService from '../../../client/lib/service/Category';
 
 const fileTarget = {
   drop(props, monitor, cmp) {
     cmp.onDropFiles(monitor.getItem().files);
   },
 };
-
 
 const categoryService = new CategoryService({
   apiEndpoint: config.apiEndpoint,

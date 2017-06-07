@@ -4,9 +4,9 @@ import {
   withRouter,
 } from 'react-router-dom';
 
-import config from '../../../src/etc/config.json';
-import PhotoService from '../../../lib/service/Photo';
-import CategoryService from '../../../lib/service/Category';
+import config from '../../../client/src/etc/config.json';
+import PhotoService from '../../../client/lib/service/Photo';
+import CategoryService from '../../../client/lib/service/Category';
 import Category from './Category';
 import Photo from './Photo';
 
@@ -44,10 +44,12 @@ class App extends React.Component {
 
   constructor(props) {
     super(props);
+    const { match } = props;
+    console.log(match);
 
     this.state = {
       token: localStorage.getItem(AUTH) || '',
-      category: props.params ? props.params.category : null,
+      // category: match && match.params.category,
       selection: [],
       categories: [],
       photos: [],
@@ -63,15 +65,17 @@ class App extends React.Component {
     this.setState({ photos, groups });
   }
 
-  fetchPhotos() {
+  fetchPhotos(category) {
     const me = this;
     const state = me.state;
-    const photoService = new PhotoService(state.token);
+    const photoService = new PhotoService({
+      apiEndpoint: config.apiEndpoint,
+    });
 
     me.setState({ photos: [] });
-    photoService.fetchPhotos(state.category, state.showHidden)
+    photoService.fetchPhotos(category, state.showHidden)
       .then((photos) => {
-        const parent = state.categories.find(c => c.id === state.category);
+        const parent = state.categories.find(c => c.id === category);
 
         if (parent && parent.parent) {
           photoService.updateParents(photos, parent.parent, state.showHidden).then(me.setPhotos);
@@ -82,28 +86,30 @@ class App extends React.Component {
   }
 
   fetchCategories() {
-    let me = this,
-      categoryService = new CategoryService({
-        apiEndpoint: config.apiEndpoint,
-      });
+    const categoryService = new CategoryService({
+      apiEndpoint: config.apiEndpoint,
+    });
 
     categoryService.fetchCategories()
-      .then(categories => me.setState({ categories }));
+      .then(categories => this.setState({ categories }));
   }
 
 
   componentDidMount() {
-    let me = this,
-      state = me.state;
+    const state = this.state;
+    const category = this.props.match && this.props.match.params.category;
 
-    me.fetchCategories();
-    if (state.category) {
-      me.fetchPhotos();
+    this.fetchCategories();
+    if (category) {
+      this.fetchPhotos(category);
     }
   }
 
   componentWillReceiveProps(props) {
-    this.setState({ category: props.params && props.params.category }, this.fetchPhotos);
+    const category = props.match && props.match.params.category;
+    if (category) {
+      this.fetchPhotos(category);
+    }
   }
 
   logout() {

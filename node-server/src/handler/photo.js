@@ -87,7 +87,7 @@ router
       .then(async (buffer) => {
         const exifData = exif.create(buffer).parse();
         const src = path.join(ctx.params.category, filename);
-        const fullName = path.resolve(process.cwd(), 'static', src);
+        const fullName = path.resolve(process.cwd(), '..', 'static', src);
         const category = await Category.findOne({
           where: { name: ctx.params.category },
         });

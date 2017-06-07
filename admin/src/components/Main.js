@@ -15,7 +15,7 @@ import App from './App';
 import Upload from './Upload';
 import Header from './Header';
 
-require('../../../src/style/style.less');
+require('../../../client/src/style/style.less');
 require('../styles/app.less');
 
 // const checkAuth = (nextState, replace, callback) => {
@@ -33,6 +33,7 @@ const AppComponent = () => (
       <Header />
       <Switch>
         <Route exact path="/" component={App} />
+        <Route path="/category/:category" component={App} />
         <Route path="/auth" component={Auth} />
         <Route path="/upload" component={Upload} />
         <Route component={NoMatch} />

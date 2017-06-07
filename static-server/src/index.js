@@ -6,12 +6,12 @@ import url from 'url';
 import sharp from 'sharp';
 import vary from 'vary';
 
-import { adjust } from '../../lib/util/photo/memoize';
+import { adjust } from '../../client/lib/util/photo/memoize';
 
 import config from '../etc/config.json';
 
 const app = express();
-const basePath = path.join(__dirname, '..', 'static');
+const basePath = path.resolve(process.cwd(), '..', 'static');
 const extensions = ['jpg', 'png', 'jpeg'];
 
 app.use(express.static(basePath));

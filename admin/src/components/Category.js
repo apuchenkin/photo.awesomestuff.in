@@ -38,7 +38,7 @@ const Category = (props) => {
       'category--hovered': hovered,
     })}
     >
-      <NavLink to={`/category/${category.id}`} activeClassName="active">{category.name}</NavLink>
+      <NavLink to={`/category/${category.name}`} activeClassName="active">{category.name}</NavLink>
     </div>,
   );
 };
