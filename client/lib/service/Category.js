@@ -37,6 +37,15 @@ export default class CategoryService extends Service {
     });
   }
 
+  delete(category) {
+    const url = `${this.baseUrl()}/category/${category}`;
+
+    return fetch(url, {
+      method: 'DELETE',
+      headers: this.headers,
+    });
+  }
+
   static refineCategories(categories) {
     const map = new Map(categories.map(c => [c.id, c]));
 

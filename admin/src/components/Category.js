@@ -25,20 +25,31 @@ const categoryDrop = {
   },
 };
 
+const deleteCategory = (admin, category) => () => {
+  if (window.confirm(`Delete category ${category.name}?`)) {
+    admin.categoryService.delete(category.name).then(() => {
+      admin.fetchCategories();
+    });
+  }
+};
+
 const Category = (props) => {
   const category = props.data;
-  const dropTarget = props.dropTarget;
-  // const highlighted = props.highlighted;
-  const hovered = props.hovered;
+  const { admin, dropTarget, hovered } = props;
 
   return dropTarget(
-    <div className={classNames({
-      category: true,
+    <div className={classNames('category', {
       isHidden: category.hidden,
       'category--hovered': hovered,
     })}
     >
       <NavLink to={`/category/${category.name}`} activeClassName="active">{category.name}</NavLink>
+      <button
+        onClick={deleteCategory(admin, category)}
+        className="material-icons"
+      >
+        clear
+      </button>
     </div>,
   );
 };

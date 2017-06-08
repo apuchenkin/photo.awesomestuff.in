@@ -26,6 +26,11 @@ router
     const category = await getCategoryByName(ctx.params.name);
     ctx.body = await category.getPhotos();
   })
+  .del('/:name', async (ctx) => {
+    const category = await getCategoryByName(ctx.params.name);
+    category.destroy();
+    ctx.body = null;
+  })
   .use(body())
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });

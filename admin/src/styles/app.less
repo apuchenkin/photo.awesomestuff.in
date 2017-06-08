@@ -7,6 +7,20 @@ html, body, body > div, #app {
   height: 100%;
 }
 
+button.material-icons {
+  margin: 0;
+  padding: 2px;
+  display: inline-block;
+  border: none;
+  background: none;
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten(@grey, 30%);
+  }
+}
+
 header.main {
   background-color: @grey-light;
   color: @light-grey;
@@ -118,6 +132,12 @@ header.main {
       li {
         padding: 0.2em @divisor;
         cursor: pointer;
+        overflow: hidden;
+        line-height: 32px;
+
+        button {
+          float: right;
+        }
 
         .category--hovered {
           background: greenyellow;

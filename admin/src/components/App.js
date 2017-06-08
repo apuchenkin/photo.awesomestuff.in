@@ -78,7 +78,6 @@ class App extends React.Component {
       .then(categories => this.setState({ categories }));
   }
 
-
   componentDidMount() {
     const state = this.state;
     const category = this.props.match && this.props.match.params.category;
