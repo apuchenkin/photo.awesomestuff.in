@@ -7,28 +7,16 @@ import {
 import config from '../../../client/src/etc/config.json';
 import PhotoService from '../../../client/lib/service/Photo';
 import CategoryService from '../../../client/lib/service/Category';
-import Category from './Category';
+
 import Photo from './Photo';
 import Upload from './Upload';
+import Categories from './Categories';
 
-const Categories = (props) => {
-  const categories = props.data.map(category => (
-    <li className="item" key={category.id} >
-      <Category data={category} admin={props.admin} />
-    </li>
-  ));
 
-  return (
-    <nav className="categories">
-      <ul>{categories}</ul>
-    </nav>
-  );
-};
-
-const Photos = (props) => {
-  const photos = props.data.map(photo => (
+const Photos = ({ data, admin }) => {
+  const photos = data.map(photo => (
     <li key={photo.id} >
-      <Photo data={photo} admin={props.admin} />
+      <Photo data={photo} admin={admin} />
     </li>
   ));
 
@@ -110,6 +98,10 @@ class App extends React.Component {
 
   isSelected(photo) {
     return this.state.selection && this.state.selection.length && this.state.selection.find(p => p.id == photo.id);
+  }
+
+  createCategory() {
+    console.log(123);
   }
 
   select(photo, shift) {

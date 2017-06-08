@@ -27,6 +27,16 @@ export default class CategoryService extends Service {
     .then(this.respondJSON);
   }
 
+  create(category) {
+    const url = `${this.baseUrl()}/category`;
+
+    return fetch(url, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(category),
+    });
+  }
+
   static refineCategories(categories) {
     const map = new Map(categories.map(c => [c.id, c]));
 
