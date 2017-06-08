@@ -33,13 +33,9 @@ class Upload extends React.Component {
     };
   }
 
-  componentWillMount() {
-    this.fetchCategories();
-  }
-
   onDropFiles(files) {
     const files$ = files.map((file) => {
-      fetch(`/api/v1/photo/${this.select.value}`, {
+      fetch(`/api/v1/photo/${this.props.category}`, {
         method: 'POST',
         headers: new Headers({
           'Content-Disposition': `attachment; filename="${file.name}"`,
@@ -74,32 +70,17 @@ class Upload extends React.Component {
     this.setState({ files: List(files$) });
   }
 
-  fetchCategories() {
-    categoryService.fetchCategories()
-      .then(List)
-      .then(categories => this.setState({ categories }));
-  }
-
   render() {
-    const { dropTarget } = this.props;
-    const { files, categories } = this.state;
-    const options = categories.map(category => (
-      <option key={category.name} value={category.name}>
-        { category.title || category.name }
-      </option>
-    ));
+    const { dropTarget, children } = this.props;
+    const { files } = this.state;
 
-    return (
-      <div>
-        <select ref={(select) => { this.select = select; }}>{options}</select>
-        {dropTarget(
-          <div className="upload">
-            <ul>
-              {files.map(file => <li key={file.get('file').name}>{file.get('file').name}, {file.get('loaded')}</li>)}
-            </ul>
-          </div>,
-        )}
-      </div>
+    return dropTarget(
+      <div className="upload">
+        <ul>
+          {files.map(file => <li key={file.get('file').name}>{file.get('file').name}, {file.get('loaded')}</li>)}
+        </ul>
+        { children }
+      </div>,
     );
   }
 }

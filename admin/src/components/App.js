@@ -9,8 +9,7 @@ import PhotoService from '../../../client/lib/service/Photo';
 import CategoryService from '../../../client/lib/service/Category';
 import Category from './Category';
 import Photo from './Photo';
-
-const AUTH = 'auth';
+import Upload from './Upload';
 
 const Categories = (props) => {
   const categories = props.data.map(category => (
@@ -20,7 +19,7 @@ const Categories = (props) => {
   ));
 
   return (
-    <nav className="aside">
+    <nav className="categories">
       <ul>{categories}</ul>
     </nav>
   );
@@ -44,23 +43,26 @@ class App extends React.Component {
 
   constructor(props) {
     super(props);
-    const { match } = props;
-    console.log(match);
 
     this.state = {
-      token: localStorage.getItem(AUTH) || '',
-      // category: match && match.params.category,
       selection: [],
       categories: [],
       photos: [],
       groups: [],
       showHidden: false,
     };
+
+    this.photoService = new PhotoService({
+      apiEndpoint: config.apiEndpoint,
+    });
+
+    this.categoryService = new CategoryService({
+      apiEndpoint: config.apiEndpoint,
+    });
   }
 
   setPhotos(photos) {
-    const photoService = new PhotoService(this.state.token);
-    const groups = photoService.groupColors(photos);
+    const groups = this.photoService.groupColors(photos);
 
     this.setState({ photos, groups });
   }
@@ -68,9 +70,7 @@ class App extends React.Component {
   fetchPhotos(category) {
     const me = this;
     const state = me.state;
-    const photoService = new PhotoService({
-      apiEndpoint: config.apiEndpoint,
-    });
+    const photoService = this.photoService;
 
     me.setState({ photos: [] });
     photoService.fetchPhotos(category, state.showHidden)
@@ -86,11 +86,7 @@ class App extends React.Component {
   }
 
   fetchCategories() {
-    const categoryService = new CategoryService({
-      apiEndpoint: config.apiEndpoint,
-    });
-
-    categoryService.fetchCategories()
+    this.categoryService.fetchCategories()
       .then(categories => this.setState({ categories }));
   }
 
@@ -110,11 +106,6 @@ class App extends React.Component {
     if (category) {
       this.fetchPhotos(category);
     }
-  }
-
-  logout() {
-    localStorage.removeItem(AUTH);
-    this.props.router.push('/auth');
   }
 
   isSelected(photo) {
@@ -145,38 +136,31 @@ class App extends React.Component {
   }
 
   toggleVisibility(photo) {
-    let me = this,
-      photoService = new PhotoService(me.state.token);
-
-    photoService.patchPhoto(photo, { hidden: !photo.hidden })
+    this.categoryService
+      .patchPhoto(photo, { hidden: !photo.hidden })
       .then(() => {
-        me.cleanSelection();
-        me.fetchPhotos();
+        this.cleanSelection();
+        this.fetchPhotos();
       });
   }
 
   deletePhotos() {
-    let me = this,
-      category = me.state.categories.find(c => c.id == me.state.category),
-      categoryService = new CategoryService(me.state.token);
+    const category = this.state.categories.find(c => c.id === this.state.category);
 
     if (category) {
-      categoryService.unlinkPhotos(category, me.state.selection)
+      this.categoryService.unlinkPhotos(category, this.state.selection)
         .then(() => {
-          me.cleanSelection();
-          me.fetchPhotos();
+          this.cleanSelection();
+          this.fetchPhotos();
         });
     }
   }
 
   addToCategory(category, photos) {
-    let me = this,
-      categoryService = new CategoryService(me.state.token);
-
-    categoryService.linkPhotos(category, [photos])
+    this.categoryService.linkPhotos(category, [photos])
       .then(() => {
-        me.cleanSelection();
-        me.fetchPhotos();
+        this.cleanSelection();
+        this.fetchPhotos();
       });
   }
 
@@ -185,21 +169,17 @@ class App extends React.Component {
   }
 
   ungroup(photo) {
-    let me = this,
-      photoService = new PhotoService(me.state.token);
-
-    photoService.removeGroup(photo.group, [photo])
+    this.photoService.removeGroup(photo.group, [photo])
       .then(() => {
-        me.cleanSelection();
-        me.fetchPhotos();
+        this.cleanSelection();
+        this.fetchPhotos();
       });
   }
 
   group(photos) {
-    let me = this,
-      photoService = new PhotoService(me.state.token),
-      group = photos.find(p => !!p.group),
-      promise;
+    const photoService = this.photoService;
+    const group = photos.find(p => !!p.group);
+    let promise;
 
     if (group) {
       promise = photoService.appendGroup(group, photos);
@@ -208,47 +188,50 @@ class App extends React.Component {
     }
 
     promise.then(() => {
-      me.cleanSelection();
-      me.fetchPhotos();
+      this.cleanSelection();
+      this.fetchPhotos();
     });
   }
 
   render() {
-    let state = this.state,
-      style = { background: 'red' };
+    const state = this.state;
+    const category = this.props.match.params.category;
 
     return (
       <div className="admin">
-        <header className="main">
-          <h1 className="title">
-            <span>
-              {state.selection.length} selected
-          </span>
-            <span
-              className={classNames({
-                'show-hidden': true,
-                active: state.showHidden,
-              })}
-              onClick={this.toggleHidden}
-            >
-            hidden
-          </span>
-            <div className="tools">
-              <button disabled={state.selection.length !== 1} onClick={this.toggleVisibility.bind(this, state.selection[0])}>
-              Show/Hide
-            </button>
-              <button disabled={!state.selection.length || state.selection.filter(p => !!p.group).length} onClick={this.group.bind(this, state.selection)}>
-              Group
-            </button>
-              <button disabled={!state.selection.length} onClick={this.deletePhotos}>Delete</button>
-              <button style={style} onClick={this.logout}>Logout</button>
-            </div>
-          </h1>
-        </header>
-        <div className="content">
+        <div className="aside">
           <Categories data={state.categories} admin={this} />
-          <Photos data={state.photos} admin={this} />
         </div>
+        {category && (
+          <div className="content">
+            <div className="toolbox">
+              <span>
+                {state.selection.length} selected
+              </span>
+              <span
+                className={classNames({
+                  'show-hidden': true,
+                  active: state.showHidden,
+                })}
+                onClick={this.toggleHidden}
+              >
+                hidden
+              </span>
+              <div className="tools">
+                <button disabled={state.selection.length !== 1} onClick={this.toggleVisibility.bind(this, state.selection[0])}>
+                  Show/Hide
+                </button>
+                  <button disabled={!state.selection.length || state.selection.filter(p => !!p.group).length} onClick={this.group.bind(this, state.selection)}>
+                  Group
+                </button>
+                <button disabled={!state.selection.length} onClick={this.deletePhotos}>Delete</button>
+              </div>
+            </div>
+            <Upload category={category}>
+              <Photos data={state.photos} admin={this} />
+            </Upload>
+          </div>
+        )}
       </div>
     );
   }

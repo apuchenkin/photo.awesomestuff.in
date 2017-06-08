@@ -1,46 +1,75 @@
-@import "../../../client/src/style/main.less";
+@import "../../../client/src/style/var.less";
 
-#app {
+html, body, body > div, #app {
   width: 100%;
   height: 100%;
 }
+
+header.main {
+  background-color: @grey-light;
+  color: @light-grey;
+  margin: 0;
+  padding: @divisor / 2;
+  border-bottom: 1px solid black;
+
+  h1 {
+    font-weight: normal;
+    margin: 0;
+    display: inline-block;
+    color: @accent;
+  }
+
+  .tools {
+    right: @divisor;
+    float: right;
+  }
+}
+
 .admin {
   width: 100%;
   height:100%;
   margin: auto;
   position:relative;
   overflow: auto;
-
-  h1.title {
-    .tools {
-      float: right;
-      font-size: 18px;
-    }
-    span.show-hidden {
-      cursor: pointer;
-      margin-left: @divisor;
-      font-size: 14pt;
-      &.active {
-        background: black;
-      }
-    }
-  }
+  display: flex;
+  // flex-flow: row wrap;
 
   .content {
-    padding-top: 50px;
-    width: 100%;
+    flex: 100%;
+    // width: 100%;
     overflow: auto;
-    height: 100%;
+    // height: 100%;
+
+    .toolbox {
+      padding: @divisor / 2;
+      background: lighten(@grey, 20%);
+      color: @white;
+      font-size: 14pt;
+
+      .tools {
+        float: right;
+        font-size: 18px;
+      }
+
+      span.show-hidden {
+        cursor: pointer;
+        margin-left: @divisor;
+        &.active {
+          background: black;
+        }
+      }
+    }
+
+
+
   }
 
-  nav.aside {
-    float: left;
+  .aside {
+    flex: 20%;
     padding: @divisor 0;
     background: @grey-light;
     color: @light-grey;
-    height: 100%;
-    position: fixed;
-    width: 160px;
+    border-right: 1px solid black;
 
     ul {
       list-style: none;
@@ -73,7 +102,6 @@
   }
 
   .photos {
-    margin-left: 160px;
     padding: 10px;
     overflow: auto;
 
@@ -137,12 +165,6 @@
 }
 
 div.upload {
-  width: 100%;
-  height: 100%;
-  background: blue;
-  display: flex;
-  position: absolute;
-
   ul {
     align-items: stretch;
   }

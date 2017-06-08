@@ -1,13 +1,16 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import AuthService from '../service/auth';
 
-export default () => (
-  <header>
-    <nav>
-      <ul>
-        <li><NavLink to={'/'}>Home</NavLink></li>
-        <li><NavLink to={'/upload'}>Upload</NavLink></li>
-      </ul>
-    </nav>
+const logout = history => () => {
+  AuthService.logout().then(() => history.push('/auth'));
+};
+
+export default withRouter(({ history }) => (
+  <header className="main">
+    <h1>PHOTO.AWESOMESTUFF.IN</h1>
+    <div className="tools">
+      <button onClick={logout(history)}>Logout</button>
+    </div>
   </header>
-);
+));

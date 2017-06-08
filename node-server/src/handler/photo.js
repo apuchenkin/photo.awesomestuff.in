@@ -39,6 +39,7 @@ const writeFile = (fullName, buffer) => new Promise(
         reject(err);
       }
 
+      // TODO: check if file exists, no overwrite!
       fs.writeFile(fullName, buffer, (err$) => {
         if (err$) {
           reject(err);
