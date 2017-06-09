@@ -130,12 +130,16 @@ header.main {
       padding: 0;
 
       li {
-        padding: 0.2em @divisor;
+        padding: 2px @divisor;
         cursor: pointer;
         overflow: hidden;
-        line-height: 32px;
+        height: 28px;
 
-        button {
+        a {
+          line-height: 28px;
+        }
+
+        .tools {
           float: right;
         }
 
@@ -161,8 +165,17 @@ header.main {
   }
 
   .photos {
-    padding: 10px;
     overflow: auto;
+    min-height: 100%;
+    box-sizing: border-box;
+
+    .upload {
+      height: 100%;
+
+      ul {
+        align-items: stretch;
+      }
+    }
 
     .photo {
       float: left;
@@ -220,11 +233,5 @@ header.main {
         }
       }
     }
-  }
-}
-
-div.upload {
-  ul {
-    align-items: stretch;
   }
 }

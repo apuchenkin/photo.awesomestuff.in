@@ -8,6 +8,7 @@ const router = Router();
 const getCategoryByName = name => Category.findOne({ where: { name } });
 
 router
+  .use(body())
   .get('/', async (ctx) => {
     ctx.body = await Category.findAll();
   })
@@ -26,12 +27,15 @@ router
     const category = await getCategoryByName(ctx.params.name);
     ctx.body = await category.getPhotos();
   })
+  .patch('/:name', async (ctx) => {
+    const category = await getCategoryByName(ctx.params.name);
+    ctx.body = await category.update(ctx.request.body);
+  })
   .del('/:name', async (ctx) => {
     const category = await getCategoryByName(ctx.params.name);
     category.destroy();
     ctx.body = null;
   })
-  .use(body())
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });
     ctx.body = category;

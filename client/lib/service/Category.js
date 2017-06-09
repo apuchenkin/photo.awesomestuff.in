@@ -46,6 +46,16 @@ export default class CategoryService extends Service {
     });
   }
 
+  update(category, diff) {
+    const url = `${this.baseUrl()}/category/${category}`;
+
+    return fetch(url, {
+      method: 'PATCH',
+      headers: this.headers,
+      body: JSON.stringify(diff),
+    });
+  }
+
   static refineCategories(categories) {
     const map = new Map(categories.map(c => [c.id, c]));
 

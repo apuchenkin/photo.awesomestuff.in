@@ -1,12 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { DropTarget } from 'react-dnd';
-import { NavLink } from 'react-router-dom';
-
-// /**
-//  * Specifies which props to inject into your component.
-//  */
-
+import { NavLink, Link } from 'react-router-dom';
 
 const PHOTO = 'photo';
 
@@ -26,11 +21,18 @@ const categoryDrop = {
 };
 
 const deleteCategory = (admin, category) => () => {
+  // eslint-disable-next-line no-alert
   if (window.confirm(`Delete category ${category.name}?`)) {
     admin.categoryService.delete(category.name).then(() => {
       admin.fetchCategories();
     });
   }
+};
+
+const toggleVisibility = (admin, category) => () => {
+  admin.categoryService.update(category.name, { hidden: !category.hidden }).then(() => {
+    admin.fetchCategories();
+  });
 };
 
 const Category = (props) => {
@@ -44,12 +46,25 @@ const Category = (props) => {
     })}
     >
       <NavLink to={`/category/${category.name}`} activeClassName="active">{category.name}</NavLink>
-      <button
-        onClick={deleteCategory(admin, category)}
-        className="material-icons"
-      >
-        clear
-      </button>
+      <span className="tools">
+        <Link to={`/category/${category.name}/translation`} >
+          <button className="material-icons">
+            translate
+          </button>
+        </Link>
+        <button
+          onClick={toggleVisibility(admin, category)}
+          className="material-icons"
+        >
+          {category.hidden ? 'visibility' : 'visibility_off'}
+        </button>
+        <button
+          onClick={deleteCategory(admin, category)}
+          className="material-icons"
+        >
+          clear
+        </button>
+      </span>
     </div>,
   );
 };
