@@ -1,58 +1,68 @@
-import fetch from 'isomorphic-fetch';
 import Service from './BaseService';
 
 // var url = require('url');
 // var url_parts = url.parse(request.url, true);
 // var query = url_parts.query;
+// url.searchParams.append('hidden', true);
 
 export default class CategoryService extends Service {
 
-  fetchCategories() {
-    const url = `${this.baseUrl()}/category`;
-    // url.searchParams.append('hidden', true);
+  baseUrl() {
+    return `${super.baseUrl()}/category`;
+  }
 
-    return fetch(url, {
-      headers: this.headers,
-    })
-    .then(this.respondJSON)
-    .then(CategoryService.refineCategories);
+  fetchCategories() {
+    return this.fetch('')
+      .then(Service.respondJSON)
+      .then(CategoryService.refineCategories);
   }
 
   fetchCategory(name) {
-    const url = `${this.baseUrl()}/category/${name}`;
+    return this.fetch(`/${name}`)
+      .then(Service.respondJSON);
+  }
 
-    return fetch(url, {
-      headers: this.headers,
-    })
-    .then(this.respondJSON);
+  fetchPhotos(categoryName) {
+    return this.fetch(`/${categoryName}/photo`)
+      .then(Service.respondJSON);
+  }
+
+  fetchTranslations(categoryName) {
+    return this.fetch(`/${categoryName}/translation`)
+      .then(Service.respondJSON);
   }
 
   create(category) {
-    const url = `${this.baseUrl()}/category`;
-
-    return fetch(url, {
+    return this.fetch('', {
       method: 'POST',
-      headers: this.headers,
       body: JSON.stringify(category),
     });
   }
 
-  delete(category) {
-    const url = `${this.baseUrl()}/category/${category}`;
-
-    return fetch(url, {
+  delete(categoryName) {
+    return this.fetch(`/${categoryName}`, {
       method: 'DELETE',
-      headers: this.headers,
     });
   }
 
-  update(category, diff) {
-    const url = `${this.baseUrl()}/category/${category}`;
-
-    return fetch(url, {
+  update(categoryName, diff) {
+    return this.fetch(`/${categoryName}`, {
       method: 'PATCH',
-      headers: this.headers,
       body: JSON.stringify(diff),
+    });
+  }
+
+  linkPhotos(categoryName, photos) {
+    return this.fetch(`/${categoryName}/photo`, {
+      method: 'LINK',
+      body: JSON.stringify(photos.map(p => p.id)),
+    });
+  }
+
+  unlinkPhotos(categoryName, photos) {
+    return this.fetch(`/${categoryName}/photo`, {
+      method: 'UNLINK',
+      body: JSON.stringify(photos.map(p => p.id)),
     });
   }
 
@@ -81,25 +91,5 @@ export default class CategoryService extends Service {
         childs: categories.filter(c => c.parent && c.parent.id === category.id).map(c => c.id),
       })
       ;
-  }
-
-  linkPhotos(category, photos) {
-    const url = `${this.baseUrl()}/category/${category.id}/photo`;
-
-    return fetch(url, {
-      method: 'LINK',
-      headers: this.headers,
-      body: JSON.stringify(photos.map(p => p.id)),
-    });
-  }
-
-  unlinkPhotos(category, photos) {
-    const url = `${this.baseUrl()}/category/${category.id}/photo`;
-
-    return fetch(url, {
-      method: 'UNLINK',
-      headers: this.headers,
-      body: JSON.stringify(photos.map(p => p.id)),
-    });
   }
 }

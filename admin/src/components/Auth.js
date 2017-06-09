@@ -17,7 +17,6 @@ class Auth extends React.Component {
   submit() {
     const auth = window.btoa([this.state.email, this.state.password].join(':'));
     localStorage.setItem(AUTH, `Basic ${auth}`);
-    debugger;
     this.props.router.push('/');
   }
 

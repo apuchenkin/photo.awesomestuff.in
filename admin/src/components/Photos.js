@@ -4,6 +4,8 @@ import classNames from 'classnames';
 import Photo from './Photo';
 import Upload from './Upload';
 
+import PhotoService from '../../../client/lib/service/Photo';
+
 class Photos extends React.Component {
 
   constructor(props) {
@@ -26,8 +28,7 @@ class Photos extends React.Component {
   }
 
   setPhotos(photos) {
-    const photoService = this.props.admin.photoService;
-    const groups = photoService.groupColors(photos);
+    const groups = PhotoService.groupColors(photos);
 
     this.setState({ photos, groups });
   }
@@ -42,7 +43,7 @@ class Photos extends React.Component {
     const photoService = admin.photoService;
 
     this.setState({ photos: [] });
-    photoService.fetchPhotos(category, state.showHidden)
+    admin.categoryService.fetchPhotos(category, state.showHidden)
       .then((photos) => {
         const parent = categories.find(c => c.id === category);
 

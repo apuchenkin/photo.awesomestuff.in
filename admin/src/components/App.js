@@ -78,7 +78,10 @@ class App extends React.Component {
                 path={match.url}
                 render={() => <Photos admin={this} category={category} categories={categories} />}
               />
-              <Route path={`${match.url}/translation`} render={() => <Translation categoryName={category} />} />
+              <Route
+                path={`${match.url}/translation`}
+                render={() => <Translation admin={this} categoryName={category} />}
+              />
             </Switch>
           </div>
         )}
