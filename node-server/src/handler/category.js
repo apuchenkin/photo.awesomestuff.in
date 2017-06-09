@@ -2,49 +2,80 @@ import Router from 'koa-router';
 import body from 'koa-body';
 
 import Category from '../model/category';
-import Translation from '../model/translation';
+import Translation, { TYPE_CATEGORY } from '../model/translation';
 
-const router = Router();
+const categoriesRouter = Router();
 
 const getCategoryByName = name => Category.findOne({ where: { name } });
 
-router
-  .use(body())
-  .get('/', async (ctx) => {
-    ctx.body = await Category.findAll();
-  })
-  .get('/:id',
-    // TODO: improve as single request
-    async (ctx, next) => {
-      if (!Number(ctx.params.id)) return next();
-      ctx.body = await Category.findById(ctx.params.id);
+const categoryRouter = Router({ prefix: '/:category' });
+const photoRouter = Router({ prefix: '/photo' });
+const translationRouter = Router({ prefix: '/translation' });
 
-      return null;
-    })
-  .get('/:name', async (ctx) => {
-    ctx.body = await getCategoryByName(ctx.params.name);
-  })
-  .get('/:name/photo', async (ctx) => {
-    const category = await getCategoryByName(ctx.params.name);
-    ctx.body = await category.getPhotos();
-  })
-  .get('/:name/translation', async (ctx) => {
-    const category = await getCategoryByName(ctx.params.name);
-    const translations = await Translation.findAll({ where: { refType: 'category', refId: category.id } });
+photoRouter
+  .get('/', async (ctx) => {
+    ctx.body = await ctx.category.getPhotos();
+  });
+
+translationRouter
+  .get('/', async (ctx) => {
+    const translations = await Translation.findAll({
+      where: {
+        refType: TYPE_CATEGORY,
+        refId: ctx.category.id,
+      },
+    });
     ctx.body = translations;
   })
-  .patch('/:name', async (ctx) => {
-    const category = await getCategoryByName(ctx.params.name);
-    ctx.body = await category.update(ctx.request.body);
+  .post('/', async (ctx) => {
+    const translation = await Translation.create(Object.assign(ctx.request.body, {
+      refType: TYPE_CATEGORY,
+      refId: ctx.category.id,
+    }));
+
+    ctx.body = translation;
   })
-  .del('/:name', async (ctx) => {
-    const category = await getCategoryByName(ctx.params.name);
-    category.destroy();
+  .del('/:translationId', async (ctx) => {
+    const translation = await Translation.findById(ctx.params.translationId);
+    if (translation.refId === ctx.category.id) {
+      await translation.destroy();
+    } else {
+      throw new Error('Wrong translation reference');
+    }
+
     ctx.body = null;
+  });
+
+categoryRouter
+  .use(photoRouter.routes(), photoRouter.allowedMethods())
+  .use(translationRouter.routes(), translationRouter.allowedMethods())
+  .param('category', async (category, ctx, next) => {
+    ctx.category = await getCategoryByName(ctx.params.category);
+    return next();
+  })
+  .get('/', (ctx) => {
+    ctx.body = ctx.category;
+  })
+  .patch('/', async (ctx) => {
+    ctx.body = await ctx.category.update(ctx.request.body);
+  })
+  .del('/', async (ctx) => {
+    await ctx.category.destroy();
+    ctx.body = null;
+  })
+;
+
+categoriesRouter
+  .use(body())
+  .use(categoryRouter.routes(), categoryRouter.allowedMethods())
+  .get('/', async (ctx) => {
+    ctx.body = await Category.findAll();
   })
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });
     ctx.body = category;
-  });
+  })
 
-export default router;
+;
+
+export default categoriesRouter;

@@ -21,18 +21,12 @@ router.get('/', async (ctx) => {
   }
 });
 
-router.use('/author', authorRouter.routes());
-router.use('/author', authorRouter.allowedMethods());
-
-router.use('/category', categoryRouter.routes());
-router.use('/category', categoryRouter.allowedMethods());
-
-router.use('/photo', photoRouter.routes());
-router.use('/photo', photoRouter.allowedMethods());
+router.use('/author', authorRouter.routes(), authorRouter.allowedMethods());
+router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods());
+router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 
 app
-  .use(router.routes())
-  .use(router.allowedMethods());
+  .use(router.routes(), router.allowedMethods());
 
 db.sync({ force: true })
   .then(() => User.create({

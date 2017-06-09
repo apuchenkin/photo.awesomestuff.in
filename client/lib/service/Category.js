@@ -52,6 +52,19 @@ export default class CategoryService extends Service {
     });
   }
 
+  createTranslation(categoryName, data) {
+    return this.fetch(`/${categoryName}/translation`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }).then(Service.respondJSON);
+  }
+
+  deleteTranslation(categoryName, translationId) {
+    return this.fetch(`/${categoryName}/translation/${translationId}`, {
+      method: 'DELETE',
+    });
+  }
+
   linkPhotos(categoryName, photos) {
     return this.fetch(`/${categoryName}/photo`, {
       method: 'LINK',

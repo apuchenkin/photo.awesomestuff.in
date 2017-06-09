@@ -71,7 +71,7 @@ class App extends React.Component {
           <Categories data={categories} admin={this} />
         </div>
         {category && (
-          <div className="content">
+          <main>
             <Switch>
               <Route
                 exact
@@ -83,7 +83,7 @@ class App extends React.Component {
                 render={() => <Translation admin={this} categoryName={category} />}
               />
             </Switch>
-          </div>
+          </main>
         )}
       </div>
     );
