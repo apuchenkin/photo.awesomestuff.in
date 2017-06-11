@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import db from '../db';
+import Translation, { TYPE_PAGE } from './translation';
 
 import Category from './category';
 
@@ -18,7 +19,17 @@ const Page = db.define('page', {
 Page.belongsTo(Page);
 Page.belongsTo(Category);
 
-// force: true will drop the table if it already exists
-// Page.sync({ force: true });
+Page.hasMany(Translation, {
+  foreignKey: 'refId',
+  constraints: false,
+  scope: {
+    refType: TYPE_PAGE
+  }
+});
+Translation.belongsTo(Page, {
+  foreignKey: 'refId',
+  constraints: false,
+  as: TYPE_PAGE
+});
 
 export default Page;

@@ -3,6 +3,7 @@ import Sequelize from 'sequelize';
 import db from '../db';
 import Author from './author';
 import Category from './category';
+import Translation, { TYPE_PHOTO } from './translation';
 
 const Photo = db.define('photo', {
   name: {
@@ -53,10 +54,17 @@ Photo.belongsTo(Author);
 Category.belongsToMany(Photo, { through: 'PhotoCategory' });
 Photo.belongsToMany(Category, { through: 'PhotoCategory' });
 
-// force: true will drop the table if it already exists
-// Author.sync({ force: true }).then(() => {
-//   Photo.sync({ force: true });
-//   Category.sync({ force: true });
-// });
+Photo.hasMany(Translation, {
+  foreignKey: 'refId',
+  constraints: false,
+  scope: {
+    refType: TYPE_PHOTO
+  }
+});
+Translation.belongsTo(Photo, {
+  foreignKey: 'refId',
+  constraints: false,
+  as: TYPE_PHOTO
+});
 
 export default Photo;

@@ -69,7 +69,11 @@ categoriesRouter
   .use(body())
   .use(categoryRouter.routes(), categoryRouter.allowedMethods())
   .get('/', async (ctx) => {
-    ctx.body = await Category.findAll();
+    ctx.body = await Category.findAll({
+      include: [{
+        model: Translation,
+      }]
+    });
   })
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });

@@ -9,10 +9,6 @@ export const TYPE_PHOTO = 'photo';
 export const TYPE_PAGE = 'page';
 
 const Translation = db.define('translation', {
-  language: {
-    type: Sequelize.ENUM(LANG_RU, LANG_EN),
-    allowNull: false,
-  },
   refType: {
     type: Sequelize.ENUM(TYPE_CATEGORY, TYPE_PHOTO, TYPE_PAGE),
     allowNull: false,
@@ -27,6 +23,10 @@ const Translation = db.define('translation', {
   },
   value: {
     type: Sequelize.TEXT,
+    allowNull: false,
+  },
+  language: {
+    type: Sequelize.ENUM(LANG_RU, LANG_EN),
     allowNull: false,
   },
 }, {

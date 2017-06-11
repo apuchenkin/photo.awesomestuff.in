@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import db from '../db';
+import Translation, { TYPE_CATEGORY } from './translation';
 
 const Category = db.define('category', {
   name: {
@@ -21,5 +22,17 @@ const Category = db.define('category', {
 });
 
 Category.belongsTo(Category);
+Category.hasMany(Translation, {
+  foreignKey: 'refId',
+  constraints: false,
+  scope: {
+    refType: TYPE_CATEGORY
+  }
+});
+Translation.belongsTo(Category, {
+  foreignKey: 'refId',
+  constraints: false,
+  as: TYPE_CATEGORY
+});
 
 export default Category;

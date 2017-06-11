@@ -6,6 +6,7 @@ import Category from './model/category';
 import authorRouter from './handler/author';
 import categoryRouter from './handler/category';
 import photoRouter from './handler/photo';
+import { LANG_RU, LANG_EN } from './model/translation';
 
 const app = new Koa();
 const router = Router();
@@ -34,9 +35,20 @@ db.sync({ force: true })
     password: 'root',
   }))
   .then(() => Category.create({
-    name: 'test',
-  }))
-;
+      name: 'test',
+    }).then((category) => {
+      category.createTranslation({
+        field: 'title',
+        value: 'RUTEST',
+        language: LANG_RU,
+      });
+      category.createTranslation({
+        field: 'title',
+        value: 'ENTEST',
+        language: LANG_EN,
+      });
+    })
+  );
 
 app.context.db = db;
 
