@@ -26,13 +26,13 @@ Category.hasMany(Translation, {
   foreignKey: 'refId',
   constraints: false,
   scope: {
-    refType: TYPE_CATEGORY
-  }
+    refType: TYPE_CATEGORY,
+  },
 });
 Translation.belongsTo(Category, {
   foreignKey: 'refId',
   constraints: false,
-  as: TYPE_CATEGORY
+  as: TYPE_CATEGORY,
 });
 
 export default Category;

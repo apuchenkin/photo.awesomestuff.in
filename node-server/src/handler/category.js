@@ -3,6 +3,7 @@ import body from 'koa-body';
 
 import Category from '../model/category';
 import Translation, { TYPE_CATEGORY } from '../model/translation';
+import CategoryService from '../service/category';
 
 const categoriesRouter = Router();
 
@@ -69,11 +70,7 @@ categoriesRouter
   .use(body())
   .use(categoryRouter.routes(), categoryRouter.allowedMethods())
   .get('/', async (ctx) => {
-    ctx.body = await Category.findAll({
-      include: [{
-        model: Translation,
-      }]
-    });
+    ctx.body = await CategoryService.findAll(ctx.locale);
   })
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });

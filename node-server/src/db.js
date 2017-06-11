@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 
 const sequelize = new Sequelize('aws-photo', 'root', 'r00t', {
   host: 'localhost',
-  port: 3306,
+  port: 32770,
   dialect: 'mysql',
 
   pool: {

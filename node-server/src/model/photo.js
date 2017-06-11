@@ -58,13 +58,13 @@ Photo.hasMany(Translation, {
   foreignKey: 'refId',
   constraints: false,
   scope: {
-    refType: TYPE_PHOTO
-  }
+    refType: TYPE_PHOTO,
+  },
 });
 Translation.belongsTo(Photo, {
   foreignKey: 'refId',
   constraints: false,
-  as: TYPE_PHOTO
+  as: TYPE_PHOTO,
 });
 
 export default Photo;

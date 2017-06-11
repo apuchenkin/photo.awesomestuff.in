@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import Router from 'koa-router';
+import acceptLanguage from 'accept-language';
 import db from './db';
 import User from './model/user';
 import Category from './model/category';
@@ -10,6 +11,8 @@ import { LANG_RU, LANG_EN } from './model/translation';
 
 const app = new Koa();
 const router = Router();
+
+acceptLanguage.languages(['en-US', 'ru-RU']);
 
 router.get('/', async (ctx) => {
   try {
@@ -27,6 +30,15 @@ router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods()
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 
 app
+  .use((ctx, next) => {
+    const locale = acceptLanguage.get(ctx.get('accept-language'));
+    ctx.locale = {
+      'en-US': LANG_EN,
+      'ru-RU': LANG_RU,
+    }[locale] || LANG_EN;
+
+    return next();
+  })
   .use(router.routes(), router.allowedMethods());
 
 db.sync({ force: true })
@@ -35,20 +47,19 @@ db.sync({ force: true })
     password: 'root',
   }))
   .then(() => Category.create({
-      name: 'test',
-    }).then((category) => {
-      category.createTranslation({
-        field: 'title',
-        value: 'RUTEST',
-        language: LANG_RU,
-      });
-      category.createTranslation({
-        field: 'title',
-        value: 'ENTEST',
-        language: LANG_EN,
-      });
-    })
-  );
+    name: 'test',
+  }).then((category) => {
+    category.createTranslation({
+      field: 'title',
+      value: 'RUTEST',
+      language: LANG_RU,
+    });
+    category.createTranslation({
+      field: 'title',
+      value: 'ENTEST',
+      language: LANG_EN,
+    });
+  }));
 
 app.context.db = db;
 

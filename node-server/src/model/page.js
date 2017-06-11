@@ -23,13 +23,13 @@ Page.hasMany(Translation, {
   foreignKey: 'refId',
   constraints: false,
   scope: {
-    refType: TYPE_PAGE
-  }
+    refType: TYPE_PAGE,
+  },
 });
 Translation.belongsTo(Page, {
   foreignKey: 'refId',
   constraints: false,
-  as: TYPE_PAGE
+  as: TYPE_PAGE,
 });
 
 export default Page;

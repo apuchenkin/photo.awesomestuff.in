@@ -39,7 +39,4 @@ const Translation = db.define('translation', {
   ],
 });
 
-// force: true will drop the table if it already exists
-// Translation.sync({ force: true });
-
 export default Translation;

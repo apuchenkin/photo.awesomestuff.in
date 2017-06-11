@@ -8,6 +8,7 @@
     "serve": "nodemon index.js"
   },
   "dependencies": {
+    "accept-language": "^3.0.16",
     "content-disposition": "^0.5.2",
     "exif-parser": "^0.1.9",
     "koa": "^2.2.0",

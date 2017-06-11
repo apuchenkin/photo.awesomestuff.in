@@ -9,12 +9,12 @@ export default class BaseService {
   constructor(options = {}) {
     Object.assign(this, defaults, options);
 
-    this.headers = new Headers({
+    this.headers = {
       'Content-Type': this.contentType,
       'Accept-Language': this.locale,
       Authorization: this.token,
       Accept: this.contentType,
-    });
+    };
   }
 
   static respondJSON(response) {
@@ -33,7 +33,10 @@ export default class BaseService {
 
   fetch(url, options = {}) {
     return fetch(`${this.baseUrl()}${url}`, Object.assign({
-      headers: this.headers,
+      headers: Object.keys(this.headers).reduce((acc, key) => (
+        this.headers[key] ? Object.assign(acc, {
+          [key]: this.headers[key],
+        }) : acc), {}),
     }, options));
   }
 }
