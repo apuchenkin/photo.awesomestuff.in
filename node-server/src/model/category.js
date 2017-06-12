@@ -21,7 +21,7 @@ const Category = db.define('category', {
   },
 });
 
-Category.belongsTo(Category);
+Category.belongsTo(Category, { as: 'parent' });
 Category.hasMany(Translation, {
   foreignKey: 'refId',
   constraints: false,

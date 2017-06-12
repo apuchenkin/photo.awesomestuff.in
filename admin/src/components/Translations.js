@@ -40,6 +40,7 @@ class Translations extends React.Component {
     this.toggleCreate = this.toggleCreate.bind(this);
     this.cancel = this.cancel.bind(this);
     this.submit = this.submit.bind(this);
+    this.update = this.update.bind(this);
   }
 
   update() {

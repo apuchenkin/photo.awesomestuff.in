@@ -29,6 +29,8 @@ class App extends React.Component {
     this.categoryService = new CategoryService({
       apiEndpoint: config.apiEndpoint,
     });
+
+    this.fetchCategories = this.fetchCategories.bind(this);
   }
 
   componentDidMount() {
@@ -65,11 +67,13 @@ class App extends React.Component {
     const { match } = this.props;
     const categoryName = match.params.category;
     const category = categories.find(c => c.name === categoryName);
+    const photos = <Photos admin={this} category={categoryName} categories={categories} />;
+    const translations = <Translations admin={this} category={category} />;
 
     return (
       <div className="admin">
         <div className="aside">
-          <Categories data={categories} admin={this} />
+          <Categories categories={categories} admin={this} />
         </div>
         {category && (
           <main>
@@ -77,11 +81,11 @@ class App extends React.Component {
               <Route
                 exact
                 path={match.url}
-                render={() => <Photos admin={this} category={categoryName} categories={categories} />}
+                render={() => photos}
               />
               <Route
                 path={`${match.url}/translation`}
-                render={() => <Translations admin={this} category={category} />}
+                render={() => translations}
               />
             </Switch>
           </main>

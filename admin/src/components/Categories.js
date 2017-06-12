@@ -2,9 +2,9 @@ import React from 'react';
 import classNames from 'classnames';
 import Category from './Category';
 
-const categories = (data, admin) => data.map(category => (
+const mapCategories = (categories, admin) => categories.map(category => (
   <li className="item" key={category.id} >
-    <Category data={category} admin={admin} />
+    <Category category={category} admin={admin} />
   </li>
 ));
 
@@ -62,14 +62,14 @@ export default class Categories extends React.Component {
   }
 
   render() {
-    const { data, admin } = this.props;
+    const { categories, admin } = this.props;
     const { add } = this.state;
 
     return (
       <nav className="categories">
         <h2>Categories <AddButton handler={this.toggleCreate} add={add} /></h2>
         { add && addForm(this) }
-        <ul>{categories(data, admin)}</ul>
+        <ul>{mapCategories(categories, admin)}</ul>
       </nav>
     );
   }
