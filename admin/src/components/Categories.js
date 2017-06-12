@@ -1,12 +1,8 @@
 import React from 'react';
 import classNames from 'classnames';
-import Category from './Category';
-
-const mapCategories = (categories, admin) => categories.map(category => (
-  <li className="item" key={category.id} >
-    <Category category={category} admin={admin} />
-  </li>
-));
+import { DropTarget } from 'react-dnd';
+import RootCategory from './RootCategory';
+import { CATEGORY } from './Category';
 
 const addForm = ctx => (
   <form className="create" onSubmit={ctx.submit}>
@@ -27,7 +23,28 @@ const AddButton = ({ handler, add }) => (
   </i>
 );
 
-export default class Categories extends React.Component {
+const removeParent = (admin, category) => {
+  admin.categoryService.update(category.name, {
+    parentId: null,
+  }).then(admin.fetchCategories);
+};
+
+const categoryDrop = {
+  drop({ admin }, monitor) {
+    removeParent(admin, monitor.getItem());
+  },
+  canDrop() {
+    return true;
+  },
+};
+
+const collectDrop = (connect, monitor) => ({
+  highlighted: monitor.canDrop(),
+  hovered: monitor.isOver() && monitor.canDrop(),
+  dropTarget: connect.dropTarget(),
+});
+
+class Categories extends React.Component {
   constructor(props) {
     super(props);
 
@@ -62,15 +79,24 @@ export default class Categories extends React.Component {
   }
 
   render() {
-    const { categories, admin } = this.props;
+    const { categories, admin, dropTarget } = this.props;
     const { add } = this.state;
+    const rootCategories = categories
+      .filter(c => !c.parentId)
+      .map(category => Object.assign(category, {
+        childs: categories.filter(c => c.parentId === category.id),
+        collapsed: true,
+      }))
+      .map(category => <RootCategory category={category} admin={admin} />);
 
     return (
       <nav className="categories">
-        <h2>Categories <AddButton handler={this.toggleCreate} add={add} /></h2>
+        { dropTarget(<h2>Categories <AddButton handler={this.toggleCreate} add={add} /></h2>) }
         { add && addForm(this) }
-        <ul>{mapCategories(categories, admin)}</ul>
+        <ul>{rootCategories}</ul>
       </nav>
     );
   }
 }
+
+export default DropTarget(CATEGORY, categoryDrop, collectDrop)(Categories);

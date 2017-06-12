@@ -135,15 +135,41 @@ form.create {
       li {
         padding: 2px @divisor;
         cursor: pointer;
+        // height: 28px;
+        display: block;
         overflow: hidden;
-        height: 28px;
+
+        button {
+          float: left;
+
+          &[disabled] {
+            color: grey;
+          }
+        }
+
+        ul.childs {
+          margin-left: 28px;
+          li {
+            padding: 0px;
+          }
+        }
 
         a {
           line-height: 28px;
+          display: inline;
+
+          &:hover {
+            background: lighten(@grey-light, 10%);
+          }
         }
 
         .tools {
           float: right;
+        }
+
+        .category {
+          display: inline;
+          line-height: 28px;
         }
 
         .category--hovered {
@@ -155,9 +181,7 @@ form.create {
           opacity: 0.5;
         }
 
-        &:hover {
-          background: lighten(@grey-light, 10%);
-        }
+
 
         &.active {
           color: black;

@@ -4,7 +4,7 @@ import { DragSource, DropTarget } from 'react-dnd';
 import { NavLink, Link } from 'react-router-dom';
 
 const PHOTO = 'photo';
-const CATEGORY = 'category';
+export const CATEGORY = Symbol('category');
 
 const categorySource = {
   beginDrag: ({ category }) => category,
