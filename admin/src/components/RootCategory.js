@@ -1,7 +1,7 @@
 import React from 'react';
 import Category from './Category';
 
-export default class CategoryItem extends React.Component {
+export default class RootCategory extends React.Component {
   constructor(props) {
     super(props);
 
@@ -22,7 +22,7 @@ export default class CategoryItem extends React.Component {
     const { expanded } = this.state;
 
     return (
-      <li className="item" key={category.id} >
+      <li className="item" >
         <button
           className="material-icons"
           onClick={this.toggleExpand}

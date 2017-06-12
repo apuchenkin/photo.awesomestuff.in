@@ -87,7 +87,7 @@ class Categories extends React.Component {
         childs: categories.filter(c => c.parentId === category.id),
         collapsed: true,
       }))
-      .map(category => <RootCategory category={category} admin={admin} />);
+      .map(category => <RootCategory category={category} admin={admin} key={category.id} />);
 
     return (
       <nav className="categories">

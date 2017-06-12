@@ -43,10 +43,15 @@ class Translations extends React.Component {
     this.update = this.update.bind(this);
   }
 
+  componentWillReceiveProps() {
+    this.update();
+  }
+
   update() {
     const { admin } = this.props;
 
-    admin.categoryService.fetchCategory(this.state.category.name)
+    admin.categoryService
+      .fetchCategory(this.props.category.name)
       .then((category) => {
         this.setState({ category });
       });
