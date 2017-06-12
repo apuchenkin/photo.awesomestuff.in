@@ -1,26 +1,29 @@
 import Category from '../model/category';
 import Translation from '../model/translation';
 
-const findAll = async (language) => {
-  const raw = await Category.findAll({
-    include: [{
-      model: Translation,
-      where: {
-        language,
-      },
-    }],
-  });
-  // console.log(raw);
-  // const categories = raw.map(category =>
-  //   category.translations.reduce((acc, v) =>
-  //     Object.assign(acc, { [v.field]: v.value }),
-  //     category,
-  //   ),
-  // );
+const withTranslation = (options, language) => Object.assign(options, {
+  include: [Object.assign({
+    model: Translation,
+  }, language
+  ? ({ where: { language } }) : {})],
+});
 
-  return raw;
-};
+const findAll = language => Category.findAll(withTranslation({}, language));
+
+const getByName = (name, language) => Category.findOne(
+  withTranslation(
+    { where: { name } },
+    language,
+  ));
+
+const getPublicData = category =>
+  category.translations.reduce((acc, v) =>
+    Object.assign(acc, { [v.field]: v.value }),
+    category,
+  );
 
 export default {
   findAll,
+  getPublicData,
+  getByName,
 };

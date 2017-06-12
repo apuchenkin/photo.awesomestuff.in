@@ -10,7 +10,7 @@ import PhotoService from '../../../client/lib/service/Photo';
 import CategoryService from '../../../client/lib/service/Category';
 
 import Photos from './Photos';
-import Translation from './Translation';
+import Translations from './Translations';
 import Categories from './Categories';
 
 class App extends React.Component {
@@ -63,7 +63,8 @@ class App extends React.Component {
   render() {
     const { categories } = this.state;
     const { match } = this.props;
-    const category = match.params.category;
+    const categoryName = match.params.category;
+    const category = categories.find(c => c.name === categoryName);
 
     return (
       <div className="admin">
@@ -76,11 +77,11 @@ class App extends React.Component {
               <Route
                 exact
                 path={match.url}
-                render={() => <Photos admin={this} category={category} categories={categories} />}
+                render={() => <Photos admin={this} category={categoryName} categories={categories} />}
               />
               <Route
                 path={`${match.url}/translation`}
-                render={() => <Translation admin={this} categoryName={category} />}
+                render={() => <Translations admin={this} category={category} />}
               />
             </Switch>
           </main>

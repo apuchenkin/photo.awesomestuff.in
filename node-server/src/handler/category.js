@@ -2,12 +2,9 @@ import Router from 'koa-router';
 import body from 'koa-body';
 
 import Category from '../model/category';
-import Translation, { TYPE_CATEGORY } from '../model/translation';
 import CategoryService from '../service/category';
 
 const categoriesRouter = Router();
-
-const getCategoryByName = name => Category.findOne({ where: { name } });
 
 const categoryRouter = Router({ prefix: '/:category' });
 const photoRouter = Router({ prefix: '/photo' });
@@ -20,30 +17,22 @@ photoRouter
 
 translationRouter
   .get('/', async (ctx) => {
-    const translations = await Translation.findAll({
-      where: {
-        refType: TYPE_CATEGORY,
-        refId: ctx.category.id,
-      },
-    });
-    ctx.body = translations;
+    ctx.body = await ctx.category.getTranslations();
   })
   .post('/', async (ctx) => {
-    const translation = await Translation.create(Object.assign(ctx.request.body, {
-      refType: TYPE_CATEGORY,
-      refId: ctx.category.id,
-    }));
-
-    ctx.body = translation;
+    ctx.body = await ctx.category.createTranslation(ctx.request.body);
+  })
+  .patch('/:translationId', async (ctx) => {
+    const translation = ctx.category.translations.find(t =>
+      t.id === Number(ctx.params.translationId),
+    );
+    ctx.body = await translation.update(ctx.request.body);
   })
   .del('/:translationId', async (ctx) => {
-    const translation = await Translation.findById(ctx.params.translationId);
-    if (translation.refId === ctx.category.id) {
-      await translation.destroy();
-    } else {
-      throw new Error('Wrong translation reference');
-    }
-
+    const translation = ctx.category.translations.find(t =>
+      t.id === Number(ctx.params.translationId),
+    );
+    await translation.destroy();
     ctx.body = null;
   });
 
@@ -51,7 +40,7 @@ categoryRouter
   .use(photoRouter.routes(), photoRouter.allowedMethods())
   .use(translationRouter.routes(), translationRouter.allowedMethods())
   .param('category', async (category, ctx, next) => {
-    ctx.category = await getCategoryByName(ctx.params.category);
+    ctx.category = await CategoryService.getByName(ctx.params.category);
     return next();
   })
   .get('/', (ctx) => {
@@ -70,7 +59,8 @@ categoriesRouter
   .use(body())
   .use(categoryRouter.routes(), categoryRouter.allowedMethods())
   .get('/', async (ctx) => {
-    ctx.body = await CategoryService.findAll(ctx.locale);
+    // TODO: false represents public access
+    ctx.body = await CategoryService.findAll(false ? ctx.locale : null);
   })
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });

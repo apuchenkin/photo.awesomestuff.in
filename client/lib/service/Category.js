@@ -59,6 +59,14 @@ export default class CategoryService extends Service {
     }).then(Service.respondJSON);
   }
 
+  updateTranslation(categoryName, translationId, diff) {
+    return this.fetch(`/${categoryName}/translation/${translationId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(diff),
+    }).then(Service.respondJSON);
+  }
+
+
   deleteTranslation(categoryName, translationId) {
     return this.fetch(`/${categoryName}/translation/${translationId}`, {
       method: 'DELETE',

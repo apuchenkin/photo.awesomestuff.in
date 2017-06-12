@@ -1,130 +1,80 @@
 import React from 'react';
-import classNames from 'classnames';
-import { Link } from 'react-router-dom';
 
-const langs = ['ru', 'en'];
-
-const addForm = ctx => (
-  <form className="create" onSubmit={ctx.submit}>
-    <select name="language">
-      {langs.map(lang => <option key={lang} value={lang}>{lang}</option>)}
-    </select>
-    <input name="value" />
-    <input type="submit" value="Submit" />
-    <button onClick={ctx.cancel}>Cancel</button>
-  </form>
-);
-
-const AddButton = ({ handler, add }) => (
-  <i
-    role="button"
-    tabIndex="0"
-    onClick={handler}
-    className={classNames('material-icons', { active: add })}
-  >
-    add
-  </i>
-);
-
-class Translation extends React.Component {
+class Translations extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      add: false,
-      translations: [],
+      edit: false,
+      translation: props.translation,
     };
 
-    this.toggleCreate = this.toggleCreate.bind(this);
+    this.toggleEdit = this.toggleEdit.bind(this);
     this.cancel = this.cancel.bind(this);
     this.submit = this.submit.bind(this);
   }
 
-  componentWillMount() {
-    const { categoryName, admin } = this.props;
-
-    admin.categoryService.fetchTranslations(categoryName)
-      .then((translations) => {
-        this.setState({ translations });
-      });
-  }
-
-  toggleCreate() {
-    this.setState((state => ({ add: !state.add })));
+  toggleEdit() {
+    this.setState((state => ({ edit: !state.add })));
   }
 
   cancel() {
-    this.setState({ add: false });
+    this.setState({ edit: false });
   }
 
-  submit(e) {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const { admin, categoryName } = this.props;
+  submit() {
+    const { admin, category } = this.props;
+    const { translation } = this.state;
 
-    admin.categoryService.createTranslation(categoryName, {
-      language: data.get('language'),
-      value: data.get('value'),
-      field: 'title',
-    }).then((translation) => {
-      this.setState((state => ({
-        add: false,
-        translations: [translation, ...state.translations],
-      })));
+    admin.categoryService.updateTranslation(category.name, translation.id, {
+      value: this.input.value,
+    }).then((t) => {
+      this.setState({
+        edit: false,
+        translation: t, //Object.assign(translation, { value })
+      });
     });
   }
 
-  delete(translation) {
-    const { admin, categoryName } = this.props;
-
-    return () => {
-      admin.categoryService.deleteTranslation(categoryName, translation.id).then(() => {
-        this.setState(({ translations }) => ({
-          translations: translations.filter(t => t !== translation),
-        }));
-      });
-    };
-  }
-
   render() {
-    const { categoryName } = this.props;
-    const { translations, add } = this.state;
-    const translationRows = translations.map(translation => (
+    const { parent } = this.props;
+    const { edit, translation } = this.state;
+
+    return (
       <tr>
         <td>{translation.language}</td>
         <td>{translation.field}</td>
-        <td>{translation.value}</td>
+        <td>{edit
+          ? <input
+            ref={(input) => { this.input = input; }}
+            type="text"
+            name="value"
+            defaultValue={translation.value}
+          />
+          : translation.value}
+        </td>
         <td>
-          <button className="material-icons">
-            mode_edit
-          </button>
-          <button className="material-icons" onClick={this.delete(translation)}>
+          {edit
+          ? ([
+            <button key="submit" onClick={this.submit}>
+              Save
+            </button>,
+            <button key="cancel" onClick={this.cancel}>
+              Cancel
+            </button>,
+          ])
+          : (
+            <button className="material-icons" onClick={this.toggleEdit}>
+              mode_edit
+            </button>
+          )}
+          <button className="material-icons" onClick={parent.delete(translation)}>
             clear
           </button>
         </td>
       </tr>
-    ));
-
-    return (
-      <div className="translation">
-        <div className="toolbox">
-          Translations
-          <div className="tools">
-            <AddButton handler={this.toggleCreate} />
-            <Link to={`/category/${categoryName}`} >
-              <button className="material-icons">
-                clear
-              </button>
-            </Link>
-          </div>
-        </div>
-        <div className="content">
-          { add && addForm(this)}
-          <table>{ translationRows }</table>
-        </div>
-      </div>
     );
   }
 }
 
-export default Translation;
+export default Translations;
