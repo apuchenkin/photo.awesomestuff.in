@@ -34,7 +34,7 @@ class Translations extends React.Component {
 
     this.state = {
       add: false,
-      category: props.category,
+      translations: props.category.translations,
     };
 
     this.toggleCreate = this.toggleCreate.bind(this);
@@ -43,17 +43,16 @@ class Translations extends React.Component {
     this.update = this.update.bind(this);
   }
 
-  componentWillReceiveProps() {
-    this.update();
+  componentWillReceiveProps({ category: { translations } }) {
+    this.setState({ translations }, this.update);
   }
 
   update() {
-    const { admin } = this.props;
-
+    const { admin, category } = this.props;
     admin.categoryService
-      .fetchCategory(this.props.category.name)
-      .then((category) => {
-        this.setState({ category });
+      .fetchTranslations(category.name)
+      .then((translations) => {
+        this.setState({ translations });
       });
   }
 
@@ -86,16 +85,19 @@ class Translations extends React.Component {
     const { admin, category } = this.props;
 
     return () => {
-      admin.categoryService
-        .deleteTranslation(category.name, translation.id)
-        .then(this.update);
+      // eslint-disable-next-line no-alert
+      if (window.confirm(`Delete translation ${translation.value}?`)) {
+        admin.categoryService
+          .deleteTranslation(category.name, translation.id)
+          .then(this.update);
+      }
     };
   }
 
   render() {
-    const { admin } = this.props;
-    const { add, category } = this.state;
-    const translations = category.translations.map(translation => (
+    const { admin, category } = this.props;
+    const { add } = this.state;
+    const translations = this.state.translations.map(translation => (
       <Translation
         admin={admin}
         translation={translation}

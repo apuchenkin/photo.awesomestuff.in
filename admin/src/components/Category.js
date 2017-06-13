@@ -37,8 +37,11 @@ const categoryDrop = {
       [CATEGORY]: () => setParent(admin, category, monitor.getItem()),
     }[monitor.getItemType()]();
   },
-  canDrop() {
-    return true;
+  canDrop({ admin, category }, monitor) {
+    return {
+      [PHOTO]: true,
+      [CATEGORY]: category.parentId === null && category.id !== monitor.getItem().id,
+    }[monitor.getItemType()];
   },
 };
 
