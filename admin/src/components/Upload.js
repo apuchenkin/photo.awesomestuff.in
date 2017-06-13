@@ -1,10 +1,8 @@
 import React from 'react';
-import { List, Map } from 'immutable';
+import classNames from 'classnames';
+import Immutable from 'seamless-immutable';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
-
-import config from '../../../client/src/etc/config.json';
-import CategoryService from '../../../client/lib/service/Category';
 
 const fileTarget = {
   drop(props, monitor, cmp) {
@@ -12,25 +10,49 @@ const fileTarget = {
   },
 };
 
-const categoryService = new CategoryService({
-  apiEndpoint: config.apiEndpoint,
-});
-
 const collectDrop = (connect, monitor) => ({
   dropTarget: connect.dropTarget(),
-  isOver: monitor.isOver(),
-  canDrop: monitor.canDrop(),
+  hovered: monitor.isOver() && monitor.canDrop(),
   drop: monitor.getDropResult(),
 });
 
+const STATUS_PENDING = Symbol('pending');
+const STATUS_COMPLETE = Symbol('complete');
+const STATUS_ERROR = Symbol('error');
+
+const File = ({ file: { file, progress, status, error } }) => (
+  <li className="upload-file">
+    <span className="title">{file.name}</span>
+    {progress && (
+      <span className="progress">
+        <span className="bar" style={{ width: `${progress}%` }} />
+      </span>
+    )}
+    <span className="status">
+      <i className="material-icons" title={error} >
+        {
+          ({
+            [STATUS_PENDING]: 'pause',
+            [STATUS_COMPLETE]: 'check_circle',
+            [STATUS_ERROR]: 'error',
+          }[status])
+        }
+      </i>
+    </span>
+  </li>
+);
+
 class Upload extends React.Component {
+
   constructor(props) {
     super(props);
 
     this.state = {
-      categories: List(),
-      files: List(),
+      files: Immutable([]),
     };
+
+    this.updateFile = this.updateFile.bind(this);
+    this.onDropFiles = this.onDropFiles.bind(this);
   }
 
   onDropFiles(files) {
@@ -47,39 +69,52 @@ class Upload extends React.Component {
 
         const pump = () => reader.read().then(({ value, done }) => {
           if (done) {
+            this.updateFile(file, { status: STATUS_COMPLETE });
             return true;
           }
 
-          const status = decoder.decode(value).trim().split('\n').pop();
-          console.log(status);
-          this.setState(state => ({
-            files: state.files.update(
-              state.files.findIndex(f => f.get('file') === file),
-              f => f.set('loaded', status),
-            ),
-          }));
+          const progress = decoder.decode(value).trim().split('\n').pop();
+          if (progress.startsWith('error')) {
+            throw new Error(progress);
+          }
+          if (Number(progress)) {
+            this.updateFile(file, { progress: Number(progress) });
+          }
+
           return pump();
+        }).catch((error) => {
+          this.updateFile(file, { status: STATUS_ERROR, error });
         });
 
         return pump();
       });
 
-      return Map({ file, loaded: 'pending' });
+      return Immutable({ file, status: STATUS_PENDING });
     });
 
-    this.setState({ files: List(files$) });
+    this.setState({ files: Immutable(files$) });
+  }
+
+  updateFile(file, data) {
+    this.setState(state => ({
+      files: state.files.update(
+        state.files.findIndex(f => f.file === file),
+        f => f.merge(data),
+      ),
+    }));
   }
 
   render() {
-    const { dropTarget, children } = this.props;
+    const { dropTarget, children, hovered } = this.props;
     const { files } = this.state;
 
     return dropTarget(
-      <div className="upload">
-        <ul>
-          {files.map(file => <li key={file.get('file').name}>{file.get('file').name}, {file.get('loaded')}</li>)}
-        </ul>
-        { children }
+      <div className={classNames('upload', { hovered })}>
+        { files.length ? (
+          <ul>
+            {files.map(file => <File file={file} key={file.file.name} />)}
+          </ul>
+        ) : children }
       </div>,
     );
   }

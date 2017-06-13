@@ -181,8 +181,6 @@ form.create {
           opacity: 0.5;
         }
 
-
-
         &.active {
           color: black;
           background: @light-grey;
@@ -193,14 +191,53 @@ form.create {
 
   .photos {
     overflow: auto;
-    min-height: 100%;
+    height: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 
     .upload {
-      height: 100%;
+      flex: 1 100%;
+
+      &.hovered {
+        background: greenyellow;
+        cursor: pointer;
+      }
 
       ul {
         align-items: stretch;
+        padding: @divisor;
+
+        li.upload-file {
+          padding: @divisor / 4;
+          background: @grey-light;
+          margin-bottom: @divisor / 4;
+          line-height: 24px;
+          color: @light;
+          display: flex;
+          box-sizing: border-box;
+          height: 32px;
+
+          & > span {
+            margin: 0 @divisor / 4;
+          }
+
+          .progress {
+            display: inline-block;
+            background-color: lighten(@grey-light, 10%);
+            flex: 100%;
+            box-sizing: border-box;
+
+            .bar {
+              background-color: @accent;
+              position: relative;
+              display: block;
+              overflow: hidden;
+              height: 22px;
+              box-sizing: border-box;
+            }
+          }
+        }
       }
     }
 

@@ -65,9 +65,7 @@ const readBody = async (ctx, progressStream) => {
       progressStream.write(`${(Buffer.concat(data).length * 100) / ctx.request.length}\n`);
     });
     stream.on('end', () => {
-      const buffer = Buffer.concat(data);
-      progressStream.write('done');
-      resolve(buffer);
+      resolve(Buffer.concat(data));
     });
   });
 
@@ -102,8 +100,8 @@ router
           src,
         };
 
-        await writeFile(fullName, buffer);
         await ctx.db.transaction(async (t) => {
+          await writeFile(fullName, buffer);
           const photo = await Photo.create(photoData, {
             validate: true,
             transaction: t,
@@ -112,7 +110,10 @@ router
           await photo.addCategory(category, { transaction: t });
         });
 
-        stream.end();
+        stream.end('ok');
+      })
+      .catch((error) => {
+        stream.end(`error: ${error}`);
       });
   });
 

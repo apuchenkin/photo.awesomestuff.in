@@ -2,23 +2,23 @@ import React from 'react';
 import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 
-import config from '../../../client/src/etc/config.json';
+// import config from '../../../client/src/etc/config.json';
 import utils from '../../../client/src/lib/utils';
 
 export const PHOTO = 'photo';
 
 const photoSource = {
-  beginDrag(props) {
-    return props.data;
+  beginDrag({ photo }) {
+    return photo;
   },
 };
 
 const photoDrop = {
-  drop({ admin, data }, monitor) {
-    admin.group([monitor.getItem(), data]);
+  drop({ admin, photo }, monitor) {
+    admin.group([monitor.getItem(), photo]);
   },
-  canDrop(props, monitor) {
-    return props.data.id !== monitor.getItem().id;
+  canDrop({ photo }, monitor) {
+    return photo.id !== monitor.getItem().id;
   },
 };
 
@@ -38,8 +38,7 @@ const collectDrag = (connect, monitor) => ({
 
 class Photo extends React.Component {
   render() {
-    const photo = this.props.data;
-    const admin = this.props.admin;
+    const { admin, photo, parent } = this.props;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -56,7 +55,7 @@ class Photo extends React.Component {
           'photo--highlighted': highlighted,
           'photo--hovered': hovered,
           'dragging': isDragging,
-          'selected': admin.isSelected(photo),
+          'selected': parent.isSelected(photo),
           'hasParent': photo.hasParent,
           'isHidden': photo.hidden
         })}

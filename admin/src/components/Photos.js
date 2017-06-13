@@ -124,7 +124,7 @@ class Photos extends React.Component {
 
     const photoItems = photos.map(photo => (
       <li key={photo.id} >
-        <Photo data={photo} admin={admin} />
+        <Photo photo={photo} admin={admin} parent={this} />
       </li>
     ));
 
