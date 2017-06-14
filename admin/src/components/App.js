@@ -42,18 +42,6 @@ class App extends React.Component {
       .then(categories => this.setState({ categories }));
   }
 
-  deletePhotos() {
-    const category = this.state.categories.find(c => c.id === this.state.category);
-
-    if (category) {
-      this.categoryService.unlinkPhotos(category, this.state.selection)
-        .then(() => {
-          this.cleanSelection();
-          this.fetchPhotos();
-        });
-    }
-  }
-
   addToCategory(category, photos) {
     this.categoryService.linkPhotos(category, [photos])
       .then(() => {

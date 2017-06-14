@@ -36,9 +36,19 @@ const collectDrag = (connect, monitor) => ({
   isDragging: monitor.isDragging(),
 });
 
+const Group = ({ color, onClick }) => (
+  <div
+    tabIndex="0"
+    role="button"
+    className="group"
+    style={{ background: color }}
+    onClick={onClick}
+  />
+);
+
 class Photo extends React.Component {
   render() {
-    const { admin, photo, parent } = this.props;
+    const { photo, parent } = this.props;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -48,25 +58,27 @@ class Photo extends React.Component {
     const highlighted = this.props.highlighted;
     const hovered = this.props.hovered;
 
+    const color = parent.state.groups[photo.group];
+
     return dragSource(dropTarget(
       <div
         className={classNames({
-          'photo': true,
+          photo: true,
           'photo--highlighted': highlighted,
           'photo--hovered': hovered,
-          'dragging': isDragging,
-          'selected': parent.isSelected(photo),
-          'hasParent': photo.hasParent,
-          'isHidden': photo.hidden
+          dragging: isDragging,
+          selected: parent.isSelected(photo),
+          hasParent: photo.hasParent,
+          isHidden: photo.hidden,
         })}
-        onClick={e => admin.select(photo, e.ctrlKey)}
+        onClick={e => parent.select(photo, e.ctrlKey)}
         onDoubleClick={() => console.log(photo)}
         role="presentation"
       >
         <div className="views">{photo.views}</div>
         {photo.hasParent && <div className="parent" />}
-        {photo.group && <div className="group" style={{background: admin.state.groups[photo.group]}} onClick={admin.ungroup.bind(admin, photo)}></div>}
-        <img src={utils.getSrc(photo.src, 200, 200, true)} />
+        {photo.group && <Group color={color} onClick={parent.ungroup(photo)} />}
+        <img alt={photo.name} src={utils.getSrc(photo.src, 200, 200, true)} />
       </div>,
     ));
   }
