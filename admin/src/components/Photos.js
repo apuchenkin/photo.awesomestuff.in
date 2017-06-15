@@ -98,6 +98,8 @@ class Photos extends React.Component {
         selection: selection$,
       };
     });
+
+    return true;
   }
 
   toggleHidden() {
@@ -113,20 +115,22 @@ class Photos extends React.Component {
   }
 
   ungroup(photo) {
-    return () => this.props.admin.photoService
+    return () => {
+      this.props.admin.photoService
       .removeGroup(photo.group, [photo])
       .then(this.update);
+    };
   }
 
   group(photos) {
     return () => {
       const photoService = this.props.admin.photoService;
-      const group = photos.find(p => !!p.group);
-      const promise = group
-        ? photoService.appendGroup(group, photos)
+      const photo = photos.find(p => !!p.group);
+      const promise = photo
+        ? photoService.appendGroup(photo.group, photos)
         : photoService.group(photos)
+      ;
 
-        ;
       promise.then(() => {
         this.cleanSelection();
         this.update();
@@ -136,12 +140,12 @@ class Photos extends React.Component {
 
   render() {
     const { admin, category } = this.props;
-    const { photos, selection } = this.state;
+    const { photos, selection, groups } = this.state;
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
 
     const photoItems = photos.map(photo => (
       <li key={photo.id} >
-        <Photo photo={photo} admin={admin} parent={this} />
+        <Photo photo={photo} group={groups[photo.group]} admin={admin} parent={this} />
       </li>
     ));
 

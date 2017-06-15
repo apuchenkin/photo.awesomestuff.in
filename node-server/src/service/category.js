@@ -1,7 +1,7 @@
 import Category from '../model/category';
 import Translation from '../model/translation';
 
-const withTranslation = (options, language) => Object.assign(options, {
+export const withTranslation = (options, language) => Object.assign(options, {
   include: [Object.assign({
     model: Translation,
   }, language

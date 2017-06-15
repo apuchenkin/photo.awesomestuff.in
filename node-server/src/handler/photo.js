@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+import body from 'koa-body';
 import { PassThrough } from 'stream';
 import exif from 'exif-parser';
 import contentDisposition from 'content-disposition';
@@ -7,8 +8,7 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import Photo from '../model/photo';
 import Category from '../model/category';
-
-const router = Router();
+import { withTranslation } from '../service/category';
 
 const checkImage = (ctx) => {
   if (!ctx.is('image/*')) {
@@ -72,9 +72,58 @@ const readBody = async (ctx, progressStream) => {
   return promise;
 };
 
-router
+const findPhoto = (id, language) => Photo.findById(id, withTranslation({}, language));
+
+const photoRouter = Router({ prefix: '/:photo' });
+photoRouter
+  .param('photo', async (category, ctx, next) => {
+    ctx.photo = await findPhoto(ctx.params.photo);
+    return next();
+  })
+  .use(body())
+  .get('/', (ctx) => {
+    ctx.body = ctx.photo;
+  })
+  .patch('/', async (ctx) => {
+    ctx.body = await ctx.photo.update(ctx.request.body);
+  })
+  .del('/', async (ctx) => {
+    await ctx.photo.destroy();
+    ctx.body = null;
+  })
+;
+
+const photosRouter = Router();
+photosRouter
+  .use(photoRouter.routes(), photoRouter.allowedMethods())
   .get('/', async (ctx) => {
     ctx.body = await Photo.findAll();
+  })
+  .post('/group', async (ctx) => {
+    const pids = ctx.request.body;
+    const maxGroup = await Photo.max('group');
+    const group = (maxGroup || 0) + 1;
+    await Photo.update(
+      { group },
+      { where: { id: { $in: pids } } },
+    );
+
+    ctx.body = group;
+  })
+  .link('/group/:groupId', async (ctx) => {
+    const group = ctx.params.groupId;
+    await Photo.update(
+      { group },
+      { where: { id: { $in: ctx.request.body } } },
+    );
+    ctx.body = null;
+  })
+  .unlink('/group/:groupId', async (ctx) => {
+    await Photo.update(
+      { group: null },
+      { where: { id: { $in: ctx.request.body } } },
+    );
+    ctx.body = null;
   })
   .post('/:category', (ctx) => {
     checkImage(ctx);
@@ -117,4 +166,4 @@ router
       });
   });
 
-export default router;
+export default photosRouter;

@@ -14,8 +14,8 @@ const photoSource = {
 };
 
 const photoDrop = {
-  drop({ admin, photo }, monitor) {
-    admin.group([monitor.getItem(), photo]);
+  drop({ parent, photo }, monitor) {
+    parent.group([monitor.getItem(), photo])();
   },
   canDrop({ photo }, monitor) {
     return photo.id !== monitor.getItem().id;
@@ -48,7 +48,7 @@ const Group = ({ color, onClick }) => (
 
 class Photo extends React.Component {
   render() {
-    const { photo, parent } = this.props;
+    const { photo, parent, group } = this.props;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -57,8 +57,6 @@ class Photo extends React.Component {
     const dropTarget = this.props.dropTarget;
     const highlighted = this.props.highlighted;
     const hovered = this.props.hovered;
-
-    const color = parent.state.groups[photo.group];
 
     return dragSource(dropTarget(
       <div
@@ -77,7 +75,7 @@ class Photo extends React.Component {
       >
         <div className="views">{photo.views}</div>
         {photo.hasParent && <div className="parent" />}
-        {photo.group && <Group color={color} onClick={parent.ungroup(photo)} />}
+        {photo.group && <Group color={group} onClick={parent.ungroup(photo)} />}
         <img alt={photo.name} src={utils.getSrc(photo.src, 200, 200, true)} />
       </div>,
     ));

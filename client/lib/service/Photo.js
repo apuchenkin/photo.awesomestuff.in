@@ -52,11 +52,11 @@ export default class PhotoService extends Service {
 
   static getRandomColor() {
     const letters = '0123456789ABCDEF'.split('');
-    return Array(6).reduce(color => color + letters[Math.floor(Math.random() * 16)], '#');
+    return Array(6).fill().reduce(color => color + letters[Math.floor(Math.random() * 16)], '#');
   }
 
   static groupColors(photos) {
-    const groups = [...new Set(photos.map(p => p.group).filter(x => !!x))];
+    const groups = Array.from(new Set(photos.map(p => p.group).filter(x => !!x)));
 
     return groups.reduce((style, g) => Object.assign(style, {
       [g]: PhotoService.getRandomColor(),
