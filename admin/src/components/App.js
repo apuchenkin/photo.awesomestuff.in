@@ -43,11 +43,8 @@ class App extends React.Component {
   }
 
   addToCategory(category, photos) {
-    this.categoryService.linkPhotos(category, [photos])
-      .then(() => {
-        this.cleanSelection();
-        this.fetchPhotos();
-      });
+    this.categoryService
+      .linkPhotos(category.name, [photos]);
   }
 
   render() {

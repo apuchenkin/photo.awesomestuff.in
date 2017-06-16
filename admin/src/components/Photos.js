@@ -31,8 +31,8 @@ class Photos extends React.Component {
     this.update();
   }
 
-  componentWillReceiveProps() {
-    this.update();
+  componentWillReceiveProps(props) {
+    this.update(props);
   }
 
   setPhotos(photos) {
@@ -45,8 +45,8 @@ class Photos extends React.Component {
     this.setState({ selection: [] });
   }
 
-  update() {
-    const { categories, category, admin } = this.props;
+  update(props) {
+    const { categories, category, admin } = props || this.props;
     const photoService = admin.photoService;
 
     this.setState({ photos: [], selection: [] });

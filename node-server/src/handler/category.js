@@ -6,15 +6,22 @@ import CategoryService from '../service/category';
 
 const categoriesRouter = Router();
 
-const categoryRouter = Router({ prefix: '/:category' });
 const photoRouter = Router({ prefix: '/photo' });
-const translationRouter = Router({ prefix: '/translation' });
-
 photoRouter
   .get('/', async (ctx) => {
     ctx.body = await ctx.category.getPhotos();
-  });
+  })
+  .link('/', async (ctx) => {
+    await ctx.category.addPhotos(ctx.request.body);
+    ctx.body = null;
+  })
+  .unlink('/', async (ctx) => {
+    await ctx.category.removePhotos(ctx.request.body);
+    ctx.body = null;
+  })
+  ;
 
+const translationRouter = Router({ prefix: '/translation' });
 translationRouter
   .get('/', async (ctx) => {
     ctx.body = await ctx.category.getTranslations();
@@ -36,6 +43,7 @@ translationRouter
     ctx.body = null;
   });
 
+const categoryRouter = Router({ prefix: '/:category' });
 categoryRouter
   .use(photoRouter.routes(), photoRouter.allowedMethods())
   .use(translationRouter.routes(), translationRouter.allowedMethods())
