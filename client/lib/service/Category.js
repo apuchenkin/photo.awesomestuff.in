@@ -27,11 +27,6 @@ export default class CategoryService extends Service {
       .then(Service.respondJSON);
   }
 
-  fetchTranslations(categoryName) {
-    return this.fetch(`/${categoryName}/translation`)
-      .then(Service.respondJSON);
-  }
-
   create(category) {
     return this.fetch('', {
       method: 'POST',
@@ -52,23 +47,28 @@ export default class CategoryService extends Service {
     });
   }
 
-  createTranslation(categoryName, data) {
-    return this.fetch(`/${categoryName}/translation`, {
+  fetchTranslations(category) {
+    return this.fetch(`/${category.name}/translation`)
+      .then(Service.respondJSON);
+  }
+
+  createTranslation(category, data) {
+    return this.fetch(`/${category.name}/translation`, {
       method: 'POST',
       body: JSON.stringify(data),
     }).then(Service.respondJSON);
   }
 
-  updateTranslation(categoryName, translationId, diff) {
-    return this.fetch(`/${categoryName}/translation/${translationId}`, {
+  updateTranslation(category, translation, diff) {
+    return this.fetch(`/${category.name}/translation/${translation.id}`, {
       method: 'PATCH',
       body: JSON.stringify(diff),
     }).then(Service.respondJSON);
   }
 
 
-  deleteTranslation(categoryName, translationId) {
-    return this.fetch(`/${categoryName}/translation/${translationId}`, {
+  deleteTranslation(category, translation) {
+    return this.fetch(`/${category.name}/translation/${translation.id}`, {
       method: 'DELETE',
     });
   }

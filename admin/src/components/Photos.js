@@ -1,7 +1,13 @@
 import React from 'react';
+import {
+  Route,
+  Switch,
+  withRouter,
+} from 'react-router-dom';
 
 import Photo from './Photo';
 import Upload from './Upload';
+import Translations from './Translations';
 
 import PhotoService from '../../../client/lib/service/Photo';
 
@@ -31,12 +37,20 @@ class Photos extends React.Component {
     this.update();
   }
 
-  componentWillReceiveProps(props) {
-    this.update(props);
+  componentWillReceiveProps() {
+    this.update();
   }
 
   setPhotos(photos) {
     const groups = PhotoService.groupColors(photos);
+
+    // const parent = categories.find(c => c.id === category);
+    //
+    // if (parent && parent.parent) {
+    //   photoService.updateParents(photos, parent.parent).then(this.setPhotos);
+    // } else {
+    //   this.setPhotos(photos);
+    // }
 
     this.setState({ photos, groups });
   }
@@ -45,21 +59,14 @@ class Photos extends React.Component {
     this.setState({ selection: [] });
   }
 
-  update(props) {
-    const { categories, category, admin } = props || this.props;
-    const photoService = admin.photoService;
+  update() {
+    this.setState({ photos: [], selection: [] }, () => {
+      const { category, admin } = this.props;
 
-    this.setState({ photos: [], selection: [] });
-    admin.categoryService.fetchPhotos(category)
-      .then((photos) => {
-        const parent = categories.find(c => c.id === category);
-
-        if (parent && parent.parent) {
-          photoService.updateParents(photos, parent.parent).then(this.setPhotos);
-        } else {
-          this.setPhotos(photos);
-        }
-      });
+      admin.categoryService
+        .fetchPhotos(category)
+        .then(this.setPhotos);
+    });
   }
 
   delete(photos) {
@@ -139,17 +146,26 @@ class Photos extends React.Component {
   }
 
   render() {
-    const { admin, category } = this.props;
+    const { admin, category, match } = this.props;
     const { photos, selection, groups } = this.state;
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
 
-    const photoItems = photos.map(photo => (
-      <li key={photo.id} >
-        <Photo photo={photo} group={groups[photo.group]} admin={admin} parent={this} />
+    const photoTranslations = photo => (
+      <Translations
+        service={admin.photoService}
+        entity={photo}
+        backUrl={match.url}
+        field="description"
+      />
+    );
+
+    const photoItems = photos.map(p => (
+      <li key={p.id} >
+        <Photo photo={p} group={groups[p.group]} admin={admin} parent={this} />
       </li>
     ));
 
-    return (
+    const PhotosCmp = (
       <div className="photos">
         <div className="toolbox">
           <span>
@@ -164,13 +180,28 @@ class Photos extends React.Component {
             </button>
             <button disabled={!selection.length} onClick={this.delete(selection)}>Delete</button>
           </div>
-        </div>
+        </div>,
         <Upload category={category}>
           <ul>{photoItems}</ul>
         </Upload>
       </div>
     );
+
+    return (
+      <Switch>
+        {photos.length && (
+          <Route
+            path={`${match.url}/:id/translation`}
+            render={({ match }) => {
+              const photo = photos.find(p => p.id === Number(match.params.id));
+              return photoTranslations(photo);
+            }}
+          />
+        )}
+        <Route render={() => PhotosCmp} />
+      </Switch>
+    );
   }
 }
 
-export default Photos;
+export default withRouter(Photos);

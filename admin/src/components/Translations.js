@@ -34,7 +34,7 @@ class Translations extends React.Component {
 
     this.state = {
       add: false,
-      translations: props.category.translations,
+      translations: props.entity.translations,
     };
 
     this.toggleCreate = this.toggleCreate.bind(this);
@@ -43,14 +43,15 @@ class Translations extends React.Component {
     this.update = this.update.bind(this);
   }
 
-  componentWillReceiveProps({ category: { translations } }) {
+  componentWillReceiveProps({ entity: { translations } }) {
     this.setState({ translations }, this.update);
   }
 
   update() {
-    const { admin, category } = this.props;
-    admin.categoryService
-      .fetchTranslations(category.name)
+    const { service, entity } = this.props;
+
+    service
+      .fetchTranslations(entity)
       .then((translations) => {
         this.setState({ translations });
       });
@@ -67,12 +68,12 @@ class Translations extends React.Component {
   submit(e) {
     e.preventDefault();
     const data = new FormData(e.target);
-    const { admin, category } = this.props;
+    const { service, entity, field } = this.props;
 
-    admin.categoryService.createTranslation(category.name, {
+    service.createTranslation(entity, {
       language: data.get('language'),
       value: data.get('value'),
-      field: 'title',
+      field,
     }).then(() => {
       this.update();
       this.setState({
@@ -82,26 +83,30 @@ class Translations extends React.Component {
   }
 
   delete(translation) {
-    const { admin, category } = this.props;
+    const { service, entity } = this.props;
 
     return () => {
       // eslint-disable-next-line no-alert
       if (window.confirm(`Delete translation ${translation.value}?`)) {
-        admin.categoryService
-          .deleteTranslation(category.name, translation.id)
+        service
+          .deleteTranslation(entity, translation)
           .then(this.update);
       }
     };
   }
 
+  updateTranslation(translation, data) {
+    const { service, entity } = this.props;
+
+    return service.updateTranslation(entity, translation, data);
+  }
+
   render() {
-    const { admin, category } = this.props;
+    const { backUrl } = this.props;
     const { add } = this.state;
     const translations = this.state.translations.map(translation => (
       <Translation
-        admin={admin}
         translation={translation}
-        category={category}
         parent={this}
         key={translation.id}
       />
@@ -113,7 +118,7 @@ class Translations extends React.Component {
           Translations
           <div className="tools">
             <AddButton handler={this.toggleCreate} />
-            <Link to={`/category/${category.name}`} >
+            <Link to={backUrl} >
               <button className="material-icons">
                 clear
               </button>

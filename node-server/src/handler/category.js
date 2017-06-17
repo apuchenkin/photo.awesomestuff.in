@@ -2,14 +2,12 @@ import Router from 'koa-router';
 import body from 'koa-body';
 
 import Category from '../model/category';
-import CategoryService from '../service/category';
-
-const categoriesRouter = Router();
+import CategoryService, { withTranslation } from '../service/category';
 
 const photoRouter = Router({ prefix: '/photo' });
 photoRouter
   .get('/', async (ctx) => {
-    ctx.body = await ctx.category.getPhotos();
+    ctx.body = await ctx.category.getPhotos(withTranslation({}, null));
   })
   .link('/', async (ctx) => {
     await ctx.category.addPhotos(ctx.request.body);
@@ -63,6 +61,7 @@ categoryRouter
   })
 ;
 
+const categoriesRouter = Router();
 categoriesRouter
   .use(body())
   .use(categoryRouter.routes(), categoryRouter.allowedMethods())

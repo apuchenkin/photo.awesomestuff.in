@@ -1,8 +1,8 @@
 import React from 'react';
 import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
+import { Link, withRouter } from 'react-router-dom';
 
-// import config from '../../../client/src/etc/config.json';
 import utils from '../../../client/src/lib/utils';
 
 export const PHOTO = 'photo';
@@ -46,9 +46,23 @@ const Group = ({ color, onClick }) => (
   />
 );
 
+const translateColor = (category) => {
+  if (!category.translations.length) {
+    return 'red';
+  }
+
+  if (category.translations.find(translation => translation.language === 'ru')
+   && category.translations.find(translation => translation.language === 'en')
+  ) {
+    return 'green';
+  }
+
+  return 'yellow';
+};
+
 class Photo extends React.Component {
   render() {
-    const { photo, parent, group } = this.props;
+    const { photo, parent, group, match } = this.props;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -74,6 +88,11 @@ class Photo extends React.Component {
         role="presentation"
       >
         <div className="views">{photo.views}</div>
+        <Link to={`${match.url}/${photo.id}/translation`} >
+          <button className="translation material-icons" style={{ color: translateColor(photo) }}>
+            translate
+          </button>
+        </Link>
         {photo.hasParent && <div className="parent" />}
         {photo.group && <Group color={group} onClick={parent.ungroup(photo)} />}
         <img alt={photo.name} src={utils.getSrc(photo.src, 200, 200, true)} />
@@ -83,5 +102,5 @@ class Photo extends React.Component {
 }
 
 export default DragSource(PHOTO, photoSource, collectDrag)(
-  DropTarget(PHOTO, photoDrop, collectDrop)(Photo),
+  DropTarget(PHOTO, photoDrop, collectDrop)(withRouter(Photo)),
 );

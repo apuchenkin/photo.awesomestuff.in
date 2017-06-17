@@ -23,10 +23,10 @@ class Translations extends React.Component {
   }
 
   submit() {
-    const { admin, category } = this.props;
+    const { parent } = this.props;
     const { translation } = this.state;
 
-    admin.categoryService.updateTranslation(category.name, translation.id, {
+    parent.updateTranslation(translation, {
       value: this.input.value,
     }).then((t) => {
       this.setState({

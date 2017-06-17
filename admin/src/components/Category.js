@@ -60,6 +60,20 @@ const toggleVisibility = (admin, category) => () => {
   });
 };
 
+const translateColor = (category) => {
+  if (!category.translations.length) {
+    return 'red';
+  }
+
+  if (category.translations.find(translation => translation.language === 'ru')
+   && category.translations.find(translation => translation.language === 'en')
+  ) {
+    return 'green';
+  }
+
+  return 'yellow';
+};
+
 const Category = (props) => {
   const { category, admin, dragSource, dropTarget, hovered } = props;
 
@@ -69,10 +83,10 @@ const Category = (props) => {
       'category--hovered': hovered,
     })}
     >
-      <NavLink to={`/category/${category.name}`} activeClassName="active">{category.name}</NavLink>
+      <NavLink to={`/category/${category.name}/photo`} activeClassName="active">{category.name}</NavLink>
       <span className="tools">
         <Link to={`/category/${category.name}/translation`} >
-          <button className="material-icons">
+          <button className="material-icons" style={{ color: translateColor(category) }}>
             translate
           </button>
         </Link>

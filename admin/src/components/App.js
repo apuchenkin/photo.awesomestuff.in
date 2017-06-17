@@ -53,7 +53,15 @@ class App extends React.Component {
     const categoryName = match.params.category;
     const category = categories.find(c => c.name === categoryName);
     const photos = <Photos admin={this} category={categoryName} categories={categories} />;
-    const translations = <Translations admin={this} category={category} />;
+
+    const categoryTranslations = (
+      <Translations
+        service={this.categoryService}
+        entity={category}
+        backUrl={match.url}
+        field="title"
+      />
+    );
 
     return (
       <div className="admin">
@@ -64,13 +72,12 @@ class App extends React.Component {
           <main>
             <Switch>
               <Route
-                exact
-                path={match.url}
+                path={`${match.url}/photo`}
                 render={() => photos}
               />
               <Route
                 path={`${match.url}/translation`}
-                render={() => translations}
+                render={() => categoryTranslations}
               />
             </Switch>
           </main>

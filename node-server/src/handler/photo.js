@@ -72,15 +72,38 @@ const readBody = async (ctx, progressStream) => {
   return promise;
 };
 
-const findPhoto = (id, language) => Photo.findById(id, withTranslation({}, language));
+const findPhoto = (id, language) => Photo.findById(id, withTranslation({}, null));
+
+const translationRouter = Router({ prefix: '/translation' });
+translationRouter
+  .get('/', async (ctx) => {
+    ctx.body = await ctx.photo.getTranslations();
+  })
+  .post('/', async (ctx) => {
+    ctx.body = await ctx.photo.createTranslation(ctx.request.body);
+  })
+  .patch('/:translationId', async (ctx) => {
+    const translation = ctx.photo.translations.find(t =>
+      t.id === Number(ctx.params.translationId),
+    );
+    ctx.body = await translation.update(ctx.request.body);
+  })
+  .del('/:translationId', async (ctx) => {
+    const translation = ctx.photo.translations.find(t =>
+      t.id === Number(ctx.params.translationId),
+    );
+    await translation.destroy();
+    ctx.body = null;
+  });
 
 const photoRouter = Router({ prefix: '/:photo' });
 photoRouter
-  .param('photo', async (category, ctx, next) => {
-    ctx.photo = await findPhoto(ctx.params.photo);
+  .param('photo', async (photo, ctx, next) => {
+    ctx.photo = await findPhoto(photo);
     return next();
   })
   .use(body())
+  .use(translationRouter.routes(), translationRouter.allowedMethods())
   .get('/', (ctx) => {
     ctx.body = ctx.photo;
   })

@@ -275,6 +275,13 @@ form.create {
           1px 1px 0 black;
       }
 
+      .translation {
+        position: absolute;
+        top: @divisor / 2;
+        right: @divisor / 2;
+        z-index: 10;
+      }
+
       .parent {
         position: absolute;
         top: @divisor / 2;
@@ -283,6 +290,7 @@ form.create {
         height: @divisor / 2;
         outline: 1px solid @accent;
         background: yellow;
+        z-index: 10;
       }
 
       .group {

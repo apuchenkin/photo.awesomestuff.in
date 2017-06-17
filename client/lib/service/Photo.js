@@ -22,12 +22,30 @@ export default class PhotoService extends Service {
     });
   }
 
-  // updateParents(photos, parent, showHidden) {
-  //   return this.fetchPhotos(parent, showHidden)
-  //     .then(parents => photos.map(photo => Object.assign(photo, {
-  //       hasParent: parents.find(p => p.id === photo.id),
-  //     })));
-  // }
+  fetchTranslations(photo) {
+    return this.fetch(`/${photo.id}/translation`)
+      .then(Service.respondJSON);
+  }
+
+  createTranslation(photo, data) {
+    return this.fetch(`/${photo.id}/translation`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }).then(Service.respondJSON);
+  }
+
+  updateTranslation(photo, translation, diff) {
+    return this.fetch(`/${photo.id}/translation/${translation.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(diff),
+    }).then(Service.respondJSON);
+  }
+
+  deleteTranslation(photo, translation) {
+    return this.fetch(`/${photo.id}/translation/${translation.id}`, {
+      method: 'DELETE',
+    });
+  }
 
   group(photos) {
     return this.fetch('/group', {
