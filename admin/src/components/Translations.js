@@ -2,6 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
+import utils from '../../../client/src/lib/utils';
 import Translation from './Translation';
 
 const langs = ['ru', 'en'];
@@ -102,7 +103,7 @@ class Translations extends React.Component {
   }
 
   render() {
-    const { backUrl } = this.props;
+    const { backUrl, entity } = this.props;
     const { add } = this.state;
     const translations = this.state.translations.map(translation => (
       <Translation
@@ -115,7 +116,7 @@ class Translations extends React.Component {
     return (
       <div className="translation">
         <div className="toolbox">
-          Translations
+          Translations - {entity.name}
           <div className="tools">
             <AddButton handler={this.toggleCreate} />
             <Link to={backUrl} >
@@ -127,6 +128,7 @@ class Translations extends React.Component {
         </div>
         <div className="content">
           { add && addForm(this)}
+          {entity.src && <img alt={entity.name} src={utils.getSrc(entity.src, 800, 600, true)} />}
           <table>
             <tbody>
               { translations }
