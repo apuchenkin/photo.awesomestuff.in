@@ -17,11 +17,6 @@ class App extends React.PureComponent {
     this.props.loadCategories();
   }
 
-  addToCategory(category, photos) {
-    this.categoryService
-      .linkPhotos(category.name, [photos]);
-  }
-
   render() {
     const { match, categories } = this.props;
     const categoryName = match.params.category;

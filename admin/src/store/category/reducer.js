@@ -1,20 +1,25 @@
 import Immutable from 'seamless-immutable';
 
-import { LOAD_CATEGORIES, CATEGORIES_LOADED, ADD_CATEGORY } from './actions';
+import { ADD, LOADED, UPDATED, DELETED } from './actions';
 
 const initial = Immutable({
   categories: [],
 });
 
-const categoriesLoad = state => state;
 const categoriesLoaded = (state, { categories }) => state.set('categories', Immutable(categories));
-const categoryAdd = (state, { category }) => state.set('categories', state.get('categories').push(category));
+const categoryAdd = (state, { category }) => state.set('categories', Immutable([...state.categories, category]));
+const categoryUpdated = (state, { category }) => state.set('categories',
+  state.categories.set(state.categories.findIndex(c => c.id === category.id), category),
+);
+const categoryDeleted = (state, { category }) =>
+  state.set('categories', Immutable(state.categories.filter(c => c.id !== category.id)));
 
 export default (state = initial, action) => {
   const reducer = {
-    [LOAD_CATEGORIES]: categoriesLoad,
-    [CATEGORIES_LOADED]: categoriesLoaded,
-    [ADD_CATEGORY]: categoryAdd,
+    [LOADED]: categoriesLoaded,
+    [ADD]: categoryAdd,
+    [UPDATED]: categoryUpdated,
+    [DELETED]: categoryDeleted,
   }[action.type];
 
   return reducer ? reducer(state, action) : state;

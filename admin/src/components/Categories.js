@@ -1,8 +1,11 @@
 import React from 'react';
 import classNames from 'classnames';
 import { DropTarget } from 'react-dnd';
+import { connect } from 'react-redux';
 import RootCategory from './RootCategory';
 import { CATEGORY } from './Category';
+
+import { categoryCreate, categoryUpdate } from '../store/category/actions';
 
 const addForm = ctx => (
   <form className="create" onSubmit={ctx.submit}>
@@ -23,28 +26,24 @@ const AddButton = ({ handler, add }) => (
   </i>
 );
 
-const removeParent = (admin, category) => {
-  admin.categoryService.update(category.name, {
-    parentId: null,
-  }).then(admin.fetchCategories);
-};
-
 const categoryDrop = {
-  drop({ admin }, monitor) {
-    removeParent(admin, monitor.getItem());
+  drop({ updateCategory }, monitor) {
+    updateCategory(monitor.getItem(), {
+      parentId: null,
+    });
   },
   canDrop() {
     return true;
   },
 };
 
-const collectDrop = (connect, monitor) => ({
+const collectDrop = ({ dropTarget }, monitor) => ({
   highlighted: monitor.canDrop(),
   hovered: monitor.isOver() && monitor.canDrop(),
-  dropTarget: connect.dropTarget(),
+  dropTarget: dropTarget(),
 });
 
-class Categories extends React.Component {
+class Categories extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -68,26 +67,24 @@ class Categories extends React.Component {
   submit(e) {
     e.preventDefault();
     const data = new FormData(e.target);
-    const { admin } = this.props;
 
-    admin.categoryService.create({
+    this.props.categoryCreate({
       name: data.get('category'),
-    }).then(() => {
-      admin.fetchCategories();
-      this.setState({ add: false });
     });
+    this.cancel();
   }
 
   render() {
-    const { categories, admin, dropTarget } = this.props;
+    const { categories, dropTarget } = this.props;
     const { add } = this.state;
+
     const rootCategories = categories
       .filter(c => !c.parentId)
       .map(category => Object.assign({}, category, {
         childs: categories.filter(c => c.parentId === category.id),
         collapsed: true,
       }))
-      .map(category => <RootCategory category={category} admin={admin} key={category.id} />);
+      .map(category => <RootCategory category={category} key={category.id} />);
 
     return (
       <nav className="categories">
@@ -99,4 +96,12 @@ class Categories extends React.Component {
   }
 }
 
-export default DropTarget(CATEGORY, categoryDrop, collectDrop)(Categories);
+export default connect(
+  ({ category: { categories } }) => ({
+    categories,
+  }),
+  dispatch => ({
+    categoryCreate: data => dispatch(categoryCreate(data)),
+    updateCategory: (category, data) => dispatch(categoryUpdate(category, data)),
+  }),
+)(DropTarget(CATEGORY, categoryDrop, collectDrop)(Categories));

@@ -31,20 +31,20 @@ export default class CategoryService extends Service {
     return this.fetch('', {
       method: 'POST',
       body: JSON.stringify(category),
-    });
+    }).then(Service.respondJSON);
   }
 
-  delete(categoryName) {
-    return this.fetch(`/${categoryName}`, {
+  delete(category) {
+    return this.fetch(`/${category.name}`, {
       method: 'DELETE',
     });
   }
 
-  update(categoryName, diff) {
-    return this.fetch(`/${categoryName}`, {
+  update(category, diff) {
+    return this.fetch(`/${category.name}`, {
       method: 'PATCH',
       body: JSON.stringify(diff),
-    });
+    }).then(Service.respondJSON);
   }
 
   fetchTranslations(category) {
@@ -73,8 +73,8 @@ export default class CategoryService extends Service {
     });
   }
 
-  linkPhotos(categoryName, photos) {
-    return this.fetch(`/${categoryName}/photo`, {
+  linkPhotos(category, photos) {
+    return this.fetch(`/${category.name}/photo`, {
       method: 'LINK',
       body: JSON.stringify(photos.map(p => p.id)),
     });
