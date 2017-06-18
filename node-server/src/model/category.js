@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
 import db from '../db';
 import Translation, { TYPE_CATEGORY } from './translation';
+import Photo from './photo';
 
 const Category = db.define('category', {
   name: {
@@ -13,13 +14,16 @@ const Category = db.define('category', {
     allowNull: false,
     defaultValue: true,
   },
-  image: {
-    type: Sequelize.STRING,
-  },
   date: {
     type: Sequelize.DATEONLY,
   },
 });
+
+Category.belongsTo(Photo, { as: 'featured' });
+
+Category.belongsToMany(Photo, { through: 'PhotoCategory' });
+Photo.belongsToMany(Category, { through: 'PhotoCategory' });
+
 
 Category.belongsTo(Category, { as: 'parent' });
 Category.hasMany(Translation, {

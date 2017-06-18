@@ -4,27 +4,25 @@ import {
   Switch,
   withRouter,
 } from 'react-router-dom';
+import { connect } from 'react-redux';
 
 import Photo from './Photo';
 import Upload from './Upload';
 import Translations from './Translations';
 
-import PhotoService from '../../../client/lib/service/Photo';
+import { loadPhotos } from '../store/photo/actions';
 
-class Photos extends React.Component {
+class Photos extends React.PureComponent {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      photos: [],
       selection: [],
-      groups: [],
     };
 
     this.toggleVisibility = this.toggleVisibility.bind(this);
     this.update = this.update.bind(this);
-    this.setPhotos = this.setPhotos.bind(this);
     this.cleanSelection = this.cleanSelection.bind(this);
     this.select = this.select.bind(this);
     this.isSelected = this.isSelected.bind(this);
@@ -37,35 +35,14 @@ class Photos extends React.Component {
     this.update();
   }
 
-  componentWillReceiveProps() {
-    this.update();
-  }
-
-  setPhotos(photos) {
-    const groups = PhotoService.groupColors(photos);
-
-    // const parent = categories.find(c => c.id === category);
-    //
-    // if (parent && parent.parent) {
-    //   photoService.updateParents(photos, parent.parent).then(this.setPhotos);
-    // } else {
-    //   this.setPhotos(photos);
-    // }
-
-    this.setState({ photos, groups });
-  }
-
   cleanSelection() {
     this.setState({ selection: [] });
   }
 
   update() {
-    this.setState({ photos: [], selection: [] }, () => {
-      const { category, admin } = this.props;
-
-      admin.categoryService
-        .fetchPhotos(category)
-        .then(this.setPhotos);
+    this.setState({ selection: [] }, () => {
+      const { category } = this.props;
+      this.props.loadPhotos(category);
     });
   }
 
@@ -115,6 +92,14 @@ class Photos extends React.Component {
     );
   }
 
+  makeFeatured(photo) {
+    return () => {
+      this.props.admin.categoryService.update(this.props.category.name, {
+        featured: photo.id,
+      });
+    };
+  }
+
   toggleVisibility(photo) {
     return () => this.props.admin.photoService
       .patchPhoto(photo.id, { hidden: !photo.hidden })
@@ -138,16 +123,13 @@ class Photos extends React.Component {
         : photoService.group(photos)
       ;
 
-      promise.then(() => {
-        this.cleanSelection();
-        this.update();
-      });
+      promise.then(this.update);
     };
   }
 
   render() {
-    const { admin, category, match } = this.props;
-    const { photos, selection, groups } = this.state;
+    const { admin, category, match, photos, groups } = this.props;
+    const { selection } = this.state;
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
 
     const photoTranslations = photo => (
@@ -172,6 +154,9 @@ class Photos extends React.Component {
             {selection.length} selected
           </span>
           <div className="tools">
+            <button disabled={selection.length !== 1} onClick={this.makeFeatured(selection[0])}>
+              Feature
+            </button>
             <button disabled={selection.length !== 1} onClick={this.toggleVisibility(selection[0])}>
               Show/Hide
             </button>
@@ -180,7 +165,7 @@ class Photos extends React.Component {
             </button>
             <button disabled={!selection.length} onClick={this.delete(selection)}>Delete</button>
           </div>
-        </div>,
+        </div>
         <Upload category={category}>
           <ul>{photoItems}</ul>
         </Upload>
@@ -204,4 +189,12 @@ class Photos extends React.Component {
   }
 }
 
-export default withRouter(Photos);
+export default connect(
+  ({ photo: { photos, groups } }) => ({
+    photos,
+    groups,
+  }),
+  dispatch => ({
+    loadPhotos: category => dispatch(loadPhotos(category)),
+  }),
+)(withRouter(Photos));

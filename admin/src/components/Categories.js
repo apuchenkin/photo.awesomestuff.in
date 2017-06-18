@@ -83,7 +83,7 @@ class Categories extends React.Component {
     const { add } = this.state;
     const rootCategories = categories
       .filter(c => !c.parentId)
-      .map(category => Object.assign(category, {
+      .map(category => Object.assign({}, category, {
         childs: categories.filter(c => c.parentId === category.id),
         collapsed: true,
       }))

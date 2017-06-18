@@ -22,8 +22,8 @@ export default class CategoryService extends Service {
       .then(Service.respondJSON);
   }
 
-  fetchPhotos(categoryName) {
-    return this.fetch(`/${categoryName}/photo`)
+  fetchPhotos(category) {
+    return this.fetch(`/${category.name}/photo`)
       .then(Service.respondJSON);
   }
 

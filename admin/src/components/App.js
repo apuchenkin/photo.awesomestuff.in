@@ -4,42 +4,17 @@ import {
   Switch,
   withRouter,
 } from 'react-router-dom';
-
-import config from '../../../client/src/etc/config.json';
-import PhotoService from '../../../client/lib/service/Photo';
-import CategoryService from '../../../client/lib/service/Category';
+import { connect } from 'react-redux';
 
 import Photos from './Photos';
 import Translations from './Translations';
 import Categories from './Categories';
 
-class App extends React.Component {
+import { loadCategories } from '../store/category/actions';
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      categories: [],
-    };
-
-    this.photoService = new PhotoService({
-      apiEndpoint: config.apiEndpoint,
-    });
-
-    this.categoryService = new CategoryService({
-      apiEndpoint: config.apiEndpoint,
-    });
-
-    this.fetchCategories = this.fetchCategories.bind(this);
-  }
-
+class App extends React.PureComponent {
   componentDidMount() {
-    this.fetchCategories();
-  }
-
-  fetchCategories() {
-    this.categoryService.fetchCategories()
-      .then(categories => this.setState({ categories }));
+    this.props.loadCategories();
   }
 
   addToCategory(category, photos) {
@@ -48,11 +23,10 @@ class App extends React.Component {
   }
 
   render() {
-    const { categories } = this.state;
-    const { match } = this.props;
+    const { match, categories } = this.props;
     const categoryName = match.params.category;
     const category = categories.find(c => c.name === categoryName);
-    const photos = <Photos admin={this} category={categoryName} categories={categories} />;
+    const photos = <Photos admin={this} category={category} />;
 
     const categoryTranslations = (
       <Translations
@@ -87,4 +61,11 @@ class App extends React.Component {
   }
 }
 
-export default withRouter(App);
+export default connect(
+  ({ category: { categories } }) => ({
+    categories,
+  }),
+  dispatch => ({
+    loadCategories: () => dispatch(loadCategories()),
+  }),
+)(withRouter(App));

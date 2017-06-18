@@ -2,7 +2,6 @@ import Sequelize from 'sequelize';
 
 import db from '../db';
 import Author from './author';
-import Category from './category';
 import Translation, { TYPE_PHOTO } from './translation';
 
 const Photo = db.define('photo', {
@@ -50,9 +49,6 @@ const Photo = db.define('photo', {
 });
 
 Photo.belongsTo(Author);
-
-Category.belongsToMany(Photo, { through: 'PhotoCategory' });
-Photo.belongsToMany(Category, { through: 'PhotoCategory' });
 
 Photo.hasMany(Translation, {
   foreignKey: 'refId',
