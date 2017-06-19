@@ -3,7 +3,10 @@ import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NavLink, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { categoryUpdate, categoryDelete } from '../store/category/actions';
+import {
+  update as categoryUpdate,
+  remove as categoryDelete,
+} from '../store/category/actions';
 
 const PHOTO = 'photo';
 export const CATEGORY = Symbol('category');

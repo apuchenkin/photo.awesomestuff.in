@@ -2,7 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
-import utils from '../../../client/src/lib/utils';
+// import utils from '../../../client/src/lib/utils';
 import Translation from './Translation';
 
 const langs = ['ru', 'en'];
@@ -29,33 +29,23 @@ const AddButton = ({ handler, add }) => (
   </i>
 );
 
-class Translations extends React.Component {
+class Translations extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
       add: false,
-      translations: props.entity.translations,
     };
 
     this.toggleCreate = this.toggleCreate.bind(this);
     this.cancel = this.cancel.bind(this);
     this.submit = this.submit.bind(this);
+    this.remove = this.remove.bind(this);
     this.update = this.update.bind(this);
   }
 
-  componentWillReceiveProps({ entity: { translations } }) {
-    this.setState({ translations }, this.update);
-  }
-
-  update() {
-    const { service, entity } = this.props;
-
-    service
-      .fetchTranslations(entity)
-      .then((translations) => {
-        this.setState({ translations });
-      });
+  componentDidMount() {
+    this.props.load();
   }
 
   toggleCreate() {
@@ -69,54 +59,44 @@ class Translations extends React.Component {
   submit(e) {
     e.preventDefault();
     const data = new FormData(e.target);
-    const { service, entity, field } = this.props;
 
-    service.createTranslation(entity, {
+    this.props.create({
       language: data.get('language'),
       value: data.get('value'),
-      field,
-    }).then(() => {
-      this.update();
-      this.setState({
-        add: false,
-      });
+      field: data.get('field'),
     });
+
+    this.cancel();
   }
 
-  delete(translation) {
-    const { service, entity } = this.props;
-
-    return () => {
-      // eslint-disable-next-line no-alert
-      if (window.confirm(`Delete translation ${translation.value}?`)) {
-        service
-          .deleteTranslation(entity, translation)
-          .then(this.update);
-      }
-    };
+  remove(translation) {
+    // eslint-disable-next-line no-alert
+    if (window.confirm(`Delete translation ${translation.value}?`)) {
+      this.props.remove(translation);
+    }
   }
 
-  updateTranslation(translation, data) {
-    const { service, entity } = this.props;
-
-    return service.updateTranslation(entity, translation, data);
+  update(translation, data) {
+    return this.props.update(translation, data);
   }
 
   render() {
-    const { backUrl, entity } = this.props;
+    const { backUrl, title, translations, children } = this.props;
     const { add } = this.state;
-    const translations = this.state.translations.map(translation => (
+
+    const translationsCmp = translations.map(translation => (
       <Translation
-        translation={translation}
-        parent={this}
         key={translation.id}
+        update={this.update}
+        remove={this.remove}
+        translation={translation}
       />
     ));
 
     return (
       <div className="translation">
         <div className="toolbox">
-          Translations - {entity.name}
+          Translations - {title}
           <div className="tools">
             <AddButton handler={this.toggleCreate} />
             <Link to={backUrl} >
@@ -128,10 +108,10 @@ class Translations extends React.Component {
         </div>
         <div className="content">
           { add && addForm(this)}
-          {entity.src && <img alt={entity.name} src={utils.getSrc(entity.src, 800, 600, true)} />}
+          { children }
           <table>
             <tbody>
-              { translations }
+              { translationsCmp }
             </tbody>
           </table>
         </div>

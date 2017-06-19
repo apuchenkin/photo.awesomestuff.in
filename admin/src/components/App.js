@@ -7,10 +7,10 @@ import {
 import { connect } from 'react-redux';
 
 import Photos from './Photos';
-import Translations from './Translations';
+import CategoryTranslations from './translation/Category';
 import Categories from './Categories';
 
-import { loadCategories } from '../store/category/actions';
+import { load as loadCategories } from '../store/category/actions';
 
 class App extends React.PureComponent {
   componentDidMount() {
@@ -24,11 +24,9 @@ class App extends React.PureComponent {
     const photos = <Photos admin={this} category={category} />;
 
     const categoryTranslations = (
-      <Translations
-        service={this.categoryService}
-        entity={category}
+      <CategoryTranslations
         backUrl={match.url}
-        field="title"
+        category={category}
       />
     );
 

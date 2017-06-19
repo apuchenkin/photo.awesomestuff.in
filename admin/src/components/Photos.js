@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 
 import Photo from './Photo';
 import Upload from './Upload';
-import Translations from './Translations';
+// import Translations from './Translations';
 
 import { loadPhotos } from '../store/photo/actions';
 
@@ -132,14 +132,14 @@ class Photos extends React.PureComponent {
     const { selection } = this.state;
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
 
-    const photoTranslations = photo => (
-      <Translations
-        service={admin.photoService}
-        entity={photo}
-        backUrl={match.url}
-        field="description"
-      />
-    );
+    // const photoTranslations = photo => (
+    //   <Translations
+    //     service={admin.photoService}
+    //     entity={photo}
+    //     backUrl={match.url}
+    //     field="description"
+    //   />
+    // );
 
     const photoItems = photos.map(p => (
       <li key={p.id} >
@@ -174,7 +174,7 @@ class Photos extends React.PureComponent {
 
     return (
       <Switch>
-        {photos.length && (
+        {/* {photos.length && (
           <Route
             path={`${match.url}/:id/translation`}
             render={({ match }) => {
@@ -182,7 +182,7 @@ class Photos extends React.PureComponent {
               return photoTranslations(photo);
             }}
           />
-        )}
+        )} */}
         <Route render={() => PhotosCmp} />
       </Switch>
     );

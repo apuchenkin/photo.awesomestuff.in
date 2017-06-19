@@ -3,12 +3,16 @@ import { SET_RUNTIME_VARIABLE } from './actions';
 import config from '../../../../client/src/etc/config.json';
 import PhotoService from '../../../../client/lib/service/Photo';
 import CategoryService from '../../../../client/lib/service/Category';
+import TranslationService from '../../../../client/lib/service/Translation';
 
 const initial = {
   photoService: new PhotoService({
     apiEndpoint: config.apiEndpoint,
   }),
   categoryService: new CategoryService({
+    apiEndpoint: config.apiEndpoint,
+  }),
+  translationService: new TranslationService({
     apiEndpoint: config.apiEndpoint,
   }),
 };

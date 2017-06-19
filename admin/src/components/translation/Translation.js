@@ -1,12 +1,11 @@
 import React from 'react';
 
-class Translations extends React.Component {
+class Translations extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
       edit: false,
-      translation: props.translation,
     };
 
     this.toggleEdit = this.toggleEdit.bind(this);
@@ -15,7 +14,7 @@ class Translations extends React.Component {
   }
 
   toggleEdit() {
-    this.setState((state => ({ edit: !state.add })));
+    this.setState((state => ({ edit: !state.edit })));
   }
 
   cancel() {
@@ -23,22 +22,20 @@ class Translations extends React.Component {
   }
 
   submit() {
-    const { parent } = this.props;
-    const { translation } = this.state;
+    const { translation } = this.props;
 
-    parent.updateTranslation(translation, {
+    this.props.update(translation, {
       value: this.input.value,
-    }).then((t) => {
-      this.setState({
-        edit: false,
-        translation: t, //Object.assign(translation, { value })
-      });
+    });
+
+    this.setState({
+      edit: false,
     });
   }
 
   render() {
-    const { parent } = this.props;
-    const { edit, translation } = this.state;
+    const { translation, remove } = this.props;
+    const { edit } = this.state;
 
     return (
       <tr>
@@ -68,7 +65,7 @@ class Translations extends React.Component {
               mode_edit
             </button>
           )}
-          <button className="material-icons" onClick={parent.delete(translation)}>
+          <button className="material-icons" onClick={() => remove(translation)}>
             clear
           </button>
         </td>

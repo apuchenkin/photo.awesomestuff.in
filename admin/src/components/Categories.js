@@ -5,7 +5,10 @@ import { connect } from 'react-redux';
 import RootCategory from './RootCategory';
 import { CATEGORY } from './Category';
 
-import { categoryCreate, categoryUpdate } from '../store/category/actions';
+import {
+  create as categoryCreate,
+  update as categoryUpdate,
+} from '../store/category/actions';
 
 const addForm = ctx => (
   <form className="create" onSubmit={ctx.submit}>

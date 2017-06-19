@@ -1,48 +1,48 @@
-export const LOAD = 'LOAD';
-export const LOADED = 'LOADED';
-export const CREATE = 'CREATE';
-export const ADD = 'ADD';
-export const UPDATE = 'UPDATE';
-export const UPDATED = 'UPDATED';
-export const DELETE = 'DELETE';
-export const DELETED = 'DELETED';
+export const LOAD = 'LOAD/CATEGORY';
+export const LOADED = 'LOADED/CATEGORY';
+export const CREATE = 'CREATE/CATEGORY';
+export const CREATED = 'CREATED/CATEGORY';
+export const UPDATE = 'UPDATE/CATEGORY';
+export const UPDATED = 'UPDATED/CATEGORY';
+export const REMOVE = 'REMOVE/CATEGORY';
+export const REMOVED = 'REMOVED/CATEGORY';
 
-export const loadCategories = () => ({
+export const load = () => ({
   type: LOAD,
 });
 
-export const categoriesLoaded = categories => ({
+export const loaded = categories => ({
   type: LOADED,
   categories,
 });
 
-export const categoryCreate = data => ({
+export const create = data => ({
   type: CREATE,
   data,
 });
 
-export const categoryUpdate = (category, data) => ({
+export const created = category => ({
+  type: CREATED,
+  category,
+});
+
+export const update = (category, data) => ({
   type: UPDATE,
   category,
   data,
 });
 
-export const categoryUpdated = category => ({
+export const updated = category => ({
   type: UPDATED,
   category,
 });
 
-export const categoryAdd = category => ({
-  type: ADD,
+export const remove = category => ({
+  type: REMOVE,
   category,
 });
 
-export const categoryDelete = category => ({
-  type: DELETE,
-  category,
-});
-
-export const categoryDeleted = category => ({
-  type: DELETED,
+export const removed = category => ({
+  type: REMOVED,
   category,
 });

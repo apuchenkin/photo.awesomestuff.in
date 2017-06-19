@@ -8,8 +8,8 @@ import {
 const load = (action, store) =>
   action
     .ofType(LOAD)
-    .mergeMap(() => store.getState().runtime
-      .categoryService.fetchCategories()
+    .mergeMap(({ query }) => store.getState().runtime
+      .translationService.load(query)
       .then(loaded),
     )
 ;
@@ -18,7 +18,7 @@ const create = (action, store) =>
   action
     .ofType(CREATE)
     .mergeMap(({ data }) => store.getState().runtime
-      .categoryService.create(data)
+      .translationService.create(data)
       .then(created),
     )
 ;
@@ -26,8 +26,8 @@ const create = (action, store) =>
 const update = (action, store) =>
   action
     .ofType(UPDATE)
-    .mergeMap(({ category, data }) => store.getState().runtime
-      .categoryService.update(category, data)
+    .mergeMap(({ translation, data }) => store.getState().runtime
+      .translationService.update(translation, data)
       .then(updated),
     )
 ;
@@ -35,9 +35,9 @@ const update = (action, store) =>
 const remove = (action, store) =>
   action
     .ofType(REMOVE)
-    .mergeMap(({ category }) => store.getState().runtime
-      .categoryService.delete(category)
-      .then(() => removed(category)),
+    .mergeMap(({ translation }) => store.getState().runtime
+      .translationService.delete(translation)
+      .then(() => removed(translation)),
     )
 ;
 

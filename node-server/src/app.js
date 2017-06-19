@@ -7,6 +7,8 @@ import Category from './model/category';
 import authorRouter from './handler/author';
 import categoryRouter from './handler/category';
 import photoRouter from './handler/photo';
+import translationRouter from './handler/translation';
+
 import { LANG_RU, LANG_EN } from './model/translation';
 
 const app = new Koa();
@@ -28,6 +30,7 @@ router.get('/', async (ctx) => {
 router.use('/author', authorRouter.routes(), authorRouter.allowedMethods());
 router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods());
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
+router.use(translationRouter.routes(), translationRouter.allowedMethods());
 
 app
   .use((ctx, next) => {
