@@ -35,11 +35,11 @@ const setParent = (update, categoryDroped, categoryDraged) => {
 const categoryDrop = {
   drop({ updateCategory, category, categoryService }, monitor) {
     return {
-      [PHOTO]: () => categoryService.linkPhotos(category, monitor.getItem()),
+      [PHOTO]: () => { categoryService.linkPhotos(category, [monitor.getItem()]); },
       [CATEGORY]: () => setParent(updateCategory, category, monitor.getItem()),
     }[monitor.getItemType()]();
   },
-  canDrop({ admin, category }, monitor) {
+  canDrop({ category }, monitor) {
     return {
       [PHOTO]: true,
       [CATEGORY]: category.parentId === null && category.id !== monitor.getItem().id,

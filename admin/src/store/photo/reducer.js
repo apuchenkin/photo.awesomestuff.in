@@ -1,35 +1,26 @@
 import Immutable from 'seamless-immutable';
-
-import { LOAD_PHOTOS, PHOTOS_LOADED, ADD_PHOTO } from './actions';
 import PhotoService from '../../../../client/lib/service/Photo';
+import { LOADED, UPDATED } from './actions';
 
 const initial = Immutable({
   photos: [],
   groups: [],
-  category: null,
 });
 
-const loadPhotos = (state, { category }) => state.set('category', category);
-const photosLoaded = (state, { photos }) => state
-  .set('photos', photos)
-  .set('groups', PhotoService.groupColors(photos));
+const loaded = (state, { photos }) => state
+  .set('photos', Immutable(photos))
+  .set('groups', PhotoService.groupColors(photos))
+;
 
-const photoAdd = (state, { photo }) => state.set('photos', state.photos.push(photo));
+const updated = (state, { photo }) => state.set('photos',
+  state.photos.set(state.photos.findIndex(p => p.id === photo.id), photo),
+);
 
 export default (state = initial, action) => {
   const reducer = {
-    [LOAD_PHOTOS]: loadPhotos,
-    [PHOTOS_LOADED]: photosLoaded,
-    [ADD_PHOTO]: photoAdd,
+    [LOADED]: loaded,
+    [UPDATED]: updated,
   }[action.type];
 
   return reducer ? reducer(state, action) : state;
 };
-
-// const parent = categories.find(c => c.id === category);
-//
-// if (parent && parent.parent) {
-//   photoService.updateParents(photos, parent.parent).then(this.setPhotos);
-// } else {
-//   this.setPhotos(photos);
-// }

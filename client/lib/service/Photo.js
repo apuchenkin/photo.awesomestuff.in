@@ -15,11 +15,11 @@ export default class PhotoService extends Service {
     .then(Service.respondJSON);
   }
 
-  patchPhoto(photoId, diff) {
-    return this.fetch(`/${photoId}`, {
+  update(photo, data) {
+    return this.fetch(`/${photo.id}`, {
       method: 'PATCH',
-      body: JSON.stringify(diff),
-    });
+      body: JSON.stringify(data),
+    }).then(Service.respondJSON);
   }
 
   fetchTranslations(photo) {

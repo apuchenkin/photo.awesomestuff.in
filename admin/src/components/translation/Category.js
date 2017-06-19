@@ -12,26 +12,42 @@ import {
 
 const FIELDS = ['title'];
 
-const CategoryTranslations = ({
-  translations,
-  category,
-  backUrl,
-  load,
-  create,
-  update,
-  remove,
-}) => (
-  <Translations
-    translations={translations}
-    load={load(category)}
-    create={create(category)}
-    update={update}
-    remove={remove}
-    fiels={FIELDS}
-    title={category.name}
-    backUrl={backUrl}
-  />
-);
+class CategoryTranslations extends React.PureComponent {
+
+  componentDidMount() {
+    this.props.load(this.props.category);
+  }
+
+  componentWillReceiveProps(props) {
+    if (this.props.category !== props.category) {
+      this.props.load(props.category);
+    }
+  }
+
+  render() {
+    const {
+      translations,
+      category,
+      backUrl,
+      create,
+      update,
+      remove,
+    } = this.props;
+
+    return (
+      <Translations
+        translations={translations}
+        create={create(category)}
+        update={update}
+        remove={remove}
+        fiels={FIELDS}
+        title={category.name}
+        backUrl={backUrl}
+      />
+    );
+  }
+}
+
 /* {entity.src && <img alt={entity.name}
  src={utils.getSrc(entity.src, 800, 600, true)} />} */
 
@@ -40,7 +56,7 @@ export default connect(
     translations,
   }),
   dispatch => ({
-    load: category => () => dispatch(loadTranslations({ refType: 'category', refId: category.id })),
+    load: category => dispatch(loadTranslations({ refType: 'category', refId: category.id })),
     create: category => translation => dispatch(createTranslations(Object.assign({}, translation, {
       refType: 'category',
       refId: category.id,

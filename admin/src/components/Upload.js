@@ -57,7 +57,7 @@ class Upload extends React.Component {
 
   onDropFiles(files) {
     const files$ = files.map((file) => {
-      fetch(`/api/v1/photo/${this.props.category}`, {
+      fetch(`/api/v1/photo/${this.props.category.name}`, {
         method: 'POST',
         headers: new Headers({
           'Content-Disposition': `attachment; filename="${file.name}"`,

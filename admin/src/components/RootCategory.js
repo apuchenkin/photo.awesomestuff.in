@@ -18,7 +18,7 @@ export default class RootCategory extends React.Component {
   }
 
   render() {
-    const { category, admin } = this.props;
+    const { category } = this.props;
     const { expanded } = this.state;
 
     return (
@@ -32,13 +32,13 @@ export default class RootCategory extends React.Component {
             ? 'keyboard_arrow_up'
             : 'keyboard_arrow_down'
         }</button>
-        <Category category={category} admin={admin} />
+        <Category category={category} />
         {
           expanded && (
             <ul className="childs">
               {category.childs.map(child => (
                 <li className="item" key={child.id} >
-                  <Category category={child} admin={admin} />
+                  <Category category={child} />
                 </li>
               ))}
             </ul>

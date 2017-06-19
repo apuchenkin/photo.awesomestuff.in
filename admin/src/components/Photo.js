@@ -15,7 +15,7 @@ const photoSource = {
 
 const photoDrop = {
   drop({ parent, photo }, monitor) {
-    parent.group([monitor.getItem(), photo])();
+    parent.group([monitor.getItem(), photo]);
   },
   canDrop({ photo }, monitor) {
     return photo.id !== monitor.getItem().id;
@@ -29,10 +29,7 @@ const collectDrop = (connect, monitor) => ({
 });
 
 const collectDrag = (connect, monitor) => ({
-  // Call this function inside render()
-  // to let React DnD handle the drag events:
   dragSource: connect.dragSource(),
-  // You can ask the monitor about the current drag state:
   isDragging: monitor.isDragging(),
 });
 
@@ -62,7 +59,7 @@ const translateColor = (category) => {
 
 class Photo extends React.Component {
   render() {
-    const { photo, parent, group, match } = this.props;
+    const { photo, parent, group, match, featured } = this.props;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -93,8 +90,9 @@ class Photo extends React.Component {
             translate
           </button>
         </Link>
+        {featured && <div className="featured material-icons">star</div>}
         {photo.hasParent && <div className="parent" />}
-        {photo.group && <Group color={group} onClick={parent.ungroup(photo)} />}
+        {photo.group && <Group color={group} onClick={() => parent.ungroup(photo)} />}
         <img alt={photo.name} src={utils.getSrc(photo.src, 200, 200, true)} />
       </div>,
     ));

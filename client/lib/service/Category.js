@@ -80,8 +80,8 @@ export default class CategoryService extends Service {
     });
   }
 
-  unlinkPhotos(categoryName, photos) {
-    return this.fetch(`/${categoryName}/photo`, {
+  unlinkPhotos(category, photos) {
+    return this.fetch(`/${category.name}/photo`, {
       method: 'UNLINK',
       body: JSON.stringify(photos.map(p => p.id)),
     });

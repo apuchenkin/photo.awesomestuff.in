@@ -10,7 +10,14 @@ import Photo from './Photo';
 import Upload from './Upload';
 // import Translations from './Translations';
 
-import { loadPhotos } from '../store/photo/actions';
+import {
+  load as loadPhotos,
+  update as updatePhotos,
+} from '../store/photo/actions';
+
+import {
+  update as updateCategory,
+} from '../store/category/actions';
 
 class Photos extends React.PureComponent {
 
@@ -22,40 +29,40 @@ class Photos extends React.PureComponent {
     };
 
     this.toggleVisibility = this.toggleVisibility.bind(this);
-    this.update = this.update.bind(this);
     this.cleanSelection = this.cleanSelection.bind(this);
     this.select = this.select.bind(this);
     this.isSelected = this.isSelected.bind(this);
     this.group = this.group.bind(this);
     this.ungroup = this.ungroup.bind(this);
     this.delete = this.delete.bind(this);
+    this.makeFeatured = this.makeFeatured.bind(this);
   }
 
   componentWillMount() {
-    this.update();
+    this.props.loadPhotos(this.props.category);
+  }
+
+  componentWillReceiveProps(props) {
+    if (this.props.category !== props.category) {
+      this.props.loadPhotos(props.category);
+    }
   }
 
   cleanSelection() {
     this.setState({ selection: [] });
   }
 
-  update() {
-    this.setState({ selection: [] }, () => {
-      const { category } = this.props;
-      this.props.loadPhotos(category);
-    });
-  }
-
   delete(photos) {
-    return () => {
-      const { category, admin: { categoryService } } = this.props;
+    const { category, categoryService } = this.props;
 
-      if (category) {
-        categoryService
-          .unlinkPhotos(category, photos)
-          .then(this.update);
-      }
-    };
+    if (category) {
+      categoryService
+        .unlinkPhotos(category, photos)
+        .then(() => {
+          this.cleanSelection();
+          this.props.loadPhotos(this.props.category);
+        });
+    }
   }
 
   isSelected(photo) {
@@ -82,55 +89,48 @@ class Photos extends React.PureComponent {
         selection: selection$,
       };
     });
-
-    return true;
-  }
-
-  toggleHidden() {
-    this.setState(({ showHidden }) => ({ showHidden: !showHidden }),
-      this.update,
-    );
   }
 
   makeFeatured(photo) {
-    return () => {
-      this.props.admin.categoryService.update(this.props.category.name, {
-        featured: photo.id,
-      });
-    };
+    this.props.updateCategory(this.props.category, {
+      featured: photo.id,
+    });
+    this.cleanSelection();
   }
 
   toggleVisibility(photo) {
-    return () => this.props.admin.photoService
-      .patchPhoto(photo.id, { hidden: !photo.hidden })
-      .then(this.update);
+    this.props.updatePhoto(photo, { hidden: !photo.hidden });
+    this.cleanSelection();
   }
 
   ungroup(photo) {
-    return () => {
-      this.props.admin.photoService
+    this.props.photoService
       .removeGroup(photo.group, [photo])
-      .then(this.update);
-    };
+      .then(() => {
+        this.cleanSelection();
+        this.props.loadPhotos(this.props.category);
+      });
   }
 
   group(photos) {
-    return () => {
-      const photoService = this.props.admin.photoService;
-      const photo = photos.find(p => !!p.group);
-      const promise = photo
-        ? photoService.appendGroup(photo.group, photos)
-        : photoService.group(photos)
-      ;
+    const photoService = this.props.photoService;
+    const photo = photos.find(p => !!p.group);
+    const promise = photo
+      ? photoService.appendGroup(photo.group, photos)
+      : photoService.group(photos)
+    ;
 
-      promise.then(this.update);
-    };
+    promise.then(() => {
+      this.cleanSelection();
+      this.props.loadPhotos(this.props.category);
+    });
   }
 
   render() {
-    const { admin, category, match, photos, groups } = this.props;
+    const { category, match, photos, groups } = this.props;
     const { selection } = this.state;
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
+    const singleSelect = selection.length === 1;
 
     // const photoTranslations = photo => (
     //   <Translations
@@ -143,7 +143,12 @@ class Photos extends React.PureComponent {
 
     const photoItems = photos.map(p => (
       <li key={p.id} >
-        <Photo photo={p} group={groups[p.group]} admin={admin} parent={this} />
+        <Photo
+          photo={p}
+          featured={category.featuredId === p.id}
+          group={groups[p.group]}
+          parent={this}
+        />
       </li>
     ));
 
@@ -154,16 +159,18 @@ class Photos extends React.PureComponent {
             {selection.length} selected
           </span>
           <div className="tools">
-            <button disabled={selection.length !== 1} onClick={this.makeFeatured(selection[0])}>
+            <button disabled={!singleSelect} onClick={() => this.makeFeatured(selection[0])}>
               Feature
             </button>
-            <button disabled={selection.length !== 1} onClick={this.toggleVisibility(selection[0])}>
+            <button disabled={!singleSelect} onClick={() => this.toggleVisibility(selection[0])}>
               Show/Hide
             </button>
-            <button disabled={!canGroup} onClick={this.group(selection)}>
+            <button disabled={!canGroup} onClick={() => this.group(selection)}>
               Group
             </button>
-            <button disabled={!selection.length} onClick={this.delete(selection)}>Delete</button>
+            <button disabled={!selection.length} onClick={() => this.delete(selection)}>
+              Delete
+            </button>
           </div>
         </div>
         <Upload category={category}>
@@ -190,11 +197,15 @@ class Photos extends React.PureComponent {
 }
 
 export default connect(
-  ({ photo: { photos, groups } }) => ({
+  ({ photo: { photos, groups }, runtime: { categoryService, photoService } }) => ({
     photos,
     groups,
+    categoryService,
+    photoService,
   }),
   dispatch => ({
     loadPhotos: category => dispatch(loadPhotos(category)),
+    updatePhoto: (photo, data) => dispatch(updatePhotos(photo, data)),
+    updateCategory: (category, data) => dispatch(updateCategory(category, data)),
   }),
 )(withRouter(Photos));

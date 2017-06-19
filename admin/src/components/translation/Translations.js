@@ -44,10 +44,6 @@ class Translations extends React.PureComponent {
     this.update = this.update.bind(this);
   }
 
-  componentDidMount() {
-    this.props.load();
-  }
-
   toggleCreate() {
     this.setState((state => ({ add: !state.add })));
   }

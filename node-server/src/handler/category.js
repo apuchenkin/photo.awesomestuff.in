@@ -1,6 +1,7 @@
 import Router from 'koa-router';
 import body from 'koa-body';
 
+import Photo from '../model/photo';
 import Category from '../model/category';
 import CategoryService, { withTranslation } from '../service/category';
 
@@ -53,7 +54,13 @@ categoryRouter
     ctx.body = ctx.category;
   })
   .patch('/', async (ctx) => {
-    ctx.body = await ctx.category.update(ctx.request.body);
+    const data = ctx.request.body;
+    const category = await ctx.category.update(ctx.request.body);
+    if (data.featured) {
+      await category.setFeatured(data.featured);
+    }
+
+    ctx.body = category;
   })
   .del('/', async (ctx) => {
     await ctx.category.destroy();
