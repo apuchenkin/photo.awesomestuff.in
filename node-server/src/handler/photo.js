@@ -116,7 +116,7 @@ photoRouter
   })
 ;
 
-const photosRouter = Router();
+const photosRouter = Router({ prefix: '/photo' });
 photosRouter
   .use(photoRouter.routes(), photoRouter.allowedMethods())
   .get('/', async (ctx) => {

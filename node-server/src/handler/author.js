@@ -3,8 +3,7 @@ import body from 'koa-body';
 
 import Author from '../model/author';
 
-const router = Router();
-
+const router = Router({ prefix: '/author' });
 router
   .get('/', async (ctx) => {
     ctx.body = await Author.findAll();

@@ -1,7 +1,6 @@
 import Router from 'koa-router';
 import body from 'koa-body';
 
-import Photo from '../model/photo';
 import Category from '../model/category';
 import CategoryService, { withTranslation } from '../service/category';
 
@@ -68,13 +67,12 @@ categoryRouter
   })
 ;
 
-const categoriesRouter = Router();
+const categoriesRouter = Router({ prefix: '/category' });
 categoriesRouter
   .use(body())
   .use(categoryRouter.routes(), categoryRouter.allowedMethods())
   .get('/', async (ctx) => {
-    // TODO: false represents public access
-    ctx.body = await CategoryService.findAll(false ? ctx.locale : null);
+    ctx.body = await CategoryService.findAll(ctx.locale, ctx.user);
   })
   .post('/', async (ctx) => {
     const category = await Category.create(ctx.request.body, { validate: true });

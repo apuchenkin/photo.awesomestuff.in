@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import Router from 'koa-router';
 import acceptLanguage from 'accept-language';
+import auth from 'basic-auth';
 import db from './db';
 import User from './model/user';
 import Category from './model/category';
@@ -16,6 +17,26 @@ const router = Router();
 
 acceptLanguage.languages(['en-US', 'ru-RU']);
 
+router.use(async (ctx, next) => {
+  const credentials = auth(ctx);
+
+  if (credentials) {
+    const user = await User.findOne({
+      where: {
+        email: credentials.name,
+        password: credentials.pass,
+      },
+    });
+
+    ctx.user = user;
+  }
+  if (ctx.method !== 'GET' && !ctx.user) {
+    ctx.status = 401;
+  } else {
+    return next();
+  }
+});
+
 router.get('/', async (ctx) => {
   try {
     await ctx.db.authenticate();
@@ -27,9 +48,9 @@ router.get('/', async (ctx) => {
   }
 });
 
-router.use('/author', authorRouter.routes(), authorRouter.allowedMethods());
-router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods());
-router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
+router.use(authorRouter.routes(), authorRouter.allowedMethods());
+router.use(categoryRouter.routes(), categoryRouter.allowedMethods());
+router.use(photoRouter.routes(), photoRouter.allowedMethods());
 router.use(translationRouter.routes(), translationRouter.allowedMethods());
 
 app
