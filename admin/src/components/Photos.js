@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 
 import Photo from './Photo';
 import Upload from './Upload';
-// import Translations from './Translations';
+import PhotoTranslations from './translation/Photo';
 
 import {
   load as loadPhotos,
@@ -132,14 +132,9 @@ class Photos extends React.PureComponent {
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
     const singleSelect = selection.length === 1;
 
-    // const photoTranslations = photo => (
-    //   <Translations
-    //     service={admin.photoService}
-    //     entity={photo}
-    //     backUrl={match.url}
-    //     field="description"
-    //   />
-    // );
+    const translations = photo => (
+      <PhotoTranslations backUrl={match.url} photo={photo} />
+    );
 
     const photoItems = photos.map(p => (
       <li key={p.id} >
@@ -181,22 +176,22 @@ class Photos extends React.PureComponent {
 
     return (
       <Switch>
-        {/* {photos.length && (
+        {photos.length && (
           <Route
             path={`${match.url}/:id/translation`}
-            render={({ match }) => {
-              const photo = photos.find(p => p.id === Number(match.params.id));
-              return photoTranslations(photo);
+            render={({ match: { params } }) => {
+              const photo = photos.find(p => p.id === Number(params.id));
+              return translations(photo);
             }}
           />
-        )} */}
+        )}
         <Route render={() => PhotosCmp} />
       </Switch>
     );
   }
 }
 
-export default connect(
+export default withRouter(connect(
   ({ photo: { photos, groups }, runtime: { categoryService, photoService } }) => ({
     photos,
     groups,
@@ -208,4 +203,4 @@ export default connect(
     updatePhoto: (photo, data) => dispatch(updatePhotos(photo, data)),
     updateCategory: (category, data) => dispatch(updateCategory(category, data)),
   }),
-)(withRouter(Photos));
+)(Photos));

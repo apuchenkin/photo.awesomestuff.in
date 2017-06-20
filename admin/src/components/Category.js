@@ -102,7 +102,7 @@ const Category = (props) => {
           onClick={remove}
           className="material-icons"
         >
-          clear
+          delete_forever
         </button>
       </span>
     </div>,

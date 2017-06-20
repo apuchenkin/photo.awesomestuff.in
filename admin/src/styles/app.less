@@ -134,13 +134,12 @@ form.create {
 
       li {
         padding: 2px @divisor;
-        cursor: pointer;
-        // height: 28px;
-        display: block;
+        // cursor: pointer;
         overflow: hidden;
 
-        button {
+        & > button {
           float: left;
+          position: relative;
 
           &[disabled] {
             color: grey;
@@ -155,21 +154,29 @@ form.create {
         }
 
         a {
-          line-height: 28px;
-          display: inline;
-
           &:hover {
             background: lighten(@grey-light, 10%);
           }
         }
 
-        .tools {
-          float: right;
-        }
-
         .category {
-          display: inline;
+          display: flex;
           line-height: 28px;
+
+          & > a {
+            display: inline-block;
+            padding: 0 2px;
+            flex: 1 100%;
+          }
+
+          .tools {
+            display: inline-block;
+            float: right;
+            display: flex;
+            a {
+              height: 28px;
+            }
+          }
         }
 
         .category--hovered {

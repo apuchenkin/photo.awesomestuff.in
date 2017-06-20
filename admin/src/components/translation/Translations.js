@@ -2,7 +2,6 @@ import React from 'react';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
-// import utils from '../../../client/src/lib/utils';
 import Translation from './Translation';
 
 const langs = ['ru', 'en'];

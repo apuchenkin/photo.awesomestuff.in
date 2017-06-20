@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Translations from './Translations';
+import utils from '../../../../client/src/lib/utils';
 
 import {
   load as loadTranslations,
@@ -12,22 +13,22 @@ import {
 
 const FIELDS = ['title'];
 
-class CategoryTranslations extends React.PureComponent {
+class PhotoTranslations extends React.PureComponent {
 
   componentDidMount() {
-    this.props.load(this.props.category);
+    this.props.load(this.props.photo);
   }
 
   componentWillReceiveProps(props) {
-    if (this.props.category !== props.category) {
-      this.props.load(props.category);
+    if (this.props.photo !== props.photo) {
+      this.props.load(props.photo);
     }
   }
 
   render() {
     const {
       translations,
-      category,
+      photo,
       backUrl,
       create,
       update,
@@ -37,32 +38,31 @@ class CategoryTranslations extends React.PureComponent {
     return (
       <Translations
         translations={translations}
-        create={create(category)}
+        create={create(photo)}
         update={update}
         remove={remove}
         fields={FIELDS}
-        title={category.name}
+        title={photo.name}
         backUrl={backUrl}
-      />
+      >
+        <img alt={photo.name} src={utils.getSrc(photo.src, 800, 600, true)} />
+      </Translations>
     );
   }
 }
-
-/* {entity.src && <img alt={entity.name}
- src={utils.getSrc(entity.src, 800, 600, true)} />} */
 
 export default connect(
   ({ translation: { translations } }) => ({
     translations,
   }),
   dispatch => ({
-    load: category => dispatch(loadTranslations({ refType: 'category', refId: category.id })),
-    create: category => translation => dispatch(createTranslations(Object.assign({}, translation, {
-      refType: 'category',
-      refId: category.id,
-      field: 'title',
+    load: photo => dispatch(loadTranslations({ refType: 'photo', refId: photo.id })),
+    create: photo => translation => dispatch(createTranslations(Object.assign({}, translation, {
+      refType: 'photo',
+      refId: photo.id,
+      field: 'description',
     }))),
     update: (translation, data) => dispatch(updateTranslation(translation, data)),
     remove: translation => dispatch(removeTranslation(translation)),
   }),
-)(CategoryTranslations);
+)(PhotoTranslations);

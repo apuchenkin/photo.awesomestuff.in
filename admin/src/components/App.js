@@ -22,12 +22,8 @@ class App extends React.PureComponent {
     const categoryName = match.params.category;
     const category = categories.find(c => c.name === categoryName);
     const photos = <Photos admin={this} category={category} />;
-
-    const categoryTranslations = (
-      <CategoryTranslations
-        backUrl={match.url}
-        category={category}
-      />
+    const transalations = (
+      <CategoryTranslations backUrl={match.url} category={category} />
     );
 
     return (
@@ -44,7 +40,7 @@ class App extends React.PureComponent {
               />
               <Route
                 path={`${match.url}/translation`}
-                render={() => categoryTranslations}
+                render={() => transalations}
               />
             </Switch>
           </main>
@@ -54,11 +50,11 @@ class App extends React.PureComponent {
   }
 }
 
-export default connect(
+export default withRouter(connect(
   ({ category: { categories } }) => ({
     categories,
   }),
   dispatch => ({
     loadCategories: () => dispatch(loadCategories()),
   }),
-)(withRouter(App));
+)(App));
