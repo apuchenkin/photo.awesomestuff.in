@@ -1,37 +1,40 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-
-const AUTH = 'auth';
+import AuthService from '../service/auth';
 
 class Auth extends React.Component {
-
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       email: '',
       password: '',
     };
+
+    this.submit = this.submit.bind(this);
   }
 
   submit() {
-    const auth = window.btoa([this.state.email, this.state.password].join(':'));
-    localStorage.setItem(AUTH, `Basic ${auth}`);
-    this.props.router.push('/');
+    const { email, password } = this.state;
+    const { history } = this.props;
+
+    AuthService.login(email, password).then(() => {
+      history.push('/');
+    });
   }
 
   render() {
     return (
-      <div>
+      <div className="auth">
         <form onSubmit={this.submit}>
-          Username ({this.state.email}):
+          Username:
           <input
             name="email"
             type="email"
             value={this.state.email}
             onChange={e => this.setState({ email: e.target.value })}
           />
-          Password ({this.state.password}):
+          Password:
           <input
             name="password"
             type="passord"

@@ -2,6 +2,12 @@ const AUTH = 'auth';
 
 const getToken = () => localStorage.getItem(AUTH) || '';
 
+const login = (user, pass) => {
+  const auth = window.btoa([user, pass].join(':'));
+  localStorage.setItem(AUTH, `Basic ${auth}`);
+  return Promise.resolve();
+};
+
 const logout = () => {
   localStorage.removeItem(AUTH);
 
@@ -11,4 +17,5 @@ const logout = () => {
 export default {
   getToken,
   logout,
+  login,
 };

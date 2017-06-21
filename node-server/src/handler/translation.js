@@ -1,13 +1,11 @@
 import Router from 'koa-router';
-import body from 'koa-body';
 import queryString from 'query-string';
 
 import Translation from '../model/translation';
 
-const translationRouter = Router({ prefix: '/translation' });
+const translationRouter = Router();
 
 translationRouter
-  .use(body())
   .get('/', async (ctx) => {
     const query = queryString.parse(ctx.search);
     ctx.body = await Translation.findAll({

@@ -1,7 +1,8 @@
 import Category from '../model/category';
+import Photo from '../model/photo';
 import Translation from '../model/translation';
 
-const PUBLIC_FIELDS = ['id', 'name'];
+export const PUBLIC_FIELDS = ['id', 'name', 'date'];
 
 export const withTranslation = (options, language) => Object.assign(options, {
   include: [Object.assign({
@@ -11,6 +12,10 @@ export const withTranslation = (options, language) => Object.assign(options, {
 });
 
 const toPublic = language => (entity) => {
+  if (!entity) {
+    return null;
+  }
+
   const data = entity.toJSON();
   const result = data.translations
     .filter(t => t.language === language)
@@ -20,33 +25,41 @@ const toPublic = language => (entity) => {
   return result;
 };
 
-const findAll = (language, authorized) => Category.findAll(
+const findAll = (authorized, language) => Category.findAll({
+  attributes: authorized ? undefined : PUBLIC_FIELDS,
+  where: authorized ? {} : {
+    hidden: false,
+  },
+  include: [
+    {
+      model: Category,
+      as: 'parent',
+      attributes: authorized ? undefined : PUBLIC_FIELDS,
+    },
+    {
+      model: Photo,
+      as: 'featured',
+      attributes: authorized ? undefined : undefined, //TODO: enrich with photo publics
+    },
+    Object.assign({
+      model: Translation,
+    }, authorized ? {} : { where: { language } }),
+  ],
+});
+
+const getByName = (name, authorized, language) => Category.findOne(
   withTranslation({
     attributes: authorized ? undefined : PUBLIC_FIELDS,
-    where: authorized ? {} : {
+    where: authorized ? { name } : {
       hidden: false,
+      name,
     },
   }, authorized ? null : language))
-  .then(categories => (authorized
-    ? categories
-    : categories.map(toPublic(language))
-  ));
-
-
-const getByName = (name, language) => Category.findOne(
-  withTranslation(
-    { where: { name } },
-    language,
-  ));
-
-const getPublicData = category =>
-  category.translations.reduce((acc, v) =>
-    Object.assign(acc, { [v.field]: v.value }),
-    category,
-  );
+  .then(category => (authorized ? category : toPublic(language)(category)))
+;
 
 export default {
   findAll,
-  getPublicData,
+  toPublic,
   getByName,
 };

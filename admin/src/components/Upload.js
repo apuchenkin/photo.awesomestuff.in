@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import Immutable from 'seamless-immutable';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
+import authService from '../service/auth';
 
 const fileTarget = {
   drop(props, monitor, cmp) {
@@ -61,6 +62,7 @@ class Upload extends React.Component {
         method: 'POST',
         headers: new Headers({
           'Content-Disposition': `attachment; filename="${file.name}"`,
+          Authorization: authService.getToken(),
         }),
         body: file,
       }).then((response) => {

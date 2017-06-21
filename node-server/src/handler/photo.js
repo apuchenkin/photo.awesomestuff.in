@@ -1,5 +1,4 @@
 import Router from 'koa-router';
-import body from 'koa-body';
 import { PassThrough } from 'stream';
 import exif from 'exif-parser';
 import contentDisposition from 'content-disposition';
@@ -100,9 +99,8 @@ const photoRouter = Router({ prefix: '/:photo' });
 photoRouter
   .param('photo', async (photo, ctx, next) => {
     ctx.photo = await findPhoto(photo);
-    return next();
+    await next();
   })
-  .use(body())
   .use(translationRouter.routes(), translationRouter.allowedMethods())
   .get('/', (ctx) => {
     ctx.body = ctx.photo;
@@ -116,7 +114,7 @@ photoRouter
   })
 ;
 
-const photosRouter = Router({ prefix: '/photo' });
+const photosRouter = Router();
 photosRouter
   .use(photoRouter.routes(), photoRouter.allowedMethods())
   .get('/', async (ctx) => {
