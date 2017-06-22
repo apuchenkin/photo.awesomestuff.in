@@ -1,28 +1,22 @@
 import Category from '../model/category';
 import Photo from '../model/photo';
 import Translation from '../model/translation';
+import { joinTranslation } from './translation';
+import { PUBLIC_FIELDS as PHOTO_FIELDS } from './photo';
 
-export const PUBLIC_FIELDS = ['id', 'name', 'date'];
+export const PUBLIC_FIELDS = ['id', 'name', 'date', 'parentId', 'featuredId'];
 
-export const withTranslation = (options, language) => Object.assign(options, {
-  include: [Object.assign({
-    model: Translation,
-  }, language
-  ? ({ where: { language } }) : {})],
-});
-
-const toPublic = language => (entity) => {
-  if (!entity) {
+const toPublic = language => (category) => {
+  if (!category) {
     return null;
   }
 
-  const data = entity.toJSON();
-  const result = data.translations
-    .filter(t => t.language === language)
-    .reduce((acc, t) => Object.assign(acc, { [t.field]: t.value }), data);
+  const categoryData = joinTranslation(language, category.toJSON());
 
-  delete result.translations;
-  return result;
+  delete categoryData.parentId;
+  delete categoryData.featuredId;
+
+  return categoryData;
 };
 
 const findAll = (authorized, language) => Category.findAll({
@@ -39,7 +33,7 @@ const findAll = (authorized, language) => Category.findAll({
     {
       model: Photo,
       as: 'featured',
-      attributes: authorized ? undefined : undefined, //TODO: enrich with photo publics
+      attributes: authorized ? undefined : PHOTO_FIELDS,
     },
     Object.assign({
       model: Translation,
@@ -47,16 +41,28 @@ const findAll = (authorized, language) => Category.findAll({
   ],
 });
 
-const getByName = (name, authorized, language) => Category.findOne(
-  withTranslation({
-    attributes: authorized ? undefined : PUBLIC_FIELDS,
-    where: authorized ? { name } : {
-      hidden: false,
-      name,
+const getByName = (name, authorized, language) => Category.findOne({
+  attributes: authorized ? undefined : PUBLIC_FIELDS,
+  where: authorized ? { name } : {
+    hidden: false,
+    name,
+  },
+  include: [
+    {
+      model: Category,
+      as: 'parent',
+      attributes: authorized ? undefined : PUBLIC_FIELDS,
     },
-  }, authorized ? null : language))
-  .then(category => (authorized ? category : toPublic(language)(category)))
-;
+    {
+      model: Photo,
+      as: 'featured',
+      attributes: authorized ? undefined : PHOTO_FIELDS,
+    },
+    Object.assign({
+      model: Translation,
+    }, authorized ? {} : { where: { language } }),
+  ],
+});
 
 export default {
   findAll,

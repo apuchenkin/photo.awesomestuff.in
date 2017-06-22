@@ -1,12 +1,14 @@
 import Router from 'koa-router';
 
 import Category from '../model/category';
-import CategoryService, { withTranslation } from '../service/category';
+import CategoryService from '../service/category';
+import PhotoService from '../service/photo';
 
 const photoRouter = Router();
 photoRouter
   .get('/', async (ctx) => {
-    ctx.body = await ctx.category.getPhotos(withTranslation({}, null));
+    const photos = await PhotoService.findAll(ctx.category, ctx.user, ctx.locale);
+    ctx.body = ctx.user ? photos : photos.map(PhotoService.toPublic(ctx.locale));
   })
   .link('/', async (ctx) => {
     await ctx.category.addPhotos(ctx.request.body);
@@ -21,6 +23,10 @@ photoRouter
 const translationRouter = Router();
 translationRouter
   .get('/', async (ctx) => {
+    if (!ctx.user) {
+      ctx.throw(401);
+    }
+
     ctx.body = await ctx.category.getTranslations();
   })
   .post('/', async (ctx) => {
@@ -53,15 +59,10 @@ categoryRouter
   .use('/photo', photoRouter.routes(), photoRouter.allowedMethods())
   .use('/translation', translationRouter.routes(), translationRouter.allowedMethods())
   .get('/', (ctx) => {
-    ctx.body = ctx.category;
+    ctx.body = ctx.user ? ctx.category : CategoryService.toPublic(ctx.locale)(ctx.category);
   })
   .patch('/', async (ctx) => {
-    const data = ctx.request.body;
-    const category = await ctx.category.update(ctx.request.body);
-    if (data.featured) {
-      await category.setFeatured(data.featured);
-    }
-    ctx.body = category;
+    ctx.body = await ctx.category.update(ctx.request.body);
   })
   .del('/', async (ctx) => {
     await ctx.category.destroy();

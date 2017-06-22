@@ -93,7 +93,7 @@ class Photos extends React.PureComponent {
 
   makeFeatured(photo) {
     this.props.updateCategory(this.props.category, {
-      featured: photo.id,
+      featuredId: photo.id,
     });
     this.cleanSelection();
   }

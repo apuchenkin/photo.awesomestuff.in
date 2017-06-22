@@ -43,13 +43,13 @@ const Group = ({ color, onClick }) => (
   />
 );
 
-const translateColor = (category) => {
-  if (!category.translations.length) {
+const translateColor = (photo) => {
+  if (!photo.translations || !photo.translations.length) {
     return 'red';
   }
 
-  if (category.translations.find(translation => translation.language === 'ru')
-   && category.translations.find(translation => translation.language === 'en')
+  if (photo.translations.find(translation => translation.language === 'ru')
+   && photo.translations.find(translation => translation.language === 'en')
   ) {
     return 'green';
   }
