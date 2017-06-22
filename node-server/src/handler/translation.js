@@ -7,13 +7,9 @@ const translationRouter = Router();
 
 translationRouter
   .get('/', async (ctx) => {
-    if (!ctx.user) {
-      ctx.throw(401);
-    }
-
-    const query = queryString.parse(ctx.search);
+    ctx.assert(ctx.user, 401);
     ctx.body = await Translation.findAll({
-      where: query,
+      where: queryString.parse(ctx.search),
     });
   })
   .post('/', async (ctx) => {

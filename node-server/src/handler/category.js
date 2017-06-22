@@ -23,25 +23,28 @@ photoRouter
 const translationRouter = Router();
 translationRouter
   .get('/', async (ctx) => {
-    if (!ctx.user) {
-      ctx.throw(401);
-    }
-
+    ctx.assert(ctx.user, 401);
     ctx.body = await ctx.category.getTranslations();
   })
   .post('/', async (ctx) => {
     ctx.body = await ctx.category.createTranslation(ctx.request.body);
   })
   .patch('/:translationId', async (ctx) => {
-    const translation = ctx.category.translations.find(t =>
-      t.id === Number(ctx.params.translationId),
-    );
+    const translation = await ctx.category.getTranslations({
+      where: {
+        id: ctx.params.translationId,
+      },
+    }).then(t => t[0]);
+    ctx.assert(translation, 404);
     ctx.body = await translation.update(ctx.request.body);
   })
   .del('/:translationId', async (ctx) => {
-    const translation = ctx.category.translations.find(t =>
-      t.id === Number(ctx.params.translationId),
-    );
+    const translation = await ctx.category.getTranslations({
+      where: {
+        id: ctx.params.translationId,
+      },
+    }).then(t => t[0]);
+    ctx.assert(translation, 404);
     await translation.destroy();
     ctx.body = null;
   });
@@ -50,9 +53,7 @@ const categoryRouter = Router({ prefix: '/:category' });
 categoryRouter
   .param('category', async (name, ctx, next) => {
     const category = await CategoryService.getByName(ctx.params.category, ctx.user, ctx.locale);
-    if (!category) {
-      ctx.throw(404);
-    }
+    ctx.assert(category, 404);
     ctx.category = category;
     await next();
   })
@@ -78,8 +79,7 @@ categoriesRouter
     ctx.body = ctx.user ? categories : categories.map(CategoryService.toPublic(ctx.locale));
   })
   .post('/', async (ctx) => {
-    const category = await Category.create(ctx.request.body, { validate: true });
-    ctx.body = category;
+    ctx.body = await Category.create(ctx.request.body);
   })
 ;
 

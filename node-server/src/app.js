@@ -3,6 +3,7 @@ import Router from 'koa-router';
 import body from 'koa-body';
 import acceptLanguage from 'accept-language';
 import auth from 'basic-auth';
+import { ValidationError } from 'sequelize';
 import db from './db';
 import User from './model/user';
 import Category from './model/category';
@@ -52,6 +53,18 @@ router.use(async (ctx, next) => {
   }
 
   await next();
+});
+
+router.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      ctx.throw(400, err, ...err.errors);
+    }
+
+    throw err;
+  }
 });
 
 // router.use(authorRouter.routes(), authorRouter.allowedMethods());

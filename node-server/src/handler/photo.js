@@ -7,25 +7,26 @@ import PhotoService from '../service/photo';
 const translationRouter = Router();
 translationRouter
   .get('/', async (ctx) => {
-    if (!ctx.user) {
-      ctx.throw(401);
-    }
-
+    ctx.assert(ctx.user, 401);
     ctx.body = await ctx.photo.getTranslations();
   })
   .post('/', async (ctx) => {
     ctx.body = await ctx.photo.createTranslation(ctx.request.body);
   })
   .patch('/:translationId', async (ctx) => {
-    const translation = ctx.photo.translations.find(t =>
-      t.id === Number(ctx.params.translationId),
-    );
+    const translation = await ctx.photo.getTranslations({
+      where: {
+        id: ctx.params.translationId,
+      },
+    }).then(t => t[0]);
     ctx.body = await translation.update(ctx.request.body);
   })
   .del('/:translationId', async (ctx) => {
-    const translation = ctx.photo.translations.find(t =>
-      t.id === Number(ctx.params.translationId),
-    );
+    const translation = await ctx.photo.getTranslations({
+      where: {
+        id: ctx.params.translationId,
+      },
+    }).then(t => t[0]);
     await translation.destroy();
     ctx.body = null;
   });
@@ -34,9 +35,7 @@ const photoRouter = Router({ prefix: '/:photo' });
 photoRouter
   .param('photo', async (id, ctx, next) => {
     const photo = await PhotoService.getById(id, ctx.user, ctx.locale);
-    if (!photo) {
-      ctx.throw(404);
-    }
+    ctx.assert(photo, 404);
     ctx.photo = photo;
     await next();
   })
