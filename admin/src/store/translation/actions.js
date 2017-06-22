@@ -1,11 +1,12 @@
-export const LOAD = 'LOAD/TRANSLATION';
-export const LOADED = 'LOADED/TRANSLATION';
-export const CREATE = 'CREATE/TRANSLATION';
-export const CREATED = 'CREATED/TRANSLATION';
-export const UPDATE = 'UPDATE/TRANSLATION';
-export const UPDATED = 'UPDATED/TRANSLATION';
-export const REMOVE = 'REMOVE/TRANSLATION';
-export const REMOVED = 'REMOVED/TRANSLATION';
+export const LOAD = 'TRANSLATION/LOAD';
+export const LOADED = 'TRANSLATION/LOADED';
+export const CREATE = 'TRANSLATION/CREATE';
+export const CREATED = 'TRANSLATION/CREATED';
+export const UPDATE = 'TRANSLATION/UPDATE';
+export const UPDATED = 'TRANSLATION/UPDATED';
+export const REMOVE = 'TRANSLATION/REMOVE';
+export const REMOVED = 'TRANSLATION/REMOVED';
+export const ERROR = 'TRANSLATION/ERROR';
 
 export const load = query => ({
   type: LOAD,
@@ -46,4 +47,9 @@ export const remove = translation => ({
 export const removed = translation => ({
   type: REMOVED,
   translation,
+});
+
+export const error = err => ({
+  type: ERROR,
+  error: err,
 });

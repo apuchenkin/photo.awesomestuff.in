@@ -1,6 +1,6 @@
 import Immutable from 'seamless-immutable';
 import PhotoService from '../../../../client/lib/service/Photo';
-import { LOADED, UPDATED } from './actions';
+import { LOADED, UPDATED, ERROR } from './actions';
 
 const initial = Immutable({
   photos: [],
@@ -16,10 +16,16 @@ const updated = (state, { photo }) => state.set('photos',
   state.photos.set(state.photos.findIndex(p => p.id === photo.id), photo),
 );
 
+const error = (state, action) => {
+  console.log(action.error); // eslint-disable-line no-console
+  return state;
+};
+
 export default (state = initial, action) => {
   const reducer = {
     [LOADED]: loaded,
     [UPDATED]: updated,
+    [ERROR]: error,
   }[action.type];
 
   return reducer ? reducer(state, action) : state;

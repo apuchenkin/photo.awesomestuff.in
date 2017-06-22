@@ -1,6 +1,6 @@
 import Immutable from 'seamless-immutable';
 
-import { LOADED, CREATED, UPDATED, REMOVED } from './actions';
+import { LOADED, CREATED, UPDATED, REMOVED, ERROR } from './actions';
 
 const initial = Immutable({
   translations: [],
@@ -14,12 +14,18 @@ const updated = (state, { translation }) => state.set('translations',
 const removed = (state, { translation }) =>
   state.set('translations', Immutable(state.translations.filter(c => c.id !== translation.id)));
 
+const error = (state, action) => {
+  console.log(action.error); // eslint-disable-line no-console
+  return state;
+};
+
 export default (state = initial, action) => {
   const reducer = {
     [LOADED]: loaded,
     [CREATED]: created,
     [UPDATED]: updated,
     [REMOVED]: removed,
+    [ERROR]: error,
   }[action.type];
 
   return reducer ? reducer(state, action) : state;

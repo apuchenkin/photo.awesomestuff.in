@@ -1,7 +1,8 @@
-export const LOAD = 'LOAD/PHOTO';
-export const LOADED = 'LOADED/PHOTO';
-export const UPDATE = 'UPDATE/PHOTO';
-export const UPDATED = 'UPDATED/PHOTO';
+export const LOAD = 'PHOTO/LOAD';
+export const LOADED = 'PHOTO/LOADED';
+export const UPDATE = 'PHOTO/UPDATE';
+export const UPDATED = 'PHOTO/UPDATED';
+export const ERROR = 'PHOTO/ERROR';
 
 export const load = category => ({
   type: LOAD,
@@ -22,4 +23,9 @@ export const update = (photo, data) => ({
 export const updated = photo => ({
   type: UPDATED,
   photo,
+});
+
+export const error = err => ({
+  type: ERROR,
+  error: err,
 });

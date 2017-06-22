@@ -1,8 +1,11 @@
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/observable/of';
 import { combineEpics } from 'redux-observable';
 import {
   LOAD, CREATE, UPDATE, REMOVE,
-  loaded, created, updated, removed,
+  loaded, created, updated, removed, error,
 } from './actions';
 
 const load = (action, store) =>
@@ -11,7 +14,7 @@ const load = (action, store) =>
     .mergeMap(() => store.getState().runtime
       .categoryService.fetchCategories()
       .then(loaded),
-    )
+    ).catch(err => Observable.of(error(err)))
 ;
 
 const create = (action, store) =>
@@ -20,7 +23,7 @@ const create = (action, store) =>
     .mergeMap(({ data }) => store.getState().runtime
       .categoryService.create(data)
       .then(created),
-    )
+    ).catch(err => Observable.of(error(err)))
 ;
 
 const update = (action, store) =>
@@ -29,7 +32,7 @@ const update = (action, store) =>
     .mergeMap(({ category, data }) => store.getState().runtime
       .categoryService.update(category, data)
       .then(updated),
-    )
+    ).catch(err => Observable.of(error(err)))
 ;
 
 const remove = (action, store) =>
@@ -38,7 +41,7 @@ const remove = (action, store) =>
     .mergeMap(({ category }) => store.getState().runtime
       .categoryService.delete(category)
       .then(() => removed(category)),
-    )
+    ).catch(err => Observable.of(error(err)))
 ;
 
 export default combineEpics(
