@@ -1,13 +1,17 @@
 import Koa from 'koa';
 import Router from 'koa-router';
 import body from 'koa-body';
+import compress from 'koa-compress';
+import cacheControl from 'koa-cache-control';
 import acceptLanguage from 'accept-language';
 import auth from 'basic-auth';
 import { ValidationError } from 'sequelize';
+
 import db from './db';
+
 import User from './model/user';
 import Category from './model/category';
-// import authorRouter from './handler/author';
+
 import categoryRouter from './handler/category';
 import photoRouter from './handler/photo';
 import translationRouter from './handler/translation';
@@ -23,6 +27,7 @@ router.use(body({
   urlencoded: false,
   text: false,
 }));
+
 router.use((ctx, next) => {
   const locale = acceptLanguage.get(ctx.get('accept-language'));
   ctx.locale = {
@@ -72,7 +77,26 @@ router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods()
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 router.use('/translation', translationRouter.routes(), translationRouter.allowedMethods());
 
-app.use(router.routes(), router.allowedMethods());
+app.use(cacheControl());
+app.use(compress());
+
+// x-response-time
+app.use(async (ctx, next) => {
+  const start = new Date();
+  await next();
+  const ms = new Date() - start;
+  ctx.set('X-Response-Time', `${ms}ms`);
+});
+
+// logger
+app.use(async (ctx, next) => {
+  const start = new Date();
+  await next();
+  const ms = new Date() - start;
+
+  // eslint-disable-next-line no-console
+  console.log(`${ctx.method} ${ctx.url} - ${ms}`);
+});
 
 db.sync({ force: true })
   .then(() => User.create({
@@ -95,22 +119,5 @@ db.sync({ force: true })
   }));
 
 app.context.db = db;
-
-// // x-response-time
-// app.use(async (ctx, next) => {
-//   const start = new Date();
-//   await next();
-//   const ms = new Date() - start;
-//   ctx.set('X-Response-Time', `${ms}ms`);
-// });
-//
-// // logger
-// app.use(async (ctx, next) => {
-//   const start = new Date();
-//   await next();
-//   const ms = new Date() - start;
-//
-//   console.log(`${ctx.method} ${ctx.url} - ${ms}`);
-// });
-
+app.use(router.routes(), router.allowedMethods());
 app.listen(3000);

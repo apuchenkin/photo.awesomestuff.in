@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+import vary from 'vary';
 
 import Photo from '../model/photo';
 import upload from './upload';
@@ -40,7 +41,13 @@ photoRouter
     await next();
   })
   .use('/translation', translationRouter.routes(), translationRouter.allowedMethods())
-  .get('/', (ctx) => {
+  .get('/', async (ctx) => {
+    vary(ctx.res, 'Accept-Language');
+    ctx.cacheControl = {
+      public: true,
+      maxAge: 60 * 60 * 24,
+    };
+    await ctx.photo.update({ views: ctx.photo.views + 1 });
     ctx.body = ctx.user ? ctx.photo : PhotoService.toPublic(ctx.locale)(ctx.photo);
   })
   .patch('/', async (ctx) => {

@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-
+import vary from 'vary';
 import Category from '../model/category';
 import CategoryService from '../service/category';
 import PhotoService from '../service/photo';
@@ -7,6 +7,11 @@ import PhotoService from '../service/photo';
 const photoRouter = Router();
 photoRouter
   .get('/', async (ctx) => {
+    vary(ctx.res, 'Accept-Language');
+    ctx.cacheControl = {
+      public: true,
+      maxAge: 60 * 60 * 24,
+    };
     const photos = await PhotoService.findAll(ctx.category, ctx.user, ctx.locale);
     ctx.body = ctx.user ? photos : photos.map(PhotoService.toPublic(ctx.locale));
   })
@@ -60,6 +65,11 @@ categoryRouter
   .use('/photo', photoRouter.routes(), photoRouter.allowedMethods())
   .use('/translation', translationRouter.routes(), translationRouter.allowedMethods())
   .get('/', (ctx) => {
+    vary(ctx.res, 'Accept-Language');
+    ctx.cacheControl = {
+      public: true,
+      maxAge: 60 * 60 * 24 * 30,
+    };
     ctx.body = ctx.user ? ctx.category : CategoryService.toPublic(ctx.locale)(ctx.category);
   })
   .patch('/', async (ctx) => {
@@ -75,6 +85,11 @@ const categoriesRouter = Router();
 categoriesRouter
   .use(categoryRouter.routes(), categoryRouter.allowedMethods())
   .get('/', async (ctx) => {
+    vary(ctx.res, 'Accept-Language');
+    ctx.cacheControl = {
+      public: true,
+      maxAge: 60 * 60 * 24 * 30,
+    };
     const categories = await CategoryService.findAll(ctx.user, ctx.locale);
     ctx.body = ctx.user ? categories : categories.map(CategoryService.toPublic(ctx.locale));
   })
