@@ -1,25 +1,26 @@
 import webpack from 'webpack';
-// import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import merge from 'webpack-merge';
 import AssetsPlugin from 'assets-webpack-plugin';
 import path from 'path';
 
 import base from './webpack.config.base.babel';
+const isDevelopment = env => env === 'development';
 
-const DEBUG = base.debug;
-const GLOBALS = {
+const GLOBALS = DEBUG => ({
   'process.env.NODE_ENV': DEBUG ? '"development"' : '"production"',
+  'process.env.BROWSER': true,
   __DEV__: DEBUG,
   isBrowser: true,
-};
+});
 
-module.exports = Object.assign({}, base, {
-  entry: './index.js',
+module.exports = env => merge(base(env), {
+  entry: ['babel-polyfill', './client.js'],
 
   output: {
     path: path.resolve(__dirname, '../dist/assets'),
     publicPath: '/',
-    filename: DEBUG ? '[name].js' : '[name].[hash].js',
-    chunkFilename: DEBUG ? '[name].[id].js' : '[name].[id].[chunkhash].js',
+    filename: isDevelopment(env) ? '[name].js' : '[name].[hash].js',
+    chunkFilename: isDevelopment(env) ? '[name].[id].js' : '[name].[id].[chunkhash].js',
   },
 
   target: 'web',
@@ -27,7 +28,7 @@ module.exports = Object.assign({}, base, {
   plugins: ([
     // Define free variables
     // https://webpack.github.io/docs/list-of-plugins.html#defineplugin
-    new webpack.DefinePlugin({ ...GLOBALS, 'process.env.BROWSER': true }),
+    new webpack.DefinePlugin(GLOBALS(isDevelopment(env))),
 
     // Emit a file with assets paths
     // https://github.com/sporto/assets-webpack-plugin#options
@@ -46,7 +47,7 @@ module.exports = Object.assign({}, base, {
     // new ExtractTextPlugin('bundle.css', {
     //   allChunks: true
     // }),
-  ]).concat(DEBUG ? [] : [
+  ]).concat(isDevelopment(env) ? [] : [
     // Search for equal or similar files and deduplicate them in the output
     // https://webpack.github.io/docs/list-of-plugins.html#dedupeplugin
     new webpack.optimize.DedupePlugin(),
@@ -68,5 +69,5 @@ module.exports = Object.assign({}, base, {
 
   // Choose a developer tool to enhance debugging
   // http://webpack.github.io/docs/configuration.html#devtool
-  devtool: DEBUG ? 'eval' : false,
+  devtool: isDevelopment(env) ? 'eval' : false,
 });

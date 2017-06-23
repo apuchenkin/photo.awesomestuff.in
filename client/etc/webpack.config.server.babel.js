@@ -1,20 +1,19 @@
 import webpack from 'webpack';
-// import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import merge from 'webpack-merge';
 import AssetsPlugin from 'assets-webpack-plugin';
 import path from 'path';
 
 import base from './webpack.config.base.babel';
 
-const DEBUG = base.debug;
-const GLOBALS = {
+const GLOBALS = DEBUG => ({
   'process.env.NODE_ENV': DEBUG ? '"development"' : '"production"',
+  'process.env.BROWSER': false,
   __DEV__: DEBUG,
   isBrowser: false,
-};
+});
 
-module.exports = Object.assign({}, base, {
-
-  entry: './server.js',
+module.exports = env => merge(base(env), {
+  entry: ['babel-polyfill', './server.js'],
   target: 'node',
 
   output: {
@@ -30,16 +29,54 @@ module.exports = Object.assign({}, base, {
     /^[@a-z][a-z\/\.\-0-9]*$/i,
   ],
 
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        include: [
+          path.resolve(__dirname, '../src'),
+          path.resolve(__dirname, '../lib'),
+        ],
+        loader: 'babel-loader',
+        query: {
+          // https://babeljs.io/docs/usage/options/
+          babelrc: false,
+          presets: [
+            'react',
+            ["env", {
+              "targets": {
+                "node": "current"
+              },
+              useBuiltIns: true,
+            }]
+          ],
+          plugins: [
+            // 'transform-runtime',
+            // 'transform-decorators-legacy',
+            // 'transform-class-properties',
+
+            'transform-object-rest-spread',
+            ...env ? [] : [
+              // 'transform-react-remove-prop-types',
+              // 'transform-react-constant-elements',
+              // 'transform-react-inline-elements',
+            ],
+          ],
+        },
+      },
+    ],
+  },
+
   plugins: [
 
     // Define free variables
     // https://webpack.github.io/docs/list-of-plugins.html#defineplugin
-    new webpack.DefinePlugin({ ...GLOBALS, 'process.env.BROWSER': false }),
+    new webpack.DefinePlugin(GLOBALS(env === 'development')),
 
-    // Adds a banner to the top of each generated chunk
-    // https://webpack.github.io/docs/list-of-plugins.html#bannerplugin
-    new webpack.BannerPlugin('require("source-map-support").install();',
-      { raw: true, entryOnly: false }),
+    // // Adds a banner to the top of each generated chunk
+    // // https://webpack.github.io/docs/list-of-plugins.html#bannerplugin
+    // new webpack.BannerPlugin('require("source-map-support").install();',
+    //   { raw: true, entryOnly: false }),
   ],
 
   node: {

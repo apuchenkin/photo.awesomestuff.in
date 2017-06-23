@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { locationShape } from 'react-router/lib/PropTypes';
+// import { locationShape } from 'found/lib/PropTypes';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -28,7 +28,7 @@ const Locale = (props) => {
 };
 
 Locale.propTypes = {
-  location: locationShape,
+  // location: locationShape,
   locale: string.isRequired,
   disabled: bool.isRequired,
   intl: intlShape.isRequired,

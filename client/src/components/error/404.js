@@ -1,5 +1,5 @@
 import React from 'react';
-import { locationShape } from 'react-router/lib/PropTypes';
+// import { locationShape } from 'react-router/lib/PropTypes';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -70,7 +70,7 @@ const NotFound = (props) => {
 };
 
 NotFound.propTypes = {
-  location: locationShape,
+  // location: locationShape,
 };
 
 export default withStyles(style)(NotFound);

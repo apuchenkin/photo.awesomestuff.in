@@ -98,8 +98,12 @@ class Photos extends React.PureComponent {
     this.cleanSelection();
   }
 
-  toggleVisibility(photo) {
-    this.props.updatePhoto(photo, { hidden: !photo.hidden });
+  toggleVisibility() {
+    const { selection } = this.state;
+    selection.forEach((photo) => {
+      this.props.updatePhoto(photo, { hidden: !photo.hidden });
+    });
+
     this.cleanSelection();
   }
 
@@ -157,7 +161,7 @@ class Photos extends React.PureComponent {
             <button disabled={!singleSelect} onClick={() => this.makeFeatured(selection[0])}>
               Feature
             </button>
-            <button disabled={!singleSelect} onClick={() => this.toggleVisibility(selection[0])}>
+            <button disabled={!selection.length} onClick={() => this.toggleVisibility()}>
               Show/Hide
             </button>
             <button disabled={!canGroup} onClick={() => this.group(selection)}>

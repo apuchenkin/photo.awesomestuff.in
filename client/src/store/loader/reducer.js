@@ -1,4 +1,4 @@
-import { START_LOADING, STOP_LOADING } from '../actions/loader';
+import { START_LOADING, STOP_LOADING } from './actions';
 
 const initialState = {
   count: 0,

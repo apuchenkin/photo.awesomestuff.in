@@ -2,8 +2,8 @@ import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import Link from '../link';
-import { title } from '../../etc/config';
+import Link from 'found/lib/Link';
+import { title } from '../../etc/config.json';
 import style from '../../style/header.less';
 
 const messages = defineMessages({
@@ -17,7 +17,7 @@ const messages = defineMessages({
   },
 });
 
-const HomeHeader = () =>
+const HomeHeader = () => (
   <header className={style.main}>
     <h1 className={style.title}>
       <Link to="/">{title}</Link>
@@ -29,6 +29,6 @@ const HomeHeader = () =>
       <FormattedMessage {...messages.description} />
     </h2>
   </header>
-;
+);
 
 export default withStyles(style)(HomeHeader);

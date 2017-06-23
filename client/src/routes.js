@@ -44,35 +44,35 @@ export default (store) => {
       location => getPhoto(location.params.photoId),
     ],
 
-    onEnter(location, replace, cb) {
-      const { category } = store.getState().api;
-
-      if (!isBrowser) {
-        store.dispatch(startLoading());
-      }
-
-      this.resolve(location)
-        .catch(() => replace(category.parent ? `/${category.parent.name}/${category.name}` : `/${category.name}`))
-        .then(() => cb());
-    },
-
-    getMeta() {
-      const
-        { photo } = store.getState().api,
-        description = new IntlMessageFormat(messages['meta.description.photo']);
-
-      return photo && {
-        title: photo.caption,
-        description: description.format({
-          author: photo.author && photo.author.name,
-          title: photo.caption,
-        }),
-      };
-    },
-
-    getLangs() {
-      return store.getState().api.photo.langs;
-    },
+    // onEnter(location, replace, cb) {
+    //   const { category } = store.getState().api;
+    //
+    //   if (!isBrowser) {
+    //     store.dispatch(startLoading());
+    //   }
+    //
+    //   this.resolve(location)
+    //     .catch(() => replace(category.parent ? `/${category.parent.name}/${category.name}` : `/${category.name}`))
+    //     .then(() => cb());
+    // },
+    //
+    // getMeta() {
+    //   const
+    //     { photo } = store.getState().api,
+    //     description = new IntlMessageFormat(messages['meta.description.photo']);
+    //
+    //   return photo && {
+    //     title: photo.caption,
+    //     description: description.format({
+    //       author: photo.author && photo.author.name,
+    //       title: photo.caption,
+    //     }),
+    //   };
+    // },
+    //
+    // getLangs() {
+    //   return store.getState().api.photo.langs;
+    // },
   });
 
   const categoryRoute = category => new Route({

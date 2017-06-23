@@ -1,32 +1,17 @@
 import React from 'react';
-import { locationShape } from 'react-router/lib/PropTypes';
-import withRouter from 'react-router/lib/withRouter';
+import { string, func, element, arrayOf, shape } from 'prop-types';
+import withRouter from 'found/lib/withRouter';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import Component from '../lib/PureComponent';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 
 import Loader from './loader/loader';
-import Footer from './footer';
+// import Footer from './footer';
 
-const
-  { string, func, element, arrayOf, shape } = React.PropTypes,
-  Ps = isBrowser ? require('perfect-scrollbar') : null
-  ;
+const Ps = isBrowser ? require('perfect-scrollbar') : null;
 
-class Main extends Component {
-
-  static propTypes = {
-    routes: arrayOf(shape({
-      class: string,
-      getLangs: func,
-    })).isRequired,
-    header: element.isRequired,
-    body: element.isRequired,
-    location: locationShape.isRequired,
-  }
-
+class Main extends React.PureComponent {
   componentDidMount() {
     const me = this;
 
@@ -39,21 +24,17 @@ class Main extends Component {
   }
 
   render() {
-    const
-      { routes, header, body, location } = this.props,
-      route = routes[routes.length - 1],
-      langs = route.getLangs && route.getLangs()
-      ;
+    const { data: { className, header }, children } = this.props;
+
+    // const route = routes[routes.length - 1];
+    // const langs = route.getLangs && route.getLangs();
 
     return (
-      <div className={[style.main, style[route.class]].join(' ')}>
-        {header}
+      <div className={[style.main, style[className]].join(' ')}>
+        {React.createElement(header)}
         <div className={style.content} ref={(c) => { this.content = c; }}>
-          {body}
-          <Footer
-            langs={langs}
-            location={location}
-          />
+          {children}
+          {/* <Footer /> */}
         </div>
         <Loader key="loader" />
       </div>
@@ -61,6 +42,11 @@ class Main extends Component {
   }
 }
 
+Main.propTypes = {
+  // header: element.isRequired,
+  children: element.isRequired,
+};
+
 export default withStyles(style, baseStyle)(
-  withRouter(Main)
+  withRouter(Main),
 );

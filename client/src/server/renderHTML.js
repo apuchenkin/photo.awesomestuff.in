@@ -25,7 +25,7 @@ GoogleAnalytics.propTypes = {
   id: React.PropTypes.string.isRequired,
 };
 
-function renderHTML({ componentHTML, initialState, meta, styles }) {
+function renderHTML({ markup, initialState, meta, styles }) {
   const { config, locale } = initialState.runtime;
 
   return (
@@ -41,7 +41,7 @@ function renderHTML({ componentHTML, initialState, meta, styles }) {
         { meta.links }
       </head>
       <body>
-        <div id="react-view" className={style.wrapper} dangerouslySetInnerHTML={{ __html: componentHTML }} />
+        <div id="react-view" className={style.wrapper} dangerouslySetInnerHTML={{ __html: markup }} />
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
         <script type="application/javascript" src={`${config.hostname}${assets.main.js}`} />
@@ -51,7 +51,7 @@ function renderHTML({ componentHTML, initialState, meta, styles }) {
 }
 
 renderHTML.propTypes = {
-  componentHTML: string.isRequired,
+  markup: string.isRequired,
   initialState: shape({
     runtime: shape({
       locale: string.isRequired,

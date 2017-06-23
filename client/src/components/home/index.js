@@ -2,9 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
 import Gallery from './gallery';
-
 import style from './style.less';
 
 const { array, arrayOf, shape, number } = React.PropTypes;
@@ -16,20 +14,18 @@ const messages = defineMessages({
   },
 });
 
-const Home = (props) => {
-  const
-    { categories } = props,
-    galleries = categories
-      .filter(c => !c.parent && c.title && c.image)
-      .map(category => (
-        <li key={category.id} >
-          <Gallery
-            category={category}
-            childs={category.childs.map(cid => categories.find(c => c.id === cid))}
-          />
-        </li>
-      ))
-    ;
+const Home = ({ categories }) => {
+  const galleries = categories
+    .filter(c => !c.parent && c.title && c.featured)
+    .map(category => (
+      <li key={category.id} >
+        <Gallery
+          category={category}
+          childs={category.childs.map(cid => categories.find(c => c.id === cid))}
+        />
+      </li>
+    ))
+  ;
 
   return (
     <div className={style.galleries}>
@@ -49,7 +45,7 @@ Home.propTypes = {
 };
 
 export default connect(
-  state => ({ categories: state.api.categories })
+  ({ category: { categories } }) => ({ categories }),
 )(
-  withStyles(style)(Home)
+  withStyles(style)(Home),
 );

@@ -7,6 +7,8 @@ import TranslationService from '../../../../client/lib/service/Translation';
 
 const initial = {};
 
+config.apiEndpoint = '/api/v1'; //TODO: fix with mergeable configs
+
 const init = (state, { token }) => Object.assign(state, {
   photoService: new PhotoService({
     apiEndpoint: config.apiEndpoint,

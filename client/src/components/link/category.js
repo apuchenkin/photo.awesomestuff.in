@@ -1,7 +1,6 @@
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
-import Link from './index';
+import Link from 'found/lib/Link';
 import utils from '../../lib/utils';
 
 import baseStyle from '../../style/style.less';

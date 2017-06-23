@@ -1,12 +1,6 @@
-/*
- * action types
- */
 export const START_LOADING = 'START_LOADING';
 export const STOP_LOADING = 'STOP_LOADING';
 
-/*
- * action creators
- */
 export function startLoading() {
   return { type: START_LOADING };
 }

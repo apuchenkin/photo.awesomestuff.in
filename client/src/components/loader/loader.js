@@ -1,23 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { bool } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
-import Component from '../../lib/PureComponent';
 
 import style from './style.less';
 
-const
-  { bool } = React.PropTypes,
-  CLASS_NAME = style.loader,
-  CLASS_NAME_TRANSITION = style.fade,
-  CLASS_NAME_HIDDEN = style.hidden,
-  TRANSITION_DURATION = 200;
+const CLASS_NAME = style.loader;
+const CLASS_NAME_TRANSITION = style.fade;
+const CLASS_NAME_HIDDEN = style.hidden;
+const TRANSITION_DURATION = 200;
 
-class Loader extends Component {
-
-  static propTypes = {
-    isLoading: bool.isRequired,
-  }
+class Loader extends React.PureComponent {
 
   constructor(props) {
     super(props);
@@ -47,12 +40,11 @@ class Loader extends Component {
   }
 
   render() {
-    const
-      { visible, className } = this.state,
-      className$ = [
-        CLASS_NAME,
-        visible ? className : CLASS_NAME_HIDDEN,
-      ].filter(x => !!x).join(' ');
+    const { visible, className } = this.state;
+    const className$ = [
+      CLASS_NAME,
+      visible ? className : CLASS_NAME_HIDDEN,
+    ].filter(x => !!x).join(' ');
 
     return (
       <div className={className$} key="loader"><div className={style.accent} /></div>
@@ -60,6 +52,10 @@ class Loader extends Component {
   }
 }
 
+Loader.propTypes = {
+  isLoading: bool.isRequired,
+};
+
 export default connect(
-  state => ({ isLoading: state.isLoading.count > 0 })
+  state => ({ isLoading: state.isLoading.count > 0 }),
 )(withStyles(style)(Loader));

@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import Router from 'koa-router';
 import body from 'koa-body';
+import cors from 'koa-cors';
 import compress from 'koa-compress';
 import cacheControl from 'koa-cache-control';
 import acceptLanguage from 'accept-language';
@@ -51,7 +52,7 @@ router.use(async (ctx, next) => {
 
     ctx.user = user;
   }
-  if (!(ctx.method === 'GET' || ctx.method === 'HEAD')) {
+  if (!(ctx.method === 'GET' || ctx.method === 'HEAD' || ctx.method === 'OPTIONS')) {
     if (!ctx.user) {
       ctx.throw(401);
     }
@@ -77,6 +78,7 @@ router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods()
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 router.use('/translation', translationRouter.routes(), translationRouter.allowedMethods());
 
+app.use(cors());
 app.use(cacheControl());
 app.use(compress());
 
@@ -98,25 +100,25 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}`);
 });
 
-db.sync({ force: true })
-  .then(() => User.create({
-    email: 'apuchenkin@gmail.com',
-    password: 'root',
-  }))
-  .then(() => Category.create({
-    name: 'test',
-  }).then((category) => {
-    category.createTranslation({
-      field: 'title',
-      value: 'RUTEST',
-      language: LANG_RU,
-    });
-    category.createTranslation({
-      field: 'title',
-      value: 'ENTEST',
-      language: LANG_EN,
-    });
-  }));
+// db.sync({ force: true })
+//   .then(() => User.create({
+//     email: 'apuchenkin@gmail.com',
+//     password: 'root',
+//   }))
+//   .then(() => Category.create({
+//     name: 'test',
+//   }).then((category) => {
+//     category.createTranslation({
+//       field: 'title',
+//       value: 'RUTEST',
+//       language: LANG_RU,
+//     });
+//     category.createTranslation({
+//       field: 'title',
+//       value: 'ENTEST',
+//       language: LANG_EN,
+//     });
+//   }));
 
 app.context.db = db;
 app.use(router.routes(), router.allowedMethods());

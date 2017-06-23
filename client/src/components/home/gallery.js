@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { shape, arrayOf, string, number } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import CategoryLink, { fromCategory } from '../link/category';
@@ -8,20 +9,11 @@ import utils from '../../lib/utils';
 import style from './style.less';
 import baseStyle from '../../style/style.less';
 
-const
-  { shape, arrayOf, string, number } = React.PropTypes,
-  categoryShape = shape({
-    name: string.isRequired,
-    title: string.isRequired,
-    date: string,
-    image: string,
-  });
-
-const Gallery = ({ category, childs, width, height }) =>
+const Gallery = ({ category, childs, width, height }) => (
   <div className={style.gallery}>
     <CategoryLink category={category.name} className={style.cover}>
       <img
-        src={utils.getSrc(category.image, width, height, true)}
+        src={utils.getSrc(category.featured.src, width, height, true)}
         width={width}
         title={category.title}
         alt={category.title}
@@ -34,16 +26,27 @@ const Gallery = ({ category, childs, width, height }) =>
           {category.title}
         </CategoryLink>
       </h3>
-      {childs && !!childs.length && <ul>
-        {childs.map(c => (
-          <li key={c.id}>
-            <CategoryLink {...fromCategory(c)}>{c.title}</CategoryLink>
-          </li>
-        ))}
-      </ul>}
+      {Boolean(childs.length) && (
+        <ul>
+          {childs.map(c => (
+            <li key={c.id}>
+              <CategoryLink {...fromCategory(c)}>{c.title}</CategoryLink>
+            </li>
+          ))}
+        </ul>
+      )}
     </aside>
   </div>
-;
+);
+
+const categoryShape = shape({
+  name: string.isRequired,
+  title: string.isRequired,
+  date: string,
+  featured: shape({
+    src: string.isRequired,
+  }).isRequired,
+});
 
 Gallery.propTypes = {
   width: number.isRequired,
@@ -53,14 +56,18 @@ Gallery.propTypes = {
     id: number.isRequired,
     name: string.isRequired,
     title: string.isRequired,
-  })).isRequired,
+  })),
+};
+
+Gallery.defaultProps = {
+  childs: [],
 };
 
 export default connect(
-  state => ({
-    width: state.runtime.config.gallery.width,
-    height: state.runtime.config.gallery.height,
-  })
+  ({ runtime: { config: { gallery } } }) => ({
+    width: gallery.width,
+    height: gallery.height,
+  }),
 )(
-  withStyles(style, baseStyle)(Gallery)
+  withStyles(style, baseStyle)(Gallery),
 );
