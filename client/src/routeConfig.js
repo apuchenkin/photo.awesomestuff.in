@@ -1,13 +1,20 @@
 import { HttpError, RedirectException } from 'found';
 import Main from './components/main';
 import HomeHeader from './components/home/header';
-import Home from './components/home';
 import PageHeader from './components/page/header';
+import GalleryHeader from './components/gallery/header';
+import Home from './components/home';
 import Page from './components/page';
+import Gallery from './components/gallery';
+
 import {
   loadAll as loadCategories,
   load as loadCategory,
 } from './store/category/actions';
+import {
+  loadAll as loadPhotos,
+  // load as loadPhoto,
+} from './store/photo/actions';
 import { load as loadPage } from './store/page/actions';
 
 export default pages => [
@@ -56,7 +63,7 @@ export default pages => [
       })),
       {
         path: '/:category/:subcategory?',
-        header: HomeHeader,
+        header: GalleryHeader,
         getData: async ({ params, context: { store } }) => {
           const category = await (new Promise((resolve, reject) => {
             store.dispatch(loadCategory(params.subcategory || params.category, resolve, reject));
@@ -68,6 +75,12 @@ export default pages => [
             throw new RedirectException(`/${category.parent.name}/${category.name}`);
           }
 
+          await (new Promise((resolve, reject) => {
+            store.dispatch(loadPhotos(category, resolve, reject));
+          })).catch(() => {
+            throw new HttpError(404);
+          });
+
           return {
             meta: {
               title: category.title,
@@ -76,11 +89,7 @@ export default pages => [
             langs: category.langs,
           };
         },
-        render: () => {
-          console.log('render');
-
-          return () => 'test';
-        },
+        Component: Gallery,
       },
     ],
   },

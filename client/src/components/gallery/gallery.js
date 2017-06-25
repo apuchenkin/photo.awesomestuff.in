@@ -1,13 +1,11 @@
 import React from 'react';
+import { shape, arrayOf } from 'prop-types';
 import { connect } from 'react-redux';
-import Component from '../../lib/PureComponent';
 import { fromCategory } from '../link/category';
 import PhotoLink from '../link/photo';
 import Brick from './brick';
 
-const
-  { shape, arrayOf } = React.PropTypes,
-  Packery = isBrowser ? require('packery') : null;
+const Packery = isBrowser ? require('packery') : null;
 
 const createPackery = (container) => {
   const packery = new Packery(container, {
@@ -24,15 +22,9 @@ const createPackery = (container) => {
   return packery;
 };
 
-class Gallery extends Component {
-
-  static propTypes = {
-    category: shape().isRequired,
-    photos: arrayOf(shape()).isRequired,
-  };
-
+class Gallery extends React.PureComponent {
   componentDidMount() {
-    this.packery = createPackery(this.packeryCmp);
+    this.packery = createPackery(this.root);
   }
 
   componentDidUpdate() {
@@ -47,26 +39,29 @@ class Gallery extends Component {
   }
 
   render() {
-    const
-      { photos, category } = this.props,
-      bricks = photos.map(p => (
-        <li key={p.id} >
-          <PhotoLink photoId={p.id} {...fromCategory(category)}>
-            <Brick photo={p} />
-          </PhotoLink>
-        </li>
-      ));
+    const { photos, category } = this.props;
+    const bricks = photos.map(p => (
+      <li key={p.id} >
+        <PhotoLink photoId={p.id} {...fromCategory(category)}>
+          <Brick photo={p} />
+        </PhotoLink>
+      </li>
+    ));
 
     return (
-      <ul ref={(c) => { this.packeryCmp = c; }}>
+      <ul ref={(node) => { this.root = node; }}>
         {bricks}
       </ul>
     );
   }
 }
 
+Gallery.propTypes = {
+  category: shape().isRequired,
+  photos: arrayOf(shape()).isRequired,
+};
+
 export default connect(
-  state => ({
-    isLoading: state.isLoading.count > 0,
-    photos: state.api.photos,
+  ({ photo: { photos } }) => ({
+    photos,
   }))(Gallery);

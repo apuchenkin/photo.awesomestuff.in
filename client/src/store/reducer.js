@@ -4,6 +4,7 @@ import isLoading from './loader/reducer';
 import runtime from './runtime/reducer';
 import category from './category/reducer';
 import page from './page/reducer';
+import photo from './photo/reducer';
 
 export default combineReducers({
   found: foundReducer,
@@ -11,4 +12,5 @@ export default combineReducers({
   isLoading,
   category,
   page,
+  photo,
 });

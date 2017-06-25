@@ -1,43 +1,32 @@
 import React from 'react';
+import { shape, element, bool } from 'prop-types';
 import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import Component from '../../lib/PureComponent';
-import { startLoading, stopLoading } from '../../actions/loader';
+// import { startLoading, stopLoading } from '../../actions/loader';
 import Gallery from './gallery';
 
 import style from './gallery.less';
 import transitionStyle from '../../style/transition.less';
 
-const
-  { shape, element, bool, func } = React.PropTypes;
 
-class GalleryPage extends Component {
-
-  static propTypes = {
-    children: element,
-    category: shape().isRequired,
-    stopLoading: func.isRequired,
-    isLoading: bool.isRequired,
-  };
-
+class GalleryPage extends React.PureComponent {
   componentWillMount() {
-    if (isBrowser) {
-      // stops the loading initiated by server
-      this.props.stopLoading();
-    }
+    // if (isBrowser) {
+    //   // stops the loading initiated by server
+    //   this.props.stopLoading();
+    // }
   }
 
   render() {
-    const
-      { category, isLoading, children } = this.props,
-      hasNav = !!(category.parent || category).childs.length,
-      className = [
-        style.gallery,
-        hasNav ? style.nav : '',
-        isLoading ? style.loading : '',
-      ].filter(x => !!x).join(' ');
+    const { category, isLoading, children } = this.props;
+    // const hasNav = !!(category.parent || category).childs.length;
+    const className = [
+      style.gallery,
+      // hasNav ? style.nav : '',
+      isLoading ? style.loading : '',
+    ].filter(x => !!x).join(' ');
 
     return (
       <div className={className} >
@@ -53,21 +42,30 @@ class GalleryPage extends Component {
         >
           {children}
         </ReactCSSTransitionGroup>
-        <Gallery
-          category={category}
-        />
+        <Gallery category={category} />
       </div>
     );
   }
 }
 
+GalleryPage.propTypes = {
+  children: element,
+  category: shape().isRequired,
+  // stopLoading: func.isRequired,
+  isLoading: bool.isRequired,
+};
+
+GalleryPage.defaultProps = {
+  children: null,
+};
+
 export default connect(
-  state => ({
-    isLoading: state.isLoading.count > 0,
-    category: state.api.category,
+  ({ category: { category } }) => ({
+    isLoading: false,
+    category,
   }),
-  dispatch => ({
-    startLoading: () => dispatch(startLoading()),
-    stopLoading: () => dispatch(stopLoading()),
-  })
+  // dispatch => ({
+  //   startLoading: () => dispatch(startLoading()),
+  //   stopLoading: () => dispatch(stopLoading()),
+  // })
 )(withStyles(style, transitionStyle)(GalleryPage));

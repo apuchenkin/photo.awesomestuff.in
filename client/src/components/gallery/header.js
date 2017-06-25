@@ -1,24 +1,24 @@
 import React from 'react';
+import { number, string, shape, arrayOf } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import Link from '../link';
+import Link from 'found/lib/Link';
 import CategoryLink from '../link/category';
 
 import style from '../../style/header.less';
 import navStyle from './navigation.less';
 
-const
-  { number, string, shape, arrayOf } = React.PropTypes,
-  categoryBase = {
-    id: number.isRequired,
-    name: string.isRequired,
-    title: string.isRequired,
-  },
-  categoryShape = shape(Object.assign({}, categoryBase, {
-    parent: shape(categoryBase),
-  }));
+const categoryBase = {
+  id: number.isRequired,
+  name: string.isRequired,
+  title: string.isRequired,
+};
+
+const categoryShape = shape(Object.assign({}, categoryBase, {
+  parent: shape(categoryBase),
+}));
 
 const messages = defineMessages({
   home: {
@@ -27,23 +27,20 @@ const messages = defineMessages({
   },
 });
 
-const GalleryHeader = (props) => {
-  const
-    { category, categories } = props,
-    parent = category.parent || category,
-    childrens = categories
-      .filter(c => c.parent && c.parent.name === parent.name)
-      .map(c => (
-        <li key={c.id} >
-          <CategoryLink
-            activeClassName={navStyle.active}
-            category={c.parent.name}
-            subcategory={c.name}
-          >{c.title}</CategoryLink>
-        </li>
-        )
-      )
-    ;
+const GalleryHeader = ({ category, categories }) => {
+  const parent = category.parent || category;
+  const childrens = categories
+    .filter(c => c.parent && c.parent.id === parent.id)
+    .map(c => (
+      <li key={c.id} >
+        <CategoryLink
+          activeClassName={navStyle.active}
+          category={c.parent.name}
+          subcategory={c.name}
+        >{c.title}</CategoryLink>
+      </li>
+    ))
+  ;
 
   return (
     <header className={style.main}>
@@ -65,11 +62,10 @@ GalleryHeader.propTypes = {
 };
 
 export default connect(
-  state => ({
-    isLoading: state.isLoading.count > 0,
-    category: state.api.category,
-    categories: state.api.categories,
-  })
+  ({ category: { category, categories } }) => ({
+    category,
+    categories,
+  }),
 )(
-  withStyles(navStyle, style)(GalleryHeader)
+  withStyles(navStyle, style)(GalleryHeader),
 );

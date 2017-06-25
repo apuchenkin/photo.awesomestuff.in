@@ -6,17 +6,15 @@ import utils from '../../lib/utils';
 
 const { number, string, shape } = React.PropTypes;
 
-const Brick = (props) => {
-  const
-    { photo } = props,
-    { w, h, src } = photo,
-    size = Math.max(w, h),
-    url = utils.getSrc(src, size, size, true),
-    brickStyle = {
-      width: `${w}px`,
-      height: `${h}px`,
-      backgroundImage: `url(${url})`,
-    };
+const Brick = ({ photo }) => {
+  const { w, h, src } = photo;
+  const size = Math.max(w, h);
+  const url = utils.getSrc(src, size, size, true);
+  const brickStyle = {
+    width: `${w}px`,
+    height: `${h}px`,
+    backgroundImage: `url(${url})`,
+  };
 
   return (
     <div className={style.brick} style={brickStyle} />
@@ -30,7 +28,7 @@ Brick.propTypes = {
     ratio: number.isRequired,
     w: number.isRequired,
     h: number.isRequired,
-  }),
+  }).isRequired,
 };
 
 export default withStyles(style)(Brick);
