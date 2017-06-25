@@ -1,34 +1,22 @@
 import React from 'react';
-import { bind } from 'decko';
-
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
-import Component from '../../lib/PureComponent';
 import style from './photo.less';
 import loaderStyle from '../loader/style.less';
-import utils from '../../lib/utils';
 
 const
   { string, number, element } = React.PropTypes;
 
-@withStyles(style, loaderStyle)
-export default class Img extends Component {
-
-  static propTypes = {
-    src: string.isRequired,
-    alt: string.isRequired,
-    width: number.isRequired,
-    height: number.isRequired,
-    tools: element,
-    caption: element,
-  }
-
+class Img extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
       isLoading: !!isBrowser,
     };
+
+    this.createLoader = this.createLoader.bind(this);
+    this.handleLoad = this.handleLoad.bind(this);
+    this.destroyLoader = this.destroyLoader.bind(this);
   }
 
   componentDidMount() {
@@ -51,7 +39,6 @@ export default class Img extends Component {
     this.destroyLoader();
   }
 
-  @bind
   createLoader() {
     this.destroyLoader();  // We can only have one loader at a time.
 
@@ -61,13 +48,11 @@ export default class Img extends Component {
     this.img.src = this.props.src;
   }
 
-  @bind
   handleLoad() {
     this.destroyLoader();
     this.setState({ isLoading: false });
   }
 
-  @bind
   destroyLoader() {
     if (this.img) {
       this.img.onload = null;
@@ -77,18 +62,16 @@ export default class Img extends Component {
   }
 
   renderImg() {
-    const
-      { alt, width, height, tools, caption } = this.props,
-      props$ = utils.omit(this.props, ['width', 'height', 'tools', 'caption']);
+    const { alt, width, height, tools, caption, ...props } = this.props;
 
     return (
       <figure className={style.content} >
         {tools}
         <img
-          {...props$}
+          alt={alt}
           className={style.image}
           style={{ maxWidth: `${width}px`, maxHeight: `${height}px` }}
-          alt={alt}
+          {...props}
         />
         {caption}
       </figure>
@@ -106,3 +89,15 @@ export default class Img extends Component {
     ;
   }
 }
+
+
+Img.propTypes = {
+  src: string.isRequired,
+  alt: string.isRequired,
+  width: number.isRequired,
+  height: number.isRequired,
+  tools: element,
+  caption: element,
+}
+
+export default withStyles(style, loaderStyle)(Img)

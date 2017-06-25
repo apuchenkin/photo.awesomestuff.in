@@ -11,6 +11,7 @@ import routeConfig from '../routeConfig';
 
 import CategoryService from '../../lib/service/Category';
 import PageService from '../../lib/service/Page';
+import PhotoService from '../../lib/service/Photo';
 
 export default async function configureStore(historyProtocol, initialState) {
   // let store;
@@ -43,9 +44,11 @@ export default async function configureStore(historyProtocol, initialState) {
   //   store = createStore(reducers, initialState, enhancer);
 
   const { runtime: { locale, config: { apiEndpoint } } } = initialState;
+  const defaults = { locale, apiEndpoint };
 
-  const categoryService = new CategoryService({ locale, apiEndpoint });
-  const pageService = new PageService({ locale, apiEndpoint });
+  const categoryService = new CategoryService(defaults);
+  const pageService = new PageService(defaults);
+  const photoService = new PhotoService(defaults);
 
   const pages = await pageService.fetchPages();
   const initial = Object.assign(initialState, {
@@ -69,6 +72,7 @@ export default async function configureStore(historyProtocol, initialState) {
         dependencies: {
           categoryService,
           pageService,
+          photoService,
         },
       })),
     ),

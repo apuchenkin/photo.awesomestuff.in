@@ -1,22 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { number, string, shape, arrayOf, bool } from 'prop-types';
 import { injectIntl, intlShape, defineMessages } from 'react-intl';
-import withRouter from 'react-router/lib/withRouter';
+// import withRouter from 'react-router/lib/withRouter';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { routerShape } from 'react-router/lib/PropTypes';
-import { bind } from 'decko';
+// import { routerShape } from 'react-router/lib/PropTypes';
+// import { bind } from 'decko';
 
 import Figure from './figure';
-import { stopLoading } from '../../actions/loader';
-import Component from '../../lib/PureComponent';
+// import { stopLoading } from '../../actions/loader';
 import PhotoLink from '../link/photo';
 import { fromCategory } from '../link/category';
 
 import style from './photo.less';
-
-const
-  { number, string, shape, arrayOf, bool, func } = React.PropTypes
-  ;
 
 const messages = defineMessages({
   prev: {
@@ -29,26 +25,15 @@ const messages = defineMessages({
   },
 });
 
-class Photo extends Component {
+class Photo extends React.PureComponent {
+  // componentWillMount() {
+  //   if (isBrowser) {
+  //     // stops the loading initiated by server
+  //     this.props.stopLoading();
+  //   }
+  // }
 
-  static propTypes = {
-    category: shape({ name: string.isRequired }).isRequired,
-    photos: arrayOf(shape({ id: number.isRequired })).isRequired,
-    photo: shape().isRequired,
-    intl: intlShape.isRequired,
-    router: routerShape.isRequired,
-    isLoading: bool.isRequired,
-    stopLoading: func.isRequired,
-  }
-
-  componentWillMount() {
-    if (isBrowser) {
-      // stops the loading initiated by server
-      this.props.stopLoading();
-    }
-  }
-
-  @bind
+  // @bind
   goNext(next) {
     const
       { category, router } = this.props,
@@ -58,7 +43,7 @@ class Photo extends Component {
     return () => router.push(`/${url}/photo/${next.id}`);
   }
 
-  @bind
+  // @bind
   close() {
     const
       { category, router } = this.props,
@@ -108,6 +93,16 @@ class Photo extends Component {
   }
 }
 
+Photo.propTypes = {
+  category: shape({ name: string.isRequired }).isRequired,
+  photos: arrayOf(shape({ id: number.isRequired })).isRequired,
+  photo: shape().isRequired,
+  intl: intlShape.isRequired,
+  // router: routerShape.isRequired,
+  isLoading: bool.isRequired,
+  // stopLoading: func.isRequired,
+};
+
 export default connect(
   state => ({
     isLoading: state.isLoading.count > 0,
@@ -115,7 +110,10 @@ export default connect(
     photos: state.api.photos,
     category: state.api.category,
   }),
-  dispatch => ({
-    stopLoading: () => dispatch(stopLoading()),
-  })
-)(withStyles(style)(withRouter(injectIntl(Photo))));
+  // dispatch => ({
+  //   stopLoading: () => dispatch(stopLoading()),
+  // }),
+)(withStyles(style)(
+  // withRouter()
+  injectIntl(Photo),
+));

@@ -1,21 +1,15 @@
 import React from 'react';
+import { number, string, object, shape, func } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { bind, debounce } from 'decko';
+// import { bind, debounce } from 'decko';
+import Link from 'found/lib/Link';
 
 import utils from '../../lib/utils';
-
-import Component from '../../lib/PureComponent';
-import Link from '../link';
-
 import Img from './img';
 
 import style from './photo.less';
-
-const
-  { number, string, object, shape, func } = React.PropTypes
-  ;
 
 const photoShape = shape({
   id: number.isRequired,
@@ -42,15 +36,7 @@ const closeIcon = (<FormattedMessage
   values={{ icon: <i className="icon-cancel" /> }}
 />);
 
-class Figure extends Component {
-
-  static propTypes = {
-    width: number.isRequired,
-    height: number.isRequired,
-    photo: photoShape.isRequired,
-    backUrl: string.isRequired,
-    onClick: func.isRequired,
-  }
+class Figure extends React.PureComponent {
 
   constructor(props) {
     super(props);
@@ -77,8 +63,8 @@ class Figure extends Component {
     };
   }
 
-  @bind
-  @debounce(50)
+  // @bind
+  // @debounce(50)
   resize() {
     this.setState({
       dimensions: this.getDimensions(),
@@ -110,11 +96,9 @@ class Figure extends Component {
   }
 
   render() {
-    const
-      { dimensions } = this.state,
-      { photo, onClick } = this.props,
-      { width, height } = dimensions,
-      src = utils.getSrc(photo.src, width, height);
+    const { dimensions: { width, height } } = this.state;
+    const { photo, onClick } = this.props;
+    const src = utils.getSrc(photo.src, width, height);
 
     return (
       <Img
@@ -130,11 +114,19 @@ class Figure extends Component {
   }
 }
 
+Figure.propTypes = {
+  width: number.isRequired,
+  height: number.isRequired,
+  photo: photoShape.isRequired,
+  backUrl: string.isRequired,
+  onClick: func.isRequired,
+};
+
 export default connect(
   state => ({
     width: state.runtime.config.photo.width,
     height: state.runtime.config.photo.height,
-  })
+  }),
 )(
-  withStyles(style)(Figure)
+  withStyles(style)(Figure),
 );

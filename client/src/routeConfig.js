@@ -6,6 +6,7 @@ import GalleryHeader from './components/gallery/header';
 import Home from './components/home';
 import Page from './components/page';
 import Gallery from './components/gallery';
+import Photo from './components/photo';
 
 import {
   loadAll as loadCategories,
@@ -13,7 +14,7 @@ import {
 } from './store/category/actions';
 import {
   loadAll as loadPhotos,
-  // load as loadPhoto,
+  load as loadPhoto,
 } from './store/photo/actions';
 import { load as loadPage } from './store/page/actions';
 
@@ -65,6 +66,8 @@ export default pages => [
         path: '/:category/:subcategory?',
         header: GalleryHeader,
         getData: async ({ params, context: { store } }) => {
+          console.log(params);
+          debugger;
           const category = await (new Promise((resolve, reject) => {
             store.dispatch(loadCategory(params.subcategory || params.category, resolve, reject));
           })).catch(() => {
@@ -90,6 +93,34 @@ export default pages => [
           };
         },
         Component: Gallery,
+        children: [
+          {
+            path: '/photo/:photoId',
+            header: GalleryHeader,
+            component: Photo,
+            getData: async ({ params, context: { store } }) => {
+              debugger;
+              const photo = await (new Promise((resolve, reject) => {
+                store.dispatch(loadPhoto(params.photoId, resolve, reject));
+              })).catch(() => {
+                debugger;
+                throw new HttpError(404);
+              });
+              // const description = new IntlMessageFormat(messages['meta.description.photo']);
+
+              return {
+                meta: {
+                  title: photo.caption,
+                  // description: description.format({
+                  //   author: photo.author && photo.author.name,
+                  //   title: photo.caption,
+                  // }),
+                },
+                langs: photo.langs,
+              };
+            },
+          },
+        ],
       },
     ],
   },

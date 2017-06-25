@@ -90,7 +90,7 @@ const remapPhoto = (avg, photo, config) => {
     v = photo.views,
     std = Math.sqrt(Math.pow((v - avg), 2)),
     norm = [16, 8, 4, 1].map(i => i * (Math.floor(avg) + 1)),
-    norm$ = [1, 2, 3, 4].map(i => Math.floor((i * std * v) / avg) + 1),
+    norm$ = [1, 2, 3, 4].map(i => Math.floor((i * std * v) / (avg + 1)) + 1),
     probs = norm.map((n, i) => n + norm$[i]),
     mode = weightedRandom(probs),
     isHorisontal = (photo.width > photo.height),
