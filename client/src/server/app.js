@@ -15,7 +15,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 
 import HTML from './renderHTML';
-import createStore from '../store/configureStore';
+import configureStore from '../store/configureStore';
 import render from './render';
 // import createRoutes from '../routes';
 import config from '../etc/config.json';
@@ -53,7 +53,7 @@ app.use(async (req, res) => {
   const css = new Set(); // CSS for all rendered React components
     // eslint-disable-next-line no-underscore-dangle
   const onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
-  const store = createStore(new ServerProtocol(req.url), initial);
+  const store = await configureStore(new ServerProtocol(req.url), initial);
   store.dispatch(FarceActions.init());
 
   const matchContext = { store };

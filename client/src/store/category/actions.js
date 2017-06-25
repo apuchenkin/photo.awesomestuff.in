@@ -3,8 +3,9 @@ export const LOADED = 'CATEGORY/LOADED';
 export const CANCELLED = 'CATEGORY/CANCELLED';
 export const ERROR = 'CATEGORY/ERROR';
 
-export const load = () => ({
+export const load = (resolve, reject) => ({
   type: LOAD,
+  meta: { resolve, reject },
 });
 
 export const loaded = categories => ({

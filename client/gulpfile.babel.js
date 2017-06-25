@@ -1,13 +1,13 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import gulp from 'gulp';
-// import gutil from 'gulp-util';
+import gutil from 'gulp-util';
 import webpack from 'webpack';
 import runWebpack from 'webpack-stream';
 import nodemon from 'gulp-nodemon';
 import del from 'del';
 import file from 'gulp-file';
 import eslint from 'gulp-eslint';
-// import WebpackDevServer from 'webpack-dev-server';
+import WebpackDevServer from 'webpack-dev-server';
 
 import clientConfig from './etc/webpack.config.client.babel';
 import serverConfig from './etc/webpack.config.server.babel';
@@ -22,7 +22,7 @@ const DIST = 'dist';
 
 // gulp.task('watch', () => {
 //     // Start a webpack-dev-server
-//   new WebpackDevServer(webpack(clientConfig), {
+//   new WebpackDevServer(webpack(clientConfig(env)), {
 //     // debug: true,
 //     hot: true,
 //     inline: true,
@@ -31,7 +31,7 @@ const DIST = 'dist';
 //     if (err) throw new gutil.PluginError('webpack-dev-server', err);
 //     // Server listening
 //     gutil.log('[webpack-dev-server]', 'http://localhost:8080');
-//     // gulp.start('serve');
+//     gulp.start('serve');
 //     // keep the server alive or continue?
 //     // callback();
 //   });

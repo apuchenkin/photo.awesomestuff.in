@@ -1,10 +1,7 @@
-import Sequelize from 'sequelize';
-import db from '../db';
+import { sequelize, Sequelize } from './index';
 import Translation, { TYPE_PAGE } from './translation';
 
-import Category from './category';
-
-const Page = db.define('page', {
+const Page = sequelize.define('page', {
   alias: {
     type: Sequelize.STRING,
     unique: true,
@@ -16,9 +13,6 @@ const Page = db.define('page', {
   },
 });
 
-Page.belongsTo(Page);
-Page.belongsTo(Category);
-
 Page.hasMany(Translation, {
   foreignKey: 'refId',
   constraints: false,
@@ -26,6 +20,7 @@ Page.hasMany(Translation, {
     refType: TYPE_PAGE,
   },
 });
+
 Translation.belongsTo(Page, {
   foreignKey: 'refId',
   constraints: false,

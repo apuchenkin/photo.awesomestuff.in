@@ -8,11 +8,12 @@ import acceptLanguage from 'accept-language';
 import auth from 'basic-auth';
 import { ValidationError } from 'sequelize';
 
-import db from './db';
+import { sequelize } from './model';
 
 import User from './model/user';
-import Category from './model/category';
+// import Category from './model/category';
 
+import pageRouter from './handler/page';
 import categoryRouter from './handler/category';
 import photoRouter from './handler/photo';
 import translationRouter from './handler/translation';
@@ -74,6 +75,7 @@ router.use(async (ctx, next) => {
 });
 
 // router.use(authorRouter.routes(), authorRouter.allowedMethods());
+router.use('/page', pageRouter.routes(), pageRouter.allowedMethods());
 router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods());
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 router.use('/translation', translationRouter.routes(), translationRouter.allowedMethods());
@@ -120,6 +122,8 @@ app.use(async (ctx, next) => {
 //     });
 //   }));
 
-app.context.db = db;
+sequelize.sync();
+
+app.context.db = sequelize;
 app.use(router.routes(), router.allowedMethods());
 app.listen(3000);

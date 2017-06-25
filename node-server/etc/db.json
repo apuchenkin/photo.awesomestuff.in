@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "root",
+    "password": "r00t",
+    "database": "aws-photo",
+    "host": "127.0.0.1",
+    "port": 32768,
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "aws-photo-test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "aws-photo",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

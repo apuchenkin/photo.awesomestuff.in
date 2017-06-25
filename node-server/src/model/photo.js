@@ -1,10 +1,8 @@
-import Sequelize from 'sequelize';
-
-import db from '../db';
+import { sequelize, Sequelize } from './index';
 import Author from './author';
 import Translation, { TYPE_PHOTO } from './translation';
 
-const Photo = db.define('photo', {
+const Photo = sequelize.define('photo', {
   name: {
     type: Sequelize.STRING,
     allowNull: false,

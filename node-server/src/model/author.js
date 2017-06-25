@@ -1,7 +1,6 @@
-import Sequelize from 'sequelize';
-import db from '../db';
+import { sequelize, Sequelize } from './index';
 
-const Author = db.define('author', {
+const Author = sequelize.define('author', {
   name: {
     type: Sequelize.STRING,
     allowNull: false,

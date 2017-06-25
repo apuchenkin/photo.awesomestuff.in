@@ -6,9 +6,9 @@ import style from './style.less';
 
 const { string } = React.PropTypes;
 
-const Page = props =>
+const Page = ({ content }) =>
   // eslint-disable-next-line react/no-danger
-  <div className={style.page} dangerouslySetInnerHTML={{ __html: props.content }} />
+  <div className={style.page} dangerouslySetInnerHTML={{ __html: content }} />
 ;
 
 Page.propTypes = {
@@ -16,7 +16,7 @@ Page.propTypes = {
 };
 
 export default connect(
-  state => ({ content: state.api.page.content })
+  ({ page: { page } }) => ({ content: page.content }),
 )(
-  withStyles(style)(Page)
+  withStyles(style)(Page),
 );

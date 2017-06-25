@@ -1,9 +1,8 @@
-import Sequelize from 'sequelize';
-import db from '../db';
+import { sequelize, Sequelize } from './index';
 import Translation, { TYPE_CATEGORY } from './translation';
 import Photo from './photo';
 
-const Category = db.define('category', {
+const Category = sequelize.define('category', {
   name: {
     type: Sequelize.STRING,
     allowNull: false,

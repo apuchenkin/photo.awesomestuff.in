@@ -12,14 +12,14 @@ import {
   loaded, error,
 } from './actions';
 
-const load = (action$, store, { categoryService }) =>
+const load = (action$, store, { pageService }) =>
   action$
     .ofType(LOAD)
-    .mergeMap(action =>
-      Observable.from(categoryService.fetchCategories())
+    .mergeMap(({ meta, page }) =>
+      Observable.from(pageService.fetchPage(page))
         .do({
-          next: action.meta.resolve,
-          error: action.meta.reject,
+          next: meta.resolve,
+          error: meta.reject,
         })
         .map(loaded)
         .takeUntil(action$.ofType(CANCELLED))

@@ -1,5 +1,4 @@
-import Sequelize from 'sequelize';
-import db from '../db';
+import { sequelize, Sequelize } from './index';
 
 export const LANG_RU = 'ru';
 export const LANG_EN = 'en';
@@ -8,7 +7,7 @@ export const TYPE_CATEGORY = 'category';
 export const TYPE_PHOTO = 'photo';
 export const TYPE_PAGE = 'page';
 
-const Translation = db.define('translation', {
+const Translation = sequelize.define('translation', {
   refType: {
     type: Sequelize.ENUM(TYPE_CATEGORY, TYPE_PHOTO, TYPE_PAGE),
     allowNull: false,

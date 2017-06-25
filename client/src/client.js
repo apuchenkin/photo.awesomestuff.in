@@ -9,7 +9,7 @@ import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
-import createStore from './store/configureStore';
+import configureStore from './store/configureStore';
 // import createRoutes from './routes';
 // import utils from './lib/utils';
 import WithStylesContext from './components/WithStylesContext';
@@ -22,10 +22,7 @@ addLocaleData(ruLocaleData);
 
 // const span = document.createElement('span');
 const initialState = isBrowser && (window.__INITIAL_STATE__ || {});
-const store = createStore(new BrowserProtocol(), initialState);
-const matchContext = { store };
 const ConnectedRouter = createConnectedRouter({ render });
-const { locale, basename, messages } = store.getState().runtime;
 
 // function metaUpdate(meta) {
 //   document.title = meta.title;
@@ -66,6 +63,10 @@ function onInsertCss(...styles) {
 }
 
 (async () => {
+  const store = await configureStore(new BrowserProtocol(), initialState);
+  const matchContext = { store };
+  const { locale, basename, messages } = store.getState().runtime;
+
   const initialRenderArgs = await getStoreRenderArgs({
     store,
     matchContext,

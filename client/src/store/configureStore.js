@@ -10,8 +10,9 @@ import reducers from './reducer';
 import routeConfig from '../routeConfig';
 
 import CategoryService from '../../lib/service/Category';
+import PageService from '../../lib/service/Page';
 
-export default function configureStore(historyProtocol, initialState) {
+export default async function configureStore(historyProtocol, initialState) {
   // let store;
   // if (__DEV__) {
   //   if (isBrowser) {
@@ -44,20 +45,31 @@ export default function configureStore(historyProtocol, initialState) {
   const { runtime: { locale, config: { apiEndpoint } } } = initialState;
 
   const categoryService = new CategoryService({ locale, apiEndpoint });
+  const pageService = new PageService({ locale, apiEndpoint });
+
+  const pages = await pageService.fetchPages();
+  const initial = Object.assign(initialState, {
+    page: Object.assign(initialState.page || {}, {
+      pages,
+    }),
+  });
 
   return createStore(
     reducers,
-    initialState,
+    initial,
     compose(
       createHistoryEnhancer({
         protocol: historyProtocol,
         middlewares: [queryMiddleware],
       }),
       createMatchEnhancer(
-        new Matcher(routeConfig),
+        new Matcher(routeConfig(pages)),
       ),
       applyMiddleware(createEpicMiddleware(epic, {
-        dependencies: { categoryService },
+        dependencies: {
+          categoryService,
+          pageService,
+        },
       })),
     ),
   );

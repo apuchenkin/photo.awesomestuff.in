@@ -4,7 +4,7 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 // import { locationShape } from 'found/lib/PropTypes';
 import Link from 'found/lib/Link';
 
-import LanguageSwitcher from './common/LanguageSwitcher';
+// import LanguageSwitcher from './common/LanguageSwitcher';
 
 const
   { string, arrayOf, shape } = React.PropTypes;
@@ -32,19 +32,19 @@ const Footer = ({ title, pages, langs, locales }) => {
 
 Footer.propTypes = {
   title: string.isRequired,
-  // pages: arrayOf(shape({
-  //   alias: string.isRequired,
-  //   title: string,
-  // })).isRequired,
+  pages: arrayOf(shape({
+    alias: string.isRequired,
+    title: string,
+  })).isRequired,
   langs: arrayOf(string),
   locales: arrayOf(string).isRequired,
   // location: locationShape.isRequired,
 };
 
 export default connect(
-  state => ({
-    title: state.runtime.config.title,
-    locales: state.runtime.config.locales,
-    // pages: state.api.pages,
+  ({ runtime: { config }, page: { pages } }) => ({
+    title: config.title,
+    locales: config.locales,
+    pages,
   }),
 )(Footer);

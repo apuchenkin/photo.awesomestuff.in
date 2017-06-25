@@ -10,8 +10,8 @@ export default class PageService extends Service {
     .then(Service.respondJSON);
   }
 
-  fetchPage(pageId) {
-    return this.fetch(`/${pageId}`)
+  fetchPage(page) {
+    return this.fetch(`/${page.alias}`)
     .then(Service.respondJSON);
   }
 }
