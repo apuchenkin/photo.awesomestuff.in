@@ -41,9 +41,9 @@ module.exports = env => merge(base(env), {
     // Assign the module and chunk ids by occurrence count
     // Consistent ordering of modules required if using any hashing ([hash] or [chunkhash])
     // https://webpack.github.io/docs/list-of-plugins.html#occurrenceorderplugin
-    new webpack.optimize.OccurrenceOrderPlugin(true),
+    // new webpack.optimize.OccurrenceOrderPlugin(true),
 
-    new webpack.NoErrorsPlugin(),
+    // new webpack.NoErrorsPlugin(),
     // new ExtractTextPlugin('bundle.css', {
     //   allChunks: true
     // }),

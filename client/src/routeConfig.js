@@ -1,10 +1,13 @@
-// import Redirect from 'found/lib/Redirect';
+import { HttpError, RedirectException } from 'found';
 import Main from './components/main';
 import HomeHeader from './components/home/header';
 import Home from './components/home';
 import PageHeader from './components/page/header';
 import Page from './components/page';
-import { load as loadCategories } from './store/category/actions';
+import {
+  loadAll as loadCategories,
+  load as loadCategory,
+} from './store/category/actions';
 import { load as loadPage } from './store/page/actions';
 
 export default pages => [
@@ -22,52 +25,63 @@ export default pages => [
         },
         header: HomeHeader,
         Component: Home,
-        getData: ({ routes, context: { store } }) => {
-          const categories = new Promise((resolve, reject) => {
+        getData: async ({ routes, context: { store } }) => {
+          await new Promise((resolve, reject) => {
             store.dispatch(loadCategories(resolve, reject));
           });
 
-          return categories.then(() => ({
+          return {
             className: 'home-main',
             header: routes[routes.length - 1].header,
-          }));
+          };
         },
       },
       ...pages.map(page => ({
         path: page.alias,
         header: PageHeader,
         Component: Page,
-        getData: ({ context: { store } }) => {
-          const promise = new Promise((resolve, reject) => {
+        getData: async ({ context: { store } }) => {
+          const page$ = await new Promise((resolve, reject) => {
             store.dispatch(loadPage(page, resolve, reject));
           });
 
-          return promise.then(page$ => ({
+          return {
             meta: {
               title: page$.title,
-              description: page$.description, // TODO: create page description on BE
+              description: page$.description,
             },
             langs: page$.langs,
-          }));
+          };
         },
       })),
-      // {
-      //   path: '/:category',
-      //   header: HomeHeader,
-      //   getData: ({ params, routes, context: { store } }) => {
-      //     console.log(params);
-      //     console.log(3);
-      //     debugger;
-      //
-      //     return {};
-      //   },
-      //   getComponent: () => {
-      //     console.log(4);
-      //     debugger;
-      //
-      //     return HomeHeader;
-      //   },
-      // },
+      {
+        path: '/:category/:subcategory?',
+        header: HomeHeader,
+        getData: async ({ params, context: { store } }) => {
+          const category = await (new Promise((resolve, reject) => {
+            store.dispatch(loadCategory(params.subcategory || params.category, resolve, reject));
+          })).catch(() => {
+            throw new HttpError(404);
+          });
+
+          if (!params.subcategory && category.parent) {
+            throw new RedirectException(`/${category.parent.name}/${category.name}`);
+          }
+
+          return {
+            meta: {
+              title: category.title,
+              description: category.description,
+            },
+            langs: category.langs,
+          };
+        },
+        render: () => {
+          console.log('render');
+
+          return () => 'test';
+        },
+      },
     ],
   },
 ];

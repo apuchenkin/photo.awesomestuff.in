@@ -13,8 +13,8 @@ export default class CategoryService extends Service {
 
   fetchCategories() {
     return this.fetch('')
-      .then(Service.respondJSON)
-      .then(CategoryService.refineCategories);
+      .then(Service.respondJSON);
+      // .then(CategoryService.refineCategories);
   }
 
   fetchCategory(name) {

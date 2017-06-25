@@ -21,7 +21,7 @@ const Home = ({ categories }) => {
       <li key={category.id} >
         <Gallery
           category={category}
-          childs={category.childs.map(cid => categories.find(c => c.id === cid))}
+          childs={categories.filter(c => c.parent && c.parent.id === category.id)}
         />
       </li>
     ))

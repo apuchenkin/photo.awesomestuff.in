@@ -1,3 +1,4 @@
+import { combineEpics } from 'redux-observable';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/catch';
@@ -8,18 +9,33 @@ import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/from';
 
 import {
-  LOAD, CANCELLED,
-  loaded, error,
+  LOAD_ALL, LOAD, CANCELLED,
+  loadedAll, loaded, error,
 } from './actions';
+
+const loadAll = (action, store, { categoryService }) =>
+  action
+    .ofType(LOAD_ALL)
+    .mergeMap(({ meta }) =>
+      Observable.from(categoryService.fetchCategories())
+        .do({
+          next: meta.resolve,
+          error: meta.reject,
+        })
+        .map(loadedAll)
+        .takeUntil(action.ofType(CANCELLED))
+        .catch(err => Observable.of(error(err))),
+    )
+;
 
 const load = (action$, store, { categoryService }) =>
   action$
     .ofType(LOAD)
-    .mergeMap(action =>
-      Observable.from(categoryService.fetchCategories())
+    .mergeMap(({ meta, name }) =>
+      Observable.from(categoryService.fetchCategory(name))
         .do({
-          next: action.meta.resolve,
-          error: action.meta.reject,
+          next: meta.resolve,
+          error: meta.reject,
         })
         .map(loaded)
         .takeUntil(action$.ofType(CANCELLED))
@@ -27,4 +43,7 @@ const load = (action$, store, { categoryService }) =>
     )
 ;
 
-export default load;
+export default combineEpics(
+  loadAll,
+  load,
+);

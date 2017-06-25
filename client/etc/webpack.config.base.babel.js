@@ -74,12 +74,12 @@ module.exports = env => ({
           'style-loader',
           `css-loader?${JSON.stringify({
             sourceMap: isDevelopment(env),
-            importLoaders: 1,
+            importLoaders: false,
             modules: true,
             localIdentName: isDevelopment(env) ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
             minimize: !isDevelopment(env),
           })}`,
-          'postcss-loader',
+          // 'postcss-loader',
         ]
       },
       {
@@ -96,10 +96,10 @@ module.exports = env => ({
               minimize: !isDevelopment(env),
               modules: true,
               localIdentName: isDevelopment(env) ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
-              importLoaders: 2
+              importLoaders: 1
             }
           },
-          'postcss-loader',
+          // 'postcss-loader',
           { loader: 'less-loader', options: { sourceMap: isDevelopment(env) } },
         ]
       },

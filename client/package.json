@@ -10,8 +10,10 @@
     "test": "test"
   },
   "scripts": {
-    "serve:client": "webpack-dev-server --config ./etc/webpack.config.client.babel.js",
-    "serve:server": "webpack-dev-server --config ./etc/webpack.config.server.babel.js"
+    "build:client": "webpack --env=development --config ./etc/webpack.config.client.babel.js --watch",
+    "build:server": "webpack --env=development --config ./etc/webpack.config.server.babel.js --watch",
+    "serve:nodemon": "nodemon --watch dist ./dist/server.js",
+    "serve": "npm-run-all --parallel build:* serve:nodemon"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
@@ -59,17 +61,13 @@
     "eslint-plugin-react": "^7.0.1",
     "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "^0.11.2",
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^4.0.0",
-    "gulp-file": "^0.3.0",
-    "gulp-nodemon": "^2.1.0",
-    "gulp-util": "^3.0.8",
     "json-loader": "^0.5.4",
     "less": "^2.6.1",
     "less-loader": "^4.0.4",
     "ncp": "^2.0.0",
     "node-http-proxy": "^0.2.3",
     "nodemon": "^1.10.0",
+    "npm-run-all": "^4.0.2",
     "path": "^0.12.7",
     "postcss": "^6.0.2",
     "postcss-import": "^10.0.0",
