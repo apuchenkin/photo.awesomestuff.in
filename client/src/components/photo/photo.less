@@ -1,11 +1,12 @@
 @import '~style/var';
 
-figure, img {
-    border: none;
-    outline: 0;
-    display: block;
-    padding: 0;
-    margin: 0;
+figure,
+img {
+  border: none;
+  outline: 0;
+  display: block;
+  padding: 0;
+  margin: 0;
 }
 
 .photo {
@@ -16,13 +17,19 @@ figure, img {
   z-index: 100;
   overflow: hidden;
   position: fixed;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
   padding: 0 @divisor;
   box-sizing: border-box;
   text-align: center;
   line-height: 100%;
 
-  &:before {
+  a:hover {
+    svg {
+      fill: @accent;
+    }
+  }
+
+  &::before {
     content: '';
     display: inline-block;
     height: 100%;
@@ -40,12 +47,15 @@ figure, img {
     background: transparent;
     transition: background 0.2s ease-out;
     text-shadow: 0 0 8px black;
+
     &:hover {
       background: fade(black, 70%);
     }
+
     &.prev {
       left: 0;
     }
+
     &.next {
       right: 0;
     }
@@ -75,13 +85,23 @@ figure, img {
     .tools {
       font-size: 14px;
       text-align: right;
+      vertical-align: middle;
       line-height: @divisor * 2;
       height: @divisor * 2;
+
+      svg {
+        vertical-align: middle;
+        display: inline;
+        font-size: 24px;
+        line-height: 24px;
+        width: 24px;
+        height: 24px;
+      }
     }
 
     figcaption {
       padding: @divisor / 2 0;
-      font-size: .8em;
+      font-size: 0.8em;
       line-height: 1.2em;
       color: darken(@light-grey, 20%);
       font-family: @font-default;
@@ -91,7 +111,7 @@ figure, img {
         display: block;
         float: none;
         color: @white;
-        margin-bottom: .2em;
+        margin-bottom: 0.2em;
       }
 
       & .author {

@@ -10,6 +10,9 @@ import Figure from './figure';
 import PhotoLink from '../link/photo';
 import { fromCategory } from '../link/category';
 
+import IconLeft from './icons/left';
+import IconRight from './icons/right';
+
 import style from './photo.less';
 
 const messages = defineMessages({
@@ -72,7 +75,7 @@ class Photo extends React.PureComponent {
           className={`${style.nav} ${style.prev}`}
           title={intl.formatMessage(messages.prev)}
         >
-          <i className="icon-left-open" />
+          <IconLeft />
         </PhotoLink>
         <PhotoLink
           {...fromCategory(category)}
@@ -81,7 +84,7 @@ class Photo extends React.PureComponent {
           className={`${style.nav} ${style.next}`}
           title={intl.formatMessage(messages.next)}
         >
-          <i className="icon-right-open" />
+          <IconRight />
         </PhotoLink>
       </div>
     );

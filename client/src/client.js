@@ -15,7 +15,6 @@ import configureStore from './store/configureStore';
 import WithStylesContext from './components/WithStylesContext';
 import render from './server/render';
 
-import './assets/fontello/css/fontello.css';
 import './style/style.css';
 
 addLocaleData(ruLocaleData);

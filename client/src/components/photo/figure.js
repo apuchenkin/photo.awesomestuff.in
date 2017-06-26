@@ -3,9 +3,8 @@ import { number, string, object, shape, func } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-// import { bind, debounce } from 'decko';
 import Link from 'found/lib/Link';
-
+import Close from './icons/close';
 import utils from '../../lib/utils';
 import Img from './img';
 
@@ -23,18 +22,13 @@ const photoShape = shape({
 const messages = defineMessages({
   close: {
     id: 'icon.close',
-    defaultMessage: 'Close {icon}',
+    defaultMessage: 'Close',
   },
   author: {
     id: 'photo.author',
     defaultMessage: 'Author: {author}',
   },
 });
-
-const closeIcon = (<FormattedMessage
-  {...messages.close}
-  values={{ icon: <i className="icon-cancel" /> }}
-/>);
 
 class Figure extends React.PureComponent {
 
@@ -76,7 +70,11 @@ class Figure extends React.PureComponent {
 
     return (
       <div className={style.tools}>
-        <Link onClick={e => e.stopPropagation()} to={backUrl}>{closeIcon}</Link>
+        <Link onClick={e => e.stopPropagation()} to={backUrl}>
+          <FormattedMessage
+            {...messages.close}
+          /><Close />
+        </Link>
       </div>
     );
   }
