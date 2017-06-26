@@ -1,4 +1,4 @@
-import { HttpError, RedirectException } from 'found';
+import { HttpError, Redirect } from 'found';
 import Main from './components/main';
 import HomeHeader from './components/home/header';
 import PageHeader from './components/page/header';
@@ -9,16 +9,17 @@ import Gallery from './components/gallery';
 import Photo from './components/photo';
 
 import {
-  loadAll as loadCategories,
-  load as loadCategory,
+  loaded as loadedCategory,
 } from './store/category/actions';
+
 import {
   loadAll as loadPhotos,
   load as loadPhoto,
 } from './store/photo/actions';
+
 import { load as loadPage } from './store/page/actions';
 
-export default pages => [
+export default (pages, categories) => [
   {
     path: '/',
     Component: Main,
@@ -33,11 +34,7 @@ export default pages => [
         },
         header: HomeHeader,
         Component: Home,
-        getData: async ({ routes, context: { store } }) => {
-          await new Promise((resolve, reject) => {
-            store.dispatch(loadCategories(resolve, reject));
-          });
-
+        getData: ({ routes, context: { store } }) => {
           return {
             className: 'home-main',
             header: routes[routes.length - 1].header,
@@ -62,22 +59,14 @@ export default pages => [
           };
         },
       })),
-      {
-        path: '/:category/:subcategory?',
+      ...categories.map(category => ({
+        path: category.parent
+          ? `/${category.parent.name}/${category.name}`
+          : `/${category.name}`,
         header: GalleryHeader,
-        getData: async ({ params, context: { store } }) => {
-          console.log(params);
-          debugger;
-          const category = await (new Promise((resolve, reject) => {
-            store.dispatch(loadCategory(params.subcategory || params.category, resolve, reject));
-          })).catch(() => {
-            throw new HttpError(404);
-          });
-
-          if (!params.subcategory && category.parent) {
-            throw new RedirectException(`/${category.parent.name}/${category.name}`);
-          }
-
+        Component: Gallery,
+        getData: async ({ context: { store } }) => {
+          store.dispatch(loadedCategory(category));
           await (new Promise((resolve, reject) => {
             store.dispatch(loadPhotos(category, resolve, reject));
           })).catch(() => {
@@ -92,36 +81,38 @@ export default pages => [
             langs: category.langs,
           };
         },
-        Component: Gallery,
-        children: [
-          {
-            path: '/photo/:photoId',
-            header: GalleryHeader,
-            component: Photo,
-            getData: async ({ params, context: { store } }) => {
+        children: [{
+          path: '/photo/:photoId',
+          header: GalleryHeader,
+          component: Photo,
+          getData: async ({ params, context: { store } }) => {
+            const photo = await (new Promise((resolve, reject) => {
+              store.dispatch(loadPhoto(params.photoId, resolve, reject));
+            })).catch(() => {
               debugger;
-              const photo = await (new Promise((resolve, reject) => {
-                store.dispatch(loadPhoto(params.photoId, resolve, reject));
-              })).catch(() => {
-                debugger;
-                throw new HttpError(404);
-              });
-              // const description = new IntlMessageFormat(messages['meta.description.photo']);
+              throw new HttpError(404);
+            });
+            // const description = new IntlMessageFormat(messages['meta.description.photo']);
 
-              return {
-                meta: {
-                  title: photo.caption,
-                  // description: description.format({
-                  //   author: photo.author && photo.author.name,
-                  //   title: photo.caption,
-                  // }),
-                },
-                langs: photo.langs,
-              };
-            },
+            return {
+              meta: {
+                title: photo.caption,
+                // description: description.format({
+                //   author: photo.author && photo.author.name,
+                //   title: photo.caption,
+                // }),
+              },
+              langs: photo.langs,
+            };
           },
-        ],
-      },
+        }],
+      })),
+      ...categories
+        .filter(category => category.parent)
+        .map(category => new Redirect({
+          from: category.name,
+          to: `/${category.parent.name}/${category.name}`,
+        })),
     ],
   },
 ];

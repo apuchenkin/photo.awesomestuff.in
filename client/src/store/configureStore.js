@@ -51,10 +51,10 @@ export default async function configureStore(historyProtocol, initialState) {
   const photoService = new PhotoService(defaults);
 
   const pages = await pageService.fetchPages();
+  const categories = await categoryService.fetchCategories();
   const initial = Object.assign(initialState, {
-    page: Object.assign(initialState.page || {}, {
-      pages,
-    }),
+    page: { ...initialState.page, pages },
+    category: { ...initialState.category, categories },
   });
 
   return createStore(
@@ -66,7 +66,7 @@ export default async function configureStore(historyProtocol, initialState) {
         middlewares: [queryMiddleware],
       }),
       createMatchEnhancer(
-        new Matcher(routeConfig(pages)),
+        new Matcher(routeConfig(pages, categories)),
       ),
       applyMiddleware(createEpicMiddleware(epic, {
         dependencies: {
