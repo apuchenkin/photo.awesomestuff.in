@@ -28,7 +28,7 @@ const messages = defineMessages({
 });
 
 const GalleryHeader = ({ category, categories }) => {
-  const parent = category.parent || category;
+  const parent = categories.find(c => c.id === (category.parent || category).id);
   const childrens = categories
     .filter(c => c.parent && c.parent.id === parent.id)
     .map(c => (

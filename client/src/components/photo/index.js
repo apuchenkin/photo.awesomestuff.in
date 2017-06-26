@@ -1,14 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { number, string, shape, arrayOf, bool } from 'prop-types';
+import { number, string, shape, arrayOf, bool, func } from 'prop-types';
 import { injectIntl, intlShape, defineMessages } from 'react-intl';
-// import withRouter from 'react-router/lib/withRouter';
+// import withRouter from 'found/lib/withRouter';
+import { Actions as FarceActions } from 'farce';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-// import { routerShape } from 'react-router/lib/PropTypes';
-// import { bind } from 'decko';
 
 import Figure from './figure';
-// import { stopLoading } from '../../actions/loader';
 import PhotoLink from '../link/photo';
 import { fromCategory } from '../link/category';
 
@@ -26,41 +24,38 @@ const messages = defineMessages({
 });
 
 class Photo extends React.PureComponent {
-  // componentWillMount() {
-  //   if (isBrowser) {
-  //     // stops the loading initiated by server
-  //     this.props.stopLoading();
-  //   }
-  // }
+  constructor(props) {
+    super(props);
 
-  // @bind
-  goNext(next) {
-    const
-      { category, router } = this.props,
-      url = category.parent ? `${category.parent.name}/${category.name}` : category.name
-      ;
-
-    return () => router.push(`/${url}/photo/${next.id}`);
+    this.goNext = this.goNext.bind(this);
+    this.close = this.close.bind(this);
   }
 
-  // @bind
-  close() {
-    const
-      { category, router } = this.props,
-      url = category.parent ? `${category.parent.name}/${category.name}` : category.name
-      ;
+  goNext(next) {
+    const { category, push } = this.props;
+    const url = category.parent
+      ? `${category.parent.name}/${category.name}`
+      : category.name;
 
-    router.push(`/${url}`);
+    return () => push(`/${url}/photo/${next.id}`);
+  }
+
+  close() {
+    const { category, push } = this.props;
+    const url = category.parent
+      ? `${category.parent.name}/${category.name}`
+      : category.name;
+
+    push(`/${url}`);
   }
 
   render() {
-    const
-      { intl, photo, category, photos, isLoading } = this.props,
-      pidx = photos.findIndex(p => p.id === photo.id),
-      prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1],
-      next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1],
-      backUrl = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`,
-      onClick = this.goNext(next);
+    const { intl, photo, category, photos, isLoading } = this.props;
+    const pidx = photos.findIndex(p => p.id === photo.id);
+    const prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1];
+    const next = photos[pidx + 1 > photos.length - 1 ? 0 : pidx + 1];
+    const backUrl = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`;
+    const onClick = this.goNext(next);
 
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -98,22 +93,20 @@ Photo.propTypes = {
   photos: arrayOf(shape({ id: number.isRequired })).isRequired,
   photo: shape().isRequired,
   intl: intlShape.isRequired,
-  // router: routerShape.isRequired,
   isLoading: bool.isRequired,
-  // stopLoading: func.isRequired,
+  push: func.isRequired,
 };
 
 export default connect(
-  state => ({
-    isLoading: state.isLoading.count > 0,
-    photo: state.api.photo,
-    photos: state.api.photos,
-    category: state.api.category,
+  ({ category: { category }, photo: { photos, photo, loading } }) => ({
+    isLoading: loading,
+    photos,
+    photo,
+    category,
   }),
-  // dispatch => ({
-  //   stopLoading: () => dispatch(stopLoading()),
-  // }),
+  {
+    push: FarceActions.push,
+  },
 )(withStyles(style)(
-  // withRouter()
   injectIntl(Photo),
 ));

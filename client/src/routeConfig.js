@@ -84,12 +84,12 @@ export default (pages, categories) => [
         children: [{
           path: '/photo/:photoId',
           header: GalleryHeader,
-          component: Photo,
+          Component: Photo,
           getData: async ({ params, context: { store } }) => {
             const photo = await (new Promise((resolve, reject) => {
               store.dispatch(loadPhoto(params.photoId, resolve, reject));
             })).catch(() => {
-              debugger;
+              // debugger;
               throw new HttpError(404);
             });
             // const description = new IntlMessageFormat(messages['meta.description.photo']);

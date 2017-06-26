@@ -46,6 +46,8 @@ class Figure extends React.PureComponent {
     this.state = {
       dimensions: this.getDimensions(),
     };
+    this.getDimensions = this.getDimensions.bind(this);
+    this.resize = this.resize.bind(this); // TODO: debouce;
   }
 
   componentDidMount() {
@@ -63,8 +65,6 @@ class Figure extends React.PureComponent {
     };
   }
 
-  // @bind
-  // @debounce(50)
   resize() {
     this.setState({
       dimensions: this.getDimensions(),
