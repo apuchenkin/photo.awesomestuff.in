@@ -5,6 +5,11 @@ export const joinTranslation = (language, entity) => {
       [t.field]: t.value,
     }), entity);
 
+  if (entity.langs) {
+    result.langs = entity.langs.map(t => t.language)
+      .filter((elem, pos, arr) => arr.indexOf(elem) === pos); // drop duplicates
+  }
+
   delete result.translations;
 
   return entity;

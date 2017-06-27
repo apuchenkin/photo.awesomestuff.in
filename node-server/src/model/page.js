@@ -21,6 +21,15 @@ Page.hasMany(Translation, {
   },
 });
 
+Page.hasMany(Translation, {
+  as: 'langs',
+  foreignKey: 'refId',
+  constraints: false,
+  scope: {
+    refType: TYPE_PAGE,
+  },
+});
+
 Translation.belongsTo(Page, {
   foreignKey: 'refId',
   constraints: false,

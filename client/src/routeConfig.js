@@ -34,7 +34,7 @@ export default (pages, categories) => [
         },
         header: HomeHeader,
         Component: Home,
-        getData: ({ routes, context: { store } }) => {
+        getData: ({ routes }) => {
           return {
             className: 'home-main',
             header: routes[routes.length - 1].header,
@@ -49,6 +49,7 @@ export default (pages, categories) => [
           const page$ = await new Promise((resolve, reject) => {
             store.dispatch(loadPage(page, resolve, reject));
           });
+          // store.dispatch
 
           return {
             meta: {

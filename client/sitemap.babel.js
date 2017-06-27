@@ -2,7 +2,7 @@
 import sitemap from 'sitemap';
 import { Promise } from 'es6-promise';
 
-import config from './src/etc/config';
+import config from './src/etc/config.json';
 import CategoryService from './lib/service/Category';
 import PhotoService from './lib/service/Photo';
 import PageService from './lib/service/Page';

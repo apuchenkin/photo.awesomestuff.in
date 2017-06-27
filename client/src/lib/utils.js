@@ -8,15 +8,11 @@ import config from '../etc/config.json';
 export const localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g;
 
 export default {
-  pick(object, params) {
-    return Object.keys(object)
-    .filter(k => params.indexOf(k) >= 0)
-    .reduce((o, k) => Object.assign(o, { [k]: object[k] }), {});
-  },
-
-  omit(object, params = []) {
-    return this.pick(object, Object.keys(object).filter(k => params.indexOf(k) === -1));
-  },
+  // pick(object, params) {
+  //   return Object.keys(object)
+  //   .filter(k => params.indexOf(k) >= 0)
+  //   .reduce((o, k) => Object.assign(o, { [k]: object[k] }), {});
+  // },
 
   fetchAll(object) {
     const keys = Object.keys(object);

@@ -1,21 +1,18 @@
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
-import utils from '../../lib/utils';
 
 import baseStyle from '../../style/style.less';
 
 const { string, node } = React.PropTypes;
 
-function CategoryLink(props) {
-  const
-    { category, subcategory, children } = props,
-    link = subcategory
-      ? `${category}/${subcategory}`
-      : category;
+function CategoryLink({ category, subcategory, children, ...props }) {
+  const link = subcategory
+    ? `${category}/${subcategory}`
+    : category;
 
   return (
-    <Link to={`/${link}`} activeClassName={baseStyle.active} {...utils.omit(props, ['category', 'subcategory'])} >
+    <Link to={`/${link}`} activeClassName={baseStyle.active} {...props} >
       {children}
     </Link>
   );
@@ -25,6 +22,10 @@ CategoryLink.propTypes = {
   children: node.isRequired,
   category: string.isRequired,
   subcategory: string,
+};
+
+CategoryLink.defaultProps = {
+  subcategory: null,
 };
 
 export const fromCategory = category => ({

@@ -8,7 +8,7 @@ const toPublic = language => (page) => {
   if (!page) {
     return null;
   }
-
+  console.log(page.toJSON());
   return joinTranslation(language, page.toJSON());
 };
 
@@ -34,6 +34,10 @@ const getByAlias = (alias, authorized, language) => Page.findOne({
     Object.assign({
       model: Translation,
     }, authorized ? {} : { where: { language } }),
+    {
+      model: Translation,
+      as: 'langs',
+    },
   ],
 });
 
