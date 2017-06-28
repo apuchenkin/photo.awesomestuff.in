@@ -1,10 +1,7 @@
-import Category from '../model/category';
-import Photo from '../model/photo';
+import Category, { PUBLIC_FIELDS as CATEGORY_FIELDS } from '../model/category';
+import Photo, { PUBLIC_FIELDS as PHOTO_FIELDS } from '../model/photo';
 import Translation from '../model/translation';
 import { joinTranslation } from './translation';
-import { PUBLIC_FIELDS as PHOTO_FIELDS } from './photo';
-
-export const PUBLIC_FIELDS = ['id', 'name', 'date', 'parentId', 'featuredId'];
 
 const toPublic = language => (category) => {
   if (!category) {
@@ -19,50 +16,48 @@ const toPublic = language => (category) => {
   return categoryData;
 };
 
-const findAll = (authorized, language) => Category.findAll({
-  attributes: authorized ? undefined : PUBLIC_FIELDS,
-  where: authorized ? {} : {
-    hidden: false,
-  },
-  include: [
-    {
-      model: Category,
-      as: 'parent',
-      attributes: authorized ? undefined : PUBLIC_FIELDS,
-    },
-    {
-      model: Photo,
-      as: 'featured',
-      attributes: authorized ? undefined : PHOTO_FIELDS,
-    },
-    Object.assign({
-      model: Translation,
-    }, authorized ? {} : { where: { language } }),
-  ],
-});
+const findAll = (authorized, language) => Category
+  .scope('translations', authorized ? null : { method: ['public', language] })
+  .findAll({
+    include: [
+      {
+        model: Category,
+        as: 'parent',
+        attributes: authorized ? undefined : CATEGORY_FIELDS,
+      },
+      {
+        model: Photo,
+        as: 'featured',
+        attributes: authorized ? undefined : PHOTO_FIELDS,
+      },
+      {
+        model: Translation,
+        as: 'langs',
+      },
+    ],
+  });
 
-const getByName = (name, authorized, language) => Category.findOne({
-  attributes: authorized ? undefined : PUBLIC_FIELDS,
-  where: authorized ? { name } : {
-    hidden: false,
-    name,
-  },
-  include: [
-    {
-      model: Category,
-      as: 'parent',
-      attributes: authorized ? undefined : PUBLIC_FIELDS,
-    },
-    {
-      model: Photo,
-      as: 'featured',
-      attributes: authorized ? undefined : PHOTO_FIELDS,
-    },
-    Object.assign({
-      model: Translation,
-    }, authorized ? {} : { where: { language } }),
-  ],
-});
+const getByName = (name, authorized, language) => Category
+  .scope('translations', authorized ? null : { method: ['public', language] })
+  .findOne({
+    where: { name },
+    include: [
+      {
+        model: Category,
+        as: 'parent',
+        attributes: authorized ? undefined : CATEGORY_FIELDS,
+      },
+      {
+        model: Photo,
+        as: 'featured',
+        attributes: authorized ? undefined : PHOTO_FIELDS,
+      },
+      {
+        model: Translation,
+        as: 'langs',
+      },
+    ],
+  });
 
 export default {
   findAll,

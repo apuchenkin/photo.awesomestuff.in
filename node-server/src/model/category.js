@@ -2,6 +2,8 @@ import { sequelize, Sequelize } from './index';
 import Translation, { TYPE_CATEGORY } from './translation';
 import Photo from './photo';
 
+export const PUBLIC_FIELDS = ['id', 'name', 'date', 'parentId', 'featuredId'];
+
 const Category = sequelize.define('category', {
   name: {
     type: Sequelize.STRING,
@@ -15,6 +17,26 @@ const Category = sequelize.define('category', {
   },
   date: {
     type: Sequelize.DATEONLY,
+  },
+}, {
+  scopes: {
+    translations: {
+      include: [Translation],
+    },
+    public: language => ({
+      attributes: PUBLIC_FIELDS,
+      where: {
+        hidden: false,
+      },
+      include: [
+        {
+          model: Translation,
+          where: {
+            language,
+          },
+        },
+      ],
+    }),
   },
 });
 
@@ -32,6 +54,16 @@ Category.hasMany(Translation, {
     refType: TYPE_CATEGORY,
   },
 });
+
+Category.hasMany(Translation, {
+  as: 'langs',
+  foreignKey: 'refId',
+  constraints: false,
+  scope: {
+    refType: TYPE_CATEGORY,
+  },
+});
+
 Translation.belongsTo(Category, {
   foreignKey: 'refId',
   constraints: false,

@@ -5,6 +5,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/concatMap';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/from';
 
@@ -14,6 +15,7 @@ import {
   LOAD_ALL, LOAD, CANCELLED,
   loadedAll, loaded, error,
 } from './actions';
+import { setRuntimeVariable } from '../runtime/actions';
 
 const loadAll = (action, store, { categoryService }) => {
   const config = store.getState().runtime.config;
@@ -45,7 +47,10 @@ const load = (action$, store, { photoService }) =>
           next: meta.resolve,
           error: meta.reject,
         })
-        .map(loaded)
+        .concatMap(photo => [
+          loaded(photo),
+          setRuntimeVariable('langs', photo.langs),
+        ])
         .takeUntil(action$.ofType(CANCELLED))
         .catch(err => Observable.of(error(err))),
     )

@@ -30,7 +30,6 @@ const Translation = sequelize.define('translation', {
   },
 }, {
   indexes: [
-    // Create a unique index on poem
     {
       unique: true,
       fields: ['language', 'refType', 'refId', 'field'],

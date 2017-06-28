@@ -56,7 +56,6 @@ export default (pages, categories) => [
               title: page$.title,
               description: page$.description,
             },
-            langs: page$.langs,
           };
         },
       })),
@@ -79,7 +78,6 @@ export default (pages, categories) => [
               title: category.title,
               description: category.description,
             },
-            langs: category.langs,
           };
         },
         children: [{
@@ -103,7 +101,6 @@ export default (pages, categories) => [
                 //   title: photo.caption,
                 // }),
               },
-              langs: photo.langs,
             };
           },
         }],

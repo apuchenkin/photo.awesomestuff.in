@@ -2,8 +2,6 @@ import Photo from '../model/photo';
 import Translation from '../model/translation';
 import { joinTranslation } from './translation';
 
-export const PUBLIC_FIELDS = ['id', 'src', 'views', 'width', 'height', 'group', 'datetime'];
-
 const toPublic = language => (photo) => {
   if (!photo) {
     return null;
@@ -14,29 +12,19 @@ const toPublic = language => (photo) => {
   return result;
 };
 
-const findAll = (category, authorized, language) => category.getPhotos({
-  attributes: authorized ? undefined : PUBLIC_FIELDS,
-  where: authorized ? {} : {
-    hidden: false,
-  },
-  include: [
-    Object.assign({
-      model: Translation,
-    }, authorized ? {} : { where: { language } }),
-  ],
-});
+const findAll = (category, authorized, language) => category
+  .getPhotos({ scope: ['translations', authorized ? null : { method: ['public', language] }] });
 
-const getById = (id, authorized, language) => Photo.findById(id, {
-  attributes: authorized ? undefined : PUBLIC_FIELDS,
-  where: authorized ? { } : {
-    hidden: false,
-  },
-  include: [
-    Object.assign({
-      model: Translation,
-    }, authorized ? {} : { where: { language } }),
-  ],
-});
+const getById = (id, authorized, language) => Photo
+  .scope('translations', authorized ? null : { method: ['public', language] })
+  .findById(id, {
+    include: [
+      {
+        model: Translation,
+        as: 'langs',
+      },
+    ],
+  });
 
 export default {
   findAll,

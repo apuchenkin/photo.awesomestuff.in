@@ -1,13 +1,12 @@
 import React from 'react';
+import { shape, arrayOf, string, bool } from 'prop-types';
 import { connect } from 'react-redux';
-// import { locationShape } from 'found/lib/PropTypes';
+
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import { localeURL } from '../../lib/utils';
 import style from './style.less';
-
-const { arrayOf, string, bool } = React.PropTypes;
 
 const messages = defineMessages({
   not_available: {
@@ -16,36 +15,36 @@ const messages = defineMessages({
   },
 });
 
-const Locale = (props) => {
-  const
-    { location, locale, intl, disabled } = props,
-    localeMsg = intl.formatMessage({ id: locale, defaultMessage: locale }),
-    helpMsg = intl.formatMessage(messages.not_available, { lang: localeMsg });
+const Locale = ({ location, locale, intl, disabled }) => {
+  const localeMsg = intl.formatMessage({ id: locale, defaultMessage: locale });
+  const title = intl.formatMessage(messages.not_available, { lang: localeMsg });
 
   return disabled
-    ? <span title={helpMsg}>{localeMsg}</span>
+    ? <span title={title}>{localeMsg}</span>
     : <a href={location.pathname.replace(localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
 };
 
 Locale.propTypes = {
-  // location: locationShape,
+  location: shape({
+    pathname: string.isRequired,
+  }).isRequired,
   locale: string.isRequired,
   disabled: bool.isRequired,
   intl: intlShape.isRequired,
 };
 
-const LanguageSwitcher = (props) => {
-  const { langs, locales } = props,
-    links = locales.map(locale =>
-      <Locale {...props} locale={locale} disabled={!langs.find(l => locale === l)} key={locale} />
-    );
-
-  return (
-    <div className={style.language}>
-      {links}
-    </div>
-  );
-};
+const LanguageSwitcher = ({ langs, locales, ...props }) => (
+  <div className={style.language}>
+    {locales.map(locale => (
+      <Locale
+        {...props}
+        locale={locale}
+        disabled={!langs.find(l => locale === l)}
+        key={locale}
+      />
+    ))}
+  </div>
+);
 
 LanguageSwitcher.propTypes = {
   langs: arrayOf(string).isRequired,
@@ -53,7 +52,11 @@ LanguageSwitcher.propTypes = {
 };
 
 export default connect(
-  state => ({ locales: state.runtime.config.locales })
+  ({ runtime: { config, langs }, found: { resolvedMatch: { location } } }) => ({
+    locales: config.locales,
+    langs: langs || config.locales,
+    location,
+  }),
 )(
-  withStyles(style)(injectIntl(LanguageSwitcher))
+  withStyles(style)(injectIntl(LanguageSwitcher)),
 );
