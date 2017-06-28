@@ -18,6 +18,7 @@ import {
 } from './store/photo/actions';
 
 import { load as loadPage } from './store/page/actions';
+import { setRuntimeVariable } from './store/runtime/actions';
 
 export default (pages, categories) => [
   {
@@ -34,7 +35,9 @@ export default (pages, categories) => [
         },
         header: HomeHeader,
         Component: Home,
-        getData: ({ routes }) => {
+        getData: ({ routes, context: { store } }) => {
+          store.dispatch(setRuntimeVariable('langs', null));
+
           return {
             className: 'home-main',
             header: routes[routes.length - 1].header,
@@ -67,6 +70,8 @@ export default (pages, categories) => [
         Component: Gallery,
         getData: async ({ context: { store } }) => {
           store.dispatch(loadedCategory(category));
+          store.dispatch(setRuntimeVariable('langs', category.langs));
+
           await (new Promise((resolve, reject) => {
             store.dispatch(loadPhotos(category, resolve, reject));
           })).catch(() => {
@@ -88,7 +93,6 @@ export default (pages, categories) => [
             const photo = await (new Promise((resolve, reject) => {
               store.dispatch(loadPhoto(params.photoId, resolve, reject));
             })).catch(() => {
-              // debugger;
               throw new HttpError(404);
             });
             // const description = new IntlMessageFormat(messages['meta.description.photo']);
