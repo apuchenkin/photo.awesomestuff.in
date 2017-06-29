@@ -1,8 +1,13 @@
 import { SET_RUNTIME_VARIABLE } from './actions';
 
+const log = (val) => {
+  console.log(val);
+  return val;
+};
+
 const setRuntimeVariable = (state, { payload: { name, value } }) => ({
   ...state,
-  [name]: value,
+  [name]: log(value),
 });
 
 export default (state = {}, action) => {

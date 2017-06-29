@@ -38,7 +38,7 @@ const loadAll = (action, store, { categoryService }) => {
     );
 };
 
-const load = (action$, store, { photoService }) =>
+const load = (action$, store, { photoService, intl }) =>
   action$
     .ofType(LOAD)
     .mergeMap(({ meta, id }) =>
@@ -50,6 +50,13 @@ const load = (action$, store, { photoService }) =>
         .concatMap(photo => [
           loaded(photo),
           setRuntimeVariable('langs', photo.langs),
+          setRuntimeVariable('meta', {
+            title: photo.description,
+            description: intl.formatMessage({ id: 'meta.description.photo' }, {
+              author: photo.author && photo.author.name,
+              title: photo.description,
+            }),
+          }),
         ])
         .takeUntil(action$.ofType(CANCELLED))
         .catch(err => Observable.of(error(err))),

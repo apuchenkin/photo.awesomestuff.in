@@ -89,24 +89,12 @@ export default (pages, categories) => [
           path: '/photo/:photoId',
           header: GalleryHeader,
           Component: Photo,
-          getData: async ({ params, context: { store } }) => {
-            const photo = await (new Promise((resolve, reject) => {
+          getData: async ({ params, context: { store } }) => (
+            new Promise((resolve, reject) => {
               store.dispatch(loadPhoto(params.photoId, resolve, reject));
             })).catch(() => {
               throw new HttpError(404);
-            });
-            // const description = new IntlMessageFormat(messages['meta.description.photo']);
-
-            return {
-              meta: {
-                title: photo.caption,
-                // description: description.format({
-                //   author: photo.author && photo.author.name,
-                //   title: photo.caption,
-                // }),
-              },
-            };
-          },
+            }),
         }],
       })),
       ...categories
