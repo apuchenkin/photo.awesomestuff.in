@@ -48,10 +48,15 @@ app.use(async (req, res) => {
   const css = new Set(); // CSS for all rendered React components
     // eslint-disable-next-line no-underscore-dangle
   const onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
-  const store = await configureStore(new ServerProtocol(req.url), initial);
+  const intlProvider = new IntlProvider({
+    locale,
+    messages,
+  }, {});
+  const { intl } = intlProvider.getChildContext();
+  const store = await configureStore(new ServerProtocol(req.url), initial, intl);
   store.dispatch(FarceActions.init());
 
-  const matchContext = { store };
+  const matchContext = { store, intl };
   let renderArgs;
 
   try {

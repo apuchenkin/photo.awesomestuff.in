@@ -23,36 +23,6 @@ addLocaleData(ruLocaleData);
 const initialState = isBrowser && (window.__INITIAL_STATE__ || {});
 const ConnectedRouter = createConnectedRouter({ render });
 
-// function metaUpdate(meta) {
-//   document.title = meta.title;
-//   document.head.querySelector('meta[name=description]').content = meta.description;
-//   Array.from(document.head.querySelectorAll('link[hreflang]')).map((node) => {
-//     ReactDOM.unmountComponentAtNode(node);
-//     document.head.removeChild(node);
-//     return false;
-//   });
-//   const links = meta.links.reduce((acc, link) => {
-//     ReactDOM.render(link, span);
-//     return acc.concat(span.innerHTML);
-//   }, []);
-//   document.head.insertAdjacentHTML('beforeend', links.join('\n'));
-// }
-
-// function onUpdate() {
-//   const
-//     { routes, location } = this.state,
-//     meta = utils.getMeta(routes, messages, location.pathname);
-//
-//   metaUpdate(meta);
-//
-//   if (typeof ga !== 'undefined') {
-//     ga('send', 'pageview', {
-//       title: meta.title,
-//       page: location.pathname,
-//     });
-//   }
-// }
-
 function onInsertCss(...styles) {
   // eslint-disable-next-line no-underscore-dangle, max-len
   const removeCss = styles.map(style => style._insertCss());
@@ -62,10 +32,14 @@ function onInsertCss(...styles) {
 }
 
 (async () => {
-  const store = await configureStore(new BrowserProtocol(), initialState);
-  const matchContext = { store };
-  const { locale, basename, messages } = store.getState().runtime;
-
+  const { locale, messages, basename } = initialState;
+  const intlProvider = new IntlProvider({
+    locale,
+    messages,
+  }, {});
+  const { intl } = intlProvider.getChildContext();
+  const store = await configureStore(new BrowserProtocol(), initialState, intl);
+  const matchContext = { store, intl };
   const initialRenderArgs = await getStoreRenderArgs({
     store,
     matchContext,

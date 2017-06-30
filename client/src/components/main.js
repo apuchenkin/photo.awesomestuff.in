@@ -1,8 +1,8 @@
 import React from 'react';
 import { string, element, shape } from 'prop-types';
 import withRouter from 'found/lib/withRouter';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 

@@ -177,7 +177,7 @@ export default (store) => {
             categories.map(categoryRoute),
             categories.filter(c => !!c.parent).map(categoryRedirect),
             pages.map(pageRoute),
-            [notFound]
+            [notFound],
           );
 
           cb(null, this.childRoutes);

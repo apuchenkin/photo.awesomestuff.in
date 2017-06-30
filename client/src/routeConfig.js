@@ -1,3 +1,4 @@
+import React from 'react';
 import { HttpError, Redirect } from 'found';
 import Main from './components/main';
 import HomeHeader from './components/home/header';
@@ -20,6 +21,35 @@ import {
 import { load as loadPage } from './store/page/actions';
 import { setRuntimeVariable } from './store/runtime/actions';
 
+const metaUpdate = (meta) => {
+  document.title = meta.title;
+  document.head.querySelector('meta[name=description]').content = meta.description;
+  Array.from(document.head.querySelectorAll('link[hreflang]')).map((node) => {
+    ReactDOM.unmountComponentAtNode(node);
+    document.head.removeChild(node);
+    return false;
+  });
+  const links = meta.links.reduce((acc, link) => {
+    ReactDOM.render(link, span);
+    return acc.concat(span.innerHTML);
+  }, []);
+  document.head.insertAdjacentHTML('beforeend', links.join('\n'));
+
+  // if (typeof ga !== 'undefined') {
+  //   ga('send', 'pageview', {
+  //     title: meta.title,
+  //     page: location.pathname,
+  //   });
+  // }
+
+  //TODO: pass meta to server
+};
+
+const render = ({ Component, props, data }) => {
+  metaUpdate(data.meta);
+  return <Component {...props} />;
+};
+
 export default (pages, categories) => [
   {
     path: '/',
@@ -35,9 +65,11 @@ export default (pages, categories) => [
         },
         header: HomeHeader,
         Component: Home,
+        render,
         getData: ({ routes, context: { store } }) => {
           store.dispatch(setRuntimeVariable('langs', null));
 
+          console.log(1);
           return {
             className: 'home-main',
             header: routes[routes.length - 1].header,
@@ -48,10 +80,12 @@ export default (pages, categories) => [
         path: page.alias,
         header: PageHeader,
         Component: Page,
+        render,
         getData: async ({ context: { store } }) => {
           const page$ = await new Promise((resolve, reject) => {
             store.dispatch(loadPage(page, resolve, reject));
           });
+          console.log(2);
           // store.dispatch
 
           return {
@@ -68,6 +102,7 @@ export default (pages, categories) => [
           : `/${category.name}`,
         header: GalleryHeader,
         Component: Gallery,
+        render,
         getData: async ({ context: { store } }) => {
           store.dispatch(loadedCategory(category));
           store.dispatch(setRuntimeVariable('langs', category.langs));
@@ -89,6 +124,7 @@ export default (pages, categories) => [
           path: '/photo/:photoId',
           header: GalleryHeader,
           Component: Photo,
+          render,
           getData: async ({ params, context: { store } }) => (
             new Promise((resolve, reject) => {
               store.dispatch(loadPhoto(params.photoId, resolve, reject));

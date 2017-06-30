@@ -1,6 +1,5 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
-import { IntlProvider } from 'react-intl';
 import { createHistoryEnhancer, queryMiddleware } from 'farce';
 import createMatchEnhancer from 'found/lib/createMatchEnhancer';
 import Matcher from 'found/lib/Matcher';
@@ -13,7 +12,7 @@ import CategoryService from '../../lib/service/Category';
 import PageService from '../../lib/service/Page';
 import PhotoService from '../../lib/service/Photo';
 
-export default async function configureStore(historyProtocol, initialState) {
+export default async function configureStore(historyProtocol, initialState, intl) {
   // let store;
   // if (__DEV__) {
   //   if (isBrowser) {
@@ -43,7 +42,7 @@ export default async function configureStore(historyProtocol, initialState) {
   //
   //   store = createStore(reducers, initialState, enhancer);
 
-  const { runtime: { locale, messages, config: { apiEndpoint } } } = initialState;
+  const { runtime: { locale, config: { apiEndpoint } } } = initialState;
   const defaults = { locale, apiEndpoint };
 
   const categoryService = new CategoryService(defaults);
@@ -56,13 +55,6 @@ export default async function configureStore(historyProtocol, initialState) {
     page: { ...initialState.page, pages },
     category: { ...initialState.category, categories },
   });
-
-  const intlProvider = new IntlProvider({
-    locale,
-    messages,
-  }, {});
-
-  const { intl } = intlProvider.getChildContext();
 
   return createStore(
     reducers,
