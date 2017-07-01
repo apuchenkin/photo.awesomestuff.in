@@ -13,7 +13,7 @@ import configureStore from './store/configureStore';
 // import createRoutes from './routes';
 // import utils from './lib/utils';
 import WithStylesContext from './components/WithStylesContext';
-import render from './server/render';
+import { clientRender as render } from './render';
 
 import './style/style.css';
 
@@ -21,7 +21,9 @@ addLocaleData(ruLocaleData);
 
 // const span = document.createElement('span');
 const initialState = isBrowser && (window.__INITIAL_STATE__ || {});
-const ConnectedRouter = createConnectedRouter({ render });
+const ConnectedRouter = createConnectedRouter({
+  render,
+});
 
 function onInsertCss(...styles) {
   // eslint-disable-next-line no-underscore-dangle, max-len
@@ -32,7 +34,7 @@ function onInsertCss(...styles) {
 }
 
 (async () => {
-  const { locale, messages, basename } = initialState;
+  const { runtime: { locale, basename, messages } } = initialState;
   const intlProvider = new IntlProvider({
     locale,
     messages,
@@ -54,6 +56,8 @@ function onInsertCss(...styles) {
             matchContext={matchContext}
             resolver={resolver}
             initialRenderArgs={initialRenderArgs}
+            renderPending={() => <div>{console.log('pending')}</div>}
+            renderReady={() => <div>{console.log('ready')}</div>}
           />
         </WithStylesContext>
       </IntlProvider>

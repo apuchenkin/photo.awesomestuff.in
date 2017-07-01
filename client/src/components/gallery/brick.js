@@ -1,10 +1,9 @@
 import React from 'react';
+import { number, string, shape } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import style from './gallery.less';
 import utils from '../../lib/utils';
-
-const { number, string, shape } = React.PropTypes;
 
 const Brick = ({ photo }) => {
   const { w, h, src } = photo;

@@ -13,9 +13,9 @@ import { readFileSync } from 'fs';
 
 import HTML from './renderHTML';
 import configureStore from '../store/configureStore';
-import render from './render';
+import { serverRender as render } from '../render';
 import config from '../etc/config.json';
-import utils from '../lib/utils';
+import { buildMeta } from '../lib/meta';
 import WithStylesContext from '../components/WithStylesContext';
 
 const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.json'))
@@ -93,7 +93,7 @@ app.use(async (req, res) => {
     </Provider>,
   );
 
-  const meta = utils.getMeta(renderArgs.routes, messages, renderArgs.location.pathname);
+  const meta = buildMeta(renderArgs.location, store, intl);
   const styles = [...css].join('');
   const html = ReactDOM.renderToStaticMarkup(
     <WithStylesContext onInsertCss={onInsertCss}>

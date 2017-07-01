@@ -5,6 +5,7 @@ import runtime from './runtime/reducer';
 import category from './category/reducer';
 import page from './page/reducer';
 import photo from './photo/reducer';
+import meta from './meta/reducer';
 
 export default combineReducers({
   found: foundReducer,
@@ -13,4 +14,5 @@ export default combineReducers({
   category,
   page,
   photo,
+  meta,
 });

@@ -1,13 +1,12 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
+import { string, shape, array, object } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import escapeHtml from 'escape-html';
 import assets from '../../dist/assets.json';
 
 import style from '../style/style.less';
-
-const { string, shape, array, object } = React.PropTypes;
 
 const GoogleAnalytics = ({ id }) => (
   <script
@@ -22,7 +21,7 @@ const GoogleAnalytics = ({ id }) => (
 );
 
 GoogleAnalytics.propTypes = {
-  id: React.PropTypes.string.isRequired,
+  id: string.isRequired,
 };
 
 function renderHTML({ markup, initialState, meta, styles }) {
@@ -41,7 +40,11 @@ function renderHTML({ markup, initialState, meta, styles }) {
         { meta.links }
       </head>
       <body>
-        <div id="react-view" className={style.wrapper} dangerouslySetInnerHTML={{ __html: markup }} />
+        <div
+          id="react-view"
+          className={style.wrapper}
+          dangerouslySetInnerHTML={{ __html: markup }}
+        />
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
         <script type="application/javascript" src={`${config.hostname}${assets.main.js}`} />

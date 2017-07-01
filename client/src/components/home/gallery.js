@@ -35,7 +35,6 @@ const Gallery = ({ category, childs, width, height }) => (
           ))}
         </ul>
       )}
-      {console.log(childs)}
     </aside>
   </div>
 );

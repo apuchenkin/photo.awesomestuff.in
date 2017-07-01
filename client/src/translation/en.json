@@ -19,7 +19,7 @@
   "en": "En",
   "locale.not_available": "Current page content is not available in language {lang} yet",
   "photo.author": "by {author}",
-  "icon.close": "Close {icon}",
+  "icon.close": "Close",
   "prev": "Previous (Left arrow key)",
   "next": "Next (Right arrow key)"
 }

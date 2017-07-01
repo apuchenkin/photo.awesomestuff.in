@@ -16,9 +16,13 @@ const categoryBase = {
   title: string.isRequired,
 };
 
-const categoryShape = shape(Object.assign({}, categoryBase, {
-  parent: shape(categoryBase),
-}));
+const categoryShape = shape({
+  ...categoryBase,
+  parent: shape({
+    id: number.isRequired,
+    name: string.isRequired,
+  }),
+});
 
 const messages = defineMessages({
   home: {

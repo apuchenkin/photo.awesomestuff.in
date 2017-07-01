@@ -19,7 +19,7 @@
   "en": "En",
   "locale.not_available": "Содержимое текущей страницы недоступно на языке: {lang}",
   "photo.author": "автор {author}",
-  "icon.close": "Закрыть {icon}",
+  "icon.close": "Закрыть",
   "prev": "Предыдущая",
   "next": "Следующая"
 }

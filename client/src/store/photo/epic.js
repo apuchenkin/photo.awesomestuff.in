@@ -5,7 +5,6 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/concatMap';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/from';
 
@@ -15,7 +14,6 @@ import {
   LOAD_ALL, LOAD, CANCELLED,
   loadedAll, loaded, error,
 } from './actions';
-import { setRuntimeVariable } from '../runtime/actions';
 
 const loadAll = (action, store, { categoryService }) => {
   const config = store.getState().runtime.config;
@@ -38,7 +36,7 @@ const loadAll = (action, store, { categoryService }) => {
     );
 };
 
-const load = (action$, store, { photoService, intl }) =>
+const load = (action$, store, { photoService }) =>
   action$
     .ofType(LOAD)
     .mergeMap(({ meta, id }) =>
@@ -47,17 +45,7 @@ const load = (action$, store, { photoService, intl }) =>
           next: meta.resolve,
           error: meta.reject,
         })
-        .concatMap(photo => [
-          loaded(photo),
-          setRuntimeVariable('langs', photo.langs),
-          setRuntimeVariable('meta', {
-            title: photo.description,
-            description: intl.formatMessage({ id: 'meta.description.photo' }, {
-              author: photo.author && photo.author.name,
-              title: photo.description,
-            }),
-          }),
-        ])
+        .map(loaded)
         .takeUntil(action$.ofType(CANCELLED))
         .catch(err => Observable.of(error(err))),
     )

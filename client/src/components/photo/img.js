@@ -1,10 +1,8 @@
 import React from 'react';
+import { string, number, element } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import style from './photo.less';
 import loaderStyle from '../loader/style.less';
-
-const
-  { string, number, element } = React.PropTypes;
 
 class Img extends React.PureComponent {
   constructor(props) {

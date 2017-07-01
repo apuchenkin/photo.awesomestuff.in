@@ -1,10 +1,9 @@
 import React from 'react';
+import { string } from 'prop-types';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import style from './style.less';
-
-const { string } = React.PropTypes;
 
 const Page = ({ content }) =>
   // eslint-disable-next-line react/no-danger

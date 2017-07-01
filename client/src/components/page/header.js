@@ -1,12 +1,11 @@
 import React from 'react';
+import { string, shape } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
 
 import style from '../../style/header.less';
-
-const { string, shape } = React.PropTypes;
 
 const messages = defineMessages({
   home: {

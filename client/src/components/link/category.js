@@ -1,10 +1,9 @@
 import React from 'react';
+import { string, node } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
 
 import baseStyle from '../../style/style.less';
-
-const { string, node } = React.PropTypes;
 
 function CategoryLink({ category, subcategory, children, ...props }) {
   const link = subcategory

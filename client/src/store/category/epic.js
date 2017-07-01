@@ -12,7 +12,6 @@ import {
   LOAD_ALL, LOAD, CANCELLED,
   loadedAll, loaded, error,
 } from './actions';
-import { setRuntimeVariable } from '../runtime/actions';
 
 const loadAll = (action, store, { categoryService }) =>
   action
@@ -38,10 +37,7 @@ const load = (action$, store, { categoryService }) =>
           next: meta.resolve,
           error: meta.reject,
         })
-        .concatMap(category => [
-          loaded(category),
-          setRuntimeVariable('langs', category.langs),
-        ])
+        .map(loaded)
         .takeUntil(action$.ofType(CANCELLED))
         .catch(err => Observable.of(error(err))),
     )
