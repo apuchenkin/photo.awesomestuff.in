@@ -52,9 +52,9 @@ LanguageSwitcher.propTypes = {
 };
 
 export default connect(
-  ({ runtime: { config, langs }, found: { resolvedMatch: { location } } }) => ({
+  ({ runtime: { config }, found: { resolvedMatch: { location } }, meta }) => ({
     locales: config.locales,
-    langs: langs || config.locales,
+    langs: meta.langs || config.locales,
     location,
   }),
 )(
