@@ -16,16 +16,20 @@ import {
 const loadAll = (action, store, { categoryService }) =>
   action
     .ofType(LOAD_ALL)
-    .mergeMap(({ meta }) =>
-      Observable.from(categoryService.fetchCategories())
+    .mergeMap(({ meta }) => {
+      if (store.getState().category.categories.length) {
+        return CANCELLED;
+      }
+
+      return Observable.from(categoryService.fetchCategories())
         .do({
           next: meta.resolve,
           error: meta.reject,
         })
         .map(loadedAll)
         .takeUntil(action.ofType(CANCELLED))
-        .catch(err => Observable.of(error(err))),
-    )
+        .catch(err => Observable.of(error(err)));
+    })
 ;
 
 const load = (action$, store, { categoryService }) =>

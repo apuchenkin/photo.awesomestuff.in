@@ -3,9 +3,9 @@ export const LOADED = 'PAGE/LOADED';
 export const CANCELLED = 'PAGE/CANCELLED';
 export const ERROR = 'PAGE/ERROR';
 
-export const load = (page, resolve, reject) => ({
+export const load = page => ({
   type: LOAD,
-  meta: { resolve, reject },
+  lifecycle: { resolve: LOADED, reject: ERROR },
   page,
 });
 

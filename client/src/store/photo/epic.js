@@ -20,35 +20,37 @@ const loadAll = (action, store, { categoryService }) => {
 
   return action
     .ofType(LOAD_ALL)
-    .mergeMap(({ meta, category }) =>
-      Observable.from(
+    .mergeMap(({ category }) => {
+      const { photo } = store.getState();
+      if (photo.category && photo.category.id === category.id && photo.photos.length) {
+        return Observable.of(loadedAll(category)(photo.photos));
+      }
+
+      return Observable.from(
         categoryService.fetchPhotos(category)
           .then(refinePhotos) // TODO: photoId
           .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter })),
       )
-        .do({
-          next: meta.resolve,
-          error: meta.reject,
-        })
-        .map(loadedAll)
-        .takeUntil(action.ofType(CANCELLED))
-        .catch(err => Observable.of(error(err))),
-    );
+      .map(loadedAll(category))
+      .takeUntil(action.ofType(CANCELLED))
+      .catch(err => Observable.of(error(err)));
+    });
 };
 
 const load = (action$, store, { photoService }) =>
   action$
     .ofType(LOAD)
-    .mergeMap(({ meta, id }) =>
-      Observable.from(photoService.fetchPhoto(id))
-        .do({
-          next: meta.resolve,
-          error: meta.reject,
-        })
+    .mergeMap(({ id }) => {
+      const { photo: { photo } } = store.getState();
+      if (photo && photo.id === Number(id)) {
+        return Observable.of(loaded(photo));
+      }
+
+      return Observable.from(photoService.fetchPhoto(id))
         .map(loaded)
         .takeUntil(action$.ofType(CANCELLED))
-        .catch(err => Observable.of(error(err))),
-    )
+        .catch(err => Observable.of(error(err)));
+    })
 ;
 
 export default combineEpics(

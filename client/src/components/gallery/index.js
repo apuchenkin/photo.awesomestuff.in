@@ -1,7 +1,7 @@
 import React from 'react';
 import { shape, element, bool } from 'prop-types';
 import { connect } from 'react-redux';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { CSSTransitionGroup } from 'react-transition-group';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 // import { startLoading, stopLoading } from '../../actions/loader';
@@ -30,7 +30,7 @@ class GalleryPage extends React.PureComponent {
 
     return (
       <div className={className} >
-        <ReactCSSTransitionGroup
+        <CSSTransitionGroup
           transitionName={{
             enter: transitionStyle['fade-enter'],
             enterActive: transitionStyle['fade-enter-active'],
@@ -41,7 +41,7 @@ class GalleryPage extends React.PureComponent {
           transitionLeaveTimeout={200}
         >
           {children}
-        </ReactCSSTransitionGroup>
+        </CSSTransitionGroup>
         <Gallery category={category} />
       </div>
     );

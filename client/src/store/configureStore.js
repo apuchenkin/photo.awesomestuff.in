@@ -16,6 +16,8 @@ import CategoryService from '../../lib/service/Category';
 import PageService from '../../lib/service/Page';
 import PhotoService from '../../lib/service/Photo';
 
+import actionLifecyclesMiddleware from './actionLifecyclesMiddleware';
+
 export default async function configureStore(historyProtocol, initialState, intl) {
   // let store;
   // if (__DEV__) {
@@ -46,15 +48,15 @@ export default async function configureStore(historyProtocol, initialState, intl
   //
   //   store = createStore(reducers, initialState, enhancer);
 
-  const { runtime: { locale, basename, config: { apiEndpoint } } } = initialState;
+  const { runtime: { locale, basename, config: { apiEndpoint } }, page, category } = initialState;
   const defaults = { locale, apiEndpoint };
 
   const categoryService = new CategoryService(defaults);
   const pageService = new PageService(defaults);
   const photoService = new PhotoService(defaults);
 
-  const pages = await pageService.fetchPages();
-  const categories = await categoryService.fetchCategories();
+  const pages = (page && page.pages) || await pageService.fetchPages();
+  const categories = (category && category.categories) || await categoryService.fetchCategories();
   const initial = Object.assign(initialState, {
     page: { ...initialState.page, pages },
     category: { ...initialState.category, categories },
@@ -82,6 +84,7 @@ export default async function configureStore(historyProtocol, initialState, intl
           intl,
         },
       })),
+      applyMiddleware(actionLifecyclesMiddleware),
     ),
   );
 }

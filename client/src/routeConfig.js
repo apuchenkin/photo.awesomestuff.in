@@ -1,4 +1,4 @@
-import { HttpError, Redirect } from 'found';
+import { Redirect } from 'found';
 import Main from './components/main';
 import HomeHeader from './components/home/header';
 import PageHeader from './components/page/header';
@@ -46,22 +46,20 @@ export default (pages, categories) => [
           }));
         },
       },
-      ...pages.map(page => ({
-        path: page.alias,
+      ...pages.map(page$ => ({
+        path: page$.alias,
         header: PageHeader,
         Component: Page,
         getData: async ({ context: { store } }) => {
-          const page$ = await new Promise((resolve, reject) => {
-            store.dispatch(loadPage(page, resolve, reject));
-          });
+          const { page } = await store.dispatch(loadPage(page$));
 
           store.dispatch(setMeta({
-            langs: page$.langs,
-            title: page$.title,
-            description: page$.description,
+            langs: page.langs,
+            title: page.title,
+            description: page.description,
           }));
 
-          return page$;
+          return page;
         },
       })),
       ...categories.map(category => ({
@@ -72,12 +70,7 @@ export default (pages, categories) => [
         Component: Gallery,
         getData: async ({ context: { store } }) => {
           store.dispatch(loadedCategory(category));
-
-          await (new Promise((resolve, reject) => {
-            store.dispatch(loadPhotos(category, resolve, reject));
-          })).catch(() => {
-            throw new HttpError(404);
-          });
+          await store.dispatch(loadPhotos(category));
 
           store.dispatch(setMeta({
             langs: category.langs,
@@ -92,11 +85,7 @@ export default (pages, categories) => [
           header: GalleryHeader,
           Component: Photo,
           getData: async ({ params, context: { store, intl } }) => {
-            const photo = await new Promise((resolve, reject) => {
-              store.dispatch(loadPhoto(params.photoId, resolve, reject));
-            }).catch(() => {
-              throw new HttpError(404);
-            });
+            const photo = await store.dispatch(loadPhoto(params.photoId));
 
             store.dispatch(setMeta({
               langs: photo.langs,

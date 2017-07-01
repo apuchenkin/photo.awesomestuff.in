@@ -7,20 +7,21 @@ export const LOADED = 'PHOTO/LOADED';
 export const CANCELLED = 'PHOTO/CANCELLED';
 export const ERROR = 'PHOTO/ERROR';
 
-export const loadAll = (category, resolve, reject) => ({
+export const loadAll = category => ({
   type: LOAD_ALL,
-  meta: { resolve, reject },
+  lifecycle: { resolve: LOADED_ALL, reject: ERROR },
   category,
 });
 
-export const loadedAll = photos => ({
+export const loadedAll = category => photos => ({
   type: LOADED_ALL,
   photos,
+  category,
 });
 
-export const load = (id, resolve, reject) => ({
+export const load = id => ({
   type: LOAD,
-  meta: { resolve, reject },
+  lifecycle: { resolve: LOADED, reject: ERROR },
   id,
 });
 
