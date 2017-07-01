@@ -1,6 +1,10 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
-import { createHistoryEnhancer, queryMiddleware } from 'farce';
+import {
+  createHistoryEnhancer,
+  queryMiddleware,
+  createBasenameMiddleware,
+} from 'farce';
 import createMatchEnhancer from 'found/lib/createMatchEnhancer';
 import Matcher from 'found/lib/Matcher';
 
@@ -42,7 +46,7 @@ export default async function configureStore(historyProtocol, initialState, intl
   //
   //   store = createStore(reducers, initialState, enhancer);
 
-  const { runtime: { locale, config: { apiEndpoint } } } = initialState;
+  const { runtime: { locale, basename, config: { apiEndpoint } } } = initialState;
   const defaults = { locale, apiEndpoint };
 
   const categoryService = new CategoryService(defaults);
@@ -62,7 +66,10 @@ export default async function configureStore(historyProtocol, initialState, intl
     compose(
       createHistoryEnhancer({
         protocol: historyProtocol,
-        middlewares: [queryMiddleware],
+        middlewares: [
+          queryMiddleware,
+          basename && createBasenameMiddleware({ basename }),
+        ].filter(Boolean),
       }),
       createMatchEnhancer(
         new Matcher(routeConfig(pages, categories)),

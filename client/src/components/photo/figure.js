@@ -15,7 +15,7 @@ const photoShape = shape({
   src: string.isRequired,
   width: number.isRequired,
   height: number.isRequired,
-  caption: string.isRequired,
+  description: string.isRequired,
   author: object,
 });
 
@@ -84,7 +84,7 @@ class Figure extends React.PureComponent {
 
     return (
       <figcaption className={style.description}>
-        <span className={style.caption}>{photo.caption}</span>
+        <span className={style.caption}>{photo.description}</span>
         {photo.author && <div><FormattedMessage
           {...messages.author}
           values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
@@ -100,7 +100,7 @@ class Figure extends React.PureComponent {
 
     return (
       <Img
-        alt={photo.caption}
+        alt={photo.description}
         onClick={(e) => { e.stopPropagation(); onClick(); }}
         src={src}
         width={width}

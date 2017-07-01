@@ -44,7 +44,6 @@ app.use(async (req, res) => {
   const locale = prefix || negotiateLocale(req);
   const messages = locale ? translations[locale] : {};
   const initial = { runtime: { locale, basename, messages, config } };
-  // const location = basename ? req.url.replace(basename, '') || '/' : req.url;
   const css = new Set(); // CSS for all rendered React components
     // eslint-disable-next-line no-underscore-dangle
   const onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
@@ -67,12 +66,9 @@ app.use(async (req, res) => {
     });
   } catch (e) {
     if (e instanceof RedirectException) {
-      // moved permanently
-      // res.redirect(301, (basename || '') + redirectLocation.pathname + redirectLocation.search);
       res.redirect(301, store.farce.createHref(e.location));
       return;
     }
-
 
     throw e;
   }
