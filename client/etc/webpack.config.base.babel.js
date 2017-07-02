@@ -1,29 +1,7 @@
 import webpack from 'webpack';
-import postcssImport from 'postcss-import';
-import autoprefixer from 'autoprefixer';
-import cssNext from 'postcss-cssnext';
-import cssNano from 'cssnano'
 import path from 'path';
 
 const isDevelopment = env => env === 'development';
-// module.exports = ({ file, options, env }) => {
-//   console.log(file, options, env);
-//
-//   return ({
-//     parser: file.extname === '.sss' ? 'sugarss' : false,
-//     plugins: {
-//       'postcss-import': { root: file.dirname },
-//       'postcss-cssnext': { browsers: 'last 2 version' },
-//       autoprefixer: { browsers: 'last 2 version' },
-//       cssnano: env === 'production' ? options.cssnano : false,
-//     },
-//   });
-// };
-
-const log = v => {
-  console.log(v);
-  return v;
-}
 
 module.exports = env => ({
   context: path.resolve(__dirname, '../src'),

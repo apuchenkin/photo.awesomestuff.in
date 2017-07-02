@@ -126,4 +126,9 @@ sequelize.sync();
 
 app.context.db = sequelize;
 app.use(router.routes(), router.allowedMethods());
-app.listen(3000);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Server listening on: ${PORT}`);
+});

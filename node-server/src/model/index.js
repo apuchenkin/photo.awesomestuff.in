@@ -11,7 +11,16 @@ const config = require('../../etc/db.json')[env];
 const db = {};
 // console.log(db);
 
-const sequelize = new Sequelize(config.database, config.username, config.password, config);
+const database = process.env.DB_DATABASE || config.database;
+const username = process.env.DB_USER || config.username;
+const password = process.env.DB_PASSWORD || config.password;
+const host = process.env.DB_HOST || config.host;
+const port = process.env.DB_PORT || config.port;
+
+const sequelize = new Sequelize(database, username, password, Object.assign(config, {
+  host,
+  port,
+}));
 
 // if (config.use_env_variable) {
 //   var sequelize = new Sequelize(process.env[config.use_env_variable]);

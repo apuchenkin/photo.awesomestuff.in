@@ -1,6 +1,6 @@
 dist/
 static/*
-!static/.gitkeep 
+!static/.gitkeep
 node_modules/
 tmp/
 etc/config.json

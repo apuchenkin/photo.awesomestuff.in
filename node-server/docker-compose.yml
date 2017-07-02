@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: aws-photo
+      MYSQL_DATABASE: aws-photo
+      MYSQL_USER: aws-photo
+      MYSQL_PASSWORD: aws-photo
+  web:
+    depends_on:
+      - db
+    build: .
+    restart: always
+    volumes:
+      - .:/code
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: aws-photo
+      DB_PASSWORD: aws-photo
+
+volumes:
+    db_data:
