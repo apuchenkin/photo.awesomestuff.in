@@ -1,9 +1,10 @@
 import React from 'react';
-// import { locationShape } from 'react-router/lib/PropTypes';
+import { shape, string } from 'prop-types';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Link from 'found/lib/Link';
 
-import Link from '../link';
+import baseStyle from '../../style/style.less';
 import style from './style.less';
 
 const messages = defineMessages({
@@ -45,32 +46,33 @@ const messages = defineMessages({
   },
 });
 
-const NotFound = (props) => {
-  const { location } = props,
-    contactUs = <FormattedMessage {...messages.contactUs} />,
-    link = <Link to="/contacts" style={{ margin: 0 }}>{contactUs}</Link>
-    ;
+const link = (
+  <Link to="/contacts" style={{ margin: 0 }}>
+    <FormattedMessage {...messages.contactUs} />
+  </Link>
+);
 
-  return (
-    <div className={style['error-404']}>
-      <h2>
-        <b><FormattedMessage {...messages.title} values={{ error: 404 }} /></b>
-        &nbsp;-&nbsp;<FormattedMessage {...messages.description} />
-      </h2>
-      <p><FormattedMessage {...messages.text} values={{ url: location.pathname }} /></p>
-      <p><FormattedMessage {...messages.reasons} defaultMessage={''} /></p>
-      <ol>
-        <li><FormattedMessage {...messages.reason1} /></li>
-        <li><FormattedMessage {...messages.reason2} /></li>
-      </ol>
-      <p><FormattedMessage {...messages.contact} values={{ link }} /></p>
-      <Link to="/"><FormattedMessage {...messages.home} /></Link>
-    </div>
-  );
-};
+const NotFound = ({ location }) => (
+  <div className={style['error-404']}>
+    <h2>
+      <b><FormattedMessage {...messages.title} values={{ error: 404 }} /></b>
+      &nbsp;-&nbsp;<FormattedMessage {...messages.description} />
+    </h2>
+    <p><FormattedMessage {...messages.text} values={{ url: location.pathname }} /></p>
+    <p><FormattedMessage {...messages.reasons} defaultMessage={''} /></p>
+    <ol>
+      <li><FormattedMessage {...messages.reason1} /></li>
+      <li><FormattedMessage {...messages.reason2} /></li>
+    </ol>
+    <p><FormattedMessage {...messages.contact} values={{ link }} /></p>
+    <Link to="/"><FormattedMessage {...messages.home} /></Link>
+  </div>
+);
 
 NotFound.propTypes = {
-  // location: locationShape,
+  location: shape({
+    pathname: string.isrequired,
+  }).isRequired,
 };
 
-export default withStyles(style)(NotFound);
+export default withStyles(style, baseStyle)(NotFound);

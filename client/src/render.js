@@ -4,11 +4,16 @@ import ElementsRenderer from 'found/lib/ElementsRenderer';
 import StaticContainer from 'react-static-container';
 import Loader from './components/loader/loader';
 import { buildMeta, metaUpdate } from './lib/meta';
+import NotFound from './components/error/404';
+import ServiceUnavailable from './components/error/500';
 
 // eslint-disable-next-line react/prop-types
-const renderError = ({ error }) => (
+const renderError = ({ error, ...props }) => (
   <div>
-    {error.status === 404 ? 'Not found' : 'Error'}
+    <StaticContainer shouldUpdate>
+      {error.status === 404 ? <NotFound {...props} /> : <ServiceUnavailable />}
+    </StaticContainer>
+    <Loader />
   </div>
 );
 

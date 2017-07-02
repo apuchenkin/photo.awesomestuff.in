@@ -1,4 +1,4 @@
-import { LOAD_ALL, LOADED_ALL, LOAD, LOADED, CANCELLED, ERROR } from './actions';
+import { LOAD_ALL, LOADED_ALL, LOAD, LOADED, CANCELLED } from './actions';
 
 const initial = {
   photos: [],
@@ -12,10 +12,10 @@ const loadAll = state => ({ ...state, loading: true });
 const loaded = (state, { photo }) => ({ ...state, photo, loading: false });
 const loadedAll = (state, { photos, category }) => ({ ...state, photos, category, loading: false });
 const cancelled = state => ({ ...state, loading: false });
-const error = (state, action) => {
-  console.log(action.error); // eslint-disable-line no-console
-  return state;
-};
+// const error = (state, { error }) => {
+//   console.log(action.error); // eslint-disable-line no-console
+//   return state;
+// };
 
 export default (state = initial, action) => {
   const reducer = {
@@ -24,7 +24,7 @@ export default (state = initial, action) => {
     [LOAD_ALL]: loadAll,
     [LOADED_ALL]: loadedAll,
     [CANCELLED]: cancelled,
-    [ERROR]: error,
+    // [ERROR]: error,
   }[action.type];
 
   return reducer ? reducer(state, action) : state;

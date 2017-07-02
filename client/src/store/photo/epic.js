@@ -7,7 +7,6 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/from';
-
 import { remapPhotos, refinePhotos } from '../../../lib/service/Photo';
 
 import {
@@ -46,7 +45,7 @@ const load = (action$, store, { photoService }) =>
         return Observable.of(loaded(photo));
       }
 
-      return Observable.from(photoService.fetchPhoto(id))
+      return Observable.from(photoService.fetchPhoto(id).catch())
         .map(loaded)
         .takeUntil(action$.ofType(CANCELLED))
         .catch(err => Observable.of(error(err)));

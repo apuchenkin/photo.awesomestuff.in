@@ -1,4 +1,5 @@
-import { Redirect } from 'found';
+import Redirect from 'found/lib/Redirect';
+import HttpError from 'found/lib/HttpError';
 import Main from './components/main';
 import HomeHeader from './components/home/header';
 import PageHeader from './components/page/header';
@@ -51,7 +52,10 @@ export default (pages, categories) => [
         header: PageHeader,
         Component: Page,
         getData: async ({ context: { store } }) => {
-          const { page } = await store.dispatch(loadPage(page$));
+          const { page } = await store.dispatch(loadPage(page$))
+            .catch(({ error }) => {
+              throw new HttpError(404, error);
+            });
 
           store.dispatch(setMeta({
             langs: page.langs,
@@ -70,7 +74,10 @@ export default (pages, categories) => [
         Component: Gallery,
         getData: async ({ context: { store } }) => {
           store.dispatch(loadedCategory(category));
-          await store.dispatch(loadPhotos(category));
+          await store.dispatch(loadPhotos(category))
+            .catch(({ error }) => {
+              throw new HttpError(404, error);
+            });
 
           store.dispatch(setMeta({
             langs: category.langs,
@@ -85,7 +92,10 @@ export default (pages, categories) => [
           header: GalleryHeader,
           Component: Photo,
           getData: async ({ params, context: { store, intl } }) => {
-            const photo = await store.dispatch(loadPhoto(params.photoId));
+            const photo = await store.dispatch(loadPhoto(params.photoId))
+              .catch(({ error }) => {
+                throw new HttpError(404, error);
+              });
 
             store.dispatch(setMeta({
               langs: photo.langs,

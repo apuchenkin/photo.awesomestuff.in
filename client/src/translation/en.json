@@ -14,6 +14,8 @@
   "error.404.reason2": "Page content is not available in current language",
   "error.404.contactText": "Please, {link} if you're followed a broken link",
   "error.404.contact": "contact us",
+  "error.500.description": "Service unavailable",
+  "error.500.text": "Service temporary unavailable. Please come back later",
   "error.home": "Return home",
   "ru": "Ru",
   "en": "En",

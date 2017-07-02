@@ -29,6 +29,15 @@ const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.
     {},
   );
 
+function catchAsyncErrors(fn) {
+  return (req, res, next) => {
+    const routePromise = fn(req, res, next);
+    if (routePromise.catch) {
+      routePromise.catch(err => next(err));
+    }
+  };
+}
+
 const app = express();
 
 const negotiateLocale = req =>
@@ -37,7 +46,8 @@ const negotiateLocale = req =>
 ;
 
 app.use(express.static(path.join(__dirname, 'assets')));
-app.use(async (req, res) => {
+
+app.use(catchAsyncErrors(async (req, res) => {
   const piece = req.url.split('/')[1];
   const prefix = config.locales.find(l => l === piece);
   const basename = prefix && `/${prefix}`;
@@ -52,11 +62,11 @@ app.use(async (req, res) => {
     messages,
   }, {});
   const { intl } = intlProvider.getChildContext();
+  let renderArgs;
+
   const store = await configureStore(new ServerProtocol(req.url), initial, intl);
   store.dispatch(FarceActions.init());
-
   const matchContext = { store, intl };
-  let renderArgs;
 
   try {
     renderArgs = await getStoreRenderArgs({
@@ -64,13 +74,13 @@ app.use(async (req, res) => {
       matchContext,
       resolver,
     });
-  } catch (e) {
-    if (e instanceof RedirectException) {
-      res.redirect(301, store.farce.createHref(e.location));
+  } catch (error) {
+    if (error instanceof RedirectException) {
+      res.redirect(301, store.farce.createHref(error.location));
       return;
     }
 
-    throw e;
+    throw error;
   }
 
   if (!basename) {
@@ -108,6 +118,13 @@ app.use(async (req, res) => {
       <!DOCTYPE html>
       ${html}
     `);
+}));
+
+// eslint-disable-next-line no-unused-vars
+app.use((error, req, res, next) => {
+  res
+    .status(500)
+    .send('Service unavailable');
 });
 
 const PORT = process.env.PORT || 3001;
