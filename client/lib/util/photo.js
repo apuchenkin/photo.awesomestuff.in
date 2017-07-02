@@ -23,7 +23,7 @@ export const weightedRandom = (probabilities) => {
 export const getSrc = (src, w, h, thumb = false) =>
   [thumb ? 'rt' : 'r', w, h, src.replace('\\', '\\\\')].join('/');
 
-export const refinePhotos = (photos, excludeId) => {
+export const refinePhotos = excludeId => (photos) => {
   photos.map((p, k) => Object.assign(p, { order: k }));
 
   const

@@ -1,85 +1,52 @@
 import webpack from 'webpack';
+import postcssImport from 'postcss-import';
 import autoprefixer from 'autoprefixer';
+import cssNext from 'postcss-cssnext';
+import cssNano from 'cssnano'
 import path from 'path';
 
 const isDevelopment = env => env === 'development';
+// module.exports = ({ file, options, env }) => {
+//   console.log(file, options, env);
+//
+//   return ({
+//     parser: file.extname === '.sss' ? 'sugarss' : false,
+//     plugins: {
+//       'postcss-import': { root: file.dirname },
+//       'postcss-cssnext': { browsers: 'last 2 version' },
+//       autoprefixer: { browsers: 'last 2 version' },
+//       cssnano: env === 'production' ? options.cssnano : false,
+//     },
+//   });
+// };
+
+const log = v => {
+  console.log(v);
+  return v;
+}
 
 module.exports = env => ({
   context: path.resolve(__dirname, '../src'),
 
-  // resolve: {
-  //   root: path.resolve(__dirname, '../src'),
-  //   extensions: ['', '.jsx', '.js', '.json', '.less'],
-  //   modulesDirectories: ['node_modules'],
-  // },
   resolve: {
     extensions: ['*', '.js', '.css', '.html'],
     modules: ['src', 'node_modules'],
-    // alias: {
-    //   app: path.resolve(rootFolder, 'src/app'),
-    // },
   },
-
-  // cache: DEBUG,
-  // debug: DEBUG,
-  //
-  // stats: {
-  //   colors: true,
-  //   reasons: DEBUG,
-  //   hash: VERBOSE,
-  //   version: VERBOSE,
-  //   timings: true,
-  //   chunks: VERBOSE,
-  //   chunkModules: VERBOSE,
-  //   cached: VERBOSE,
-  //   cachedAssets: VERBOSE,
-  // },
 
   module: {
     rules: [
-      {
-        test: /\.jsx?$/,
-        include: [
-          path.resolve(__dirname, '../src'),
-          path.resolve(__dirname, '../lib'),
-        ],
-        loader: 'babel-loader',
-        query: {
-          // https://github.com/babel/babel-loader#options
-          // cacheDirectory: isDevelopment(env),
-
-          // https://babeljs.io/docs/usage/options/
-          babelrc: false,
-          presets: [
-            'react',
-            'env',
-          ],
-          plugins: [
-            // 'transform-runtime',
-            // 'transform-decorators-legacy',
-            // 'transform-class-properties',
-
-            'transform-object-rest-spread',
-            ...isDevelopment(env) ? [] : [
-              'transform-react-remove-prop-types',
-              'transform-react-constant-elements',
-              'transform-react-inline-elements',
-            ],
-          ],
-        },
-      },
       {
         test: /\.css$/,
         loaders: [
           'style-loader',
           `css-loader?${JSON.stringify({
             sourceMap: isDevelopment(env),
-            importLoaders: false,
-            modules: true,
+            importLoaders: isDevelopment(env) ? 0 : 1,
+            modules: false,
             localIdentName: isDevelopment(env) ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
             minimize: !isDevelopment(env),
           })}`,
-          // 'postcss-loader',
+          isDevelopment(env) ? null : 'postcss-loader'
         ]
       },
       {
@@ -92,14 +59,14 @@ module.exports = env => ({
           {
             loader: 'css-loader',
             options: {
-              sourceMap: isDevelopment(env),
               minimize: !isDevelopment(env),
+              sourceMap: isDevelopment(env),
               modules: true,
               localIdentName: isDevelopment(env) ? '[name]_[local]_[hash:base64:3]' : '[hash:base64:4]',
-              importLoaders: 1
+              importLoaders: isDevelopment(env) ? 1 : 2
             }
           },
-          // 'postcss-loader',
+          isDevelopment(env) ? null : 'postcss-loader',
           { loader: 'less-loader', options: { sourceMap: isDevelopment(env) } },
         ]
       },
@@ -128,8 +95,10 @@ module.exports = env => ({
       },
     ],
   },
-
-  // postcss: () => [
-  //   autoprefixer({ browsers: 'last 2 versions' }),
-  // ],
+  plugins: (isDevelopment(env) ? [] : [
+    new webpack.LoaderOptionsPlugin({
+      minimize: true,
+      debug: false,
+    }),
+  ]),
 });

@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
@@ -10,6 +11,7 @@ import ruLocaleData from 'react-intl/locale-data/ru';
 import configureStore from './store/configureStore';
 import WithStylesContext from './components/WithStylesContext';
 import { clientRender as render } from './render';
+
 
 // eslint-disable-next-line import/first
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';

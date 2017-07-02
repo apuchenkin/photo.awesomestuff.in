@@ -2,6 +2,7 @@ import React from 'react';
 import { number, string, object, shape, func } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
+import debounce from 'debounce';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
 import Close from './icons/close';
@@ -41,7 +42,7 @@ class Figure extends React.PureComponent {
       dimensions: this.getDimensions(),
     };
     this.getDimensions = this.getDimensions.bind(this);
-    this.resize = this.resize.bind(this); // TODO: debouce;
+    this.resize = debounce(this.resize, 175).bind(this);
   }
 
   componentDidMount() {

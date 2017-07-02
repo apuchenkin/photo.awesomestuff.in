@@ -72,9 +72,9 @@ export default (pages, categories) => [
           : `/${category.name}`,
         header: GalleryHeader,
         Component: Gallery,
-        getData: async ({ context: { store } }) => {
+        getData: async ({ params, context: { store } }) => {
           store.dispatch(loadedCategory(category));
-          await store.dispatch(loadPhotos(category))
+          await store.dispatch(loadPhotos(category, params.photoId))
             .catch(({ error }) => {
               throw new HttpError(404, error);
             });

@@ -19,7 +19,7 @@ const loadAll = (action, store, { categoryService }) => {
 
   return action
     .ofType(LOAD_ALL)
-    .mergeMap(({ category }) => {
+    .mergeMap(({ category, photoId }) => {
       const { photo } = store.getState();
       if (photo.category && photo.category.id === category.id && photo.photos.length) {
         return Observable.of(loadedAll(category)(photo.photos));
@@ -27,7 +27,7 @@ const loadAll = (action, store, { categoryService }) => {
 
       return Observable.from(
         categoryService.fetchPhotos(category)
-          .then(refinePhotos) // TODO: photoId
+          .then(refinePhotos(photoId))
           .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter })),
       )
       .map(loadedAll(category))

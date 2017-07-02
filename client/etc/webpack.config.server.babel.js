@@ -5,8 +5,10 @@ import path from 'path';
 
 import base from './webpack.config.base.babel';
 
+const isDevelopment = env => env === 'development';
+
 const GLOBALS = DEBUG => ({
-  'process.env.NODE_ENV': DEBUG ? '"development"' : '"production"',
+  'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
   'process.env.BROWSER': false,
   __DEV__: DEBUG,
   isBrowser: false,
@@ -38,7 +40,7 @@ module.exports = env => merge(base(env), {
           path.resolve(__dirname, '../lib'),
         ],
         loader: 'babel-loader',
-        query: {
+        options: {
           // https://babeljs.io/docs/usage/options/
           babelrc: false,
           presets: [
@@ -51,15 +53,10 @@ module.exports = env => merge(base(env), {
             }]
           ],
           plugins: [
-            // 'transform-runtime',
-            // 'transform-decorators-legacy',
-            // 'transform-class-properties',
-
+            'transform-runtime',
             'transform-object-rest-spread',
-            ...env ? [] : [
-              // 'transform-react-remove-prop-types',
-              // 'transform-react-constant-elements',
-              // 'transform-react-inline-elements',
+            ...isDevelopment(env) ? [] : [
+              'transform-react-constant-elements',
             ],
           ],
         },
@@ -68,15 +65,9 @@ module.exports = env => merge(base(env), {
   },
 
   plugins: [
-
     // Define free variables
     // https://webpack.github.io/docs/list-of-plugins.html#defineplugin
-    new webpack.DefinePlugin(GLOBALS(env === 'development')),
-
-    // // Adds a banner to the top of each generated chunk
-    // // https://webpack.github.io/docs/list-of-plugins.html#bannerplugin
-    // new webpack.BannerPlugin('require("source-map-support").install();',
-    //   { raw: true, entryOnly: false }),
+    new webpack.DefinePlugin(GLOBALS(isDevelopment(env))),
   ],
 
   node: {

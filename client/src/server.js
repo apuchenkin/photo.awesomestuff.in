@@ -1,5 +1,3 @@
-// require('babel-core/register');
-
+import 'babel-register';
 import 'babel-polyfill';
-console.log('test');
 import './server/app';
