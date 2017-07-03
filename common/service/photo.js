@@ -1,4 +1,4 @@
-import resolutions from './resolution.json';
+import resolutions from '../etc/resolution.json';
 
 export const adjust = (w, h) => {
   const

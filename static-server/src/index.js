@@ -6,12 +6,12 @@ import url from 'url';
 import sharp from 'sharp';
 import vary from 'vary';
 
-import { adjust } from '../../client/lib/util/photo/memoize';
+import photo from '../../common/service/photo/memoize';
 
-import config from '../etc/config.json';
+import config from '../etc/config';
 
 const app = express();
-const basePath = path.resolve(process.cwd(), '..', 'static');
+const basePath = path.resolve(config.static);
 const extensions = ['jpg', 'png', 'jpeg'];
 
 app.use(express.static(basePath));
@@ -88,7 +88,7 @@ const acceptWebp = (req, res, next) => {
 const serveImage = (req, res, next) => {
   const
     { width, height, thumb, webp } = req.params,
-    [w, h] = adjust(width, height),
+    [w, h] = photo.adjust(width, height),
     conf = thumb ? (config.thumb && config.thumb.opts) : config.opts,
     opts = conf && {
       kernel: sharp.kernel[conf.kernel],

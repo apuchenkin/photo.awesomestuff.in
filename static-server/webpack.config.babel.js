@@ -1,89 +1,58 @@
 import webpack from 'webpack';
 import path from 'path';
 
-const DEBUG = !process.argv.includes('--release');
-const VERBOSE = process.argv.includes('--verbose');
-
-const GLOBALS = {
+const GLOBALS = DEBUG => ({
   'process.env.NODE_ENV': DEBUG ? '"development"' : '"production"',
   __DEV__: DEBUG,
-};
+});
 
-module.exports = {
+const isDev = env => env !== 'production';
+
+module.exports = env => ({
+  entry: ['babel-polyfill', './index.js'],
   target: 'node',
-  entry: 'index.js',
 
   context: path.resolve(__dirname, 'src'),
 
   resolve: {
-    root: [
-      path.resolve(__dirname, 'src'),
-      path.resolve(__dirname, '..', 'lib'),
-    ],
-    extensions: ['', '.jsx', '.js', '.json'],
-    modulesDirectories: ['node_modules'],
-  },
-
-  resolveLoader: {
-    root: path.resolve(__dirname, 'node_modules'),
+    extensions: ['.jsx', '.js', '.json'],
+    modules: ['node_modules'],
   },
 
   externals: [
     /^[a-z\-0-9]+$/,
   ],
 
-  cache: DEBUG,
-  debug: DEBUG,
-
-  stats: {
-    colors: true,
-    reasons: DEBUG,
-    hash: VERBOSE,
-    version: VERBOSE,
-    timings: true,
-    chunks: VERBOSE,
-    chunkModules: VERBOSE,
-    cached: VERBOSE,
-    cachedAssets: VERBOSE,
-  },
-
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
         include: [
+          path.resolve(__dirname, 'etc'),
           path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, '..', 'lib'),
+          path.resolve(__dirname, '..', 'common'),
         ],
-        loader: 'babel',
-        query: {
-          cacheDirectory: true,
-          babelrc: false,
-          presets: [
-            'babel-preset-node6',
-            'babel-preset-es2015-minimal',
-          ].map(require.resolve),
-        },
+        loader: 'babel-loader',
       },
       {
         test: /\.json$/,
-        loader: 'json',
+        loader: 'json-loader',
       },
-      {
-        test: /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2)(\?.*)?$/i,
-        loader: 'url',
-        query: {
-          name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
-          limit: 10000,
-        },
-      },
-      {
-        test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
-        loader: 'file',
-        query: {
-          name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
-        },
-      },
+      // {
+      //   test: /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2)(\?.*)?$/i,
+      //   loader: 'url',
+      //   query: {
+      //     name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
+      //     limit: 10000,
+      //   },
+      // },
+      // {
+      //   test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
+      //   loader: 'file',
+      //   query: {
+      //     name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
+      //   },
+      // },
     ],
   },
 
@@ -96,7 +65,9 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.DefinePlugin({ ...GLOBALS }),
+    new webpack.DefinePlugin({
+      ...GLOBALS(isDev(env)),
+    }),
   ],
 
   node: {
@@ -109,4 +80,4 @@ module.exports = {
   },
 
   devtool: 'source-map',
-};
+});

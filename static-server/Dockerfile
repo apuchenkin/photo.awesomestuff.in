@@ -1,21 +1,22 @@
-FROM alpine:edge
+FROM node:alpine
 
-RUN apk add vips-dev  \
-	--no-cache \
-	--repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-	--allow-untrusted
+RUN apk add vips-dev --update-cache --repository https://dl-3.alpinelinux.org/alpine/edge/testing/
 
-RUN apk add --no-cache make gcc g++ python nodejs
+RUN apk add --no-cache make gcc g++ python fftw-dev
 
-ADD lib /srv/lib
-ADD image-static /srv/image-static
-WORKDIR /srv/image-static
-VOLUME /srv/image-static/static
+COPY ./static-server /srv/app
+COPY ./common srv/common
+WORKDIR /srv/app
 
-RUN npm install
-RUN npm run build
+RUN npm i yarn -g
+RUN yarn install
+RUN yarn run build
 ENV NODE_ENV production
-RUN npm prune
-
+ENV PORT 3000
+RUN yarn install --production
+RUN npm rm yarn -g
 RUN npm i pm2 -g
+
+VOLUME /static
+EXPOSE 3000
 ENTRYPOINT ["pm2-docker", "dist/index.js"]

@@ -1,7 +1,5 @@
-const env = process.env.NODE_ENV || 'development';
-
 const Sequelize = require('sequelize');
-const config = require('../../etc/db.json')[env];
+const config = require('../../etc/config.js');
 // const Page = require('./page');
 // const basename = path.basename(module.filename);
 
@@ -10,17 +8,8 @@ const config = require('../../etc/db.json')[env];
 // };
 const db = {};
 // console.log(db);
-
-const database = process.env.DB_DATABASE || config.database;
-const username = process.env.DB_USER || config.username;
-const password = process.env.DB_PASSWORD || config.password;
-const host = process.env.DB_HOST || config.host;
-const port = process.env.DB_PORT || config.port;
-
-const sequelize = new Sequelize(database, username, password, Object.assign(config, {
-  host,
-  port,
-}));
+const { database, username, password } = config.database;
+const sequelize = new Sequelize(database, username, password, config.database);
 
 // if (config.use_env_variable) {
 //   var sequelize = new Sequelize(process.env[config.use_env_variable]);

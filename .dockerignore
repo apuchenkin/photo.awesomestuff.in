@@ -1,0 +1,4 @@
+static/
+*/node_modules/
+*/dist/
+*/.stack-work/

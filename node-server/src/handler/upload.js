@@ -4,6 +4,7 @@ import contentDisposition from 'content-disposition';
 import fs from 'fs';
 import path from 'path';
 import mkdirp from 'mkdirp';
+import config from '../../etc/config';
 
 import Category from '../model/category';
 import Photo from '../model/photo';
@@ -80,7 +81,7 @@ const upload = (ctx) => {
     .then(async (buffer) => {
       const exifData = exif.create(buffer).parse();
       const src = path.join(ctx.params.category, filename);
-      const fullName = path.resolve(process.cwd(), '..', 'static', src);
+      const fullName = path.resolve(config.static, src);
       const category = await Category.findOne({
         where: { name: ctx.params.category },
       });

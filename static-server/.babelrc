@@ -1,11 +1,15 @@
 {
   "sourceMaps": true,
   "presets": [
-    "node6",
-    "es2015-minimal"
+    ["env", {
+      "targets": {
+        "node": "current"
+      },
+      "useBuiltIns": true,
+    }]
   ],
   "plugins": [
     "transform-runtime",
     "transform-object-rest-spread"
-  ]
+  ],
 }

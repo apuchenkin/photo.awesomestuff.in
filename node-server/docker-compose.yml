@@ -17,7 +17,8 @@ services:
     build: .
     restart: always
     volumes:
-      - .:/code
+      # - .:/srv
+      - static:/static
     ports:
       - "3000:3000"
     environment:
@@ -25,6 +26,8 @@ services:
       DB_PORT: 3306
       DB_USER: aws-photo
       DB_PASSWORD: aws-photo
+      STATIC_DIR: /static
 
 volumes:
     db_data:
+    static:
