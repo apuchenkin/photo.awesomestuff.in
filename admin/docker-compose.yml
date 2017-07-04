@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx
+    depends_on:
+      - admin
+    volumes:
+      - admin:/usr/share/nginx/html:ro
+    restart: always
+    ports:
+      - "8080:80"
+  admin:
+    build:
+      context: ..
+      dockerfile: ./admin/Dockerfile
+    volumes:
+      - admin:/srv/admin/dist
+
+volumes:
+    admin:
