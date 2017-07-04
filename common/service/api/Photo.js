@@ -1,6 +1,6 @@
 import Service from './BaseService';
 
-import { weightedRandom, refinePhotos, remapPhotos } from '../util/photo';
+import { weightedRandom, refinePhotos, remapPhotos } from '../photo';
 
 export { weightedRandom, refinePhotos, remapPhotos };
 

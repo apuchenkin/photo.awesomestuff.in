@@ -3,7 +3,8 @@ import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { Link, withRouter } from 'react-router-dom';
 
-import utils from '../../../client/src/lib/utils';
+import photoService from '../../../common/service/photo/memoize';
+import config from '../../etc/config';
 
 export const PHOTO = 'photo';
 
@@ -57,6 +58,11 @@ const translateColor = (photo) => {
   return 'yellow';
 };
 
+const getSrc = (...args) => [
+  config.staticEndpoint,
+  photoService.getSrc(...args),
+].join('/');
+
 class Photo extends React.Component {
   render() {
     const { photo, parent, group, match, featured } = this.props;
@@ -93,7 +99,7 @@ class Photo extends React.Component {
         {featured && <div className="featured material-icons">star</div>}
         {photo.hasParent && <div className="parent" />}
         {photo.group && <Group color={group} onClick={() => parent.ungroup(photo)} />}
-        <img alt={photo.name} src={utils.getSrc(photo.src, 200, 200, true)} />
+        <img alt={photo.name} src={getSrc(photo.src, 200, 200, true)} />
       </div>,
     ));
   }

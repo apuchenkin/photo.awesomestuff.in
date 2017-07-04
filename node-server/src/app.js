@@ -19,6 +19,7 @@ import photoRouter from './handler/photo';
 import translationRouter from './handler/translation';
 
 import { LANG_RU, LANG_EN } from './model/translation';
+import config from '../etc/config';
 
 const app = new Koa();
 const router = Router();
@@ -80,7 +81,10 @@ router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods()
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 router.use('/translation', translationRouter.routes(), translationRouter.allowedMethods());
 
-app.use(cors());
+if (config.cors) {
+  app.use(cors());
+}
+
 app.use(cacheControl());
 app.use(compress());
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Translations from './Translations';
-import utils from '../../../../client/src/lib/utils';
+import config from '../../../etc/config';
+import photoService from '../../../../common/service/photo/memoize';
 
 import {
   load as loadTranslations,
@@ -12,6 +13,11 @@ import {
 } from '../../store/translation/actions';
 
 const FIELDS = ['title'];
+
+const getSrc = (...args) => [
+  config.staticEndpoint,
+  photoService.getSrc(...args),
+].join('/');
 
 class PhotoTranslations extends React.PureComponent {
 
@@ -45,7 +51,7 @@ class PhotoTranslations extends React.PureComponent {
         title={photo.name}
         backUrl={backUrl}
       >
-        <img alt={photo.name} src={utils.getSrc(photo.src, 800, 600, true)} />
+        <img alt={photo.name} src={getSrc(photo.src, 800, 600, true)} />
       </Translations>
     );
   }

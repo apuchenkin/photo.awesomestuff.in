@@ -1,5 +1,5 @@
 import Immutable from 'seamless-immutable';
-import PhotoService from '../../../../client/lib/service/Photo';
+import PhotoService from '../../../../common/service/api/Photo';
 import { LOADED, UPDATED, ERROR } from './actions';
 
 const initial = Immutable({

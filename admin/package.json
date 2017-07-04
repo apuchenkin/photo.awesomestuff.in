@@ -3,14 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "./src/index.js",
+  "scripts": {
+    "serve": "webpack-dev-server",
+    "build": "webpack -p --env=prod"
+  },
   "dependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "classnames": "^2.2.5",
+    "isomorphic-fetch": "^2.2.1",
+    "memoizee": "^0.4.5",
     "query-string": "^4.3.4",
     "react": "^15.6.1",
     "react-dnd": "^2.4.0",
     "react-dnd-html5-backend": "^2.4.1",
     "react-dom": "^15.6.1",
-    "react-modal": "^1.9.7",
     "react-redux": "^5.0.5",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
@@ -36,11 +42,8 @@
     "less-loader": "^4.0.4",
     "postcss-loader": "^2.0.6",
     "style-loader": "^0.18.2",
-    "webpack": "^2.6.1",
+    "webpack": "^3.0.0",
     "webpack-dev-server": "^2.4.5"
-  },
-  "scripts": {
-    "serve": "webpack-dev-server"
   },
   "author": "",
   "license": "MIT"

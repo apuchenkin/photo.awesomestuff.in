@@ -1,13 +1,11 @@
 import { SET_RUNTIME_VARIABLE, INIT } from './actions';
 
-import config from '../../../../client/src/etc/config.json';
-import PhotoService from '../../../../client/lib/service/Photo';
-import CategoryService from '../../../../client/lib/service/Category';
-import TranslationService from '../../../../client/lib/service/Translation';
+import config from '../../../etc/config.json';
+import PhotoService from '../../../../common/service/api/Photo';
+import CategoryService from '../../../../common/service/api/Category';
+import TranslationService from '../../../../common/service/api/Translation';
 
 const initial = {};
-
-config.apiEndpoint = '/api/v1'; //TODO: fix with mergeable configs
 
 const init = (state, { token }) => Object.assign(state, {
   photoService: new PhotoService({

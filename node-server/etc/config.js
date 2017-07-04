@@ -2,7 +2,7 @@ const env = process.env.NODE_ENV || 'development';
 const config = require('./config.json') || {};
 const db = require('./db.json')[env];
 
-module.exports = {
+module.exports = Object.assign(config, {
   static: process.env.STATIC_DIR || config.static,
   database: Object.assign(db, {
     database: process.env.DB_DATABASE || db.database,
@@ -11,4 +11,4 @@ module.exports = {
     host: process.env.DB_HOST || db.host,
     port: process.env.DB_PORT || db.port,
   }),
-};
+});

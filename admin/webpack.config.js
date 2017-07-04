@@ -1,21 +1,50 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
 
-module.exports = {
-  entry: './src/index.js',
+const GLOBALS = DEBUG => ({
+  'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
+  __DEV__: DEBUG,
+});
+
+module.exports = env => ({
+  context: path.resolve(__dirname, './src'),
+  entry: './index.js',
+
   output: {
-    filename: 'main.bundle.js',
+    path: path.resolve(__dirname, './dist'),
     publicPath: '/',
+    filename: 'index.js',
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.jsx', '.js', '.json'],
+    modules: [
+      path.resolve(__dirname, 'node_modules'),
+    ],
   },
   module: {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /(node_modules|bower_components)/,
-        loader: 'babel-loader',
+        include: [
+          path.resolve(__dirname, 'etc'),
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, '..', 'common'),
+        ],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [
+              require('babel-preset-react'),
+              require('babel-preset-env'),
+            ],
+            plugins: [
+              require('babel-plugin-transform-object-rest-spread'),
+            ],
+          },
+        },
       },
       {
         test: /\.json$/,
@@ -31,13 +60,18 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.LoaderOptionsPlugin({
+      minimize: env === 'prod',
+      debug: env !== 'prod',
+    }),
     new ExtractTextPlugin('style.bundle.css'),
     new HtmlWebpackPlugin(),
+    new webpack.DefinePlugin(GLOBALS(env !== 'prod')),
   ],
   stats: {
     colors: true,
   },
-  devtool: 'inline-source-map',
+  devtool: env === 'prod' ? 'nosources-source-map' : 'eval',
   devServer: {
     port: 9000,
     historyApiFallback: true,
@@ -48,4 +82,4 @@ module.exports = {
       },
     },
   },
-};
+});
