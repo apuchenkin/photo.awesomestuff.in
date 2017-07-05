@@ -5,6 +5,7 @@
   "main": "./src/index.js",
   "scripts": {
     "serve": "webpack-dev-server",
+    "serve:dist": "webpack-dev-server -p --env=prod",
     "build": "webpack -p --env=prod"
   },
   "dependencies": {

@@ -2,6 +2,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
+const config = require('./etc/config');
 
 const GLOBALS = DEBUG => ({
   'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
@@ -14,7 +15,7 @@ module.exports = env => ({
 
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: '/',
+    publicPath: config.basename || '/',
     filename: 'index.js',
   },
   resolve: {
@@ -28,7 +29,6 @@ module.exports = env => ({
       {
         test: /\.jsx?$/,
         include: [
-          path.resolve(__dirname, 'etc'),
           path.resolve(__dirname, 'src'),
           path.resolve(__dirname, '..', 'common'),
         ],
@@ -52,9 +52,18 @@ module.exports = env => ({
       },
       {
         test: /\.less$/,
+        exclude: /^(https?:)?\/\//,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: ['css-loader', 'less-loader'],
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 1,
+              },
+            },
+            'less-loader',
+          ],
         }),
       },
     ],
@@ -65,7 +74,9 @@ module.exports = env => ({
       debug: env !== 'prod',
     }),
     new ExtractTextPlugin('style.bundle.css'),
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: 'index.ejs',
+    }),
     new webpack.DefinePlugin(GLOBALS(env !== 'prod')),
   ],
   stats: {
