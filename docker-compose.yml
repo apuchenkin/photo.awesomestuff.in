@@ -7,24 +7,24 @@ services:
     depends_on:
       - admin
       - api
+      - static
     volumes:
       - admin:/srv/admin:ro
       - ./etc/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: always
     ports:
       - "8080:8080"
-    command: [nginx-debug, '-g', 'daemon off;']
 
   admin:
     build:
       context: .
       dockerfile: ./admin/Dockerfile
+      args:
+        BASENAME: /admin
+        API_ENDPOINT: /api/v1
+        STATIC_ENDPOINT: /static
     volumes:
       - admin:/srv/admin/dist
-    environment:
-      BASENAME: /admin
-      API_ENDPOINT: /api/v1
-      STATIC_ENDPOINT: /static
 
   api:
     depends_on:
@@ -41,7 +41,7 @@ services:
       DB_USER: aws-photo
       DB_PASSWORD: aws-photo
       STATIC_DIR: /static
-    entrypoint:  sh -c '/srv/scripts/wait-for db:3306 -- pm2-docker dist/app.js'
+    entrypoint: ./scripts/wait.sh pm2-docker dist/app.js
 
   db:
     image: mysql
@@ -53,6 +53,16 @@ services:
       MYSQL_DATABASE: aws-photo
       MYSQL_USER: aws-photo
       MYSQL_PASSWORD: aws-photo
+
+  static:
+    build:
+      context: .
+      dockerfile: ./static-server/Dockerfile
+    restart: always
+    volumes:
+      - static:/static:ro
+    environment:
+      STATIC_DIR: /static
 
 volumes:
     db_data:

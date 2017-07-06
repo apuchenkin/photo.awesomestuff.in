@@ -61,9 +61,11 @@ const readBody = async (ctx, progressStream) => {
     });
     stream.on('data', (chunk) => {
       data.push(chunk);
+      console.log(`${(Buffer.concat(data).length * 100) / ctx.request.length}\n`);
       progressStream.write(`${(Buffer.concat(data).length * 100) / ctx.request.length}\n`);
     });
     stream.on('end', () => {
+      console.log(`end`);
       resolve(Buffer.concat(data));
     });
   });

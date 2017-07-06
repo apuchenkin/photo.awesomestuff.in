@@ -1,6 +1,7 @@
-FROM node:alpine
+FROM node
 
-RUN apk add --no-cache mysql-client
+RUN apt-get update
+RUN apt-get install mysql-client -y
 
 COPY . /srv
 WORKDIR /srv

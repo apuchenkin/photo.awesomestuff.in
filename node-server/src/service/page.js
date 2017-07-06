@@ -10,11 +10,11 @@ const toPublic = language => (page) => {
 };
 
 const findAll = (authorized, language) => Page
-  .scope('translations', authorized ? null : { method: ['public', language] })
+  .scope(['translations', authorized ? null : { method: ['public', language] }].filter(Boolean))
   .findAll();
 
 const getByAlias = (alias, authorized, language) => Page
-  .scope('translations', authorized ? null : { method: ['public', language] })
+  .scope(['translations', authorized ? null : { method: ['public', language] }].filter(Boolean))
   .findOne({
     where: { alias },
     include: [

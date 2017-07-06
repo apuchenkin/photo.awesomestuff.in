@@ -17,7 +17,7 @@ const toPublic = language => (category) => {
 };
 
 const findAll = (authorized, language) => Category
-  .scope('translations', authorized ? null : { method: ['public', language] })
+  .scope(['translations', authorized ? null : { method: ['public', language] }].filter(Boolean))
   .findAll({
     include: [
       {
@@ -38,7 +38,7 @@ const findAll = (authorized, language) => Category
   });
 
 const getByName = (name, authorized, language) => Category
-  .scope('translations', authorized ? null : { method: ['public', language] })
+  .scope(['translations', authorized ? null : { method: ['public', language] }].filter(Boolean))
   .findOne({
     where: { name },
     include: [

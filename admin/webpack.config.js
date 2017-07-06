@@ -6,6 +6,9 @@ const config = require('./etc/config');
 
 const GLOBALS = DEBUG => ({
   'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
+  'process.env.BASENAME': JSON.stringify(process.env.BASENAME),
+  'process.env.STATIC_ENDPOINT': JSON.stringify(process.env.STATIC_ENDPOINT),
+  'process.env.API_ENDPOINT': JSON.stringify(process.env.API_ENDPOINT),
   __DEV__: DEBUG,
 });
 
@@ -15,7 +18,7 @@ module.exports = env => ({
 
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: config.basename || '/',
+    publicPath: process.env.BASENAME || config.basename,
     filename: 'index.js',
   },
   resolve: {
@@ -82,7 +85,7 @@ module.exports = env => ({
   stats: {
     colors: true,
   },
-  devtool: env === 'prod' ? 'nosources-source-map' : 'eval',
+  devtool: env === 'prod' ? 'source-map' : 'eval',
   devServer: {
     port: 9000,
     historyApiFallback: true,
