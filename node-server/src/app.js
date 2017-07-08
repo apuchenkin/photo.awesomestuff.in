@@ -17,6 +17,7 @@ import pageRouter from './handler/page';
 import categoryRouter from './handler/category';
 import photoRouter from './handler/photo';
 import translationRouter from './handler/translation';
+import uploadRouter from './handler/upload';
 
 import { LANG_RU, LANG_EN } from './model/translation';
 import config from '../etc/config';
@@ -80,6 +81,7 @@ router.use('/page', pageRouter.routes(), pageRouter.allowedMethods());
 router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods());
 router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
 router.use('/translation', translationRouter.routes(), translationRouter.allowedMethods());
+router.use('/upload', uploadRouter.routes(), uploadRouter.allowedMethods());
 
 if (config.cors) {
   app.use(cors());

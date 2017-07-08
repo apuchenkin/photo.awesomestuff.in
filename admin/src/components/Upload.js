@@ -1,9 +1,14 @@
 import React from 'react';
 import classNames from 'classnames';
 import Immutable from 'seamless-immutable';
+import { Observable } from 'rxjs/Observable';
+import { Subscriber } from 'rxjs';
+import 'rxjs/add/observable/of';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
+import { ajax } from 'rxjs/observable/dom/ajax';
 import authService from '../service/auth';
+import config from '../../etc/config';
 
 const fileTarget = {
   drop(props, monitor, cmp) {
@@ -58,38 +63,25 @@ class Upload extends React.Component {
 
   onDropFiles(files) {
     const files$ = files.map((file) => {
-      fetch(`/api/v1/photo/${this.props.category.name}`, {
+      const body = new FormData();
+      body.append('file', file);
+
+      ajax({
         method: 'POST',
-        headers: new Headers({
+        url: `${config.apiEndpoint}/upload/${this.props.category.name}`,
+        body,
+        headers: {
           'Content-Disposition': `attachment; filename="${file.name}"`,
           Authorization: authService.getToken(),
-        }),
-        body: file,
-      }).then((response) => {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-
-        const pump = () => reader.read().then(({ value, done }) => {
-          if (done) {
-            this.updateFile(file, { status: STATUS_COMPLETE });
-            return true;
-          }
-
-          const progress = decoder.decode(value).trim().split('\n').pop();
-          if (progress.startsWith('error')) {
-            throw new Error(progress);
-          }
-          if (Number(progress)) {
-            this.updateFile(file, { progress: Number(progress) });
-          }
-
-          return pump();
-        }).catch((error) => {
-          this.updateFile(file, { status: STATUS_ERROR, error });
-        });
-
-        return pump();
-      });
+        },
+        progressSubscriber: Subscriber.create(e =>
+          this.updateFile(file, { progress: Number(100 * (e.loaded / e.total)) }),
+          error => Observable.of(this.updateFile(file, { status: STATUS_ERROR, error })),
+          () => this.updateFile(file, { status: STATUS_COMPLETE }),
+        ),
+      })
+      .catch(() => Observable.empty)
+      .subscribe();
 
       return Immutable({ file, status: STATUS_PENDING });
     });

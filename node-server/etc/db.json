@@ -4,7 +4,7 @@
     "password": "r00t",
     "database": "aws-photo",
     "host": "127.0.0.1",
-    "port": 32768,
+    "port": 3306,
     "dialect": "mysql"
   },
   "test": {

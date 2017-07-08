@@ -2,7 +2,6 @@ import Router from 'koa-router';
 import vary from 'vary';
 
 import Photo from '../model/photo';
-import upload from './upload';
 import PhotoService from '../service/photo';
 
 const translationRouter = Router();
@@ -87,7 +86,6 @@ photosRouter
       { where: { id: { $in: ctx.request.body } } },
     );
     ctx.body = null;
-  })
-  .post('/:category', upload);
+  });
 
 export default photosRouter;
