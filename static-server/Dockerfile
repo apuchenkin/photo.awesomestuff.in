@@ -5,7 +5,7 @@ RUN apk add vips-dev --update-cache --repository https://dl-3.alpinelinux.org/al
 RUN apk add --no-cache make gcc g++ python fftw-dev
 
 COPY ./static-server /srv/app
-COPY ./common srv/common
+COPY ./common /srv/common
 WORKDIR /srv/app
 
 RUN npm i yarn -g

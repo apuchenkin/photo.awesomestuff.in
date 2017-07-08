@@ -8,7 +8,9 @@ module.exports = env => ({
 
   resolve: {
     extensions: ['*', '.js', '.css', '.html'],
-    modules: ['src', 'node_modules'],
+    modules: [
+      path.resolve(__dirname, '..', 'node_modules'),
+    ],
   },
 
   module: {
@@ -25,7 +27,7 @@ module.exports = env => ({
             minimize: !isDevelopment(env),
           })}`,
           isDevelopment(env) ? null : 'postcss-loader'
-        ]
+        ].filter(Boolean)
       },
       {
         test: /\.less$/,
@@ -46,7 +48,7 @@ module.exports = env => ({
           },
           isDevelopment(env) ? null : 'postcss-loader',
           { loader: 'less-loader', options: { sourceMap: isDevelopment(env) } },
-        ]
+        ].filter(Boolean)
       },
       {
         test: /\.json$/,

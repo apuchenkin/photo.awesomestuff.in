@@ -21,7 +21,7 @@ import {
 import { load as loadPage } from './store/page/actions';
 import { setMeta } from './store/meta/actions';
 
-export default (pages, categories) => [
+export default (pages = [], categories = []) => [
   {
     path: '/',
     Component: Main,

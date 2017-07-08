@@ -12,9 +12,9 @@ import epic from './epic';
 import reducers from './reducer';
 import routeConfig from '../routeConfig';
 
-import CategoryService from '../../lib/service/Category';
-import PageService from '../../lib/service/Page';
-import PhotoService from '../../lib/service/Photo';
+import CategoryService from '../../../common/service/api/Category';
+import PageService from '../../../common/service/api/Page';
+import PhotoService from '../../../common/service/api/Photo';
 
 import actionLifecyclesMiddleware from './actionLifecyclesMiddleware';
 

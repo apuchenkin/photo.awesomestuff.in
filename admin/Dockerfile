@@ -1,8 +1,8 @@
 FROM node:alpine
 
 COPY ./admin /srv/admin
-COPY ./common srv/common
-COPY ./client srv/client
+COPY ./common /srv/common
+COPY ./client /srv/client
 
 ARG BASENAME
 ARG API_ENDPOINT

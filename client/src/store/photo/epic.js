@@ -7,7 +7,7 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/from';
-import { remapPhotos, refinePhotos } from '../../../lib/service/Photo';
+import { remapPhotos, refinePhotos } from '../../../../common/service/api/Photo';
 
 import {
   LOAD_ALL, LOAD, CANCELLED,

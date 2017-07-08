@@ -14,7 +14,7 @@ import { readFileSync } from 'fs';
 import HTML from './renderHTML';
 import configureStore from '../store/configureStore';
 import { serverRender as render } from '../render';
-import config from '../etc/config.json';
+import config from '../etc/config';
 import { buildMeta } from '../lib/meta';
 import WithStylesContext from '../components/WithStylesContext';
 
@@ -122,12 +122,13 @@ app.use(catchAsyncErrors(async (req, res) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
+  console.log(error);
   res
     .status(500)
     .send('Service unavailable');
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

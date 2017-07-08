@@ -3,7 +3,7 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import Link from 'found/lib/Link';
-import { title } from '../../etc/config.json';
+import { title } from '../../etc/config';
 import style from '../../style/header.less';
 
 const messages = defineMessages({

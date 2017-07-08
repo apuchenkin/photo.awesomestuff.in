@@ -2,7 +2,8 @@ import webpack from 'webpack';
 import merge from 'webpack-merge';
 import AssetsPlugin from 'assets-webpack-plugin';
 import path from 'path';
-
+import presetReact from 'babel-preset-react';
+import presetEnv from 'babel-preset-env';
 import base from './webpack.config.base.babel';
 
 const isDevelopment = env => env === 'development';
@@ -44,19 +45,19 @@ module.exports = env => merge(base(env), {
           // https://babeljs.io/docs/usage/options/
           babelrc: false,
           presets: [
-            'react',
-            ["env", {
+            presetReact,
+            presetEnv({
               "targets": {
                 "node": "current"
               },
               useBuiltIns: true,
-            }]
+            }),
           ],
           plugins: [
-            'transform-runtime',
-            'transform-object-rest-spread',
+            require('babel-plugin-transform-runtime'),
+            require('babel-plugin-transform-object-rest-spread'),
             ...isDevelopment(env) ? [] : [
-              'transform-react-constant-elements',
+              require('babel-plugin-transform-react-constant-elements'),
             ],
           ],
         },

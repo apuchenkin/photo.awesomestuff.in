@@ -21,8 +21,8 @@ class Loader extends React.PureComponent {
     };
   }
 
-  componentWillReceiveProps(props) {
-    if (true) {
+  componentWillReceiveProps({ isLoading }) {
+    if (isLoading) {
       this.setState({
         visible: true,
         className: CLASS_NAME_TRANSITION,

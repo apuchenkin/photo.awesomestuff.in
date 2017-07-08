@@ -3,6 +3,8 @@ import merge from 'webpack-merge';
 import AssetsPlugin from 'assets-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import path from 'path';
+import presetReact from 'babel-preset-react';
+import presetEnv from 'babel-preset-env';
 
 import base from './webpack.config.base.babel';
 
@@ -11,12 +13,16 @@ const isDevelopment = env => env === 'development';
 const GLOBALS = DEBUG => ({
   'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
   'process.env.BROWSER': true,
+  'process.env.ANALYTICS': JSON.stringify(process.env.ANALYTICS),
+  'process.env.HOSTNAME': JSON.stringify(process.env.HOSTNAME),
+  'process.env.STATIC_ENDPOINT': JSON.stringify(process.env.STATIC_ENDPOINT),
+  'process.env.API_ENDPOINT': JSON.stringify(process.env.API_ENDPOINT),
   __DEV__: DEBUG,
   isBrowser: true,
 });
 
 module.exports = env => merge(base(env), {
-  entry: ['babel-polyfill', './client.js'],
+  entry: './client.js',
 
   output: {
     path: path.resolve(__dirname, '../dist/assets'),
@@ -31,29 +37,30 @@ module.exports = env => merge(base(env), {
         test: /\.jsx?$/,
         include: [
           path.resolve(__dirname, '../src'),
-          path.resolve(__dirname, '../lib'),
+          path.resolve(__dirname, '../../common'),
         ],
         loader: 'babel-loader',
         options: {
           cacheDirectory: isDevelopment(env),
           babelrc: false,
           presets: [
-            'react',
-            isDevelopment
-              ? 'env'
-              : ["env", {
+            presetReact,
+            presetEnv(isDevelopment
+              ? null
+              : {
                   "targets": {
                     "browsers": ["last 2 versions"]
                   },
                   useBuiltIns: true,
                   modules: false,
-                }],
+                }
+            )
           ],
           plugins: [
-            'transform-runtime',
-            'transform-object-rest-spread',
+            require('babel-plugin-transform-runtime'),
+            require('babel-plugin-transform-object-rest-spread'),
             ...isDevelopment(env) ? [] : [
-              'transform-react-constant-elements',
+              require('babel-plugin-transform-react-constant-elements'),
             ],
           ],
         },
