@@ -55,8 +55,19 @@ export default async function configureStore(historyProtocol, initialState, intl
   const pageService = new PageService(defaults);
   const photoService = new PhotoService(defaults);
 
-  const pages = (page && page.pages) || await pageService.fetchPages();
-  const categories = (category && category.categories) || await categoryService.fetchCategories();
+  const pages = (page && page.pages)
+    || await pageService.fetchPages().catch((e) => {
+      console.log('error fetchPages', e);
+      return [];
+    });
+
+  const categories = (category && category.categories)
+    || await categoryService.fetchCategories().catch((e) => {
+      console.log('error fetchPages', e);
+      return [];
+    });
+
+    console.log(pages, categories);
 
   const initial = Object.assign(initialState, {
     page: { ...initialState.page, pages },

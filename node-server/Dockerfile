@@ -14,6 +14,7 @@ ENV PORT 3000
 RUN yarn install --production
 RUN npm rm yarn -g
 RUN npm i pm2 -g
+RUN chmod +x ./scripts/wait.sh
 
 VOLUME /static
 EXPOSE 3000

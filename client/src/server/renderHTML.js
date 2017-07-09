@@ -5,7 +5,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import escapeHtml from 'escape-html';
 import assets from '../../dist/assets.json';
-
+import favicon from '../assets/favicon.ico';
 import style from '../style/style.less';
 
 const GoogleAnalytics = ({ id }) => (
@@ -37,6 +37,7 @@ function renderHTML({ markup, initialState, meta, styles }) {
         <meta name="viewport" content="width=device-width" />
         <link href="http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400" rel="stylesheet" type="text/css" />
         <style type="text/css" dangerouslySetInnerHTML={{ __html: styles }} />
+        <link rel="shortcut icon" href={favicon} type="image/ico" />
         { meta.links }
       </head>
       <body>

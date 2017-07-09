@@ -23,12 +23,6 @@ export default class BaseService {
   }
 
   static respondJSON(response) {
-    if (!response.ok) {
-      const error = new Error(response.statusText);
-      error.response = response;
-      throw error;
-    }
-
     return response.json();
   }
 
@@ -42,6 +36,15 @@ export default class BaseService {
         this.headers[key] ? Object.assign(acc, {
           [key]: this.headers[key],
         }) : acc), {}),
-    }, options));
+    }, options))
+      .then(response => {
+        if (!response.ok) {
+          const error = new Error(response.statusText);
+          error.response = response;
+          throw error;
+        }
+
+        return response;
+      });
   }
 }
