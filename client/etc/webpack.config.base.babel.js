@@ -9,6 +9,7 @@ module.exports = env => ({
   resolve: {
     extensions: ['*', '.js', '.css', '.html'],
     modules: [
+      'node_modules',
       path.resolve(__dirname, '..', 'node_modules'),
     ],
   },

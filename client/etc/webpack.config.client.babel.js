@@ -83,6 +83,7 @@ module.exports = env => merge(base(env), {
   ]).concat(isDevelopment(env) ? [] : [
     new webpack.optimize.UglifyJsPlugin({
       beautify: false,
+      sourceMap: !isDevelopment(env),
       mangle: {
         screw_ie8: true,
         keep_fnames: true
@@ -101,5 +102,5 @@ module.exports = env => merge(base(env), {
       minRatio: 0.8
     })
   ]),
-  devtool: isDevelopment(env) ? 'eval' : false,
+  devtool: isDevelopment(env) ? 'eval' : 'source-map',
 });

@@ -10,7 +10,7 @@
     "test": "test"
   },
   "scripts": {
-    "build:client": "webpack -p --env=production --config ./etc/webpack.config.client.babel.js",
+    "build:client": "webpack --env=production --config ./etc/webpack.config.client.babel.js",
     "build:server": "webpack --env=production --config ./etc/webpack.config.server.babel.js",
     "serve:client": "webpack --env=development --config ./etc/webpack.config.client.babel.js --watch",
     "serve:server": "webpack --env=development --config ./etc/webpack.config.server.babel.js --watch",
