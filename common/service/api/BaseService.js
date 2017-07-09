@@ -4,6 +4,11 @@ const defaults = {
   contentType: 'application/json',
 };
 
+const locales = {
+  'ru': 'ru-RU',
+  'en': 'en-US',
+};
+
 export default class BaseService {
 
   constructor(options = {}) {
@@ -11,7 +16,7 @@ export default class BaseService {
 
     this.headers = {
       'Content-Type': this.contentType,
-      'Accept-Language': this.locale,
+      'Accept-Language': this.locale && locales[this.locale],
       Authorization: this.token,
       Accept: this.contentType,
     };

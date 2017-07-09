@@ -5,9 +5,9 @@ services:
     image: nginx
     depends_on:
       - admin
+      - client
       - api
       - static
-      - client
     volumes:
       - admin:/srv/admin:ro
       - client:/srv/client:ro
@@ -15,6 +15,10 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    networks:
+      default:
+        aliases:
+          - nginx
 
   admin:
     build:
@@ -34,8 +38,6 @@ services:
     restart: always
     volumes:
       - static:/static
-    ports:
-      - "3000:3000"
     environment:
       DB_HOST: db
       DB_PORT: 3306
@@ -43,6 +45,10 @@ services:
       DB_PASSWORD: aws-photo
       STATIC_DIR: /static
     entrypoint: ./scripts/wait.sh node dist/app.js
+    networks:
+      default:
+        aliases:
+          - api
 
   db:
     image: mysql
@@ -54,6 +60,10 @@ services:
       MYSQL_DATABASE: aws-photo
       MYSQL_USER: aws-photo
       MYSQL_PASSWORD: aws-photo
+    networks:
+      default:
+        aliases:
+          - db
 
   static:
     build:
@@ -64,6 +74,10 @@ services:
       - static:/static:ro
     environment:
       STATIC_DIR: /static
+    networks:
+      default:
+        aliases:
+          - static
 
   client:
     depends_on:
@@ -80,9 +94,14 @@ services:
     volumes:
       - client:/srv/client/dist/static
     environment:
+      # API_ENDPOINT: http://nginx:8080/api/v1
       API_ENDPOINT: http://api:3000
-      STATIC_ENDPOINT: http://static:3000
+      STATIC_ENDPOINT: /static
       HOSTNAME: http://localhost:8080
+    networks:
+      default:
+        aliases:
+          - client
 
 volumes:
   db_data:

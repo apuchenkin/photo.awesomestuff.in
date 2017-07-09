@@ -8,13 +8,6 @@ import base from './webpack.config.base.babel';
 
 const isDevelopment = env => env === 'development';
 
-const GLOBALS = DEBUG => ({
-  'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
-  'process.env.BROWSER': false,
-  __DEV__: DEBUG,
-  isBrowser: false,
-});
-
 module.exports = env => merge(base(env), {
   entry: ['babel-polyfill', './server.js'],
   target: 'node',
@@ -66,9 +59,14 @@ module.exports = env => merge(base(env), {
   },
 
   plugins: [
-    // Define free variables
-    // https://webpack.github.io/docs/list-of-plugins.html#defineplugin
-    new webpack.DefinePlugin(GLOBALS(isDevelopment(env))),
+    new webpack.DefinePlugin({
+      __DEV__: isDevelopment(env),
+      isBrowser: false,
+    }),
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: JSON.stringify(isDevelopment(env) ? 'development' : 'production'),
+      BROWSER: false,
+    }),
   ],
 
   node: {

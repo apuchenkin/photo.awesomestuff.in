@@ -11,7 +11,7 @@ import ruLocaleData from 'react-intl/locale-data/ru';
 import configureStore from './store/configureStore';
 import WithStylesContext from './components/WithStylesContext';
 import { clientRender as render } from './render';
-
+import config from './etc/config';
 
 // eslint-disable-next-line import/first
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
@@ -39,6 +39,7 @@ function onInsertCss(...styles) {
     locale,
     messages,
   }, {});
+  initialState.runtime.config = config;
   const { intl } = intlProvider.getChildContext();
   const store = await configureStore(new BrowserProtocol(), initialState, intl);
   const matchContext = { store, intl };

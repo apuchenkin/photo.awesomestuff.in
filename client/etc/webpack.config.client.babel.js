@@ -10,17 +10,6 @@ import base from './webpack.config.base.babel';
 
 const isDevelopment = env => env === 'development';
 
-const GLOBALS = DEBUG => ({
-  'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'development' : 'production'),
-  'process.env.BROWSER': true,
-  'process.env.ANALYTICS': JSON.stringify(process.env.ANALYTICS),
-  'process.env.HOSTNAME': JSON.stringify(process.env.HOSTNAME),
-  'process.env.STATIC_ENDPOINT': JSON.stringify(process.env.STATIC_ENDPOINT),
-  'process.env.API_ENDPOINT': JSON.stringify(process.env.API_ENDPOINT),
-  __DEV__: DEBUG,
-  isBrowser: true,
-});
-
 module.exports = env => merge(base(env), {
   entry: './client.js',
 
@@ -67,18 +56,22 @@ module.exports = env => merge(base(env), {
       },
     ],
   },
-
   plugins: ([
-    // Define free variables
-    // https://webpack.github.io/docs/list-of-plugins.html#defineplugin
-    new webpack.DefinePlugin(GLOBALS(isDevelopment(env))),
-
-    // Emit a file with assets paths
-    // https://github.com/sporto/assets-webpack-plugin#options
+    new webpack.DefinePlugin({
+      __DEV__: isDevelopment(env),
+      isBrowser: true,
+    }),
+    new webpack.EnvironmentPlugin({
+      BROWSER: true,
+      NODE_ENV: JSON.stringify(isDevelopment(env) ? 'development' : 'production'),
+      ANALYTICS: JSON.stringify(process.env.ANALYTICS),
+      HOSTNAME: JSON.stringify(process.env.HOSTNAME),
+      STATIC_ENDPOINT: JSON.stringify(process.env.STATIC_ENDPOINT),
+      API_ENDPOINT: JSON.stringify(process.env.API_ENDPOINT),
+    }),
     new AssetsPlugin({
       path: path.resolve(__dirname, '../dist'),
       filename: 'assets.json',
-      // processOutput: x => `module.exports = ${JSON.stringify(x)};`,
     }),
   ]).concat(isDevelopment(env) ? [] : [
     new webpack.optimize.UglifyJsPlugin({
