@@ -4,7 +4,6 @@ COPY ./admin /srv/admin
 COPY ./common /srv/common
 COPY ./client /srv/client
 WORKDIR /srv/admin
-VOLUME /srv/admin/dist
 
 ARG BASENAME
 ARG API_ENDPOINT
@@ -20,3 +19,4 @@ ENV NODE_ENV production
 RUN yarn run build
 RUN yarn install --production
 RUN npm rm yarn -g
+VOLUME /srv/admin/dist

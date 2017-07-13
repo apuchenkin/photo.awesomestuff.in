@@ -16,7 +16,6 @@ EXPOSE 3000
 COPY ./client /srv/client
 COPY ./common /srv/common
 WORKDIR /srv/client
-VOLUME /srv/client/dist/assets
 
 RUN npm i yarn -g
 RUN yarn install
@@ -25,5 +24,6 @@ RUN yarn run build
 RUN yarn install --production
 RUN npm rm yarn -g
 
+VOLUME /srv/client/dist/assets
 RUN npm i pm2 -g
 ENTRYPOINT ["pm2-docker", "dist/server.js"]
