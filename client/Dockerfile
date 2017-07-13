@@ -16,7 +16,7 @@ EXPOSE 3000
 COPY ./client /srv/client
 COPY ./common /srv/common
 WORKDIR /srv/client
-VOLUME /srv/client/dist/static
+VOLUME /srv/client/dist/assets
 
 RUN npm i yarn -g
 RUN yarn install

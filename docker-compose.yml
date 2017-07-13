@@ -93,7 +93,7 @@ services:
         STATIC_ENDPOINT: /static
     restart: always
     volumes:
-      - client:/srv/client/dist/static
+      - client:/srv/client/dist/assets
     environment:
       API_ENDPOINT: http://nginx/api/v1
       STATIC_ENDPOINT: /static
