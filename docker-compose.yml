@@ -14,7 +14,7 @@ services:
       - ./etc/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: always
     ports:
-      - "8080:8080"
+      - "${EXTERNAL_PORT:-80}:80"
     networks:
       default:
         aliases:
@@ -88,17 +88,16 @@ services:
       context: .
       dockerfile: ./client/Dockerfile
       args:
-        HOSTNAME: http://localhost:8080
+        HOSTNAME: ${HOSTNAME:-http://localhost}
         API_ENDPOINT: /api/v1
         STATIC_ENDPOINT: /static
     restart: always
     volumes:
       - client:/srv/client/dist/static
     environment:
-      # API_ENDPOINT: http://nginx:8080/api/v1
-      API_ENDPOINT: http://api:3000
+      API_ENDPOINT: http://nginx/api/v1
       STATIC_ENDPOINT: /static
-      HOSTNAME: http://localhost:8080
+      HOSTNAME: ${HOSTNAME:-http://localhost}
     networks:
       default:
         aliases:
