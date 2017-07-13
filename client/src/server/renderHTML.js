@@ -35,7 +35,6 @@ function renderHTML({ markup, initialState, meta, styles }) {
         <title>{escapeHtml(meta.title)}</title>
         <meta name="description" content={escapeHtml(meta.description)} />
         <meta name="viewport" content="width=device-width" />
-        <link href="http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400" rel="stylesheet" type="text/css" />
         <style type="text/css" dangerouslySetInnerHTML={{ __html: styles }} />
         <link rel="shortcut icon" href={favicon} type="image/ico" />
         { meta.links }
@@ -49,6 +48,7 @@ function renderHTML({ markup, initialState, meta, styles }) {
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
         <script type="application/javascript" src={`${config.hostname}${assets.main.js}`} />
+        <link href="http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400" rel="stylesheet" type="text/css" />
       </body>
     </html>
   );
