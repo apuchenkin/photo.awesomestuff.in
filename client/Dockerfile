@@ -24,6 +24,5 @@ RUN yarn run build
 RUN yarn install --production
 RUN npm rm yarn -g
 
-VOLUME /srv/client/dist/assets
 RUN npm i pm2 -g
 ENTRYPOINT ["pm2-docker", "dist/server.js"]

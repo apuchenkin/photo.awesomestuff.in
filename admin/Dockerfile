@@ -19,4 +19,3 @@ ENV NODE_ENV production
 RUN yarn run build
 RUN yarn install --production
 RUN npm rm yarn -g
-VOLUME /srv/admin/dist

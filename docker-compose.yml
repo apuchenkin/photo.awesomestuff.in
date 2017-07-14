@@ -9,8 +9,8 @@ services:
       - api
       - static
     volumes:
-      - admin:/srv/admin:ro
-      - client:/srv/client:ro
+      - ./dist/admin:/srv/admin:ro
+      - ./dist/client:/srv/client:ro
       - ./etc/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: always
     ports:
@@ -28,8 +28,6 @@ services:
         BASENAME: /admin
         API_ENDPOINT: /api/v1
         STATIC_ENDPOINT: /static
-    volumes:
-      - admin:/srv/admin/dist
 
   api:
     depends_on:
@@ -92,8 +90,6 @@ services:
         API_ENDPOINT: /api/v1
         STATIC_ENDPOINT: /static
     restart: always
-    volumes:
-      - client:/srv/client/dist/assets
     environment:
       API_ENDPOINT: http://nginx/api/v1
       STATIC_ENDPOINT: /static
@@ -106,5 +102,3 @@ services:
 volumes:
   db_data:
   static:
-  admin:
-  client:
