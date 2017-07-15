@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { FormattedDate } from 'react-intl';
 import { shape, arrayOf, string, number } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -18,7 +19,13 @@ const Gallery = ({ category, childs, width, height }) => (
         title={category.title}
         alt={category.title}
       />
-      {category.date && <span className={style.sub}>{category.date}</span>}
+      {category.date && <span className={style.sub}>
+        <FormattedDate
+          value={category.date}
+          year="numeric"
+          month="long"
+        />
+      </span>}
     </CategoryLink>
     <aside>
       <h3>
