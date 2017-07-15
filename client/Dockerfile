@@ -17,12 +17,10 @@ COPY ./client /srv/client
 COPY ./common /srv/common
 WORKDIR /srv/client
 
-RUN npm i yarn -g
 RUN yarn install
 ENV NODE_ENV production
 RUN yarn run build
 RUN yarn install --production
-RUN npm rm yarn -g
 
 RUN npm i pm2 -g
 ENTRYPOINT ["pm2-docker", "dist/server.js"]

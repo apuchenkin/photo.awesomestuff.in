@@ -9,13 +9,11 @@ COPY ./static-server /srv/app
 COPY ./common /srv/common
 WORKDIR /srv/app
 
-RUN npm i yarn -g
 RUN yarn install
 RUN yarn run build
 ENV NODE_ENV production
 ENV PORT 3000
 RUN yarn install --production
-RUN npm rm yarn -g
 RUN npm i pm2 -g
 
 VOLUME /static
