@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "r00t",
+    "password": "aws-photo",
     "database": "aws-photo",
     "host": "127.0.0.1",
     "port": 3306,

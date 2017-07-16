@@ -5,6 +5,8 @@
   "author": "Puchenkin Artem",
   "license": "MIT",
   "scripts": {
+    "db:start": "docker run --name mysql-aws -e MYSQL_ROOT_PASSWORD=aws-photo -e MYSQL_DATABASE=aws-photo -d -p 3306:3306 mysql",
+    "db:stop": "docker rm -f mysql-aws",
     "serve": "nodemon src/app.js --exec babel-node",
     "build": "babel src -d dist"
   },
@@ -12,7 +14,8 @@
     "accept-language": "^3.0.16",
     "basic-auth": "^1.1.0",
     "content-disposition": "^0.5.2",
-    "exif-parser": "^0.1.9",
+    "exif": "^0.6.0",
+    "image-size": "^0.6.0",
     "koa": "^2.2.0",
     "koa-body": "^2.0.1",
     "koa-cache-control": "^2.0.0",

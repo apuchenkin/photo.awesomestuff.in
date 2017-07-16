@@ -108,26 +108,6 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}`);
 });
 
-// db.sync({ force: true })
-//   .then(() => User.create({
-//     email: 'apuchenkin@gmail.com',
-//     password: 'root',
-//   }))
-//   .then(() => Category.create({
-//     name: 'test',
-//   }).then((category) => {
-//     category.createTranslation({
-//       field: 'title',
-//       value: 'RUTEST',
-//       language: LANG_RU,
-//     });
-//     category.createTranslation({
-//       field: 'title',
-//       value: 'ENTEST',
-//       language: LANG_EN,
-//     });
-//   }));
-
 sequelize.sync();
 
 app.context.db = sequelize;

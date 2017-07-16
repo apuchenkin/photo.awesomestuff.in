@@ -1,38 +1,14 @@
-// import { PassThrough } from 'stream';
-// import through from 'through';
-import exif from 'exif-parser';
 import body from 'koa-body';
 import Router from 'koa-router';
-// import contentDisposition from 'content-disposition';
 import fs from 'fs';
 import path from 'path';
 import mkdirp from 'mkdirp';
+import { ExifImage } from 'exif/lib/exif/ExifImage';
+import sizeOf from 'image-size';
 import config from '../../etc/config';
 
 import Category from '../model/category';
 import Photo from '../model/photo';
-
-// const checkImage = (ctx) => {
-//   if (!ctx.is('image/*')) {
-//     ctx.throw(415, 'images only!');
-//   }
-// };
-
-// const getFilename = (ctx) => {
-//   const header = ctx.get('Content-Disposition');
-//
-//   if (!header) {
-//     ctx.thow(400, '"Content-Disposition" header missed');
-//   }
-//   const result = contentDisposition.parse(header);
-//   const filename = result.parameters && result.parameters.filename;
-//
-//   if (!filename) {
-//     ctx.thow(400, 'filename missed');
-//   }
-//
-//   return filename;
-// };
 
 const mkdir = fullName => new Promise((resolve, reject) => {
   mkdirp(path.dirname(fullName), (err) => {
@@ -43,8 +19,6 @@ const mkdir = fullName => new Promise((resolve, reject) => {
   });
 });
 
-// const sse = (event, data) => data;// `event:${event}\ndata: ${data}\n\n`;
-//
 const readBody = async (inputStream) => {
   const data = [];
 
@@ -52,7 +26,6 @@ const readBody = async (inputStream) => {
     inputStream.on('error', reject);
     inputStream.on('data', (chunk) => {
       data.push(chunk);
-      // outputStream.write(sse('progress', `${(Buffer.concat(data).length * 100) / length}\n`));
     });
     inputStream.on('end', () => {
       resolve(Buffer.concat(data));
@@ -62,22 +35,26 @@ const readBody = async (inputStream) => {
   return promise;
 };
 
-// body
+const readExif = buffer => new Promise((resolve, reject) => {
+  try {
+    ExifImage(buffer, (error, exifData) => (
+      error
+        ? reject(error.message)
+        : resolve(exifData)
+    ));
+  } catch (error) {
+    reject(error.message);
+  }
+});
+
+const parseDate = (datetime) => {
+  const [date, time] = datetime.split(' ');
+  const [YYYY, MM, DD] = date.split(':');
+
+  return new Date(YYYY, MM - 1, DD, ...time.split(':'));
+};
 
 const upload = async (ctx) => {
-  // checkImage(ctx);
-  // const filename = getFilename(ctx);
-  // const stream = through();
-  //
-  // ctx.req.on('close', ctx.res.end);
-  // ctx.req.on('finish', ctx.res.end);
-  // ctx.req.on('error', ctx.res.end);
-
-  // console.log(ctx.request.body.fields);
-  // console.log(ctx.request.body.files);
-
-  // const data = [];
-
   const file = ctx.request.body.files.file;
   const src = path.join(ctx.params.category, file.name);
   const fullName = path.resolve(config.static, src);
@@ -87,32 +64,25 @@ const upload = async (ctx) => {
   const stream = fs.createWriteStream(fullName);
   reader.pipe(stream);
 
-  // reader.on('data', (chunk) => {
-  //   data.push(chunk);
-  // });
-  // reader.on('end', () => {
-  //   const buffer = Buffer.concat(data);
-  // });
-
   await readBody(reader)
     .then(async (buffer) => {
-      const exifData = exif.create(buffer).parse();
-
+      const exif = await readExif(buffer);
+      const { width, height } = sizeOf(buffer);
+      const datetime = parseDate(exif.exif.CreateDate);
       const category = await Category.findOne({
         where: { name: ctx.params.category },
       });
 
       const photoData = {
         name: file.name,
-        width: exifData.imageSize.width,
-        height: exifData.imageSize.height,
-        exif: JSON.stringify(exifData),
-        datetime: new Date(exifData.tags.CreateDate * 1000),
+        width,
+        height,
+        datetime,
         src,
+        exif: JSON.stringify(exif),
       };
 
       await ctx.db.transaction(async (transaction) => {
-        // await writeFile(fullName, buffer);
         const photo = await Photo.create(photoData, {
           validate: true,
           transaction,
@@ -120,47 +90,10 @@ const upload = async (ctx) => {
 
         await photo.addCategory(category, { transaction });
       });
-
-      // stream.end(sse('end', 'ok'));
     })
     .catch(ctx.onerror);
 
   ctx.body = null;
-
-  // readBody(ctx.request.length)(ctx.req, stream)
-  //   .then(async (buffer) => {
-  //     const exifData = exif.create(buffer).parse();
-  //     const src = path.join(ctx.params.category, filename);
-  //     const fullName = path.resolve(config.static, src);
-  //     const category = await Category.findOne({
-  //       where: { name: ctx.params.category },
-  //     });
-  //
-  //     const photoData = {
-  //       name: filename,
-  //       width: exifData.imageSize.width,
-  //       height: exifData.imageSize.height,
-  //       exif: JSON.stringify(exifData),
-  //       datetime: new Date(exifData.tags.CreateDate * 1000),
-  //       src,
-  //     };
-  //
-  //     await ctx.db.transaction(async (t) => {
-  //       await writeFile(fullName, buffer);
-  //       const photo = await Photo.create(photoData, {
-  //         validate: true,
-  //         transaction: t,
-  //       });
-  //
-  //       await photo.addCategory(category, { transaction: t });
-  //     });
-  //
-  //     stream.end(sse('end', 'ok'));
-  //   })
-  //   .catch((error) => {
-  //     // ctx.onerror(error);
-  //     stream.end(sse('end', `error: ${error}`));
-  //   });
 };
 
 
