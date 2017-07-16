@@ -13,7 +13,12 @@ const toPublic = language => (photo) => {
 };
 
 const findAll = (category, authorized, language) => category
-  .getPhotos({ scope: ['translations', authorized ? null : { method: ['public', language] }].filter(Boolean) });
+  .getPhotos({
+    scope: ['translations', authorized ? null : { method: ['public', language] }].filter(Boolean),
+    order: [
+      ['datetime', 'ASC'],
+    ],
+  });
 
 const getById = (id, authorized, language) => Photo
   .scope(['translations', authorized ? null : { method: ['public', language] }].filter(Boolean))

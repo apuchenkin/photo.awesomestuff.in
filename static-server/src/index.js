@@ -52,9 +52,9 @@ const checkParams = (req, res, next) => {
   }
 
   Object.assign(req.params, {
-    width: parseInt(req.params.width, 10),
-    height: parseInt(req.params.height, 10),
-    thumb: req.url.split('/').filter(x => !!x)[0] === 'rt',
+    width: Number(req.params.width),
+    height: Number(req.params.height),
+    thumb: req.url.split('/').filter(Boolean)[0] === 'rt',
   });
 
   Object.assign(req, {
@@ -90,10 +90,10 @@ const serveImage = (req, res, next) => {
     { width, height, thumb, webp } = req.params,
     [w, h] = photo.adjust(width, height),
     conf = thumb ? (config.thumb && config.thumb.opts) : config.opts,
-    opts = conf && {
+    opts = Object.assign({
       kernel: sharp.kernel[conf.kernel],
       interpolator: sharp.interpolator[conf.interpolator],
-    },
+    }, conf),
     ext = path.extname(req.url),
     basename = path.basename(req.url);
 

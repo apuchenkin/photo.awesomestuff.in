@@ -65,7 +65,7 @@ const getSrc = (...args) => [
 
 class Photo extends React.Component {
   render() {
-    const { photo, parent, group, match, featured } = this.props;
+    const { photo, parent, group, match, featured, history } = this.props;
 
     // These two props are injected by React DnD,
     // as defined by your `collect` function above:
@@ -87,7 +87,7 @@ class Photo extends React.Component {
           isHidden: photo.hidden,
         })}
         onClick={e => parent.select(photo, e.ctrlKey)}
-        onDoubleClick={() => console.log(photo)}
+        onDoubleClick={() => history.push(`${match.url}/${photo.id}/translation`)}
         role="presentation"
       >
         <div className="views">{photo.views}</div>
@@ -99,7 +99,17 @@ class Photo extends React.Component {
         {featured && <div className="featured material-icons">star</div>}
         {photo.hasParent && <div className="parent" />}
         {photo.group && <Group color={group} onClick={() => parent.ungroup(photo)} />}
-        <img alt={photo.name} src={getSrc(photo.src, 200, 200, true)} />
+        <div
+          alt={photo.name}
+          style={{
+            width: 150,
+            height: 150,
+            backgroundImage: `url(${getSrc(photo.src, 200, 200, true)})`,
+            backgroundPosition: 'center center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
       </div>,
     ));
   }

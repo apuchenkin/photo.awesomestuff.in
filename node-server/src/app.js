@@ -11,7 +11,6 @@ import { ValidationError } from 'sequelize';
 import { sequelize } from './model';
 
 import User from './model/user';
-// import Category from './model/category';
 
 import pageRouter from './handler/page';
 import categoryRouter from './handler/category';
