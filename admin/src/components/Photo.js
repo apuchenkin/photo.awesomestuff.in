@@ -100,6 +100,7 @@ class Photo extends React.Component {
         {photo.hasParent && <div className="parent" />}
         {photo.group && <Group color={group} onClick={() => parent.ungroup(photo)} />}
         <div
+          className="img"
           alt={photo.name}
           style={{
             width: 150,
