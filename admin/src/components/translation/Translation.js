@@ -3,6 +3,7 @@ import React from 'react';
 class Translations extends React.PureComponent {
   constructor(props) {
     super(props);
+    console.log(props.translation);
 
     this.state = {
       edit: false,
@@ -38,9 +39,9 @@ class Translations extends React.PureComponent {
     const { edit } = this.state;
 
     return (
-      <tr>
-        <td>{translation.language}</td>
-        <td>{translation.field}</td>
+      <tr className={translation.value ? '' : 'error'}>
+        <td width="30">{translation.language}</td>
+        <td width="50">{translation.field}</td>
         <td>{edit
           ? <input
             ref={(input) => { this.input = input; }}
@@ -50,7 +51,7 @@ class Translations extends React.PureComponent {
           />
           : translation.value}
         </td>
-        <td>
+        <td width="130">
           {edit
           ? ([
             <button key="submit" onClick={this.submit}>
@@ -60,14 +61,16 @@ class Translations extends React.PureComponent {
               Cancel
             </button>,
           ])
-          : (
-            <button className="material-icons" onClick={this.toggleEdit}>
+          : ([
+            <button key="edit" className="material-icons" onClick={this.toggleEdit}>
               mode_edit
-            </button>
-          )}
-          <button className="material-icons" onClick={() => remove(translation)}>
-            clear
-          </button>
+            </button>,
+            translation.id && (
+              <button key="remove" className="material-icons" onClick={() => remove(translation)}>
+                clear
+              </button>
+            ),
+          ])}
         </td>
       </tr>
     );

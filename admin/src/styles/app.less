@@ -328,3 +328,37 @@ form.create {
     }
   }
 }
+
+.translation {
+  .content {
+    position: relative;
+      .translations {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        background-color: rgba(0, 0, 0, 0.3);
+        color: white;
+        padding: 10px;
+        width: 100%;
+
+        table {
+          width: 900px;
+
+          input {
+            width: 100%;
+          }
+
+          input,button {
+            float: none;
+            margin-right: 4px;
+            display: inline-block;
+            vertical-align: middle;
+          }
+
+          .error {
+            color: red;
+          }
+        }
+      }
+  }
+}

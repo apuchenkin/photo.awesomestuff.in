@@ -12,7 +12,7 @@ import {
   remove as removeTranslation,
 } from '../../store/translation/actions';
 
-const FIELDS = ['title'];
+const FIELDS = ['description'];
 
 const getSrc = (...args) => [
   config.staticEndpoint,
@@ -43,6 +43,7 @@ class PhotoTranslations extends React.PureComponent {
 
     return (
       <Translations
+        entity="photo"
         translations={translations}
         create={create(photo)}
         update={update}
@@ -64,9 +65,7 @@ export default connect(
   dispatch => ({
     load: photo => dispatch(loadTranslations({ refType: 'photo', refId: photo.id })),
     create: photo => translation => dispatch(createTranslations(Object.assign({}, translation, {
-      refType: 'photo',
       refId: photo.id,
-      field: 'description',
     }))),
     update: (translation, data) => dispatch(updateTranslation(translation, data)),
     remove: translation => dispatch(removeTranslation(translation)),

@@ -36,6 +36,7 @@ class CategoryTranslations extends React.PureComponent {
 
     return (
       <Translations
+        entity="category"
         translations={translations}
         create={create(category)}
         update={update}
@@ -58,9 +59,7 @@ export default connect(
   dispatch => ({
     load: category => dispatch(loadTranslations({ refType: 'category', refId: category.id })),
     create: category => translation => dispatch(createTranslations(Object.assign({}, translation, {
-      refType: 'category',
       refId: category.id,
-      field: 'title',
     }))),
     update: (translation, data) => dispatch(updateTranslation(translation, data)),
     remove: translation => dispatch(removeTranslation(translation)),

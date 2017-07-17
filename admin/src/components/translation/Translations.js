@@ -6,17 +6,6 @@ import Translation from './Translation';
 
 const langs = ['ru', 'en'];
 
-const addForm = ctx => (
-  <form className="create" onSubmit={ctx.submit}>
-    <select name="language">
-      {langs.map(lang => <option key={lang} value={lang}>{lang}</option>)}
-    </select>
-    <input name="value" />
-    <input type="submit" value="Submit" />
-    <button onClick={ctx.cancel}>Cancel</button>
-  </form>
-);
-
 const AddButton = ({ handler, add }) => (
   <i
     role="button"
@@ -36,32 +25,8 @@ class Translations extends React.PureComponent {
       add: false,
     };
 
-    this.toggleCreate = this.toggleCreate.bind(this);
-    this.cancel = this.cancel.bind(this);
-    this.submit = this.submit.bind(this);
     this.remove = this.remove.bind(this);
     this.update = this.update.bind(this);
-  }
-
-  toggleCreate() {
-    this.setState((state => ({ add: !state.add })));
-  }
-
-  cancel() {
-    this.setState({ add: false });
-  }
-
-  submit(e) {
-    e.preventDefault();
-    const data = new FormData(e.target);
-
-    this.props.create({
-      language: data.get('language'),
-      value: data.get('value'),
-      field: data.get('field'),
-    });
-
-    this.cancel();
   }
 
   remove(translation) {
@@ -72,21 +37,14 @@ class Translations extends React.PureComponent {
   }
 
   update(translation, data) {
-    return this.props.update(translation, data);
+    return translation.id
+      ? this.props.update(translation, data)
+      : this.props.create(Object.assign(translation, data))
+    ;
   }
 
   render() {
-    const { backUrl, title, translations, children } = this.props;
-    const { add } = this.state;
-
-    const translationsCmp = translations.map(translation => (
-      <Translation
-        key={translation.id}
-        update={this.update}
-        remove={this.remove}
-        translation={translation}
-      />
-    ));
+    const { backUrl, title, translations, children, fields, entity } = this.props;
 
     return (
       <div className="translation">
@@ -102,13 +60,33 @@ class Translations extends React.PureComponent {
           </div>
         </div>
         <div className="content">
-          { add && addForm(this)}
           { children }
-          <table>
-            <tbody>
-              { translationsCmp }
-            </tbody>
-          </table>
+          <div className="translations">
+            <table>
+              <tbody>
+                {fields.map(field => (langs.map((language) => {
+                  const translation = translations.find(t =>
+                    t.field === field &&
+                    t.refType === entity &&
+                    t.language === language,
+                  ) || {
+                    field,
+                    language,
+                    refType: entity,
+                  };
+
+                  return (
+                    <Translation
+                      key={`${field}-${language}`}
+                      update={this.update}
+                      remove={this.remove}
+                      translation={translation}
+                    />
+                  );
+                })))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     );
