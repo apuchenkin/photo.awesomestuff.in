@@ -8,6 +8,7 @@ import Link from 'found/lib/Link';
 import Close from './icons/close';
 import utils from '../../lib/utils';
 import Img from './img';
+import { setRuntimeVariable } from '../../store/runtime/actions';
 
 import style from './photo.less';
 
@@ -33,16 +34,25 @@ const messages = defineMessages({
 
 class Figure extends React.PureComponent {
 
+  static getDimensions() {
+    return {
+      width: window.innerWidth - 40,
+      height: window.innerHeight - 40,
+    };
+  }
+
   constructor(props) {
     super(props);
 
-    this.width = props.width;
-    this.height = props.height;
-    this.state = {
-      dimensions: this.getDimensions(),
-    };
-    this.getDimensions = this.getDimensions.bind(this);
     this.resize = debounce(this.resize, 175).bind(this);
+  }
+
+  componentWillMount() {
+    const { width, height } = this.props;
+    this.props.setRuntimeVariable('dimensions', {
+      width,
+      height,
+    });
   }
 
   componentDidMount() {
@@ -50,20 +60,18 @@ class Figure extends React.PureComponent {
   }
 
   componentWillUnmount() {
+    this.props.setRuntimeVariable('dimensions', null);
     window.removeEventListener('resize', this.resize);
   }
 
-  getDimensions() {
-    return {
-      width: isBrowser ? window.innerWidth - 40 : this.width,
-      height: isBrowser ? window.innerHeight - 40 : this.height,
-    };
+  componentWillReceiveProps(props) {
+    if (props.photo !== this.props.photo) {
+      this.props.setRuntimeVariable('dimensions', Figure.getDimensions());
+    }
   }
 
   resize() {
-    this.setState({
-      dimensions: this.getDimensions(),
-    });
+    this.props.setRuntimeVariable('dimensions', Figure.getDimensions());
   }
 
   renderTools() {
@@ -95,8 +103,7 @@ class Figure extends React.PureComponent {
   }
 
   render() {
-    const { dimensions: { width, height } } = this.state;
-    const { photo, onClick } = this.props;
+    const { width, height, photo, onClick } = this.props;
     const src = utils.getSrc(photo.src, width, height);
 
     return (
@@ -122,10 +129,13 @@ Figure.propTypes = {
 };
 
 export default connect(
-  state => ({
-    width: state.runtime.config.photo.width,
-    height: state.runtime.config.photo.height,
-  }),
+  ({ runtime: { config, dimensions } }) => (dimensions
+    ? ({ ...dimensions })
+    : (isBrowser ? { ...Figure.getDimensions() } : { ...config.photo })
+  ),
+  {
+    setRuntimeVariable,
+  },
 )(
   withStyles(style)(Figure),
 );

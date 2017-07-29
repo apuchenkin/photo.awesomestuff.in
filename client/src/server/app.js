@@ -45,6 +45,18 @@ const negotiateLocale = req =>
   || config.fallbackLocale
 ;
 
+if (__DEV__) {
+  const proxy = require('http-proxy-middleware');
+  app.use('/api/v1', proxy({
+    target: 'http://photo.awesomestuff.in',
+    changeOrigin: true,
+  }));
+  app.use('/static', proxy({
+    target: 'http://photo.awesomestuff.in',
+    changeOrigin: true,
+  }));
+}
+
 app.use(express.static(path.join(__dirname, 'assets')));
 
 app.use(catchAsyncErrors(async (req, res) => {

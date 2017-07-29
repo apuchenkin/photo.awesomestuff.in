@@ -40,6 +40,7 @@ function onInsertCss(...styles) {
     messages,
   }, {});
   initialState.runtime.config = config;
+
   const { intl } = intlProvider.getChildContext();
   const store = await configureStore(new BrowserProtocol(), initialState, intl);
   const matchContext = { store, intl };

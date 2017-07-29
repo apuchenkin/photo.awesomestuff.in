@@ -9,7 +9,7 @@ class Img extends React.PureComponent {
     super(props);
 
     this.state = {
-      isLoading: !!isBrowser,
+      isLoading: false,
     };
 
     this.createLoader = this.createLoader.bind(this);
