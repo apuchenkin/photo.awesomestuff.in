@@ -1,4 +1,4 @@
-import fetch from 'isomorphic-fetch';
+import fetch from 'unfetch';
 
 const defaults = {
   contentType: 'application/json',

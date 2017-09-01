@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import photoService from 'common/service/photo/memoize';
 
 import Translations from './Translations';
 import config from '../../../etc/config';
-import photoService from '../../../../common/service/photo/memoize';
 
 import {
   load as loadTranslations,

@@ -1,30 +1,26 @@
-import Immutable from 'seamless-immutable';
-
+import R from 'ramda';
 import { LOADED, CREATED, UPDATED, REMOVED, ERROR } from './actions';
+import { loaded, updated, created, removed } from '../util/listReducer';
 
-const initial = Immutable({
-  categories: [],
-});
+const NAMESPACE = 'categories';
 
-const loaded = (state, { categories }) => state.set('categories', Immutable(categories));
-const created = (state, { category }) => state.set('categories', Immutable([...state.categories, category]));
-const updated = (state, { category }) => state.set('categories',
-  state.categories.set(state.categories.findIndex(c => c.id === category.id), category),
-);
-const removed = (state, { category }) =>
-  state.set('categories', Immutable(state.categories.filter(c => c.id !== category.id)));
+const initial = {
+  [NAMESPACE]: [],
+};
 
 const error = (state, action) => {
   console.log(action.error); // eslint-disable-line no-console
   return state;
 };
 
+const equals = c1 => c2 => c1.id === c2.id;
+
 export default (state = initial, action) => {
   const reducer = {
-    [LOADED]: loaded,
-    [CREATED]: created,
-    [UPDATED]: updated,
-    [REMOVED]: removed,
+    [LOADED]: loaded(NAMESPACE)(R.prop('categories')),
+    [CREATED]: created(NAMESPACE)(R.prop('category')),
+    [UPDATED]: updated(NAMESPACE)(R.prop('category'))(equals),
+    [REMOVED]: removed(NAMESPACE)(R.prop('category'))(equals),
     [ERROR]: error,
   }[action.type];
 

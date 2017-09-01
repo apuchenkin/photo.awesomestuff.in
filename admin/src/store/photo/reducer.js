@@ -1,30 +1,29 @@
-import Immutable from 'seamless-immutable';
-import PhotoService from '../../../../common/service/api/Photo';
+import R from 'ramda';
+import PhotoService from 'common/service/api/Photo';
+
+import { loaded, updated } from '../util/listReducer';
 import { LOADED, UPDATED, ERROR } from './actions';
 
-const initial = Immutable({
+const initial = {
   photos: [],
   groups: [],
-});
-
-const loaded = (state, { photos }) => state
-  .set('photos', Immutable(photos))
-  .set('groups', PhotoService.groupColors(photos))
-;
-
-const updated = (state, { photo }) => state.set('photos',
-  state.photos.set(state.photos.findIndex(p => p.id === photo.id), photo),
-);
+};
 
 const error = (state, action) => {
   console.log(action.error); // eslint-disable-line no-console
   return state;
 };
+const equals = p1 => p2 => p1.id === p2.id;
+
+const loaded$ = (state, action) => {
+  const state$ = loaded('photos')(R.prop('photos'))(state, action);
+  return loaded('groups')(({ photos }) => PhotoService.groupColors(photos))(state$, action);
+};
 
 export default (state = initial, action) => {
   const reducer = {
-    [LOADED]: loaded,
-    [UPDATED]: updated,
+    [LOADED]: loaded$,
+    [UPDATED]: updated('photos')(R.prop('photo'))(equals),
     [ERROR]: error,
   }[action.type];
 

@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "memoizee": "^0.4.9",
+    "query-string": "^5.0.0",
+    "unfetch": "^3.0.0"
+  },
+  "name": "common",
+  "version": "1.0.0",
+  "main": "./",
+  "license": "MIT"
+}

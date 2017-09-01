@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { Link, withRouter } from 'react-router-dom';
 
-import photoService from '../../../common/service/photo/memoize';
+import photoService from 'common/service/photo/memoize';
 import config from '../../etc/config';
 
 export const PHOTO = 'photo';

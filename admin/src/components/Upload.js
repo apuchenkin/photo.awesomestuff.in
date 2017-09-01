@@ -1,6 +1,6 @@
+import R from 'ramda';
 import React from 'react';
 import classNames from 'classnames';
-import Immutable from 'seamless-immutable';
 import { Observable } from 'rxjs/Observable';
 import { Subscriber } from 'rxjs';
 import 'rxjs/add/observable/of';
@@ -49,12 +49,11 @@ const File = ({ file: { file, progress, status, error } }) => (
 );
 
 class Upload extends React.Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      files: Immutable([]),
+      files: [],
     };
 
     this.updateFile = this.updateFile.bind(this);
@@ -83,17 +82,18 @@ class Upload extends React.Component {
       .catch(() => Observable.empty)
       .subscribe();
 
-      return Immutable({ file, status: STATUS_PENDING });
+      return { file, status: STATUS_PENDING };
     });
 
-    this.setState({ files: Immutable(files$) });
+    this.setState({ files: files$ });
   }
 
   updateFile(file, data) {
-    this.setState(state => ({
-      files: state.files.update(
-        state.files.findIndex(f => f.file === file),
-        f => f.merge(data),
+    this.setState(({ files }) => ({
+      files: R.state.files.update(
+        files.findIndex(f => f.file === file),
+        f => R.merge(f, data),
+        files,
       ),
     }));
   }

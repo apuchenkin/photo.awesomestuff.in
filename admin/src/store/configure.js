@@ -30,8 +30,8 @@ const reducer = combineReducers({
 
 const store = createStore(reducer,
   composeEnhancers(
-   applyMiddleware(epicMiddleware),
- ),
+    applyMiddleware(epicMiddleware),
+  ),
 );
 
 export default store;

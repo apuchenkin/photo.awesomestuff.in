@@ -91,8 +91,10 @@ module.exports = env => ({
     historyApiFallback: true,
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:3000',
-        pathRewrite: { '^/api/v1': '' },
+        logLevel: 'debug',
+        target: 'http://photo.awesomestuff.in',
+        changeOrigin: true,
+        // pathRewrite: { '^/api/v1': '' },
       },
     },
   },

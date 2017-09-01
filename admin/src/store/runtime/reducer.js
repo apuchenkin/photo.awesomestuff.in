@@ -1,9 +1,9 @@
-import { SET_RUNTIME_VARIABLE, INIT } from './actions';
+import PhotoService from 'common/service/api/Photo';
+import CategoryService from 'common/service/api/Category';
+import TranslationService from 'common/service/api/Translation';
 
+import { SET_RUNTIME_VARIABLE, INIT } from './actions';
 import config from '../../../etc/config';
-import PhotoService from '../../../../common/service/api/Photo';
-import CategoryService from '../../../../common/service/api/Category';
-import TranslationService from '../../../../common/service/api/Translation';
 
 const initial = {};
 
