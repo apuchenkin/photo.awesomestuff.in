@@ -3,3 +3,4 @@
 - Photos pagination
 - Photos prev/next in translations
 - Remove redunant actions and epics
+- Remove react-router
