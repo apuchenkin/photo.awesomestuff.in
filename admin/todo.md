@@ -1,0 +1,5 @@
+- Remove seamless-immutable in favor of Ramda
+- Play around flow types
+- Photos pagination
+- Photos prev/next in translations
+- Remove redunant actions and epics
