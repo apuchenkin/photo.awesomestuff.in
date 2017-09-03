@@ -23,7 +23,9 @@ export default class BaseService {
   }
 
   static respondJSON(response) {
-    return response.json();
+    return response.json().then(data => Object.assign(data, {
+      __response: response,
+    }));
   }
 
   baseUrl() {

@@ -12,13 +12,20 @@ const toPublic = language => (photo) => {
   return result;
 };
 
-const findAll = (category, authorized, language) => category
+const LIMIT = 50;
+
+const findAll = (category, authorized, language, page) => category
   .getPhotos({
     scope: ['translations', authorized ? null : { method: ['public', language] }].filter(Boolean),
     order: [
       ['datetime', 'ASC'],
     ],
+    limit: page ? LIMIT : null,
+    offset: page && (page - 1) * LIMIT,
   });
+
+const countAll = category => category
+  .countPhotos();
 
 const getById = (id, authorized, language) => Photo
   .scope(['translations', authorized ? null : { method: ['public', language] }].filter(Boolean))
@@ -33,6 +40,7 @@ const getById = (id, authorized, language) => Photo
 
 export default {
   findAll,
+  countAll,
   toPublic,
   getById,
 };

@@ -12,6 +12,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "classnames": "^2.2.5",
     "common": "file:../common",
+    "query-string": "^5.0.0",
     "ramda": "^0.24.1",
     "react": "^15.6.1",
     "react-dnd": "^2.4.0",

@@ -4,9 +4,10 @@ export const UPDATE = 'PHOTO/UPDATE';
 export const UPDATED = 'PHOTO/UPDATED';
 export const ERROR = 'PHOTO/ERROR';
 
-export const load = category => ({
+export const load = (category, page) => ({
   type: LOAD,
   category,
+  page
 });
 
 export const loaded = photos => ({

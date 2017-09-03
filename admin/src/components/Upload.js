@@ -90,9 +90,9 @@ class Upload extends React.Component {
 
   updateFile(file, data) {
     this.setState(({ files }) => ({
-      files: R.state.files.update(
-        files.findIndex(f => f.file === file),
+      files: R.adjust(
         f => R.merge(f, data),
+        files.findIndex(f => f.file === file),
         files,
       ),
     }));

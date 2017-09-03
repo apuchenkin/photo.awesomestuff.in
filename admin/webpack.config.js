@@ -92,9 +92,9 @@ module.exports = env => ({
     proxy: {
       '/api/v1': {
         logLevel: 'debug',
-        target: 'http://photo.awesomestuff.in',
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        // pathRewrite: { '^/api/v1': '' },
+        pathRewrite: { '^/api/v1': '' },
       },
     },
   },

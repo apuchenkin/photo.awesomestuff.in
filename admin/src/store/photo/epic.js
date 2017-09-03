@@ -11,8 +11,8 @@ import {
 const load = (action, store) =>
   action
     .ofType(LOAD)
-    .mergeMap(({ category }) => store.getState().runtime
-      .categoryService.fetchPhotos(category)
+    .mergeMap(({ category, page }) => store.getState().runtime
+      .categoryService.fetchPhotos(category, page)
       .then(loaded),
     ).catch(err => Observable.of(error(err)))
 ;

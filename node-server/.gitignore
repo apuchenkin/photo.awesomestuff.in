@@ -4,4 +4,3 @@ static/*
 node_modules/
 tmp/
 etc/config.json
-yarn.lock

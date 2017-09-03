@@ -5,10 +5,12 @@ import {
   withRouter,
 } from 'react-router-dom';
 import { connect } from 'react-redux';
+import queryString from 'query-string';
 
 import Photo from './Photo';
 import Upload from './Upload';
 import PhotoTranslations from './translation/Photo';
+import Pagination from './Pagination';
 
 import {
   load as loadPhotos,
@@ -39,12 +41,13 @@ class Photos extends React.PureComponent {
   }
 
   componentWillMount() {
-    this.props.loadPhotos(this.props.category);
+    this.props.loadPhotos(this.props.category, this.props.page);
   }
 
   componentWillReceiveProps(props) {
-    if (this.props.category !== props.category) {
-      this.props.loadPhotos(props.category);
+    if (this.props.category !== props.category
+    || this.props.page !== props.page) {
+      this.props.loadPhotos(props.category, props.page);
     }
   }
 
@@ -131,7 +134,7 @@ class Photos extends React.PureComponent {
   }
 
   render() {
-    const { category, match, photos, groups } = this.props;
+    const { category, match, photos, groups, total } = this.props;
     const { selection } = this.state;
     const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
     const singleSelect = selection.length === 1;
@@ -175,6 +178,7 @@ class Photos extends React.PureComponent {
         <Upload category={category}>
           <ul>{photoItems}</ul>
         </Upload>
+        <Pagination total={total} />
       </div>
     );
 
@@ -196,15 +200,17 @@ class Photos extends React.PureComponent {
 }
 
 export default withRouter(connect(
-  ({ photo: { photos, groups }, runtime: { categoryService, photoService } }) => ({
+  ({ photo: { total, photos, groups }, runtime: { categoryService, photoService } }, { location }) => ({
+    total,
     photos,
     groups,
     categoryService,
     photoService,
+    page: queryString.parse(location.search).page,
   }),
-  dispatch => ({
-    loadPhotos: category => dispatch(loadPhotos(category)),
-    updatePhoto: (photo, data) => dispatch(updatePhotos(photo, data)),
-    updateCategory: (category, data) => dispatch(updateCategory(category, data)),
-  }),
+  {
+    loadPhotos,
+    updatePhotos,
+    updateCategory,
+  },
 )(Photos));

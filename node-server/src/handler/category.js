@@ -1,5 +1,6 @@
 import Router from 'koa-router';
 import vary from 'vary';
+import queryString from 'query-string';
 import Category from '../model/category';
 import CategoryService from '../service/category';
 import PhotoService from '../service/photo';
@@ -12,7 +13,14 @@ photoRouter
       public: true,
       maxAge: 60 * 60 * 24,
     };
-    const photos = await PhotoService.findAll(ctx.category, ctx.user, ctx.locale);
+    const { page } = queryString.parse(ctx.search);
+    const photos = await PhotoService.findAll(ctx.category, ctx.user, ctx.locale, page);
+
+    if (page && photos.length) {
+      const total = await PhotoService.countAll(ctx.category, ctx.user, ctx.locale);
+      ctx.set('X-Total-Count', total);
+    }
+
     ctx.body = ctx.user ? photos : photos.map(PhotoService.toPublic(ctx.locale));
   })
   .link('/', async (ctx) => {
@@ -22,8 +30,7 @@ photoRouter
   .unlink('/', async (ctx) => {
     await ctx.category.removePhotos(ctx.request.body);
     ctx.body = null;
-  })
-;
+  });
 
 const translationRouter = Router();
 translationRouter

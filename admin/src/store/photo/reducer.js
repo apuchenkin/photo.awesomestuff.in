@@ -5,6 +5,7 @@ import { loaded, updated } from '../util/listReducer';
 import { LOADED, UPDATED, ERROR } from './actions';
 
 const initial = {
+  total: 0,
   photos: [],
   groups: [],
 };
@@ -16,7 +17,10 @@ const error = (state, action) => {
 const equals = p1 => p2 => p1.id === p2.id;
 
 const loaded$ = (state, action) => {
-  const state$ = loaded('photos')(R.prop('photos'))(state, action);
+  const response = action.photos.__response;
+  const total = response.headers.get('x-total-count') || action.photos.length;
+  const state$ = loaded('photos')(R.prop('photos'))(
+    { ...state, total }, action);
   return loaded('groups')(({ photos }) => PhotoService.groupColors(photos))(state$, action);
 };
 

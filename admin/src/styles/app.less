@@ -3,6 +3,14 @@
 html, body, body > div, #app {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .auth {
@@ -30,6 +38,7 @@ header.main {
   margin: 0;
   padding: @divisor / 2;
   border-bottom: 1px solid black;
+  flex: 0 0 auto;
 
   h1 {
     font-weight: normal;
@@ -66,22 +75,28 @@ form.create {
 }
 
 .admin {
-  width: 100%;
-  height:100%;
-  margin: auto;
-  position:relative;
-  overflow: auto;
+  position: relative;
+  overflow: hidden;
   display: flex;
+  flex: 1 1 100%;
+  flex-direction: row;
+  align-items: stretch;
 
   main {
-    flex: 100%;
-    overflow: auto;
+    flex: 1 1 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
 
     .toolbox {
       padding: @divisor / 2;
       background: lighten(@grey, 20%);
       color: @white;
       font-size: 14pt;
+      flex: 1 0 48px;
+      box-sizing: border-box;
 
       .tools {
         float: right;
@@ -97,6 +112,21 @@ form.create {
       }
     }
 
+    .pagination {
+      flex: 1 0 48px;
+      box-sizing: border-box;
+      align-self: flex-end;
+      padding: 8px;
+
+      a {
+        padding: 8px;
+
+        &.active {
+          font-weight: bold;
+        }
+      }
+    }
+
     .content {
       color: @light-grey;
       padding: @divisor / 2;
@@ -104,11 +134,13 @@ form.create {
   }
 
   .aside {
-    flex: 20%;
+    flex: 1 0 20%;
     padding: @divisor 0;
     background: @grey-light;
     color: @light-grey;
     border-right: 1px solid black;
+    box-sizing: border-box;
+    overflow: auto;
 
     h2 {
       font-weight: normal;
@@ -200,14 +232,17 @@ form.create {
   }
 
   .photos {
-    overflow: auto;
-    height: 100%;
+    overflow: hidden;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex: 1 1 100%;
 
     .upload {
-      flex: 1 100%;
+      flex: 1 1 100%;
+      overflow: auto;
 
       &.hovered {
         background: greenyellow;

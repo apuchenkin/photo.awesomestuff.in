@@ -1,4 +1,5 @@
 import Service from './BaseService';
+import queryString from 'query-string';
 
 // var url = require('url');
 // var url_parts = url.parse(request.url, true);
@@ -22,8 +23,8 @@ export default class CategoryService extends Service {
       .then(Service.respondJSON);
   }
 
-  fetchPhotos(category) {
-    return this.fetch(`/${category.name}/photo`)
+  fetchPhotos(category, page) {
+    return this.fetch(`/${category.name}/photo${ page ? '?' + queryString.stringify({ page }) : ''}`)
       .then(Service.respondJSON);
   }
 
