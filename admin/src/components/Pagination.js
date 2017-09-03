@@ -15,7 +15,7 @@ const Pagination = ({
 
         return (
           <NavLink
-            isActive={() => queryString.parse(location.search).page === page}
+            isActive={() => Number(queryString.parse(location.search).page) === page}
             activeClassName="active"
             to={`${match.url}?page=${page}`}
           >

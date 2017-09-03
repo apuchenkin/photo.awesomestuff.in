@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import Translation from './Translation';
 
@@ -44,7 +44,7 @@ class Translations extends React.PureComponent {
   }
 
   render() {
-    const { backUrl, title, translations, children, fields, entity } = this.props;
+    const { history, title, translations, children, fields, entity } = this.props;
 
     return (
       <div className="translation">
@@ -52,11 +52,9 @@ class Translations extends React.PureComponent {
           Translations - {title}
           <div className="tools">
             <AddButton handler={this.toggleCreate} />
-            <Link to={backUrl} >
-              <button className="material-icons">
-                clear
-              </button>
-            </Link>
+            <button className="material-icons" onClick={history.goBack}>
+              clear
+            </button>
           </div>
         </div>
         <div className="content">
@@ -93,4 +91,4 @@ class Translations extends React.PureComponent {
   }
 }
 
-export default Translations;
+export default withRouter(Translations);
