@@ -1,5 +1,5 @@
-import photo from '../../../common/service/photo/memoize';
-import config from '../etc/config';
+import photo from 'common/service/photo/memoize';
+import config from '../../etc/config';
 
 export const localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g;
 
