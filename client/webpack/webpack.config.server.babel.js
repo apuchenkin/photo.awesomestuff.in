@@ -9,7 +9,7 @@ import base from './webpack.config.base.babel';
 const isDevelopment = env => env === 'development';
 
 module.exports = env => merge(base(env), {
-  entry: ['babel-polyfill', './server.js'],
+  entry: ['babel-polyfill', './server/app.js'],
   target: 'node',
 
   output: {

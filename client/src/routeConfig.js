@@ -1,13 +1,17 @@
 import Redirect from 'found/lib/Redirect';
 import HttpError from 'found/lib/HttpError';
-import Main from './components/main';
+
+import {
+  Main,
+  Home,
+  Static,
+  Category,
+  Photo
+} from './page';
+
 import HomeHeader from './components/home/header';
 import PageHeader from './components/page/header';
 import GalleryHeader from './components/gallery/header';
-import Home from './components/home';
-import Page from './components/page';
-import Gallery from './components/gallery';
-import Photo from './components/photo';
 
 import {
   loaded as loadedCategory,
@@ -25,19 +29,12 @@ export default (pages = [], categories = []) => [
   {
     path: '/',
     Component: Main,
-    getData: ({ routes }) => {
-      const route = routes[routes.length - 1];
-
-      return {
-        header: route.header,
-        className: route.className,
-      };
-    },
-    children: [
-      {
-        header: HomeHeader,
+    children: {
+      header: [{
+        Component: HomeHeader,
+      }],
+      body: [{
         Component: Home,
-        className: 'home',
         getData: ({ context: { store } }) => {
           const { config } = store.getState().runtime;
           store.dispatch(setMeta({
@@ -46,76 +43,77 @@ export default (pages = [], categories = []) => [
             description: null,
           }));
         },
+      }]
+    },
+    ...pages.map(page$ => ({
+      path: page$.alias,
+      header: PageHeader,
+      Component: Static,
+      getData: async ({ context: { store } }) => {
+        const { page } = await store.dispatch(loadPage(page$))
+          .catch(({ error }) => {
+            throw new HttpError(404, error);
+          });
+
+        store.dispatch(setMeta({
+          langs: page.langs,
+          title: page.title,
+          description: page.description,
+        }));
+
+        return page;
       },
-      ...pages.map(page$ => ({
-        path: page$.alias,
-        header: PageHeader,
-        Component: Page,
-        getData: async ({ context: { store } }) => {
-          const { page } = await store.dispatch(loadPage(page$))
-            .catch(({ error }) => {
-              throw new HttpError(404, error);
-            });
+    })),
+    ...categories.map(category => ({
+      path: category.parent
+        ? `/${category.parent.name}/${category.name}`
+        : `/${category.name}`,
+      header: GalleryHeader,
+      Component: Gallery,
+      getData: async ({ params, context: { store } }) => {
+        store.dispatch(loadedCategory(category));
+        await store.dispatch(loadPhotos(category, params.photoId))
+          .catch(({ error }) => {
+            throw new HttpError(404, error);
+          });
 
-          store.dispatch(setMeta({
-            langs: page.langs,
-            title: page.title,
-            description: page.description,
-          }));
+        store.dispatch(setMeta({
+          langs: category.langs,
+          title: category.title,
+          description: category.description,
+        }));
 
-          return page;
-        },
-      })),
-      ...categories.map(category => ({
-        path: category.parent
-          ? `/${category.parent.name}/${category.name}`
-          : `/${category.name}`,
+        return category;
+      },
+      children: [{
+        path: '/photo/:photoId',
         header: GalleryHeader,
-        Component: Gallery,
-        getData: async ({ params, context: { store } }) => {
-          store.dispatch(loadedCategory(category));
-          await store.dispatch(loadPhotos(category, params.photoId))
+        Component: Photo,
+        getData: async ({ params, context: { store, intl } }) => {
+          const photo = await store.dispatch(loadPhoto(params.photoId))
             .catch(({ error }) => {
               throw new HttpError(404, error);
             });
 
           store.dispatch(setMeta({
-            langs: category.langs,
-            title: category.title,
-            description: category.description,
+            langs: photo.langs,
+            title: photo.description,
+            description: intl.formatMessage({ id: 'meta.description.photo' }, {
+              author: photo.author && photo.author.name,
+              title: photo.description,
+            }),
           }));
 
-          return category;
+          return photo;
         },
-        children: [{
-          path: '/photo/:photoId',
-          header: GalleryHeader,
-          Component: Photo,
-          getData: async ({ params, context: { store, intl } }) => {
-            const photo = await store.dispatch(loadPhoto(params.photoId))
-              .catch(({ error }) => {
-                throw new HttpError(404, error);
-              });
-
-            store.dispatch(setMeta({
-              langs: photo.langs,
-              title: photo.description,
-              description: intl.formatMessage({ id: 'meta.description.photo' }, {
-                author: photo.author && photo.author.name,
-                title: photo.description,
-              }),
-            }));
-
-            return photo;
-          },
-        }],
+      }],
+    })),
+    ...categories
+      .filter(category => category.parent)
+      .map(category => new Redirect({
+        from: category.name,
+        to: `/${category.parent.name}/${category.name}`,
       })),
-      ...categories
-        .filter(category => category.parent)
-        .map(category => new Redirect({
-          from: category.name,
-          to: `/${category.parent.name}/${category.name}`,
-        })),
     ],
   },
 ];

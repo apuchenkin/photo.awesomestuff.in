@@ -5,8 +5,8 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 
-import Loader from './loader/loader';
-import Footer from './footer';
+import Loader from '../components/loader';
+import Footer from '../components/footer';
 
 const Ps = isBrowser ? require('perfect-scrollbar') : null;
 
