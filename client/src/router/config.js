@@ -7,7 +7,7 @@ import {
   Static,
   Category,
   Photo
-} from './page';
+} from '../page';
 
 import HomeHeader from './components/home/header';
 import PageHeader from './components/page/header';
@@ -43,7 +43,7 @@ export default (pages = [], categories = []) => [
             description: null,
           }));
         },
-      }]
+      }],
     },
     ...pages.map(page$ => ({
       path: page$.alias,
@@ -114,6 +114,5 @@ export default (pages = [], categories = []) => [
         from: category.name,
         to: `/${category.parent.name}/${category.name}`,
       })),
-    ],
   },
 ];

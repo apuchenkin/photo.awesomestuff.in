@@ -6,14 +6,14 @@ import { injectIntl, intlShape, defineMessages } from 'react-intl';
 import { Actions as FarceActions } from 'farce';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import Figure from './figure';
-import PhotoLink from '../link/photo';
-import { fromCategory } from '../link/category';
+import Figure from '../components/photo/figure';
+import PhotoLink from '../components/link/photo';
+import { fromCategory } from '../components/link/category';
 
-import IconLeft from './icons/left';
-import IconRight from './icons/right';
+import IconLeft from '../components/photo/icons/left';
+import IconRight from '../components/photo/icons/right';
 
-import style from './photo.less';
+import style from '../components/photo/photo.less';
 
 const messages = defineMessages({
   prev: {

@@ -3,7 +3,7 @@ import { string } from 'prop-types';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import style from './style.less';
+import style from '../components/page/style.less';
 
 const Page = ({ content }) =>
   // eslint-disable-next-line react/no-danger

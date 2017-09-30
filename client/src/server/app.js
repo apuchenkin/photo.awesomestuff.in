@@ -12,11 +12,12 @@ import { IntlProvider } from 'react-intl';
 import { readFileSync } from 'fs';
 
 import HTML from './renderHTML';
-import configureStore from '../store/configureStore';
-import { serverRender as render } from '../render';
-import config from '../etc/config';
-import { buildMeta } from '../lib/meta';
+import configureStore from '../store/configure';
+import { serverRender as render } from '../router/render';
+import config from '../../etc/config';
+import { buildMeta } from '../service/meta';
 import WithStylesContext from '../components/WithStylesContext';
+import serviceFactory from '../service/factory';
 
 const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.json'))
   .map(filename => [
@@ -26,7 +27,7 @@ const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.
   .map(([locale, file]) => [locale, JSON.parse(file)])
   .reduce((collection, [locale, messages]) =>
     Object.assign(collection, { [locale]: messages }),
-    {},
+  {},
   );
 
 function catchAsyncErrors(fn) {
@@ -67,18 +68,24 @@ app.use(catchAsyncErrors(async (req, res) => {
   const messages = locale ? translations[locale] : {};
   const initial = { runtime: { locale, basename, messages, config } };
   const css = new Set(); // CSS for all rendered React components
-    // eslint-disable-next-line no-underscore-dangle
+  // eslint-disable-next-line no-underscore-dangle
   const onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
   const intlProvider = new IntlProvider({
     locale,
     messages,
   }, {});
   const { intl } = intlProvider.getChildContext();
+  const { apiEndpoint } = config;
   let renderArgs;
 
-  const store = await configureStore(new ServerProtocol(req.url), initial, intl);
+  const services = serviceFactory({
+    locale,
+    apiEndpoint,
+  });
+
+  const store = await configureStore(new ServerProtocol(req.url), initial, services);
   store.dispatch(FarceActions.init());
-  const matchContext = { store, intl };
+  const matchContext = { store, intl, services };
 
   try {
     renderArgs = await getStoreRenderArgs({

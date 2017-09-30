@@ -8,10 +8,10 @@ import getStoreRenderArgs from 'found/lib/getStoreRenderArgs';
 import resolver from 'found/lib/resolver';
 import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
-import configureStore from './store/configureStore';
+import configureStore from './store/configure';
 import WithStylesContext from './components/WithStylesContext';
-import { clientRender as render } from './render';
-import config from '../etc/config';
+import { clientRender as render } from './router/render';
+import serviceFactory from './service/factory';
 
 // eslint-disable-next-line import/first
 import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
@@ -34,16 +34,27 @@ function onInsertCss(...styles) {
 }
 
 (async () => {
-  const { runtime: { locale, messages } } = initialState;
+  const { runtime: { locale, messages, config } } = initialState;
   const intlProvider = new IntlProvider({
     locale,
     messages,
   }, {});
-  initialState.runtime.config = config;
 
+  const { apiEndpoint } = config;
   const { intl } = intlProvider.getChildContext();
-  const store = await configureStore(new BrowserProtocol(), initialState, intl);
-  const matchContext = { store, intl };
+
+  const services = serviceFactory({
+    locale,
+    apiEndpoint,
+  });
+
+  const store = await configureStore(new BrowserProtocol(), initialState, services);
+  const matchContext = ({
+    store,
+    intl,
+    services,
+  });
+
   const initialRenderArgs = await getStoreRenderArgs({
     store,
     matchContext,

@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { CSSTransitionGroup } from 'react-transition-group';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import Gallery from './gallery';
+import Gallery from '../components/gallery/gallery';
 
-import style from './gallery.less';
-import transitionStyle from '../../style/transition.less';
+import style from '../components/gallery/gallery.less';
+import transitionStyle from '../style/transition.less';
 
 const GalleryPage = ({ category, categories, loading, children }) => {
   const hasNav = categories.some(c => c.parent

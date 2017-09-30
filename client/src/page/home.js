@@ -3,8 +3,8 @@ import { array, arrayOf, shape, number } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Gallery from './gallery';
-import style from './style.less';
+import Gallery from '../components/home/gallery';
+import style from '../components/home/style.less';
 
 const messages = defineMessages({
   galleries: {
