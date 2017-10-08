@@ -9,11 +9,15 @@ import base from './webpack.config.base.babel';
 const isDevelopment = env => env === 'development';
 
 module.exports = env => merge(base(env), {
-  entry: ['babel-polyfill', './server/app.js'],
   target: 'node',
 
+  entry: [
+    'babel-polyfill',
+    path.resolve(__dirname, '..', 'src', 'server', 'app.js'),
+  ],
+
   output: {
-    path: path.resolve(__dirname, '../dist'),
+    path: path.resolve(__dirname, '..', 'dist'),
     publicPath: '/assets/',
     filename: 'server.js',
     chunkFilename: 'server.[name].js',
@@ -22,7 +26,8 @@ module.exports = env => merge(base(env), {
 
   externals: [
     /^\.\/assets$/,
-    /^[@a-z][a-z\/\.\-0-9]*$/i,
+    path.resolve(__dirname, '..', 'node_modules'),
+    // /^[@a-z][a-z\/\.\-0-9]*$/i,
   ],
 
   module: {
@@ -30,8 +35,8 @@ module.exports = env => merge(base(env), {
       {
         test: /\.jsx?$/,
         include: [
-          path.resolve(__dirname, '../src'),
-          path.resolve(__dirname, '../lib'),
+          path.resolve(__dirname, '..', 'src'),
+          path.resolve(__dirname, '..', 'node_modules', 'common'),
         ],
         loader: 'babel-loader',
         options: {
@@ -44,6 +49,7 @@ module.exports = env => merge(base(env), {
                 "node": "current"
               },
               useBuiltIns: true,
+              modules: false,
             }),
           ],
           plugins: [

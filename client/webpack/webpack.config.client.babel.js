@@ -11,22 +11,22 @@ import base from './webpack.config.base.babel';
 const isDevelopment = env => env === 'development';
 
 module.exports = env => merge(base(env), {
-  entry: './client.js',
+  target: 'web',
+  entry: path.resolve(__dirname, '..', 'src', 'client.js'),
 
   output: {
-    path: path.resolve(__dirname, '../dist/assets'),
+    path: path.resolve(__dirname, '..', 'dist', 'assets'),
     publicPath: '/',
     filename: isDevelopment(env) ? '[name].js' : '[name].[hash].js',
   },
 
-  target: 'web',
   module: {
     rules: [
       {
         test: /\.jsx?$/,
         include: [
-          path.resolve(__dirname, '../src'),
-          path.resolve(__dirname, '../../common'),
+          path.resolve(__dirname, '..', 'src'),
+          path.resolve(__dirname, '..', 'node_modules', 'common'),
         ],
         loader: 'babel-loader',
         options: {

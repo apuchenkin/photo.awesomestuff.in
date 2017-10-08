@@ -1,4 +1,7 @@
-const config = require('./config.json') || {};
+let config = {};
+try {
+  config = require('./config.json');
+} catch(e) {}
 
 module.exports = Object.assign(config, {
   analytics: process.env.ANALYTICS || config.analytics,

@@ -3,7 +3,7 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import Link from 'found/lib/Link';
-import { title } from '../../etc/config';
+// import { title } from '../../etc/config';
 import style from '../../style/header.less';
 
 const messages = defineMessages({
@@ -17,7 +17,7 @@ const messages = defineMessages({
   },
 });
 
-const HomeHeader = () => (
+const HomeHeader = ({ title = null }) => (
   <header className={style.main}>
     <h1 className={style.title}>
       <Link to="/">{title}</Link>

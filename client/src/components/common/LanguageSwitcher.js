@@ -1,12 +1,11 @@
 import React from 'react';
 import { shape, arrayOf, string, bool } from 'prop-types';
 import { connect } from 'react-redux';
-
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
-import { localeURL } from '../../lib/utils';
 import style from './style.less';
+
+const localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g;
 
 const messages = defineMessages({
   not_available: {

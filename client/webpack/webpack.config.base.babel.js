@@ -4,13 +4,14 @@ import path from 'path';
 const isDevelopment = env => env === 'development';
 
 module.exports = env => ({
-  context: path.resolve(__dirname, '../src'),
+  // context: path.resolve(__dirname, '../src'),
 
   resolve: {
-    extensions: ['*', '.js', '.css', '.html'],
+    extensions: ['.js', '.css', '.html'],
+    symlinks: false,
     modules: [
-      'node_modules',
       path.resolve(__dirname, '..', 'node_modules'),
+      'node_modules',
     ],
   },
 

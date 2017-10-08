@@ -6,7 +6,7 @@ import debounce from 'debounce';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
 import Close from './icons/close';
-import utils from '../../lib/utils';
+// import utils from '../../lib/utils';
 import Img from './img';
 import { setRuntimeVariable } from '../../store/runtime/actions';
 
@@ -103,8 +103,8 @@ class Figure extends React.PureComponent {
   }
 
   render() {
-    const { width, height, photo, onClick } = this.props;
-    const src = utils.getSrc(photo.src, width, height);
+    const { width, height, photo, onClick, getSrc } = this.props;
+    const src = getSrc(photo.src, width, height);
 
     return (
       <Img

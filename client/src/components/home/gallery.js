@@ -5,16 +5,14 @@ import { shape, arrayOf, string, number } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import CategoryLink, { fromCategory } from '../link/category';
-import utils from '../../lib/utils';
-
 import style from './style.less';
 import baseStyle from '../../style/style.less';
 
-const Gallery = ({ category, childs, width, height }) => (
+const Gallery = ({ category, getCategoryImage, childs, width }) => (
   <div className={style.gallery}>
     <CategoryLink category={category.name} className={style.cover}>
       <img
-        src={utils.getSrc(category.featured.src, width, height, true)}
+        src={getCategoryImage(category)}
         width={width}
         title={category.title}
         alt={category.title}
