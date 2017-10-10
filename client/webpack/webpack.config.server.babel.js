@@ -5,10 +5,11 @@ import path from 'path';
 import presetReact from 'babel-preset-react';
 import presetEnv from 'babel-preset-env';
 import base from './webpack.config.base.babel';
+import nodeExternals from 'webpack-node-externals';
 
 const isDevelopment = env => env === 'development';
 
-module.exports = env => merge(base(env), {
+export default env => merge(base(env), {
   target: 'node',
 
   entry: [
@@ -26,8 +27,11 @@ module.exports = env => merge(base(env), {
 
   externals: [
     /^\.\/assets$/,
-    path.resolve(__dirname, '..', 'node_modules'),
-    // /^[@a-z][a-z\/\.\-0-9]*$/i,
+    nodeExternals({
+      whitelist: [
+        /^common.*/,
+      ],
+    }),
   ],
 
   module: {
@@ -36,7 +40,9 @@ module.exports = env => merge(base(env), {
         test: /\.jsx?$/,
         include: [
           path.resolve(__dirname, '..', 'src'),
+          // path.resolve(__dirname, '..', 'api'),
           path.resolve(__dirname, '..', 'node_modules', 'common'),
+          path.resolve(__dirname, '..', '..', 'common'),
         ],
         loader: 'babel-loader',
         options: {

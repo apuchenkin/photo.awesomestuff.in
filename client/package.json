@@ -61,8 +61,10 @@
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.0.1",
     "extract-text-webpack-plugin": "^3.0.0",
+    "faker": "^4.1.0",
     "file-loader": "^0.11.2",
     "json-loader": "^0.5.7",
+    "json-server": "^0.12.0",
     "less": "^2.6.1",
     "less-loader": "^4.0.5",
     "ncp": "^2.0.0",
@@ -82,8 +84,10 @@
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.7",
     "webpack": "^3.4.1",
+    "webpack-dev-middleware": "^1.12.0",
     "webpack-dev-server": "^2.6.1",
     "webpack-hot-middleware": "^2.18.0",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "webpack-node-externals": "^1.6.0"
   }
 }

@@ -3,7 +3,7 @@ import path from 'path';
 
 const isDevelopment = env => env === 'development';
 
-module.exports = env => ({
+export default env => ({
   // context: path.resolve(__dirname, '../src'),
 
   resolve: {

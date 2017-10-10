@@ -25,11 +25,12 @@ class Main extends React.PureComponent {
   }
 
   render() {
-    const { data: { className, header }, children } = this.props;
+    const { children } = this.props;
+    // console.log(Object.keys(children));
 
     return (
-      <div className={[style.main, style[className]].join(' ')}>
-        {React.createElement(header)}
+      <div className={style.main}>
+        {/* {React.createElement(header)} */}
         <div className={style.content} ref={(c) => { this.content = c; }}>
           {children}
           <Footer />

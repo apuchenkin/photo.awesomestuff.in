@@ -1,0 +1,140 @@
+[{
+  "id": 3,
+  "name": "patagonia",
+  "date": "2015-01-01",
+  "parent": null,
+  "featured": {
+    "id": 252,
+    "src": "chile/IMG_6479.jpg",
+    "views": 333,
+    "width": 2400,
+    "height": 1600,
+    "group": null,
+    "datetime": "2015-01-01T09:00:54.000Z"
+  },
+  "langs": ["en", "ru"],
+  "description": "Треккинг в Чилийской и Аргентинской Патагонии. Январь 2015.",
+  "title": "Путешествие по южной Патагонии"
+}, {
+  "id": 4,
+  "name": "santiago",
+  "date": null,
+  "parent": {
+    "id": 3,
+    "name": "patagonia",
+    "date": "2015-01-01",
+    "parentId": null,
+    "featuredId": 252
+  },
+  "featured": null,
+  "langs": ["en", "ru"],
+  "description": "Фотографии Сантьяго - столицы Чили. Январь 2015.",
+  "title": "Сантьяго"
+}, {
+  "id": 14,
+  "name": "torres-del-paine",
+  "date": null,
+  "parent": {
+    "id": 3,
+    "name": "patagonia",
+    "date": "2015-01-01",
+    "parentId": null,
+    "featuredId": 252
+  },
+  "featured": null,
+  "langs": ["en", "ru"],
+  "description": "Треккинг в национальном парке “Торрес дель Пайне”, Патагония, Чили. Фотографии пейзажей парка: скал, ледников и перевалов, многочисленный озер. Январь, 2015.",
+  "title": "Торрес дель Пайне"
+}, {
+  "id": 16,
+  "name": "puerto-natales",
+  "date": null,
+  "parent": {
+    "id": 3,
+    "name": "patagonia",
+    "date": "2015-01-01",
+    "parentId": null,
+    "featuredId": 252
+  },
+  "featured": null,
+  "langs": ["en", "ru"],
+  "description": "Фотографии города и порта Пуэрто-Наталес, Чили. Январь 2015.",
+  "title": "Пуэрто Наталес"
+}, {
+  "id": 22,
+  "name": "los-glaciares",
+  "date": null,
+  "parent": {
+    "id": 3,
+    "name": "patagonia",
+    "date": "2015-01-01",
+    "parentId": null,
+    "featuredId": 252
+  },
+  "featured": null,
+  "langs": ["en", "ru"],
+  "description": "Треккинг в национальном парке “Лос-Гласьярес”, Патагония, Аргентина. Фотографии гигантских ледников, ледниковых озер, скалистых вершин, разнообразного мира растений и животных Патагонии. Январь, 2015.",
+  "title": "Национальный парк Лос-Гласьярес"
+}, {
+  "id": 23,
+  "name": "isla-magdalena",
+  "date": null,
+  "parent": {
+    "id": 3,
+    "name": "patagonia",
+    "date": "2015-01-01",
+    "parentId": null,
+    "featuredId": 252
+  },
+  "featured": null,
+  "langs": ["en", "ru"],
+  "description": "Путешествие на остов Магдалены, в Магелановом проливе, населенный колонией пингвинов, численность которой свыше 120000 пингвинов Магеллана, Чили. Январь 2015.",
+  "title": "Остров Магдалены"
+}, {
+  "id": 25,
+  "name": "perito-moreno",
+  "date": null,
+  "parent": {
+    "id": 3,
+    "name": "patagonia",
+    "date": "2015-01-01",
+    "parentId": null,
+    "featuredId": 252
+  },
+  "featured": null,
+  "langs": ["en", "ru"],
+  "description": "Экскурсия к величественному леднику Перито-Морено в национальном парке Лос-Гласьярес, Патагония, Аргенина. Январь 2015.",
+  "title": "Ледник Перито-Морено"
+}, {
+  "id": 27,
+  "name": "arkhyz",
+  "date": "2015-07-17",
+  "parent": null,
+  "featured": {
+    "id": 1281,
+    "src": "arkhyz/_DSF2341.jpg",
+    "views": 95,
+    "width": 2400,
+    "height": 1600,
+    "group": null,
+    "datetime": "2016-07-20T13:44:05.000Z"
+  },
+  "langs": ["ru", "en"],
+  "title": "Горы Архыза"
+}, {
+  "id": 28,
+  "name": "georgia",
+  "date": "2017-05-01",
+  "parent": null,
+  "featured": {
+    "id": 1805,
+    "src": "georgia/_DSF4903.jpg",
+    "views": 2,
+    "width": 2400,
+    "height": 1600,
+    "group": null,
+    "datetime": "2017-05-06T13:57:45.000Z"
+  },
+  "langs": ["ru", "en"],
+  "title": "Грузия"
+}]

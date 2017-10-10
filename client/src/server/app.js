@@ -47,15 +47,20 @@ const negotiateLocale = req =>
 ;
 
 if (__DEV__) {
-  const proxy = require('http-proxy-middleware');
-  app.use('/api/v1', proxy({
-    target: 'http://photo.awesomestuff.in',
-    changeOrigin: true,
-  }));
-  app.use('/static', proxy({
-    target: 'http://photo.awesomestuff.in',
-    changeOrigin: true,
-  }));
+  // const proxy = require('http-proxy-middleware');
+  // const webpackDevMiddleware = require('./dev');
+  // app.use(webpackDevMiddleware);
+  const api = require('../../api/server');
+  app.use('/api/v1', api);
+
+  // app.use('/api/v1', proxy({
+  //   target: 'http://photo.awesomestuff.in',
+  //   changeOrigin: true,
+  // }));
+  // app.use('/static', proxy({
+  //   target: 'http://photo.awesomestuff.in',
+  //   changeOrigin: true,
+  // }));
 }
 
 app.use(express.static(path.join(__dirname, 'assets')));

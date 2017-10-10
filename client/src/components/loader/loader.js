@@ -57,5 +57,5 @@ Loader.propTypes = {
 };
 
 export default connect(
-  state => ({ isLoading: state.isLoading.count > 0 }),
+  () => ({ isLoading: false }),
 )(withStyles(style)(Loader));

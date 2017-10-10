@@ -10,7 +10,7 @@ import base from './webpack.config.base.babel';
 
 const isDevelopment = env => env === 'development';
 
-module.exports = env => merge(base(env), {
+export default env => merge(base(env), {
   target: 'web',
   entry: path.resolve(__dirname, '..', 'src', 'client.js'),
 
