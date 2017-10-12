@@ -25,15 +25,16 @@ class Main extends React.PureComponent {
   }
 
   render() {
-    const { children } = this.props;
+    const { header, body, data: { pages } } = this.props;
     // console.log(Object.keys(children));
 
     return (
       <div className={style.main}>
+        {header}
         {/* {React.createElement(header)} */}
         <div className={style.content} ref={(c) => { this.content = c; }}>
-          {children}
-          <Footer />
+          {body}
+          <Footer pages={pages} />
         </div>
         <Loader key="loader" />
       </div>
@@ -42,11 +43,8 @@ class Main extends React.PureComponent {
 }
 
 Main.propTypes = {
-  data: shape({
-    className: string,
-    header: func.isRequired,
-  }).isRequired,
-  children: element.isRequired,
+  header: element.isRequired,
+  body: element.isRequired,
 };
 
 export default withStyles(style, baseStyle)(Main);

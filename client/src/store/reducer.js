@@ -9,9 +9,10 @@ import meta from './meta/reducer';
 
 export default combineReducers({
   found: foundReducer,
+  // categories: [],
   runtime,
   // isLoading,
-  // category,
+  category: {},
   page,
   photo,
   meta,

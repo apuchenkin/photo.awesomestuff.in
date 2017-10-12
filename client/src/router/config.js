@@ -29,6 +29,9 @@ export default (pages = [], categories = []) => [
   {
     path: '/',
     Component: Main,
+    getData: () => ({
+      pages,
+    }),
     children: {
       header: [{
         Component: HomeHeader,
@@ -42,6 +45,10 @@ export default (pages = [], categories = []) => [
             title: null,
             description: null,
           }));
+
+          return {
+            categories,
+          };
         },
       }],
     },

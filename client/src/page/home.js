@@ -13,7 +13,7 @@ const messages = defineMessages({
   },
 });
 
-const Home = ({ categories }) => {
+const Home = ({ data: { categories } }) => {
   const galleries = categories
     .filter(c => !c.parent && c.title && c.featured)
     .map(category => (
@@ -43,8 +43,10 @@ Home.propTypes = {
   })).isRequired,
 };
 
-export default connect(
-  ({ category: { categories } }) => ({ categories }),
-)(
-  withStyles(style)(Home),
-);
+export default Home;
+
+// connect(
+//   ({ category: { categories } }) => ({ categories }),
+// )(
+//   withStyles(style)(Home),
+// );

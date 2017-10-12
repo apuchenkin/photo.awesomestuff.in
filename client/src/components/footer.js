@@ -37,8 +37,7 @@ Footer.propTypes = {
 };
 
 export default connect(
-  ({ runtime: { config }, page: { pages } }) => ({
+  ({ runtime: { config } }) => ({
     title: config.title,
-    pages,
   }),
 )(Footer);
