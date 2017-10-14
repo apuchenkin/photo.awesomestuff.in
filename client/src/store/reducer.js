@@ -12,7 +12,7 @@ export default combineReducers({
   // categories: [],
   runtime,
   // isLoading,
-  category: {},
+  category: (state = { categories: [] }) => state,
   page,
   photo,
   meta,

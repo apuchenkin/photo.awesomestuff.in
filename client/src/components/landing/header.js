@@ -1,9 +1,10 @@
 import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { string } from 'prop-types';
 import Link from 'found/lib/Link';
-// import { title } from '../../etc/config';
 import style from '../../style/header.less';
 
 const messages = defineMessages({
@@ -17,7 +18,7 @@ const messages = defineMessages({
   },
 });
 
-const HomeHeader = ({ title = null }) => (
+const HomeHeader = ({ title }) => (
   <header className={style.main}>
     <h1 className={style.title}>
       <Link to="/">{title}</Link>
@@ -31,4 +32,13 @@ const HomeHeader = ({ title = null }) => (
   </header>
 );
 
-export default withStyles(style)(HomeHeader);
+HomeHeader.propTypes = {
+  title: string.isRequired,
+};
+
+export default compose(
+  connect(({ runtime: { config } }) => ({
+    title: config.title,
+  })),
+  withStyles(style),
+)(HomeHeader);

@@ -9,7 +9,7 @@ import {
   // Photo
 } from '../page';
 
-import HomeHeader from '../components/home/header';
+import { Header as HomeHeader } from '../components/landing';
 // import PageHeader from './components/page/header';
 // import GalleryHeader from './components/gallery/header';
 
