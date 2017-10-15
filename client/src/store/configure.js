@@ -13,19 +13,13 @@ import routeConfig from '../router/config';
 
 // const defaults = { locale, apiEndpoint };
 
-export default async function configureStore(historyProtocol, initialState, services) {
-  const { runtime: { basename }, page, category } = initialState;
-  const {
-    pageService,
-    categoryService,
-  } = services;
+export default async function configureStore(historyProtocol, initialState) {
+  const { runtime: { basename }, page: { pages }, category: { categories } } = initialState;
+  // const {
+  //   pageService,
+  //   categoryService,
+  // } = services;
 
-  const pages = (page && page.pages)
-    || await pageService.fetchPages().catch(() => []);
-
-  const categories = (category && category.categories)
-    || await categoryService.fetchCategories().catch(() => []);
-  console.log(categories);
 
   const initial = Object.assign(initialState, {
     page: { ...initialState.page, pages },

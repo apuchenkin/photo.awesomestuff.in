@@ -51,7 +51,10 @@ if (__DEV__) {
   // const webpackDevMiddleware = require('./dev');
   // app.use(webpackDevMiddleware);
   const api = require('../../api/server');
+  const statics = require('../../api/static');
+
   app.use('/api/v1', api);
+  app.use('/static', statics);
 
   // app.use('/api/v1', proxy({
   //   target: 'http://photo.awesomestuff.in',
@@ -71,7 +74,6 @@ app.use(catchAsyncErrors(async (req, res) => {
   const basename = prefix && `/${prefix}`;
   const locale = prefix || negotiateLocale(req);
   const messages = locale ? translations[locale] : {};
-  const initial = { runtime: { locale, basename, messages, config } };
   const css = new Set(); // CSS for all rendered React components
   // eslint-disable-next-line no-underscore-dangle
   const onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
@@ -87,6 +89,38 @@ app.use(catchAsyncErrors(async (req, res) => {
     locale,
     apiEndpoint,
   });
+
+
+  const pages = await services
+    .pageService
+    .fetchPages()
+    .catch((e) => {
+      console.error(e);
+      return [];
+    });
+
+  const categories = await services
+    .categoryService
+    .fetchCategories()
+    .catch((e) => {
+      console.error(e);
+      return [];
+    });
+
+  const initial = {
+    runtime: {
+      locale,
+      basename,
+      messages,
+      config,
+    },
+    page: {
+      pages,
+    },
+    category: {
+      categories,
+    },
+  };
 
   const store = await configureStore(new ServerProtocol(req.url), initial, services);
   store.dispatch(FarceActions.init());
