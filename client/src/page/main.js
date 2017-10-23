@@ -1,6 +1,5 @@
 import React from 'react';
 import { string, element, shape, func } from 'prop-types';
-
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
@@ -25,26 +24,25 @@ class Main extends React.PureComponent {
   }
 
   render() {
-    const { header, body, data: { pages } } = this.props;
-    // console.log(Object.keys(children));
+    const { children, header } = this.props;
 
     return (
-      <div className={style.main}>
+      <div className={[style.main, header.type.className].filter(Boolean).join(' ')}>
         {header}
-        {/* {React.createElement(header)} */}
         <div className={style.content} ref={(c) => { this.content = c; }}>
-          {body}
-          <Footer pages={pages} />
+          {children}
+          <Footer />
         </div>
+        {/* TODO: move loader */}
         <Loader key="loader" />
       </div>
     );
   }
 }
 
-Main.propTypes = {
-  header: element.isRequired,
-  body: element.isRequired,
-};
+// Main.propTypes = {
+//   header: element.isRequired,
+//   body: element.isRequired,
+// };
 
 export default withStyles(style, baseStyle)(Main);

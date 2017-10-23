@@ -3,7 +3,8 @@ import { array, arrayOf, shape, number } from 'prop-types';
 // import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Home, { style } from '../components/landing';
+import Home, { style, Header } from '../components/landing';
+import Main from './main';
 
 const messages = defineMessages({
   galleries: {
@@ -26,12 +27,14 @@ const Landing = ({ data: { categories } }) => {
   ;
 
   return (
-    <div className={style.galleries}>
-      <h2>
-        <FormattedMessage {...messages.galleries} />
-      </h2>
-      <ul>{galleries}</ul>
-    </div>
+    <Main header={<Header />}>
+      <div className={style.galleries}>
+        <h2>
+          <FormattedMessage {...messages.galleries} />
+        </h2>
+        <ul>{galleries}</ul>
+      </div>
+    </Main>
   );
 };
 

@@ -1,21 +1,25 @@
 import React from 'react';
-import { string } from 'prop-types';
-import { connect } from 'react-redux';
+// import { string } from 'prop-types';
+// import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
-import style from '../components/page/style.less';
+import { style, Header } from '../components/page';
+import Main from './main';
 
-const Page = ({ content }) =>
-  // eslint-disable-next-line react/no-danger
-  <div className={style.page} dangerouslySetInnerHTML={{ __html: content }} />
+const Page = ({ data: { page } }) => (
+  <Main header={<Header title={page.title} />}>
+    <div className={style.page} dangerouslySetInnerHTML={{ __html: page.content }} />
+  </Main>
+)
 ;
 
-Page.propTypes = {
-  content: string.isRequired,
-};
+// Page.propTypes = {
+//   content: string.isRequired,
+// };
 
-export default connect(
-  ({ page: { page } }) => ({ content: page.content }),
-)(
-  withStyles(style)(Page),
-);
+export default withStyles(style)(Page);
+// connect(
+//   ({ page: { page } }) => ({ content: page.content }),
+// )(
+
+// );

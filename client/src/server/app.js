@@ -83,13 +83,11 @@ app.use(catchAsyncErrors(async (req, res) => {
   }, {});
   const { intl } = intlProvider.getChildContext();
   const { apiEndpoint } = config;
-  let renderArgs;
 
   const services = serviceFactory({
     locale,
     apiEndpoint,
   });
-
 
   const pages = await services
     .pageService
@@ -126,20 +124,18 @@ app.use(catchAsyncErrors(async (req, res) => {
   store.dispatch(FarceActions.init());
   const matchContext = { store, intl, services };
 
-  try {
-    renderArgs = await getStoreRenderArgs({
-      store,
-      matchContext,
-      resolver,
-    });
-  } catch (error) {
+  const renderArgs = await getStoreRenderArgs({
+    store,
+    matchContext,
+    resolver,
+  }).catch((error) => {
     if (error instanceof RedirectException) {
       res.redirect(301, store.farce.createHref(error.location));
       return;
     }
 
     throw error;
-  }
+  });
 
   if (!basename) {
     res.vary('Accept-Language');
@@ -183,7 +179,7 @@ app.use((error, req, res, next) => {
   console.log(error);
   res
     .status(500)
-    .send('Service unavailable');
+    .send(__DEV__ ? error : 'Service unavailable');
 });
 
 const PORT = process.env.PORT || 3000;

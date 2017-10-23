@@ -1,15 +1,16 @@
 // import Redirect from 'found/lib/Redirect';
-// import HttpError from 'found/lib/HttpError';
+import HttpError from 'found/lib/HttpError';
 
 import {
   Main,
   Home,
-  // Static,
+  Page,
   // Category,
   // Photo
 } from '../page';
 
-import { Header as HomeHeader } from '../components/landing';
+
+import { Header as PageHeader } from '../components/page';
 // import PageHeader from './components/page/header';
 // import GalleryHeader from './components/gallery/header';
 
@@ -28,49 +29,50 @@ import { setMeta } from '../store/meta/actions';
 export default (pages = [], categories = []) => [
   {
     path: '/',
-    Component: Main,
-    getData: () => ({
-      pages,
-    }),
-    children: {
-      header: [{
-        Component: HomeHeader,
-      }],
-      body: [{
-        Component: Home,
-        getData: ({ context: { store } }) => {
-          const { config } = store.getState().runtime;
-          store.dispatch(setMeta({
-            langs: config.locales,
-            title: null,
-            description: null,
-          }));
+    // Component: Main,
+    // getData: ({ routes }) => ({
+    //   pages,
+    //   header: routes.pop().header || HomeHeader,
+    // }),
+    children: [{
+      Component: Home,
+      // header: HomeHeader,
+      getData: ({ context: { store } }) => {
+        const { config } = store.getState().runtime;
 
-          return {
-            categories,
-          };
-        },
-      }],
+        store.dispatch(setMeta({
+          langs: config.locales,
+          title: null,
+          description: null,
+        }));
+
+        return {
+          categories,
+        };
+      },
     },
-    // ...pages.map(page$ => ({
-    //   path: page$.alias,
-    //   header: PageHeader,
-    //   Component: Static,
-    //   getData: async ({ context: { store } }) => {
-    //     const { page } = await store.dispatch(loadPage(page$))
-    //       .catch(({ error }) => {
-    //         throw new HttpError(404, error);
-    //       });
-    //
-    //     store.dispatch(setMeta({
-    //       langs: page.langs,
-    //       title: page.title,
-    //       description: page.description,
-    //     }));
-    //
-    //     return page;
-    //   },
-    // })),
+    ...pages.map(page$ => ({
+      path: page$.alias,
+      // header: PageHeader,
+      Component: Page,
+      getData: async ({ context: { store, services: { pageService } } }) => {
+        const page = await pageService
+          .fetchPage(page$)
+          .catch(({ error }) => {
+            throw new HttpError(404, error);
+          });
+
+        store.dispatch(setMeta({
+          langs: page.langs,
+          title: page.title,
+          description: page.description,
+        }));
+
+        return {
+          page,
+        };
+      },
+    })),
     // ...categories.map(category => ({
     //   path: category.parent
     //     ? `/${category.parent.name}/${category.name}`
@@ -121,5 +123,6 @@ export default (pages = [], categories = []) => [
     //     from: category.name,
     //     to: `/${category.parent.name}/${category.name}`,
     //   })),
+    ],
   },
 ];

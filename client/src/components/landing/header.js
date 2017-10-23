@@ -36,6 +36,8 @@ HomeHeader.propTypes = {
   title: string.isRequired,
 };
 
+HomeHeader.className = 'home';
+
 export default compose(
   connect(({ runtime: { config } }) => ({
     title: config.title,
