@@ -2,15 +2,13 @@
 import HttpError from 'found/lib/HttpError';
 
 import {
-  Main,
   Home,
   Page,
   // Category,
   // Photo
 } from '../page';
 
-
-import { Header as PageHeader } from '../components/page';
+// import { Header as PageHeader } from '../components/page';
 // import PageHeader from './components/page/header';
 // import GalleryHeader from './components/gallery/header';
 
@@ -53,7 +51,6 @@ export default (pages = [], categories = []) => [
     },
     ...pages.map(page$ => ({
       path: page$.alias,
-      // header: PageHeader,
       Component: Page,
       getData: async ({ context: { store, services: { pageService } } }) => {
         const page = await pageService

@@ -42,7 +42,7 @@ export default env => merge(base(env), {
           path.resolve(__dirname, '..', 'src'),
           // path.resolve(__dirname, '..', 'api'),
           path.resolve(__dirname, '..', 'node_modules', 'common'),
-          path.resolve(__dirname, '..', '..', 'common'),
+          // path.resolve(__dirname, '..', '..', 'common'),
         ],
         loader: 'babel-loader',
         options: {

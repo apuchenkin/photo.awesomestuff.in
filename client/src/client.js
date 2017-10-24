@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
-import { BrowserProtocol } from 'farce';
+import { Actions as FarceActions, BrowserProtocol } from 'farce';
 import createConnectedRouter from 'found/lib/createConnectedRouter';
 import getStoreRenderArgs from 'found/lib/getStoreRenderArgs';
 import resolver from 'found/lib/resolver';
@@ -49,6 +49,8 @@ function onInsertCss(...styles) {
   });
 
   const store = await configureStore(new BrowserProtocol(), initialState, services);
+  store.dispatch(FarceActions.init());
+
   const matchContext = ({
     store,
     intl,

@@ -12,7 +12,11 @@ const isDevelopment = env => env === 'development';
 
 export default env => merge(base(env), {
   target: 'web',
-  entry: path.resolve(__dirname, '..', 'src', 'client.js'),
+
+  entry: [
+    'babel-polyfill',
+    path.resolve(__dirname, '..', 'src', 'client.js'),
+  ],
 
   output: {
     path: path.resolve(__dirname, '..', 'dist', 'assets'),
@@ -35,7 +39,10 @@ export default env => merge(base(env), {
           presets: [
             presetReact,
             presetEnv(isDevelopment
-              ? null
+              ? {
+                  useBuiltIns: true,
+                  modules: false,
+                }
               : {
                   "targets": {
                     "browsers": ["last 2 versions"]
