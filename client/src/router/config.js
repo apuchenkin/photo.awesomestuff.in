@@ -27,14 +27,8 @@ import { setMeta } from '../store/meta/actions';
 export default (pages = [], categories = []) => [
   {
     path: '/',
-    // Component: Main,
-    // getData: ({ routes }) => ({
-    //   pages,
-    //   header: routes.pop().header || HomeHeader,
-    // }),
     children: [{
       Component: Home,
-      // header: HomeHeader,
       getData: ({ context: { store } }) => {
         const { config } = store.getState().runtime;
 

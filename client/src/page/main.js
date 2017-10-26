@@ -1,5 +1,6 @@
 import React from 'react';
-import { string, element, shape, func } from 'prop-types';
+import classnames from 'classnames';
+import { element } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
@@ -27,7 +28,12 @@ class Main extends React.PureComponent {
     const { children, header } = this.props;
 
     return (
-      <div className={[style.main, header.type.className].filter(Boolean).join(' ')}>
+      <div
+        className={classnames(
+          style.main,
+          style[header.type.className],
+        )}
+      >
         {header}
         <div className={style.content} ref={(c) => { this.content = c; }}>
           {children}
@@ -40,9 +46,9 @@ class Main extends React.PureComponent {
   }
 }
 
-// Main.propTypes = {
-//   header: element.isRequired,
-//   body: element.isRequired,
-// };
+Main.propTypes = {
+  header: element.isRequired,
+  children: element.isRequired,
+};
 
 export default withStyles(style, baseStyle)(Main);

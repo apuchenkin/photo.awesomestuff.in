@@ -72,7 +72,7 @@ export default connect(
   ({ runtime: { config: { gallery } } }) => ({
     width: gallery.width,
     height: gallery.height,
-    getCategoryImage: category => `/static/${category.featured}/${gallery.width}/${gallery.height}`,
+    getCategoryImage: category => `/static/rt/${gallery.width}/${gallery.height}/${category.featured.src}`,
   }),
 )(
   withStyles(style, baseStyle)(Gallery),

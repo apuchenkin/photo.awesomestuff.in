@@ -10,8 +10,8 @@ export default env => ({
     extensions: ['.js', '.css', '.html'],
     symlinks: false,
     modules: [
-      path.resolve(__dirname, '..', 'node_modules'),
       'node_modules',
+      path.resolve(__dirname, '..', 'node_modules'),
     ],
   },
 
