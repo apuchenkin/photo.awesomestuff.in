@@ -1,10 +1,11 @@
-// import Redirect from 'found/lib/Redirect';
+import Redirect from 'found/lib/Redirect';
 import HttpError from 'found/lib/HttpError';
+import { remapPhotos, refinePhotos } from 'common/service/api/Photo';
 
 import {
   Home,
   Page,
-  // Category,
+  Category,
   // Photo
 } from '../page';
 
@@ -23,6 +24,7 @@ import {
 
 // import { load as loadPage } from './store/page/actions';
 import { setMeta } from '../store/meta/actions';
+
 
 export default (pages = [], categories = []) => [
   {
@@ -64,56 +66,63 @@ export default (pages = [], categories = []) => [
         };
       },
     })),
-    // ...categories.map(category => ({
-    //   path: category.parent
-    //     ? `/${category.parent.name}/${category.name}`
-    //     : `/${category.name}`,
-    //   header: GalleryHeader,
-    //   Component: Gallery,
-    //   getData: async ({ params, context: { store } }) => {
-    //     store.dispatch(loadedCategory(category));
-    //     await store.dispatch(loadPhotos(category, params.photoId))
-    //       .catch(({ error }) => {
-    //         throw new HttpError(404, error);
-    //       });
-    //
-    //     store.dispatch(setMeta({
-    //       langs: category.langs,
-    //       title: category.title,
-    //       description: category.description,
-    //     }));
-    //
-    //     return category;
-    //   },
-    //   children: [{
-    //     path: '/photo/:photoId',
-    //     header: GalleryHeader,
-    //     Component: Photo,
-    //     getData: async ({ params, context: { store, intl } }) => {
-    //       const photo = await store.dispatch(loadPhoto(params.photoId))
-    //         .catch(({ error }) => {
-    //           throw new HttpError(404, error);
-    //         });
-    //
-    //       store.dispatch(setMeta({
-    //         langs: photo.langs,
-    //         title: photo.description,
-    //         description: intl.formatMessage({ id: 'meta.description.photo' }, {
-    //           author: photo.author && photo.author.name,
-    //           title: photo.description,
-    //         }),
-    //       }));
-    //
-    //       return photo;
-    //     },
-    //   }],
-    // })),
-    // ...categories
-    //   .filter(category => category.parent)
-    //   .map(category => new Redirect({
-    //     from: category.name,
-    //     to: `/${category.parent.name}/${category.name}`,
-    //   })),
+    ...categories.map(category => ({
+      path: category.parent
+        ? `/${category.parent.name}/${category.name}`
+        : `/${category.name}`,
+      Component: Category,
+      getData: async ({ params, context: { store, services: { categoryService } } }) => {
+        const config = store.getState().runtime.config;
+        // store.dispatch(loadedCategory(category));
+        // await store.dispatch(loadPhotos(category, params.photoId))
+        //   .catch(({ error }) => {
+        //     throw new HttpError(404, error);
+        //   });
+
+        // store.dispatch(setMeta({
+        //   langs: category.langs,
+        //   title: category.title,
+        //   description: category.description,
+        // }));
+        const photos = await categoryService.fetchPhotos(category)
+          .then(refinePhotos(params.photoId))
+          .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter }))
+        ;
+
+        return {
+          category,
+          photos,
+        };
+      },
+      // children: [{
+      //   path: '/photo/:photoId',
+      //   header: GalleryHeader,
+      //   Component: Photo,
+      //   getData: async ({ params, context: { store, intl } }) => {
+      //     const photo = await store.dispatch(loadPhoto(params.photoId))
+      //       .catch(({ error }) => {
+      //         throw new HttpError(404, error);
+      //       });
+      //
+      //     store.dispatch(setMeta({
+      //       langs: photo.langs,
+      //       title: photo.description,
+      //       description: intl.formatMessage({ id: 'meta.description.photo' }, {
+      //         author: photo.author && photo.author.name,
+      //         title: photo.description,
+      //       }),
+      //     }));
+      //
+      //     return photo;
+      //   },
+      // }],
+    })),
+    ...categories
+      .filter(category => category.parent)
+      .map(category => new Redirect({
+        from: category.name,
+        to: `/${category.parent.name}/${category.name}`,
+      })),
     ],
   },
 ];
