@@ -2,7 +2,8 @@ import React from 'react';
 import createRender from 'found/lib/createRender';
 import ElementsRenderer from 'found/lib/ElementsRenderer';
 import StaticContainer from 'react-static-container';
-import Loader from '../components/loader/loader';
+// import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import Loader from '../components/loader';
 import NotFound from '../components/error/404';
 import ServiceUnavailable from '../components/error/500';
 
@@ -16,11 +17,30 @@ const renderError = ({ error, ...props }) => (
   </div>
 );
 
+// export default ({ Component, props }) => (
+//   <TransitionGroup>
+//     {
+//       (Component && props) ? (
+//         <Fade key="content" exit={false}><Component {...props} /></Fade>
+//       ) : (
+//
+//       )
+//     }
+//   </TransitionGroup>
+// );
+// const Fade = ({ children, ...props }) => (
+//   <CSSTransition
+//     {...props}
+//     timeout={150}
+//     classNames="fade"
+//   >
+//     {children}
+//   </CSSTransition>
+// );
+
 const renderPending = () => (
   <div>
-    <StaticContainer>
-      {null}
-    </StaticContainer>
+    <StaticContainer />
     <Loader />
   </div>
 );

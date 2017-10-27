@@ -1,7 +1,7 @@
 import Redirect from 'found/lib/Redirect';
 import HttpError from 'found/lib/HttpError';
 import { remapPhotos, refinePhotos } from 'common/service/api/Photo';
-import Loader from '../components/loader';
+// import Loader from '../components/loader';
 
 import {
   Home,
@@ -39,7 +39,6 @@ export default (pages = [], categories = []) => [
     ...pages.map(page$ => ({
       path: page$.alias,
       Component: Page,
-      render: Loader,
       getData: async ({ context: { services: { pageService } } }) => {
         const page = await pageService
           .fetchPage(page$)

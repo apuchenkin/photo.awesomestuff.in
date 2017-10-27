@@ -1,8 +1,8 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { bool } from 'prop-types';
+// import { connect } from 'react-redux';
+// import { bool } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+// import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import style from './style.less';
 
@@ -24,28 +24,6 @@ import style from './style.less';
 //   entered: { opacity: 1 },
 // };
 
-const Fade = ({ children, ...props }) => (
-  <CSSTransition
-    {...props}
-    timeout={150}
-    classNames="fade"
-  >
-    {children}
-  </CSSTransition>
-);
-
-export const Loader = withStyles(style)(() => (
+export default withStyles(style)(() => (
   <div className={style.loader}><div className={style.accent} /></div>
 ));
-
-export default ({ Component, props }) => (
-  <TransitionGroup>
-    {
-      (Component && props) ? (
-        <Fade key="content" exit={false}><Component {...props} /></Fade>
-      ) : (
-        <Fade key="loader" enter={false}><Loader /></Fade>
-      )
-    }
-  </TransitionGroup>
-);

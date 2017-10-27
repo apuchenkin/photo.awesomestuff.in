@@ -8,54 +8,36 @@ import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 
 import Footer from '../components/footer';
+import Scrollbar from '../components/scrollbar';
 
-const PerfectScrollbar = isBrowser ? require('perfect-scrollbar').default : null;
-
-class Main extends React.PureComponent {
-  componentDidMount() {
-    this.ps = new PerfectScrollbar(this.content);
-  }
-
-  componentDidUpdate() {
-    this.ps.update();
-  }
-
-  componentWillUnmount() {
-    this.ps.destroy();
-    this.ps = null;
-  }
-
-  render() {
-    const { children, header, title, langs, location } = this.props;
-
-    return (
-      <div
-        className={classnames(
-          style.main,
-          style[header.type.className],
-        )}
-      >
-        <Helmet
-          titleTemplate={`%s - ${title}`}
-          defaultTitle={title}
-          onChangeClientState={(helmet) => {
-            if (typeof ga !== 'undefined') {
-              ga('send', 'pageview', {
-                title: helmet.title,
-                page: location.pathname,
-              });
-            }
-          }}
-        />
-        {header}
-        <div className={style.content} ref={(c) => { this.content = c; }}>
-          {children}
-          <Footer langs={langs} />
-        </div>
+const Main = ({ children, header, title, langs, location }) => (
+  <div
+    className={classnames(
+      style.main,
+      style[header.type.className],
+    )}
+  >
+    <Helmet
+      titleTemplate={`%s - ${title}`}
+      defaultTitle={title}
+      onChangeClientState={(helmet) => {
+        if (typeof ga !== 'undefined') {
+          ga('send', 'pageview', {
+            title: helmet.title,
+            page: location.pathname,
+          });
+        }
+      }}
+    />
+    {header}
+    <Scrollbar className={style.content}>
+      <div>
+        {children}
+        <Footer langs={langs} />
       </div>
-    );
-  }
-}
+    </Scrollbar>
+  </div>
+);
 
 Main.propTypes = {
   header: element.isRequired,
