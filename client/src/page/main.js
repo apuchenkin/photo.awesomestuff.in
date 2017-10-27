@@ -7,23 +7,22 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
 
-import Loader from '../components/loader';
 import Footer from '../components/footer';
 
-const Ps = isBrowser ? require('perfect-scrollbar') : null;
+const PerfectScrollbar = isBrowser ? require('perfect-scrollbar').default : null;
 
 class Main extends React.PureComponent {
   componentDidMount() {
-    Ps.initialize(this.content);
+    this.ps = new PerfectScrollbar(this.content);
   }
 
   componentDidUpdate() {
-    this.content.scrollTop = 0;
-    Ps.update(this.content);
+    this.ps.update();
   }
 
   componentWillUnmount() {
-    Ps.destroy(this.content);
+    this.ps.destroy();
+    this.ps = null;
   }
 
   render() {

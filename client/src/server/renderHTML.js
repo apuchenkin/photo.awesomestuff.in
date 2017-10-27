@@ -3,7 +3,6 @@ import React from 'react';
 import { string, shape, object } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { Helmet } from 'react-helmet';
-// import escapeHtml from 'escape-html';
 import assets from '../../dist/assets.json';
 import favicon from '../assets/favicon.ico';
 import style from '../style/style.less';

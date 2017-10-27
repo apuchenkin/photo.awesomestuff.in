@@ -14,7 +14,7 @@ import render from './router/render';
 import serviceFactory from './service/factory';
 
 // eslint-disable-next-line import/first
-import 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
+import 'perfect-scrollbar/css/perfect-scrollbar.css';
 import './style/style.css';
 
 addLocaleData(ruLocaleData);
