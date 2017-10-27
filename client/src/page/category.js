@@ -21,7 +21,7 @@ const GalleryPage = ({ category, categories, loading, children }) => {
 
   return (
     <div className={className} >
-      <CSSTransitionGroup
+      {/* <CSSTransitionGroup
         transitionName={{
           enter: transitionStyle['fade-enter'],
           enterActive: transitionStyle['fade-enter-active'],
@@ -30,9 +30,9 @@ const GalleryPage = ({ category, categories, loading, children }) => {
         }}
         transitionEnterTimeout={200}
         transitionLeaveTimeout={200}
-      >
+      > */}
         {children}
-      </CSSTransitionGroup>
+      {/* </CSSTransitionGroup> */}
       <Gallery category={category} />
     </div>
   );

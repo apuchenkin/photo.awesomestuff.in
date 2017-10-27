@@ -2,60 +2,50 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bool } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import style from './style.less';
 
-const CLASS_NAME = style.loader;
-const CLASS_NAME_TRANSITION = style.fade;
-const CLASS_NAME_HIDDEN = style.hidden;
-const TRANSITION_DURATION = 200;
+// const CLASS_NAME = style.loader;
+// const CLASS_NAME_TRANSITION = style.fade;
+// const CLASS_NAME_HIDDEN = style.hidden;
+// const TRANSITION_DURATION = 200;
 
-class Loader extends React.PureComponent {
+// const defaultStyle = {
+//   transition: `opacity ${duration}ms ease-in-out`,
+//   opacity: 0,
+//   padding: 20,
+//   display: 'inline-block',
+//   backgroundColor: '#8787d8'
+// }
+//
+// const transitionStyles = {
+//   entering: { opacity: 0 },
+//   entered: { opacity: 1 },
+// };
 
-  constructor(props) {
-    super(props);
+const Fade = ({ children, ...props }) => (
+  <CSSTransition
+    {...props}
+    timeout={150}
+    classNames="fade"
+  >
+    {children}
+  </CSSTransition>
+);
 
-    this.state = {
-      visible: props.isLoading,
-      className: null,
-    };
-  }
+export const Loader = withStyles(style)(() => (
+  <div className={style.loader}><div className={style.accent} /></div>
+));
 
-  componentWillReceiveProps({ isLoading }) {
-    if (isLoading) {
-      this.setState({
-        visible: true,
-        className: CLASS_NAME_TRANSITION,
-      }, () => this.setState({
-        className: null,
-      }));
-    } else {
-      this.setState({
-        className: CLASS_NAME_TRANSITION,
-      }, () => setTimeout(() => this.setState({
-        visible: false,
-        className: null,
-      }), TRANSITION_DURATION));
+export default ({ Component, props }) => (
+  <TransitionGroup>
+    {
+      (Component && props) ? (
+        <Fade key="content" exit={false}><Component {...props} /></Fade>
+      ) : (
+        <Fade key="loader" enter={false}><Loader /></Fade>
+      )
     }
-  }
-
-  render() {
-    const { visible, className } = this.state;
-    const className$ = [
-      CLASS_NAME,
-      visible ? className : CLASS_NAME_HIDDEN,
-    ].filter(x => !!x).join(' ');
-
-    return (
-      <div className={className$} key="loader"><div className={style.accent} /></div>
-    );
-  }
-}
-
-Loader.propTypes = {
-  isLoading: bool.isRequired,
-};
-
-export default connect(
-  () => ({ isLoading: false }),
-)(withStyles(style)(Loader));
+  </TransitionGroup>
+);

@@ -5,8 +5,8 @@ import CompressionPlugin from 'compression-webpack-plugin';
 import path from 'path';
 import presetReact from 'babel-preset-react';
 import presetEnv from 'babel-preset-env';
-
 import base from './webpack.config.base.babel';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 const isDevelopment = env => env === 'development';
 
@@ -100,7 +100,8 @@ export default env => merge(base(env), {
       test: /\.(js|html)$/,
       threshold: 10240,
       minRatio: 0.8
-    })
+    }),
+    new BundleAnalyzerPlugin(),
   ]),
   devtool: isDevelopment(env) ? 'eval' : 'source-map',
 });

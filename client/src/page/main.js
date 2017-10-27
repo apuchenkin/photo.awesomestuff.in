@@ -53,8 +53,6 @@ class Main extends React.PureComponent {
           {children}
           <Footer langs={langs} />
         </div>
-        {/* TODO: move loader */}
-        <Loader key="loader" />
       </div>
     );
   }

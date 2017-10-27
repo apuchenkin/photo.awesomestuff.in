@@ -1,6 +1,7 @@
 import Redirect from 'found/lib/Redirect';
 import HttpError from 'found/lib/HttpError';
 import { remapPhotos, refinePhotos } from 'common/service/api/Photo';
+import Loader from '../components/loader';
 
 import {
   Home,
@@ -38,18 +39,13 @@ export default (pages = [], categories = []) => [
     ...pages.map(page$ => ({
       path: page$.alias,
       Component: Page,
+      render: Loader,
       getData: async ({ context: { services: { pageService } } }) => {
         const page = await pageService
           .fetchPage(page$)
           .catch(({ error }) => {
             throw new HttpError(404, error);
           });
-
-        // store.dispatch(setMeta({
-        //   langs: page.langs,
-        //   title: page.title,
-        //   description: page.description,
-        // }));
 
         return {
           page,
