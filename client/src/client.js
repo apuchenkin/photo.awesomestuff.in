@@ -10,7 +10,7 @@ import { IntlProvider, addLocaleData } from 'react-intl';
 import ruLocaleData from 'react-intl/locale-data/ru';
 import configureStore from './store/configure';
 import WithStylesContext from './components/WithStylesContext';
-import { clientRender as render } from './router/render';
+import render from './router/render';
 import serviceFactory from './service/factory';
 
 // eslint-disable-next-line import/first
@@ -21,9 +21,7 @@ addLocaleData(ruLocaleData);
 
 // eslint-disable-next-line no-underscore-dangle
 const initialState = isBrowser && (window.__INITIAL_STATE__ || {});
-const ConnectedRouter = createConnectedRouter({
-  render,
-});
+const ConnectedRouter = createConnectedRouter({ render });
 
 function onInsertCss(...styles) {
   // eslint-disable-next-line no-underscore-dangle, max-len

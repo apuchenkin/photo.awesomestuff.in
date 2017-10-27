@@ -1,6 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { element } from 'prop-types';
+import { element, string } from 'prop-types';
+import { Helmet } from 'react-helmet';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
 import style from '../style/main.less';
@@ -25,7 +27,7 @@ class Main extends React.PureComponent {
   }
 
   render() {
-    const { children, header } = this.props;
+    const { children, header, title, langs, location } = this.props;
 
     return (
       <div
@@ -34,10 +36,22 @@ class Main extends React.PureComponent {
           style[header.type.className],
         )}
       >
+        <Helmet
+          titleTemplate={`%s - ${title}`}
+          defaultTitle={title}
+          onChangeClientState={(helmet) => {
+            if (typeof ga !== 'undefined') {
+              ga('send', 'pageview', {
+                title: helmet.title,
+                page: location.pathname,
+              });
+            }
+          }}
+        />
         {header}
         <div className={style.content} ref={(c) => { this.content = c; }}>
           {children}
-          <Footer />
+          <Footer langs={langs} />
         </div>
         {/* TODO: move loader */}
         <Loader key="loader" />
@@ -49,6 +63,10 @@ class Main extends React.PureComponent {
 Main.propTypes = {
   header: element.isRequired,
   children: element.isRequired,
+  title: string.isRequired,
 };
 
-export default withStyles(style, baseStyle)(Main);
+export default connect(({ runtime: { config }, found: { resolvedMatch: { location } } }) => ({
+  title: config.title,
+  location,
+}))(withStyles(style, baseStyle)(Main));

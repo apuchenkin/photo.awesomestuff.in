@@ -1,7 +1,7 @@
 import React from 'react';
 import { array, arrayOf, shape, number } from 'prop-types';
-// import { connect } from 'react-redux';
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { Helmet } from 'react-helmet';
+import { injectIntl, intlShape, defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Home, { style, Header } from '../components/landing';
 import Main from './main';
@@ -13,7 +13,7 @@ const messages = defineMessages({
   },
 });
 
-const Landing = ({ data: { categories } }) => {
+const Landing = ({ intl, data: { categories } }) => {
   const galleries = categories
     .filter(c => !c.parent && c.title && c.featured)
     .map(category => (
@@ -28,6 +28,9 @@ const Landing = ({ data: { categories } }) => {
 
   return (
     <Main header={<Header />}>
+      <Helmet>
+        <meta name="description" content={intl.formatMessage({ id: 'meta.description' })} />
+      </Helmet>
       <div className={style.galleries}>
         <h2>
           <FormattedMessage {...messages.galleries} />
@@ -43,12 +46,7 @@ Landing.propTypes = {
     id: number.isRequired,
     childs: array,
   })).isRequired,
+  intl: intlShape.isRequired,
 };
 
-export default withStyles(style)(Landing);
-
-// connect(
-//   ({ category: { categories } }) => ({ categories }),
-// )(
-//   withStyles(style)(Home),
-// );
+export default withStyles(style)(injectIntl(Landing));

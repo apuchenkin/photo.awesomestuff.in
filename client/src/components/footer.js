@@ -2,7 +2,6 @@ import React from 'react';
 import { string, arrayOf, shape } from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
-// import { locationShape } from 'found/lib/PropTypes';
 import Link from 'found/lib/Link';
 
 import LanguageSwitcher from './common/LanguageSwitcher';
@@ -14,7 +13,7 @@ const messages = defineMessages({
   },
 });
 
-const Footer = ({ title, pages }) => {
+const Footer = ({ title, pages, langs }) => {
   const aboutPage = pages.find(p => p.alias === 'about');
   const contactsPage = pages.find(p => p.alias === 'contacts');
 
@@ -23,7 +22,7 @@ const Footer = ({ title, pages }) => {
       <Link to="/" >{title}</Link> | &copy; <FormattedMessage {...messages.footer} />
       {aboutPage && contactsPage.title && [' | ', <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
       {contactsPage && contactsPage.title && [' | ', <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
-      <LanguageSwitcher />
+      <LanguageSwitcher langs={langs} />
     </footer>
   );
 };

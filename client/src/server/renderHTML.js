@@ -1,9 +1,9 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
-import { string, shape, array, object } from 'prop-types';
+import { string, shape, object } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
-import escapeHtml from 'escape-html';
+import { Helmet } from 'react-helmet';
+// import escapeHtml from 'escape-html';
 import assets from '../../dist/assets.json';
 import favicon from '../assets/favicon.ico';
 import style from '../style/style.less';
@@ -24,22 +24,25 @@ GoogleAnalytics.propTypes = {
   id: string.isRequired,
 };
 
-function renderHTML({ markup, initialState, meta, styles }) {
+function renderHTML({ markup, initialState, styles }) {
   const { config, locale } = initialState.runtime;
+  const helmet = Helmet.renderStatic();
+  const htmlAttrs = helmet.htmlAttributes.toComponent();
+  const bodyAttrs = helmet.bodyAttributes.toComponent();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} {...htmlAttrs}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width initial-scale=1.0" />
-        <title>{escapeHtml(meta.title)}</title>
-        <meta name="description" content={escapeHtml(meta.description)} />
+        {helmet.title.toComponent()}
+        {helmet.meta.toComponent()}
         <meta name="viewport" content="width=device-width" />
         <style type="text/css" dangerouslySetInnerHTML={{ __html: styles }} />
         <link rel="shortcut icon" href={favicon} type="image/ico" />
-        { meta.links }
+        {helmet.link.toComponent()}
       </head>
-      <body>
+      <body {...bodyAttrs}>
         <div
           id="react-view"
           className={style.wrapper}
@@ -61,11 +64,6 @@ renderHTML.propTypes = {
       locale: string.isRequired,
       config: object.isRequired,
     }),
-  }).isRequired,
-  meta: shape({
-    title: string.isRequired,
-    description: string.isRequired,
-    links: array.isRequired,
   }).isRequired,
   styles: string.isRequired,
 };

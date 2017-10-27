@@ -4,8 +4,7 @@ import { connect } from 'react-redux';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import style from './style.less';
-
-const localeURL = /^(\/)?(ru|en)?($|\/.*$)$/g;
+import Links from './links';
 
 const messages = defineMessages({
   not_available: {
@@ -20,7 +19,7 @@ const Locale = ({ location, locale, intl, disabled }) => {
 
   return disabled
     ? <span title={title}>{localeMsg}</span>
-    : <a href={location.pathname.replace(localeURL, `/${locale}$3`)} hrefLang={locale} >{localeMsg}</a>;
+    : <a href={`/${locale}${location.pathname}`} hrefLang={locale} >{localeMsg}</a>;
 };
 
 Locale.propTypes = {
@@ -32,16 +31,18 @@ Locale.propTypes = {
   intl: intlShape.isRequired,
 };
 
-const LanguageSwitcher = ({ langs, locales, ...props }) => (
+const LanguageSwitcher = ({ langs, locales, location, ...props }) => (
   <div className={style.language}>
     {locales.map(locale => (
       <Locale
-        {...props}
+        location={location}
         locale={locale}
         disabled={!langs.find(l => locale === l)}
         key={locale}
+        {...props}
       />
     ))}
+    <Links langs={langs} url={location.pathname} />
   </div>
 );
 
@@ -51,10 +52,10 @@ LanguageSwitcher.propTypes = {
 };
 
 export default connect(
-  ({ runtime: { config }, found: { resolvedMatch: { location } }, meta }) => ({
+  ({ runtime: { config }, found: { resolvedMatch } }, { langs }) => ({
     locales: config.locales,
-    langs: meta.langs || config.locales,
-    location,
+    location: resolvedMatch.location,
+    langs: langs || config.locales,
   }),
 )(
   withStyles(style)(injectIntl(LanguageSwitcher)),

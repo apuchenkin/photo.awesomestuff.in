@@ -3,7 +3,6 @@ import createRender from 'found/lib/createRender';
 import ElementsRenderer from 'found/lib/ElementsRenderer';
 import StaticContainer from 'react-static-container';
 import Loader from '../components/loader/loader';
-import { buildMeta, metaUpdate } from '../service/meta';
 import NotFound from '../components/error/404';
 import ServiceUnavailable from '../components/error/500';
 
@@ -35,20 +34,8 @@ const renderReady = ({ elements }) => (
   </div>
 );
 
-export const serverRender = createRender({
+export default createRender({
   renderError,
   renderPending,
   renderReady,
-});
-
-export const clientRender = createRender({
-  renderError,
-  renderPending,
-  // eslint-disable-next-line react/prop-types
-  renderReady: ({ location, elements, context: { store, intl } }) => {
-    const meta = buildMeta(location, store, intl);
-    metaUpdate(meta, location);
-
-    return renderReady({ elements });
-  },
 });

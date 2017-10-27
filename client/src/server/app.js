@@ -13,9 +13,8 @@ import { readFileSync } from 'fs';
 
 import HTML from './renderHTML';
 import configureStore from '../store/configure';
-import { serverRender as render } from '../router/render';
+import render from '../router/render';
 import config from '../../etc/config';
-import { buildMeta } from '../service/meta';
 import WithStylesContext from '../components/WithStylesContext';
 import serviceFactory from '../service/factory';
 
@@ -153,14 +152,12 @@ app.use(catchAsyncErrors(async (req, res) => {
     </Provider>,
   );
 
-  const meta = buildMeta(renderArgs.location, store, intl);
   const styles = [...css].join('');
   const html = ReactDOM.renderToStaticMarkup(
     <WithStylesContext onInsertCss={onInsertCss}>
       <HTML
         markup={markup}
         initialState={store.getState()}
-        meta={meta}
         styles={styles}
       />
     </WithStylesContext>,

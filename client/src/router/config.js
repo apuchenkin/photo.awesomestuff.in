@@ -23,7 +23,6 @@ import {
 // } from './store/photo/actions';
 
 // import { load as loadPage } from './store/page/actions';
-import { setMeta } from '../store/meta/actions';
 
 
 export default (pages = [], categories = []) => [
@@ -31,35 +30,26 @@ export default (pages = [], categories = []) => [
     path: '/',
     children: [{
       Component: Home,
-      getData: ({ context: { store } }) => {
-        const { config } = store.getState().runtime;
-
-        store.dispatch(setMeta({
-          langs: config.locales,
-          title: null,
-          description: null,
-        }));
-
-        return {
-          categories,
-        };
-      },
+      data: ({
+        pages,
+        categories,
+      }),
     },
     ...pages.map(page$ => ({
       path: page$.alias,
       Component: Page,
-      getData: async ({ context: { store, services: { pageService } } }) => {
+      getData: async ({ context: { services: { pageService } } }) => {
         const page = await pageService
           .fetchPage(page$)
           .catch(({ error }) => {
             throw new HttpError(404, error);
           });
 
-        store.dispatch(setMeta({
-          langs: page.langs,
-          title: page.title,
-          description: page.description,
-        }));
+        // store.dispatch(setMeta({
+        //   langs: page.langs,
+        //   title: page.title,
+        //   description: page.description,
+        // }));
 
         return {
           page,
