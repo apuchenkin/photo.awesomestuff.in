@@ -14,7 +14,7 @@ export default env => merge(base(env), {
   target: 'web',
 
   entry: [
-    'babel-polyfill',
+    // 'babel-polyfill',
     path.resolve(__dirname, '..', 'src', 'client.js'),
   ],
 

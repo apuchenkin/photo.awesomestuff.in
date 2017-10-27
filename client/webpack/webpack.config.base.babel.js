@@ -68,13 +68,6 @@ export default env => ({
           limit: 10000,
         },
       },
-      {
-        test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
-        loader: 'file-loader',
-        query: {
-          name: isDevelopment(env) ? '[path][name].[ext]' : '[hash].[ext]',
-        },
-      },
     ],
   },
   plugins: (isDevelopment(env) ? [] : [
