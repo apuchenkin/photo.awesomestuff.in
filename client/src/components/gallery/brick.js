@@ -1,14 +1,13 @@
 import React from 'react';
 import { number, string, shape } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
+import photoService from 'common/service/photo/memoize';
 import style from './gallery.less';
-// import utils from '../../lib/utils';
 
-const Brick = ({ photo, getSrc }) => {
+const Brick = ({ photo, staticEndpoint }) => {
   const { w, h, src } = photo;
   const size = Math.max(w, h);
-  const url = getSrc(src, size, size, true);
+  const url = [staticEndpoint, photoService.getSrc(src, size, size, true)].join('/');
   const brickStyle = {
     width: `${w}px`,
     height: `${h}px`,
@@ -28,6 +27,7 @@ Brick.propTypes = {
     w: number.isRequired,
     h: number.isRequired,
   }).isRequired,
+  staticEndpoint: string.isRequired,
 };
 
 export default withStyles(style)(Brick);

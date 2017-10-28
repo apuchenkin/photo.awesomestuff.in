@@ -14,6 +14,7 @@ import render from './router/render';
 import serviceFactory from './service/factory';
 
 // eslint-disable-next-line import/first
+import 'react-grid-layout/css/styles.css';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
 import './style/style.css';
 

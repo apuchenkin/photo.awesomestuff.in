@@ -1,6 +1,6 @@
 import React from 'react';
 import { shape, arrayOf } from 'prop-types';
-import { connect } from 'react-redux';
+// import { connect } from 'react-redux';
 import { fromCategory } from '../link/category';
 import PhotoLink from '../link/photo';
 import Brick from './brick';
@@ -39,11 +39,11 @@ class Gallery extends React.PureComponent {
   }
 
   render() {
-    const { photos, category } = this.props;
+    const { photos, category, config } = this.props;
     const bricks = photos.map(p => (
       <li key={p.id} >
         <PhotoLink photoId={p.id} {...fromCategory(category)}>
-          <Brick photo={p} />
+          <Brick photo={p} staticEndpoint={config.staticEndpoint} />
         </PhotoLink>
       </li>
     ));
@@ -61,7 +61,4 @@ Gallery.propTypes = {
   photos: arrayOf(shape()).isRequired,
 };
 
-export default connect(
-  ({ photo: { photos } }) => ({
-    photos,
-  }))(Gallery);
+export default Gallery;

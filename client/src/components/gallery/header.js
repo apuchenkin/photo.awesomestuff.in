@@ -1,6 +1,5 @@
 import React from 'react';
 import { number, string, shape, arrayOf } from 'prop-types';
-import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
@@ -41,10 +40,11 @@ const GalleryHeader = ({ category, categories }) => {
           activeClassName={navStyle.active}
           category={c.parent.name}
           subcategory={c.name}
-        >{c.title}</CategoryLink>
+        >
+          {c.title}
+        </CategoryLink>
       </li>
-    ))
-  ;
+    ));
 
   return (
     <header className={style.main}>
@@ -65,11 +65,4 @@ GalleryHeader.propTypes = {
   categories: arrayOf(categoryShape).isRequired,
 };
 
-export default connect(
-  ({ category: { category, categories } }) => ({
-    category,
-    categories,
-  }),
-)(
-  withStyles(navStyle, style)(GalleryHeader),
-);
+export default withStyles(navStyle, style)(GalleryHeader);

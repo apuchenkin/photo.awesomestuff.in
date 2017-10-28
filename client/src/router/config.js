@@ -57,26 +57,16 @@ export default (pages = [], categories = []) => [
         : `/${category.name}`,
       Component: Category,
       getData: async ({ params, context: { store, services: { categoryService } } }) => {
-        const config = store.getState().runtime.config;
-        // store.dispatch(loadedCategory(category));
-        // await store.dispatch(loadPhotos(category, params.photoId))
-        //   .catch(({ error }) => {
-        //     throw new HttpError(404, error);
-        //   });
-
-        // store.dispatch(setMeta({
-        //   langs: category.langs,
-        //   title: category.title,
-        //   description: category.description,
-        // }));
+        const { config } = store.getState().runtime;
         const photos = await categoryService.fetchPhotos(category)
           .then(refinePhotos(params.photoId))
-          .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter }))
-        ;
+          .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter }));
 
         return {
           category,
+          categories,
           photos,
+          config,
         };
       },
       // children: [{
