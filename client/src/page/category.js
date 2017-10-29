@@ -51,7 +51,11 @@ const GalleryPage = ({
           transitionEnterTimeout={200}
           transitionLeaveTimeout={200}
         > */}
-        {children}
+        {children && React.cloneElement(children, {
+          config,
+          category,
+          photos,
+        })}
         {/* </CSSTransitionGroup> */}
         <Gallery category={category} photos={photos} config={config} />
       </div>

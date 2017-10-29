@@ -12,7 +12,7 @@ const Links = ({
     <link href={`${hostname}${url}`} rel="alternate" hrefLang="x-default" key="x-default" />
     {
       langs.map(lang => (
-        <link rel="alternate" href={`${hostname}/${lang}${url}`} hrefLang={lang} />
+        <link rel="alternate" href={`${hostname}/${lang}${url}`} hrefLang={lang} key={lang} />
       ))
     }
   </Helmet>

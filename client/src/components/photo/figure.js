@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import debounce from 'debounce';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import photoService from 'common/service/photo/memoize';
 import Link from 'found/lib/Link';
 import Close from './icons/close';
-// import utils from '../../lib/utils';
 import Img from './img';
 import { setRuntimeVariable } from '../../store/runtime/actions';
 
@@ -48,26 +48,23 @@ class Figure extends React.PureComponent {
   }
 
   componentWillMount() {
-    const { width, height } = this.props;
-    this.props.setRuntimeVariable('dimensions', {
-      width,
-      height,
-    });
+    const { size } = this.props;
+    this.props.setRuntimeVariable('dimensions', size);
   }
 
   componentDidMount() {
     window.addEventListener('resize', this.resize);
   }
 
-  componentWillUnmount() {
-    this.props.setRuntimeVariable('dimensions', null);
-    window.removeEventListener('resize', this.resize);
-  }
-
   componentWillReceiveProps(props) {
     if (props.photo !== this.props.photo) {
       this.props.setRuntimeVariable('dimensions', Figure.getDimensions());
     }
+  }
+
+  componentWillUnmount() {
+    this.props.setRuntimeVariable('dimensions', null);
+    window.removeEventListener('resize', this.resize);
   }
 
   resize() {
@@ -103,8 +100,9 @@ class Figure extends React.PureComponent {
   }
 
   render() {
-    const { width, height, photo, onClick, getSrc } = this.props;
-    const src = getSrc(photo.src, width, height);
+    const { photo, onClick, staticEndpoint, size: { width, height } } = this.props;
+    const src = [staticEndpoint, photoService.getSrc(photo.src, width, height)].join('/');
+    console.log(src);
 
     return (
       <Img
@@ -121,18 +119,20 @@ class Figure extends React.PureComponent {
 }
 
 Figure.propTypes = {
-  width: number.isRequired,
-  height: number.isRequired,
+  // width: number.isRequired,
+  // height: number.isRequired,
   photo: photoShape.isRequired,
   backUrl: string.isRequired,
   onClick: func.isRequired,
 };
 
 export default connect(
-  ({ runtime: { config, dimensions } }) => (dimensions
-    ? ({ ...dimensions })
-    : (isBrowser ? { ...Figure.getDimensions() } : { ...config.photo })
-  ),
+  ({ runtime: { dimensions } }, { config }) => ({
+    size: dimensions
+      ? ({ ...dimensions })
+      : (isBrowser ? { ...Figure.getDimensions() } : { ...config.photo }),
+    staticEndpoint: config.staticEndpoint,
+  }),
   {
     setRuntimeVariable,
   },
