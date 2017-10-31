@@ -61,15 +61,6 @@ class Photo extends React.PureComponent {
     const backUrl = `/${category.parent ? `${category.parent.name}/${category.name}` : category.name}`;
     const onClick = this.goNext(next);
 
-    // store.dispatch(setMeta({
-    //   langs: photo.langs,
-    //   title: photo.description,
-    //   description: intl.formatMessage({ id: 'meta.description.photo' }, {
-    //     author: photo.author && photo.author.name,
-    //     title: photo.description,
-    //   }),
-    // }));
-
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <div className={isLoading ? `${style.photo} ${style.loading}` : style.photo} onClick={this.close}>

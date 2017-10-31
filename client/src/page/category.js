@@ -26,10 +26,11 @@ const GalleryPage = ({
     && c.parent.id === (category.parent || category).id,
   );
 
+  const langs = children ? children.props.data.photo.langs : category.langs;
   const header = <Header category={category} categories={categories} />;
 
   return (
-    <Main header={header} langs={category.langs}>
+    <Main header={header} langs={langs}>
       <Helmet>
         <title>{category.title}</title>
         <meta name="description" content={category.description} />
