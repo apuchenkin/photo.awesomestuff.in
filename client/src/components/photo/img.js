@@ -1,7 +1,7 @@
 import React from 'react';
 import { string, number, element } from 'prop-types';
-import ImageLoader from 'react-imageloader';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Image from 'react-image';
 import style from './photo.less';
 import Loader from '../loader';
 
@@ -16,14 +16,11 @@ const Img = ({
 }) => (
   <figure className={style.content} >
     {tools}
-    <ImageLoader
+    <Image
       src={src}
-      imgProps={{
-        alt,
-        ...props,
-      }}
-      // wrapper={React.DOM.figure}
-      preloader={() => <Loader />}
+      alt={alt}
+      {...props}
+      loader={<Loader />}
       className={style.image}
       style={{ maxWidth: `${width}px`, maxHeight: `${height}px` }}
     />

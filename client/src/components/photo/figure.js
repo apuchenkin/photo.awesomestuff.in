@@ -102,7 +102,6 @@ class Figure extends React.PureComponent {
   render() {
     const { photo, onClick, staticEndpoint, size: { width, height } } = this.props;
     const src = [staticEndpoint, photoService.getSrc(photo.src, width, height)].join('/');
-    console.log(src);
 
     return (
       <Img
