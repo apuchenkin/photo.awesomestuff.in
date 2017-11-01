@@ -15,16 +15,8 @@ import routeConfig from '../router/config';
 
 export default async function configureStore(historyProtocol, initialState) {
   const { runtime: { basename }, page: { pages }, category: { categories } } = initialState;
-  // const {
-  //   pageService,
-  //   categoryService,
-  // } = services;
-
-
-  const initial = Object.assign(initialState, {
-    page: { ...initialState.page, pages },
-    category: { ...initialState.category, categories },
-  });
+  const { data, ...initial } = initialState;
+  console.log(data);
 
   return createStore(
     reducers,
@@ -38,7 +30,7 @@ export default async function configureStore(historyProtocol, initialState) {
         ].filter(Boolean),
       }),
       createMatchEnhancer(
-        new Matcher(routeConfig(pages, categories)),
+        new Matcher(routeConfig(pages, categories, data)),
       ),
     ),
   );

@@ -26,8 +26,7 @@ const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.
   .map(([locale, file]) => [locale, JSON.parse(file)])
   .reduce((collection, [locale, messages]) =>
     Object.assign(collection, { [locale]: messages }),
-  {},
-  );
+  {});
 
 function catchAsyncErrors(fn) {
   return (req, res, next) => {
@@ -42,8 +41,7 @@ const app = express();
 
 const negotiateLocale = req =>
   req.acceptsLanguages(config.locales)
-  || config.fallbackLocale
-;
+  || config.fallbackLocale;
 
 if (__DEV__) {
   const proxy = require('http-proxy-middleware');
@@ -136,6 +134,8 @@ app.use(catchAsyncErrors(async (req, res) => {
     throw error;
   });
 
+  console.log(renderArgs.elements);
+
   if (!basename) {
     res.vary('Accept-Language');
   }
@@ -157,7 +157,10 @@ app.use(catchAsyncErrors(async (req, res) => {
     <WithStylesContext onInsertCss={onInsertCss}>
       <HTML
         markup={markup}
-        initialState={store.getState()}
+        initialState={{
+          ...store.getState(),
+          data: renderArgs.elements.map(el => el && el.props.data),
+        }}
         styles={styles}
       />
     </WithStylesContext>,

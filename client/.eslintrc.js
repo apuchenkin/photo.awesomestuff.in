@@ -18,6 +18,7 @@ module.exports = {
   },
   "rules": {
     "react/jsx-filename-extension": "off",
+    "function-paren-newline": ["error", "consistent"],
     "jsx-a11y/anchor-is-valid": [ "error", {
       "components": [ "Link" ],
       "specialLink": [ "to" ],

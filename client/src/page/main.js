@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { element, string } from 'prop-types';
+import { element, string, node } from 'prop-types';
 import { Helmet } from 'react-helmet';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import baseStyle from '../style/style.less';
@@ -41,7 +41,7 @@ const Main = ({ children, header, title, langs, location }) => (
 
 Main.propTypes = {
   header: element.isRequired,
-  children: element.isRequired,
+  children: node.isRequired,
   title: string.isRequired,
 };
 
