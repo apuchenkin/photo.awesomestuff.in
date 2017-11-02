@@ -134,8 +134,6 @@ app.use(catchAsyncErrors(async (req, res) => {
     throw error;
   });
 
-  console.log(renderArgs.elements);
-
   if (!basename) {
     res.vary('Accept-Language');
   }

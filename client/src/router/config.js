@@ -9,7 +9,7 @@ import {
   Photo,
 } from '../page';
 
-export default (pages = [], categories = []) => [
+export default (pages = [], categories = [], data = {}) => [
   {
     path: '/',
     children: [{
@@ -41,7 +41,8 @@ export default (pages = [], categories = []) => [
       Component: Category,
       getData: async ({ params, context: { store, services: { categoryService } } }) => {
         const { config } = store.getState().runtime;
-        const photos = await categoryService.fetchPhotos(category)
+        const cachedPhotos = data.category && data.category.id === category.id && data.photos;
+        const photos = cachedPhotos || await categoryService.fetchPhotos(category)
           .then(refinePhotos(params.photoId))
           .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter }));
 

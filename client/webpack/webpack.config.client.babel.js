@@ -37,9 +37,7 @@ export default env => merge(base(env), {
           cacheDirectory: isDevelopment(env),
           babelrc: false,
           presets: [
-            presetReact({
-              development: isDevelopment(env),
-            }),
+            presetReact,
             presetEnv({
               useBuiltIns: true,
               modules: false,
@@ -98,5 +96,5 @@ export default env => merge(base(env), {
     }),
     new BundleAnalyzerPlugin(),
   ]),
-  devtool: isDevelopment(env) ? 'eval' : 'source-map',
+  devtool: isDevelopment(env) ? 'eval-source-map' : 'source-map',
 });
