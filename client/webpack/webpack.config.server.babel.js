@@ -59,7 +59,6 @@ export default env => merge(base(env), {
             }),
           ],
           plugins: [
-            require('babel-plugin-transform-runtime'),
             require('babel-plugin-transform-object-rest-spread'),
             ...isDevelopment(env) ? [] : [
               require('babel-plugin-transform-react-constant-elements'),

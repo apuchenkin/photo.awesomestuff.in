@@ -14,7 +14,7 @@ export default env => merge(base(env), {
   target: 'web',
 
   entry: [
-    // 'babel-polyfill',
+    'babel-polyfill',
     path.resolve(__dirname, '..', 'src', 'client.js'),
   ],
 
@@ -37,23 +37,18 @@ export default env => merge(base(env), {
           cacheDirectory: isDevelopment(env),
           babelrc: false,
           presets: [
-            presetReact,
-            presetEnv(isDevelopment
-              ? {
-                  useBuiltIns: true,
-                  modules: false,
-                }
-              : {
-                  "targets": {
-                    "browsers": ["last 2 versions"]
-                  },
-                  useBuiltIns: true,
-                  modules: false,
-                }
-            )
+            presetReact({
+              development: isDevelopment(env),
+            }),
+            presetEnv({
+              useBuiltIns: true,
+              modules: false,
+              "targets": {
+                "browsers": ["last 2 versions"]
+              },
+            })
           ],
           plugins: [
-            require('babel-plugin-transform-runtime'),
             require('babel-plugin-transform-object-rest-spread'),
             ...isDevelopment(env) ? [] : [
               require('babel-plugin-transform-react-constant-elements'),
