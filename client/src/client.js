@@ -7,7 +7,6 @@ import createConnectedRouter from 'found/lib/createConnectedRouter';
 import getStoreRenderArgs from 'found/lib/getStoreRenderArgs';
 import resolver from 'found/lib/resolver';
 import { IntlProvider, addLocaleData } from 'react-intl';
-import ruLocaleData from 'react-intl/locale-data/ru';
 import configureStore from './store/configure';
 import WithStylesContext from './components/WithStylesContext';
 import render from './router/render';
@@ -17,10 +16,12 @@ import serviceFactory from './service/factory';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
 import './style/style.css';
 
-addLocaleData(ruLocaleData);
-
 // eslint-disable-next-line no-underscore-dangle
 const initialState = isBrowser && (window.__INITIAL_STATE__ || {});
+Object.keys(window.ReactIntlLocaleData).forEach((lang) => {
+  addLocaleData(window.ReactIntlLocaleData[lang]);
+});
+
 const ConnectedRouter = createConnectedRouter({ render });
 
 function onInsertCss(...styles) {
@@ -30,9 +31,9 @@ function onInsertCss(...styles) {
     removeCss.forEach(f => f());
   };
 }
-
 (async () => {
   const { runtime: { locale, messages, config } } = initialState;
+
   const intlProvider = new IntlProvider({
     locale,
     messages,

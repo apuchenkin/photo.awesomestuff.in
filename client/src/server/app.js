@@ -5,12 +5,10 @@ import ReactDOM from 'react-dom/server';
 import { Actions as FarceActions, ServerProtocol } from 'farce';
 import { getStoreRenderArgs, resolver, RedirectException } from 'found';
 import { RouterProvider } from 'found/lib/server';
-
 import express from 'express';
 import { sync as globSync } from 'glob';
 import { IntlProvider } from 'react-intl';
 import { readFileSync } from 'fs';
-
 import HTML from './renderHTML';
 import configureStore from '../store/configure';
 import render from '../router/render';

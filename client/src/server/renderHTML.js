@@ -6,10 +6,12 @@ import { Helmet } from 'react-helmet';
 import assets from '../../dist/assets.json';
 import favicon from '../assets/favicon.ico';
 import style from '../style/style.less';
+import localeData from './localeData';
 
 const GoogleAnalytics = ({ id }) => (
   <script
-    dangerouslySetInnerHTML={{ __html: `
+    dangerouslySetInnerHTML={{
+      __html: `
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
           (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -48,6 +50,9 @@ function renderHTML({ markup, initialState, styles }) {
           dangerouslySetInnerHTML={{ __html: markup }}
         />
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
+        <script
+          dangerouslySetInnerHTML={{ __html: localeData(locale) }}
+        />
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
         <script type="application/javascript" src={`${config.hostname}${assets.main.js}`} />
         <link href="http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400" rel="stylesheet" type="text/css" />
