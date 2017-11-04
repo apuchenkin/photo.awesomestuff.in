@@ -153,10 +153,7 @@ app.use(catchAsyncErrors(async (req, res) => {
     <WithStylesContext onInsertCss={onInsertCss}>
       <HTML
         markup={markup}
-        initialState={{
-          ...store.getState(),
-          data: renderArgs.elements.map(el => el && el.props.data),
-        }}
+        initialState={store.getState()}
         styles={styles}
       />
     </WithStylesContext>,

@@ -9,7 +9,11 @@ import {
   Photo,
 } from '../page';
 
-export default (pages = [], categories = [], data = {}) => [
+import {
+  selectors,
+} from '../store/cache';
+
+export default ({ page: { pages }, category: { categories } }) => [
   {
     path: '/',
     children: [{
@@ -22,7 +26,14 @@ export default (pages = [], categories = [], data = {}) => [
     ...pages.map(page$ => ({
       path: page$.alias,
       Component: Page,
-      getData: async ({ context: { services: { pageService } } }) => {
+      getData: async ({ routeIndices, context: { store, services: { pageService } } }) => {
+        const { cache: { cache } } = store.getState();
+        const routeCache = selectors.getCache(cache, routeIndices.slice(0, 1));
+
+        if (routeCache) {
+          return routeCache;
+        }
+
         const page = await pageService
           .fetchPage(page$)
           .catch(({ error }) => {
@@ -39,10 +50,19 @@ export default (pages = [], categories = [], data = {}) => [
         ? `/${category.parent.name}/${category.name}`
         : `/${category.name}`,
       Component: Category,
-      getData: async ({ params, context: { store, services: { categoryService } } }) => {
-        const { config } = store.getState().runtime;
-        const cachedPhotos = data.category && data.category.id === category.id && data.photos;
-        const photos = cachedPhotos || await categoryService.fetchPhotos(category)
+      getData: async ({
+        routeIndices,
+        params,
+        context: { store, services: { categoryService } },
+      }) => {
+        const { runtime: { config }, cache: { cache } } = store.getState();
+        const routeCache = selectors.getCache(cache, routeIndices.slice(0, 2));
+
+        if (routeCache) {
+          return routeCache;
+        }
+
+        const photos = await categoryService.fetchPhotos(category)
           .then(refinePhotos(params.photoId))
           .then(remapPhotos({ width: config.brickWidth, gutter: config.gutter }));
 
@@ -56,7 +76,18 @@ export default (pages = [], categories = [], data = {}) => [
       children: [{
         path: '/photo/:photoId',
         Component: Photo,
-        getData: async ({ params, context: { services: { photoService } } }) => {
+        getData: async ({
+          routeIndices,
+          params,
+          context: { store, services: { photoService } },
+        }) => {
+          const { cache: { cache } } = store.getState();
+          const routeCache = selectors.getCache(cache, routeIndices);
+
+          if (routeCache) {
+            return routeCache;
+          }
+
           const photo = await photoService
             .fetchPhoto(params.photoId)
             .catch(({ error }) => {

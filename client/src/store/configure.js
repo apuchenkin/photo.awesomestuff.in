@@ -11,15 +11,12 @@ import Matcher from 'found/lib/Matcher';
 import reducers from './reducer';
 import routeConfig from '../router/config';
 
-// const defaults = { locale, apiEndpoint };
-
 export default async function configureStore(historyProtocol, initialState) {
-  const { runtime: { basename }, page: { pages }, category: { categories } } = initialState;
-  const { data = [], ...initial } = initialState;
+  const { runtime: { basename } } = initialState;
 
   return createStore(
     reducers,
-    initial,
+    initialState,
     compose(
       createHistoryEnhancer({
         protocol: historyProtocol,
@@ -29,7 +26,7 @@ export default async function configureStore(historyProtocol, initialState) {
         ].filter(Boolean),
       }),
       createMatchEnhancer(
-        new Matcher(routeConfig(pages, categories, data[1])),
+        new Matcher(routeConfig(initialState)),
       ),
     ),
   );

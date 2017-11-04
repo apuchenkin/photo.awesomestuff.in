@@ -6,7 +6,7 @@ import StaticContainer from 'react-static-container';
 import Loader from '../components/loader';
 import NotFound from '../components/error/404';
 import ServiceUnavailable from '../components/error/500';
-
+import { actions } from '../store/cache';
 // eslint-disable-next-line react/prop-types
 const renderError = ({ error, ...props }) => (
   <div>
@@ -46,13 +46,19 @@ const renderPending = () => (
 );
 
 // eslint-disable-next-line react/prop-types
-const renderReady = ({ elements }) => (
-  <div>
-    <StaticContainer shouldUpdate>
-      <ElementsRenderer elements={elements} />
-    </StaticContainer>
-  </div>
-);
+const renderReady = ({ elements, routeIndices, context: { store } }) => {
+  const cache = elements.map(e => e && e.props.data);
+
+  store.dispatch(actions.cache(cache, routeIndices));
+
+  return (
+    <div>
+      <StaticContainer shouldUpdate>
+        <ElementsRenderer elements={elements} />
+      </StaticContainer>
+    </div>
+  );
+};
 
 export default createRender({
   renderError,
