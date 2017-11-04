@@ -81,7 +81,7 @@ export default ({ pages, categories }) => [
           params,
           context: { store, services: { photoService } },
         }) => {
-          const { cache: { cache } } = store.getState();
+          const { runtime: { config }, cache: { cache } } = store.getState();
           const routeCache = selectors.getCache(cache, routeIndices);
 
           if (routeCache) {
@@ -96,6 +96,7 @@ export default ({ pages, categories }) => [
 
           return {
             photo,
+            dimensions: config.photo,
           };
         },
       }],

@@ -53,7 +53,16 @@ class Photo extends React.PureComponent {
   }
 
   render() {
-    const { intl, category, photos, config, isLoading, data: { photo } } = this.props;
+    const {
+      intl,
+      category,
+      photos,
+      config,
+      data: {
+        photo,
+        dimensions,
+      },
+    } = this.props;
 
     const pidx = photos.findIndex(p => p.id === photo.id);
     const prev = photos[pidx - 1 < 0 ? photos.length - 1 : pidx - 1];
@@ -63,7 +72,7 @@ class Photo extends React.PureComponent {
 
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-      <div className={isLoading ? `${style.photo} ${style.loading}` : style.photo} onClick={this.close}>
+      <div className={style.photo} onClick={this.close}>
         <Helmet>
           <title>{photo.description}</title>
           <meta
@@ -79,6 +88,7 @@ class Photo extends React.PureComponent {
           backUrl={backUrl}
           onClick={onClick}
           config={config}
+          dimensions={dimensions}
         />
         <PhotoLink
           {...fromCategory(category)}

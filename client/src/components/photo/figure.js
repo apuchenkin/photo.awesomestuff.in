@@ -8,7 +8,6 @@ import { getSrc } from 'common/service/photo';
 import Link from 'found/lib/Link';
 import Close from './icons/close';
 import Img from './img';
-import { setRuntimeVariable } from '../../store/runtime/actions';
 
 import style from './photo.less';
 
@@ -33,7 +32,6 @@ const messages = defineMessages({
 });
 
 class Figure extends React.PureComponent {
-
   static getDimensions() {
     return {
       width: window.innerWidth - 40,
@@ -45,30 +43,23 @@ class Figure extends React.PureComponent {
     super(props);
 
     this.resize = debounce(this.resize, 175).bind(this);
-  }
-
-  componentWillMount() {
-    const { size } = this.props;
-    this.props.setRuntimeVariable('dimensions', size);
+    this.state = {
+      dimensions: this.props.dimensions,
+    };
   }
 
   componentDidMount() {
     window.addEventListener('resize', this.resize);
   }
 
-  componentWillReceiveProps(props) {
-    if (props.photo !== this.props.photo) {
-      this.props.setRuntimeVariable('dimensions', Figure.getDimensions());
-    }
-  }
-
   componentWillUnmount() {
-    this.props.setRuntimeVariable('dimensions', null);
     window.removeEventListener('resize', this.resize);
   }
 
   resize() {
-    this.props.setRuntimeVariable('dimensions', Figure.getDimensions());
+    this.setState({
+      dimensions: Figure.getDimensions(),
+    });
   }
 
   renderTools() {
@@ -91,16 +82,21 @@ class Figure extends React.PureComponent {
     return (
       <figcaption className={style.description}>
         <span className={style.caption}>{photo.description}</span>
-        {photo.author && <div><FormattedMessage
-          {...messages.author}
-          values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
-        /></div>}
+        {photo.author && (
+          <div>
+            <FormattedMessage
+              {...messages.author}
+              values={{ author: (<span className={style.author}>{photo.author.name}</span>) }}
+            />
+          </div>
+        )}
       </figcaption>
     );
   }
 
   render() {
-    const { photo, onClick, staticEndpoint, size: { width, height } } = this.props;
+    const { dimensions: { width, height } } = this.state;
+    const { photo, onClick, staticEndpoint } = this.props;
     const src = [staticEndpoint, getSrc(photo.src, width, height)].join('/');
 
     return (
@@ -118,23 +114,20 @@ class Figure extends React.PureComponent {
 }
 
 Figure.propTypes = {
-  // width: number.isRequired,
-  // height: number.isRequired,
+  dimensions: shape({
+    width: number.isRequired,
+    height: number.isRequired,
+  }).isRequired,
+  staticEndpoint: string.isRequired,
   photo: photoShape.isRequired,
   backUrl: string.isRequired,
   onClick: func.isRequired,
 };
 
 export default connect(
-  ({ runtime: { dimensions } }, { config }) => ({
-    size: dimensions
-      ? ({ ...dimensions })
-      : (isBrowser ? { ...Figure.getDimensions() } : { ...config.photo }),
+  ({ runtime: { config } }) => ({
     staticEndpoint: config.staticEndpoint,
   }),
-  {
-    setRuntimeVariable,
-  },
 )(
   withStyles(style)(Figure),
 );
