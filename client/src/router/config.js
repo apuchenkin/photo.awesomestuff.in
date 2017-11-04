@@ -84,7 +84,7 @@ export default ({ pages, categories }) => [
           const { runtime: { config }, cache: { cache } } = store.getState();
           const routeCache = selectors.getCache(cache, routeIndices);
 
-          if (routeCache) {
+          if (routeCache && routeCache.photo.id === params.photoId) {
             return routeCache;
           }
 
