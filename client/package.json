@@ -10,8 +10,8 @@
     "test": "test"
   },
   "scripts": {
-    "build:client": "webpack --env=production --config ./webpack/webpack.config.client.babel.js",
-    "build:server": "webpack --env=production --config ./webpack/webpack.config.server.babel.js",
+    "build:client": "cross-env NODE_ENV=production webpack --env=production --config ./webpack/webpack.config.client.babel.js",
+    "build:server": "cross-env NODE_ENV=production webpack --env=production --config ./webpack/webpack.config.server.babel.js",
     "serve:client": "webpack --env=development --config ./webpack/webpack.config.client.babel.js --watch",
     "serve:server": "webpack --env=development --config ./webpack/webpack.config.server.babel.js --watch",
     "serve:nodemon": "nodemon --watch dist ./dist/server.js",

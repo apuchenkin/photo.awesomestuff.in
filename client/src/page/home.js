@@ -23,8 +23,7 @@ const Landing = ({ intl, data: { categories } }) => {
           childs={categories.filter(c => c.parent && c.parent.id === category.id)}
         />
       </li>
-    ))
-  ;
+    ));
 
   return (
     <Main header={<Header />}>
@@ -42,11 +41,13 @@ const Landing = ({ intl, data: { categories } }) => {
 };
 
 Landing.propTypes = {
-  categories: arrayOf(shape({
-    id: number.isRequired,
-    childs: array,
-  })).isRequired,
   intl: intlShape.isRequired,
+  data: shape({
+    categories: arrayOf(shape({
+      id: number.isRequired,
+      childs: array,
+    })).isRequired,
+  }).isRequired,
 };
 
 export default withStyles(style)(injectIntl(Landing));
