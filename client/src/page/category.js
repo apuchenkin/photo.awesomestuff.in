@@ -1,10 +1,10 @@
 import React from 'react';
 import { shape, element, arrayOf, bool } from 'prop-types';
 import classnames from 'classnames';
-// import { connect } from 'react-redux';
-// import { CSSTransitionGroup } from 'react-transition-group';
+import { TransitionGroup } from 'react-transition-group';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { Helmet } from 'react-helmet';
+import Fade from '../components/animation/fade';
 
 import Main from './main';
 import Header from '../components/gallery/header';
@@ -35,44 +35,27 @@ const GalleryPage = ({
         <title>{category.title}</title>
         <meta name="description" content={category.description} />
       </Helmet>
-      <div
+      <TransitionGroup
         className={classnames(
           style.gallery,
           hasNav && style.nav,
-          // loading && style.loading,
         )}
       >
-        {/* <CSSTransitionGroup
-          transitionName={{
-            enter: transitionStyle['fade-enter'],
-            enterActive: transitionStyle['fade-enter-active'],
-            leave: transitionStyle['fade-leave'],
-            leaveActive: transitionStyle['fade-leave-active'],
-          }}
-          transitionEnterTimeout={200}
-          transitionLeaveTimeout={200}
-        > */}
-        {children && React.cloneElement(children, {
-          config,
-          category,
-          photos,
-        })}
-        {/* </CSSTransitionGroup> */}
-        <Gallery category={category} photos={photos} config={config} />
-      </div>
+        {children && React.Children.map(children, child => (
+          <Fade enter={false} key={child.props.key}>
+            {
+              React.cloneElement(children, {
+                config,
+                category,
+                photos,
+              })
+            }
+          </Fade>
+        ))}
+        <Fade key="gallery"><Gallery category={category} photos={photos} config={config} /></Fade>
+      </TransitionGroup>
     </Main>
   );
 };
-
-// GalleryPage.propTypes = {
-//   children: element,
-//   category: shape().isRequired,
-//   categories: arrayOf(shape()).isRequired,
-//   loading: bool.isRequired,
-// };
-//
-// GalleryPage.defaultProps = {
-//   children: null,
-// };
 
 export default withStyles(style, transitionStyle)(GalleryPage);

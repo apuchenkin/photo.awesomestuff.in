@@ -1,6 +1,5 @@
 import React from 'react';
 import { shape, arrayOf } from 'prop-types';
-// import { connect } from 'react-redux';
 import { fromCategory } from '../link/category';
 import PhotoLink from '../link/photo';
 import Brick from './brick';

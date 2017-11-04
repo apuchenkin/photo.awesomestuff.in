@@ -16,6 +16,7 @@ const messages = defineMessages({
 const Landing = ({ intl, data: { categories } }) => {
   const galleries = categories
     .filter(c => !c.parent && c.title && c.featured)
+    .sort((c1, c2) => c2.date > c1.date)
     .map(category => (
       <li key={category.id} >
         <Home

@@ -1,6 +1,5 @@
 import React from 'react';
 import { string } from 'prop-types';
-// import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
@@ -29,9 +28,3 @@ PageHeader.propTypes = {
 };
 
 export default withStyles(style)(PageHeader);
-
-// connect(
-//   ({ page: { page } }) => ({ page }),
-// )(
-//
-// );
