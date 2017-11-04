@@ -1,8 +1,6 @@
 import Service from './BaseService';
 
-import { weightedRandom, refinePhotos, remapPhotos } from '../photo';
-
-export { weightedRandom, refinePhotos, remapPhotos };
+export * from '../photo';
 
 export default class PhotoService extends Service {
 

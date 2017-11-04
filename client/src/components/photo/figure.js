@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import debounce from 'debounce';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import photoService from 'common/service/photo/memoize';
+import { getSrc } from 'common/service/photo';
 import Link from 'found/lib/Link';
 import Close from './icons/close';
 import Img from './img';
@@ -101,7 +101,7 @@ class Figure extends React.PureComponent {
 
   render() {
     const { photo, onClick, staticEndpoint, size: { width, height } } = this.props;
-    const src = [staticEndpoint, photoService.getSrc(photo.src, width, height)].join('/');
+    const src = [staticEndpoint, getSrc(photo.src, width, height)].join('/');
 
     return (
       <Img

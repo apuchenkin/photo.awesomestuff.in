@@ -13,7 +13,7 @@ import {
   selectors,
 } from '../store/cache';
 
-export default ({ page: { pages }, category: { categories } }) => [
+export default ({ pages, categories }) => [
   {
     path: '/',
     children: [{

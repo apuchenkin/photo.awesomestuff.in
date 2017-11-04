@@ -1,13 +1,13 @@
 import React from 'react';
 import { number, string, shape } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import photoService from 'common/service/photo/memoize';
+import { getSrc } from 'common/service/photo';
 import style from './gallery.less';
 
 const Brick = ({ photo, staticEndpoint }) => {
   const { w, h, src } = photo;
   const size = Math.max(w, h);
-  const url = [staticEndpoint, photoService.getSrc(src, size, size, true)].join('/');
+  const url = [staticEndpoint, getSrc(src, size, size, true)].join('/');
   const brickStyle = {
     width: `${w}px`,
     height: `${h}px`,

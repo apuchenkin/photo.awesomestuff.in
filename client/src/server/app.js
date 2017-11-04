@@ -107,12 +107,8 @@ app.use(catchAsyncErrors(async (req, res) => {
       messages,
       config,
     },
-    page: {
-      pages,
-    },
-    category: {
-      categories,
-    },
+    pages,
+    categories,
   };
 
   const store = await configureStore(new ServerProtocol(req.url), initial, services);
