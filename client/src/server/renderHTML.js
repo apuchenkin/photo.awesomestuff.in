@@ -1,16 +1,17 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
-import { string, shape, array, object } from 'prop-types';
+import { string, shape, object } from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
-import escapeHtml from 'escape-html';
+import { Helmet } from 'react-helmet';
 import assets from '../../dist/assets.json';
 import favicon from '../assets/favicon.ico';
 import style from '../style/style.less';
+import localeData from './localeData';
 
 const GoogleAnalytics = ({ id }) => (
   <script
-    dangerouslySetInnerHTML={{ __html: `
+    dangerouslySetInnerHTML={{
+      __html: `
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
           (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -24,28 +25,34 @@ GoogleAnalytics.propTypes = {
   id: string.isRequired,
 };
 
-function renderHTML({ markup, initialState, meta, styles }) {
+function renderHTML({ markup, initialState, styles }) {
   const { config, locale } = initialState.runtime;
+  const helmet = Helmet.renderStatic();
+  const htmlAttrs = helmet.htmlAttributes.toComponent();
+  const bodyAttrs = helmet.bodyAttributes.toComponent();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} {...htmlAttrs}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width initial-scale=1.0" />
-        <title>{escapeHtml(meta.title)}</title>
-        <meta name="description" content={escapeHtml(meta.description)} />
+        {helmet.title.toComponent()}
+        {helmet.meta.toComponent()}
         <meta name="viewport" content="width=device-width" />
         <style type="text/css" dangerouslySetInnerHTML={{ __html: styles }} />
         <link rel="shortcut icon" href={favicon} type="image/ico" />
-        { meta.links }
+        {helmet.link.toComponent()}
       </head>
-      <body>
+      <body {...bodyAttrs}>
         <div
           id="react-view"
           className={style.wrapper}
           dangerouslySetInnerHTML={{ __html: markup }}
         />
         {config.analytics && <GoogleAnalytics id={config.analytics} />}
+        <script
+          dangerouslySetInnerHTML={{ __html: localeData(locale) }}
+        />
         <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
         <script type="application/javascript" src={`${config.hostname}${assets.main.js}`} />
         <link href="http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400" rel="stylesheet" type="text/css" />
@@ -61,11 +68,6 @@ renderHTML.propTypes = {
       locale: string.isRequired,
       config: object.isRequired,
     }),
-  }).isRequired,
-  meta: shape({
-    title: string.isRequired,
-    description: string.isRequired,
-    links: array.isRequired,
   }).isRequired,
   styles: string.isRequired,
 };

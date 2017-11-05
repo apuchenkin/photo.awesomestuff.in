@@ -5,18 +5,16 @@ import ReactDOM from 'react-dom/server';
 import { Actions as FarceActions, ServerProtocol } from 'farce';
 import { getStoreRenderArgs, resolver, RedirectException } from 'found';
 import { RouterProvider } from 'found/lib/server';
-
 import express from 'express';
 import { sync as globSync } from 'glob';
 import { IntlProvider } from 'react-intl';
 import { readFileSync } from 'fs';
-
 import HTML from './renderHTML';
-import configureStore from '../store/configureStore';
-import { serverRender as render } from '../render';
-import config from '../etc/config';
-import { buildMeta } from '../lib/meta';
+import configureStore from '../store/configure';
+import render from '../router/render';
+import config from '../../etc/config';
 import WithStylesContext from '../components/WithStylesContext';
+import serviceFactory from '../service/factory';
 
 const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.json'))
   .map(filename => [
@@ -26,8 +24,7 @@ const translations = globSync(path.join(process.cwd(), 'src', 'translation', '*.
   .map(([locale, file]) => [locale, JSON.parse(file)])
   .reduce((collection, [locale, messages]) =>
     Object.assign(collection, { [locale]: messages }),
-    {},
-  );
+  {});
 
 function catchAsyncErrors(fn) {
   return (req, res, next) => {
@@ -42,11 +39,18 @@ const app = express();
 
 const negotiateLocale = req =>
   req.acceptsLanguages(config.locales)
-  || config.fallbackLocale
-;
+  || config.fallbackLocale;
 
 if (__DEV__) {
   const proxy = require('http-proxy-middleware');
+  // const webpackDevMiddleware = require('./dev');
+  // app.use(webpackDevMiddleware);
+  // const api = require('../../api/server');
+  // const statics = require('../../api/static');
+  //
+  // app.use('/api/v1', api);
+  // app.use('/static', statics);
+
   app.use('/api/v1', proxy({
     target: 'http://photo.awesomestuff.in',
     changeOrigin: true,
@@ -65,35 +69,64 @@ app.use(catchAsyncErrors(async (req, res) => {
   const basename = prefix && `/${prefix}`;
   const locale = prefix || negotiateLocale(req);
   const messages = locale ? translations[locale] : {};
-  const initial = { runtime: { locale, basename, messages, config } };
   const css = new Set(); // CSS for all rendered React components
-    // eslint-disable-next-line no-underscore-dangle
+  // eslint-disable-next-line no-underscore-dangle
   const onInsertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
   const intlProvider = new IntlProvider({
     locale,
     messages,
   }, {});
   const { intl } = intlProvider.getChildContext();
-  let renderArgs;
+  const { apiEndpoint } = config;
 
-  const store = await configureStore(new ServerProtocol(req.url), initial, intl);
-  store.dispatch(FarceActions.init());
-  const matchContext = { store, intl };
+  const services = serviceFactory({
+    locale,
+    apiEndpoint,
+  });
 
-  try {
-    renderArgs = await getStoreRenderArgs({
-      store,
-      matchContext,
-      resolver,
+  const pages = await services
+    .pageService
+    .fetchPages()
+    .catch((e) => {
+      console.error(e);
+      return [];
     });
-  } catch (error) {
+
+  const categories = await services
+    .categoryService
+    .fetchCategories()
+    .catch((e) => {
+      console.error(e);
+      return [];
+    });
+
+  const initial = {
+    runtime: {
+      locale,
+      basename,
+      messages,
+      config,
+    },
+    pages,
+    categories,
+  };
+
+  const store = await configureStore(new ServerProtocol(req.url), initial, services);
+  store.dispatch(FarceActions.init());
+  const matchContext = { store, intl, services };
+
+  const renderArgs = await getStoreRenderArgs({
+    store,
+    matchContext,
+    resolver,
+  }).catch((error) => {
     if (error instanceof RedirectException) {
       res.redirect(301, store.farce.createHref(error.location));
       return;
     }
 
     throw error;
-  }
+  });
 
   if (!basename) {
     res.vary('Accept-Language');
@@ -111,14 +144,12 @@ app.use(catchAsyncErrors(async (req, res) => {
     </Provider>,
   );
 
-  const meta = buildMeta(renderArgs.location, store, intl);
   const styles = [...css].join('');
   const html = ReactDOM.renderToStaticMarkup(
     <WithStylesContext onInsertCss={onInsertCss}>
       <HTML
         markup={markup}
         initialState={store.getState()}
-        meta={meta}
         styles={styles}
       />
     </WithStylesContext>,
@@ -137,7 +168,7 @@ app.use((error, req, res, next) => {
   console.log(error);
   res
     .status(500)
-    .send('Service unavailable');
+    .send(__DEV__ ? error : 'Service unavailable');
 });
 
 const PORT = process.env.PORT || 3000;

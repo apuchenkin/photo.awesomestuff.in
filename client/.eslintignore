@@ -2,4 +2,5 @@ test/*
 etc/*
 build/*
 dist/*
+webpack/*
 sitemap.js

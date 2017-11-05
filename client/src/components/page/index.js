@@ -1,21 +1,9 @@
-import React from 'react';
-import { string } from 'prop-types';
-import { connect } from 'react-redux';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-
+import Header from './header';
 import style from './style.less';
 
-const Page = ({ content }) =>
-  // eslint-disable-next-line react/no-danger
-  <div className={style.page} dangerouslySetInnerHTML={{ __html: content }} />
-;
-
-Page.propTypes = {
-  content: string.isRequired,
+export {
+  Header,
+  style,
 };
 
-export default connect(
-  ({ page: { page } }) => ({ content: page.content }),
-)(
-  withStyles(style)(Page),
-);
+export default {};

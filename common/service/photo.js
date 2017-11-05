@@ -24,19 +24,19 @@ export const getSrc = (src, w, h, thumb = false) =>
   [thumb ? 'rt' : 'r', w, h, src.replace('\\', '\\\\')].join('/');
 
 export const refinePhotos = excludeId => (photos) => {
-  photos.map((p, k) => Object.assign(p, { order: k }));
+  const exclude = photos.find(p => p.id === excludeId);
+  const photos$ = photos.map((photo, key) => ({
+    ...photo,
+    order: key,
+  }));
 
-  const
-    exclude = photos.find(p => p.id === excludeId),
+  // spread list on grouped and not grouped photos
+  const [init, grouped] = photos$.reduce(([left, right], photo) => {
+      photo.group ? right.push(photo) : left.push(photo);
+      return [left, right];
+    }, [[], []]);
 
-    // spread list on grouped and not grouped photos
-    [init, grouped] = photos.reduce((acc, p) => {
-      const [i, r] = acc;
-      Object.assign(p, { group: p.group ? r.push(p) : i.push(p) });
-      return acc;
-    }, [[], []]),
-
-    groups = grouped.reduce((m, p) => {
+  const groups = grouped.reduce((m, p) => {
       if (p.group) {
         const
         v = m.get(p.group) || [];

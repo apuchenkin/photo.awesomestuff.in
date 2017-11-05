@@ -1,6 +1,5 @@
 import React from 'react';
-import { string, shape } from 'prop-types';
-import { connect } from 'react-redux';
+import { string } from 'prop-types';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Link from 'found/lib/Link';
@@ -14,22 +13,18 @@ const messages = defineMessages({
   },
 });
 
-const PageHeader = ({ page }) => (
+const PageHeader = ({ title }) => (
   <header className={style.main}>
     <h1 className={style.title}>
       <Link to="/" activeClassName="active">
         <FormattedMessage {...messages.home} />
-      </Link> / {page.title}
+      </Link> / {title}
     </h1>
   </header>
 );
 
 PageHeader.propTypes = {
-  page: shape({ title: string.isRequired }).isRequired,
+  title: string.isRequired,
 };
 
-export default connect(
-  ({ page: { page } }) => ({ page }),
-)(
-  withStyles(style)(PageHeader),
-);
+export default withStyles(style)(PageHeader);

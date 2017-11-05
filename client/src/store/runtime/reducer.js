@@ -1,6 +1,6 @@
 import { SET_RUNTIME_VARIABLE } from './actions';
 
-const setRuntimeVariable = (state, { payload: { name, value } }) => ({
+const setRuntimeVariable = (state, { name, value }) => ({
   ...state,
   [name]: value,
 });
