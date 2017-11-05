@@ -30,6 +30,7 @@ export default env => merge(base(env), {
         test: /\.jsx?$/,
         include: [
           path.resolve(__dirname, '..', 'src'),
+          path.resolve(__dirname, '..', 'etc'),
           path.resolve(__dirname, '..', 'node_modules', 'common', 'service'),
         ],
         loader: 'babel-loader',
