@@ -9,7 +9,10 @@ const GLOBALS = DEBUG => ({
 const isDev = env => env !== 'production';
 
 module.exports = env => ({
-  entry: ['babel-polyfill', './index.js'],
+  entry: [
+    'babel-polyfill',
+    './index.js',
+  ],
   target: 'node',
 
   context: path.resolve(__dirname, 'src'),
@@ -38,21 +41,6 @@ module.exports = env => ({
         test: /\.json$/,
         loader: 'json-loader',
       },
-      // {
-      //   test: /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2)(\?.*)?$/i,
-      //   loader: 'url',
-      //   query: {
-      //     name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
-      //     limit: 10000,
-      //   },
-      // },
-      // {
-      //   test: /\.(eot|ttf|wav|mp3)(\?.*)?$/,
-      //   loader: 'file',
-      //   query: {
-      //     name: DEBUG ? '[path][name].[ext]' : '[hash].[ext]',
-      //   },
-      // },
     ],
   },
 

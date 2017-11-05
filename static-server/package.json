@@ -15,7 +15,6 @@
     "babel-runtime": "^6.11.6",
     "express": "^4.14.0",
     "express-validator": "^3.2.0",
-    "memoizee": "^0.4.1",
     "sharp": "^0.18.2",
     "vary": "^1.1.0"
   },

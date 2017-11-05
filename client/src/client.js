@@ -10,6 +10,7 @@ import configureStore from './store/configure';
 import WithStylesContext from './components/WithStylesContext';
 import render from './router/render';
 import serviceFactory from './service/factory';
+import config from '../etc/config';
 
 // eslint-disable-next-line import/first
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
@@ -31,7 +32,7 @@ function onInsertCss(...styles) {
   };
 }
 (async () => {
-  const { runtime: { locale, messages, config } } = initialState;
+  const { runtime: { locale, messages } } = initialState;
 
   const intlProvider = new IntlProvider({
     locale,

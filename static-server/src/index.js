@@ -6,8 +6,7 @@ import url from 'url';
 import sharp from 'sharp';
 import vary from 'vary';
 
-import photo from '../../common/service/photo/memoize';
-
+import { adjust } from '../../common/service/photo';
 import config from '../etc/config';
 
 const app = express();
@@ -88,7 +87,7 @@ const acceptWebp = (req, res, next) => {
 const serveImage = (req, res, next) => {
   const
     { width, height, thumb, webp } = req.params,
-    [w, h] = photo.adjust(width, height),
+    [w, h] = adjust(width, height),
     conf = thumb ? (config.thumb && config.thumb.opts) : config.opts,
     opts = Object.assign({
       kernel: sharp.kernel[conf.kernel],
