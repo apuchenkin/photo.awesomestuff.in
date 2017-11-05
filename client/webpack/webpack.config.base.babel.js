@@ -4,8 +4,6 @@ import path from 'path';
 const isDevelopment = env => env === 'development';
 
 export default env => ({
-  // context: path.resolve(__dirname, '../src'),
-
   resolve: {
     extensions: ['.js', '.css', '.html'],
     symlinks: false,

@@ -30,7 +30,7 @@ export default env => merge(base(env), {
         test: /\.jsx?$/,
         include: [
           path.resolve(__dirname, '..', 'src'),
-          path.resolve(__dirname, '..', 'node_modules', 'common'),
+          path.resolve(__dirname, '..', 'node_modules', 'common', 'service'),
         ],
         loader: 'babel-loader',
         options: {
@@ -73,7 +73,9 @@ export default env => merge(base(env), {
       path: path.resolve(__dirname, '../dist'),
       filename: 'assets.json',
     }),
-  ]).concat(isDevelopment(env) ? [] : [
+  ]).concat(isDevelopment(env) ? [
+    new BundleAnalyzerPlugin(),
+  ] : [
     new webpack.optimize.UglifyJsPlugin({
       beautify: false,
       sourceMap: !isDevelopment(env),
@@ -94,7 +96,6 @@ export default env => merge(base(env), {
       threshold: 10240,
       minRatio: 0.8
     }),
-    new BundleAnalyzerPlugin(),
   ]),
   devtool: isDevelopment(env) ? 'eval-source-map' : 'source-map',
 });

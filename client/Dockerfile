@@ -15,12 +15,16 @@ EXPOSE 3000
 
 COPY ./client /srv/client
 COPY ./common /srv/common
+
+WORKDIR /srv/common
+RUN npm install
+
 WORKDIR /srv/client
 
-RUN yarn install
+RUN npm install
 ENV NODE_ENV production
-RUN yarn run build
-RUN yarn install --production
+RUN npm run build
+RUN npm prune
 
 RUN npm i pm2 -g
 ENTRYPOINT ["pm2-docker", "dist/server.js"]
