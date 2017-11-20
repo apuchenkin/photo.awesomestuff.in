@@ -12,7 +12,6 @@ module.exports = {
     "import"
   ],
   "globals": {
-    "ga": true, //# google analytics
     "__DEV__": true,
     "isBrowser": true,
   },

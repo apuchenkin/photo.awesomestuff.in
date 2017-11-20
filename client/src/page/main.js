@@ -21,10 +21,11 @@ const Main = ({ children, header, title, langs, location }) => (
       titleTemplate={`%s - ${title}`}
       defaultTitle={title}
       onChangeClientState={(helmet) => {
-        if (typeof ga !== 'undefined') {
-          ga('send', 'pageview', {
-            title: helmet.title,
-            page: location.pathname,
+        if (typeof window.gtag !== 'undefined') {
+          window.gtag('event', 'page_view', {
+            page_location: location.href,
+            page_path: location.pathname,
+            page_title: helmet.title,
           });
         }
       }}

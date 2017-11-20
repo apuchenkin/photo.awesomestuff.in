@@ -8,21 +8,21 @@ import favicon from '../assets/favicon.ico';
 import style from '../style/style.less';
 import localeData from './localeData';
 
-const GoogleAnalytics = ({ id }) => (
+const GoogleAnalytics = ({ token }) => (
   <script
     dangerouslySetInnerHTML={{
       __html: `
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-      ga('create', '${id}', 'auto'); ga('send', 'pageview');`,
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${token}');
+      `,
     }}
   />
 );
 
 GoogleAnalytics.propTypes = {
-  id: string.isRequired,
+  token: string.isRequired,
 };
 
 function renderHTML({ markup, initialState, styles }) {
@@ -30,6 +30,7 @@ function renderHTML({ markup, initialState, styles }) {
   const helmet = Helmet.renderStatic();
   const htmlAttrs = helmet.htmlAttributes.toComponent();
   const bodyAttrs = helmet.bodyAttributes.toComponent();
+  const analyticsToken = config.analytics;
 
   return (
     <html lang={locale} {...htmlAttrs}>
@@ -42,6 +43,8 @@ function renderHTML({ markup, initialState, styles }) {
         <style type="text/css" dangerouslySetInnerHTML={{ __html: styles }} />
         <link rel="shortcut icon" href={favicon} type="image/ico" />
         {helmet.link.toComponent()}
+        {analyticsToken && <script async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsToken}`} />}
+        {analyticsToken && <GoogleAnalytics token={analyticsToken} />}
       </head>
       <body {...bodyAttrs}>
         <div
@@ -49,7 +52,6 @@ function renderHTML({ markup, initialState, styles }) {
           className={style.wrapper}
           dangerouslySetInnerHTML={{ __html: markup }}
         />
-        {config.analytics && <GoogleAnalytics id={config.analytics} />}
         <script
           dangerouslySetInnerHTML={{ __html: localeData(locale) }}
         />
