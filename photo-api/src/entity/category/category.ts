@@ -19,14 +19,14 @@ export class Category {
   @Column("date")
   date: Date;
 
-  @ManyToOne(type => Category, category => category.children)
+  @ManyToOne(() => Category, category => category.children)
   parent: Category;
 
-  @OneToMany(type => Category, category => category.parent)
+  @OneToMany(() => Category, category => category.parent)
   children: Category[];
 
-  @OneToMany(type => CategoryTranslation, translation => translation.category)
-  translations: CategoryTranslation;
+  @OneToMany(() => CategoryTranslation, translation => translation.category, { cascade: true })
+  translations: CategoryTranslation[];
 }
 
 export default Category;

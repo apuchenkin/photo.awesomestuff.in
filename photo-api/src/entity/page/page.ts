@@ -16,8 +16,8 @@ export class Page {
   })
   hidden: boolean;
 
-  @OneToMany(type => PageTranslation, translation => translation.page)
-  translations: PageTranslation;
+  @OneToMany(() => PageTranslation, translation => translation.page, { cascade: true })
+  translations: PageTranslation[];
 }
 
 export default Page;

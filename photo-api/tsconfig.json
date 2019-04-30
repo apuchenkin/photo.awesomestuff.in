@@ -4,6 +4,10 @@
          "es5",
          "es6"
       ],
+      "baseUrl": "./",
+      "paths": {
+         "@app/*": ["src/*"]
+      },
       "target": "es5",
       "module": "commonjs",
       "moduleResolution": "node",

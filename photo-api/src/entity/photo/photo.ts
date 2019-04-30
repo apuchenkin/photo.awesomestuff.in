@@ -43,8 +43,8 @@ export class Photo {
   @Column()
   group: number;
 
-  @OneToMany(() => PhotoTranslation, translation => translation.photo)
-  translations: PhotoTranslation;
+  @OneToMany(() => PhotoTranslation, translation => translation.photo, { cascade: true })
+  translations: PhotoTranslation[];
 }
 
 export default Photo;

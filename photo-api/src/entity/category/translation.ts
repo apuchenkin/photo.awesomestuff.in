@@ -5,7 +5,7 @@ import { Translation } from '../translation';
 @ChildEntity()
 export class CategoryTranslation extends Translation {
 
-  @ManyToOne(type => Category, category => category.translations)
+  @ManyToOne(() => Category, category => category.translations)
   category: Category;
 }
 
