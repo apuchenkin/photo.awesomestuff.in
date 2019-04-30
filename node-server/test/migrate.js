@@ -11,11 +11,13 @@ sequelize.sync({ force: true })
   .then(() => Category.create({
     name: 'test',
   }).then((category) => {
+
     category.createTranslation({
       field: 'title',
       value: 'RUTEST',
       language: LANG_RU,
     });
+
     category.createTranslation({
       field: 'title',
       value: 'ENTEST',

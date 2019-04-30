@@ -1,0 +1,24 @@
+{
+   "name": "photo-api",
+   "version": "0.0.1",
+   "description": "Awesome project developed with TypeORM.",
+   "scripts": {
+      "start": "ts-node src/index.ts",
+      "schema:sync": "ts-node node_modules/typeorm/cli schema:sync",
+      "db:start": "docker run --name photo-mysql -e MYSQL_ROOT_PASSWORD=aws-photo -e MYSQL_DATABASE=aws-photo -d -p 3306:3306 mysql:5",
+      "db:stop": "docker rm -f photo-mysql",
+      "build": "tsc"
+   },
+   "devDependencies": {
+      "@types/node": "^11.13.8",
+      "ts-node": "^8.1.0",
+      "typescript": "^3.4.5"
+   },
+   "dependencies": {
+      "class-validator": "^0.9.1",
+      "mysql": "^2.14.1",
+      "mysql2": "^1.6.5",
+      "reflect-metadata": "^0.1.10",
+      "typeorm": "0.2.16"
+   }
+}
