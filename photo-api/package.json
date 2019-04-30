@@ -3,7 +3,7 @@
    "version": "0.0.1",
    "description": "Awesome project developed with TypeORM.",
    "scripts": {
-      "start": "ts-node --files src/index",
+      "start": "ts-node -r tsconfig-paths/register src/index",
       "schema:drop": "ts-node node_modules/typeorm/cli schema:drop",
       "schema:sync": "ts-node node_modules/typeorm/cli schema:sync",
       "db:start": "docker run --name photo-mysql -e MYSQL_ROOT_PASSWORD=aws-photo -e MYSQL_DATABASE=aws-photo -d -p 3306:3306 mysql:5 --character-set-server=utf8 --collation-server=utf8_unicode_ci",
@@ -14,17 +14,24 @@
    "devDependencies": {
       "@types/node": "^11.13.8",
       "@types/node-fetch": "^2.3.3",
+      "@types/basic-auth": "^1.1.2",
+      "@types/express": "^4.16.1",
+      "@types/vary": "^1.1.0",
       "ts-node": "^8.1.0",
       "tsconfig-paths": "^3.8.0",
       "typescript": "^3.4.5"
    },
    "dependencies": {
+      "accept-language": "^3.0.18",
+      "basic-auth": "^2.0.1",
       "class-validator": "^0.9.1",
+      "express": "^4.16.4",
       "mysql": "^2.14.1",
       "mysql2": "^1.6.5",
       "node-fetch": "^2.4.1",
       "ramda": "^0.26.1",
       "reflect-metadata": "^0.1.10",
-      "typeorm": "0.2.16"
+      "typeorm": "0.2.16",
+      "vary": "^1.1.2"
    }
 }

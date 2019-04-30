@@ -6,7 +6,7 @@
    "password": "aws-photo",
    "database": "aws-photo",
    "synchronize": true,
-   "logging": false,
+   "logging": true,
    "entities": [
       "src/entity/**/*.ts"
    ],
