@@ -3,8 +3,7 @@ import * as vary from 'vary';
 import { Connection } from 'typeorm';
 import { Page } from '@app/entity';
 import { Language } from '@app/entity/translation';
-
-// import PageService from '../service/page';
+import { pageDTO } from '@app/dto';
 
 const router = express.Router();
 
@@ -29,7 +28,7 @@ router
       .andWhere("translation.field = :field", { field: "title" })
       .getMany();
 
-    res.send(pages);
+    res.send(pages.map(pageDTO));
   })
   .get('/:alias', async (req, res) => {
     vary(res, 'Accept-Language');
@@ -58,7 +57,7 @@ router
       res.sendStatus(404);
     }
 
-    res.send(page);
+    res.send(pageDTO(page));
   });
 
 export default router;
