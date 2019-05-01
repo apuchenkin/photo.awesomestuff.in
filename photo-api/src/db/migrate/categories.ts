@@ -26,7 +26,7 @@ export default (connection: Connection) => async (categories: CategoryDTO[]) => 
 
     category.name = categoryDTO.name;
     category.hidden = categoryDTO.hidden;
-    category.date = new Date(categoryDTO.date);
+    category.date = categoryDTO.date && new Date(categoryDTO.date);
 
     category.translations = categoryDTO.translations.map(translationDTO => {
       const translation = new CategoryTranslation();

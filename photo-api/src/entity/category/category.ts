@@ -17,8 +17,10 @@ export class Category {
   })
   hidden: boolean;
 
-  @Column("date")
-  date: Date;
+  @Column("date", {
+    nullable: true,
+  })
+  date?: Date;
 
   @ManyToOne(() => Photo)
   featured: Photo;

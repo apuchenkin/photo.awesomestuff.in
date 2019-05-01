@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import { pageRouter } from './handler';
+import { pageRouter, categoryRouter } from './handler';
 import { locale, auth } from './middleware';
 
 // import categoryRouter from './handler/category';
@@ -31,10 +31,9 @@ const router = express.Router();
 router.use(auth);
 router.use(locale);
 router.use('/page', pageRouter);
-// router.use('/category', categoryRouter.routes(), categoryRouter.allowedMethods());
+router.use('/category', categoryRouter);
+
 // router.use('/photo', photoRouter.routes(), photoRouter.allowedMethods());
-// router.use('/translation', translationRouter.routes(), translationRouter.allowedMethods());
-// router.use('/upload', uploadRouter.routes(), uploadRouter.allowedMethods());
 
 // if (config.cors) {
 //   app.use(cors());
