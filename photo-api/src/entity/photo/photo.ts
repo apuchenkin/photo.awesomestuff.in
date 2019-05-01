@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from "typeorm";
 import { PhotoTranslation } from './translation';
+import { Category } from "../category/category";
 
 @Entity()
 export class Photo {
@@ -45,6 +46,10 @@ export class Photo {
 
   @OneToMany(() => PhotoTranslation, translation => translation.photo, { cascade: true })
   translations: PhotoTranslation[];
+
+  @ManyToMany(() => Category, category => category.photos)
+  @JoinTable()
+  categories: Category[];
 }
 
 export default Photo;

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, ManyToMany } from "typeorm";
 import { CategoryTranslation } from './translation';
+import { Photo } from '../photo/photo';
 
 @Entity()
 export class Category {
@@ -19,6 +20,9 @@ export class Category {
   @Column("date")
   date: Date;
 
+  @ManyToOne(() => Photo)
+  featured: Photo;
+
   @ManyToOne(() => Category, category => category.children)
   parent: Category;
 
@@ -27,6 +31,9 @@ export class Category {
 
   @OneToMany(() => CategoryTranslation, translation => translation.category, { cascade: true })
   translations: CategoryTranslation[];
+
+  @ManyToMany(() => Photo, photo => photo.categories)
+  photos: Photo[];
 }
 
 export default Category;
