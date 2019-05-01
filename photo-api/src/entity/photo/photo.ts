@@ -29,19 +29,27 @@ export class Photo {
   @Column()
   height: number;
 
-  @Column('text')
+  @Column('text', {
+    nullable: true,
+  })
   exif: string;
 
   @Column()
   views: number;
 
-  @Column('datetime')
+  @Column('datetime', {
+    nullable: true,
+  })
   datetime: Date;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   order: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   group: number;
 
   @OneToMany(() => PhotoTranslation, translation => translation.photo, { cascade: true })

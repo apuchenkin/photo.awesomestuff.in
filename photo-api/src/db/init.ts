@@ -11,9 +11,9 @@ import {
   const connection = await createConnection();
   const data = await fetchData();
 
-  // if (data.pages) {
-  //   await migratePages(connection)(data.pages);
-  // }
+  if (data.pages) {
+    await migratePages(connection)(data.pages);
+  }
 
   if (data.categories) {
     await migrateCategories(connection)(data.categories);

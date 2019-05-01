@@ -1,6 +1,6 @@
 import { Connection } from "typeorm";
 import { Language } from "@app/entity/translation";
-import { Category, CategoryTranslation } from "@app/entity";
+import { Category, CategoryTranslation, Photo } from "@app/entity";
 
 interface TranslationDTO {
   field: string;
@@ -13,6 +13,9 @@ interface CategoryDTO {
   hidden: boolean;
   date: string;
   translations: TranslationDTO[];
+  featured?: {
+    src: string;
+  }
   parent?: CategoryDTO;
 }
 
@@ -42,7 +45,7 @@ export default (connection: Connection) => async (categories: CategoryDTO[]) => 
     return category;
   })
 
-  await connection.manager.save(records);
+  await connection.manager.save(records).catch(console.log);
 
   const relations = await Promise.all(categories.map(async categoryDTO => {
     const category = await connection.manager.findOne(Category, { name: categoryDTO.name });
@@ -55,5 +58,18 @@ export default (connection: Connection) => async (categories: CategoryDTO[]) => 
     return category;
   }))
 
-  await connection.manager.save(relations);
+  await connection.manager.save(relations).catch(console.log);
+
+  const relations$ = await Promise.all(categories.map(async categoryDTO => {
+    const category = await connection.manager.findOne(Category, { name: categoryDTO.name });
+
+    if (category && categoryDTO.featured) {
+      const photo = await connection.manager.findOne(Photo, { src: categoryDTO.featured.src });
+      category.featured = photo;
+    }
+
+    return category;
+  }))
+
+  await connection.manager.save(relations$).catch(console.log);
 }

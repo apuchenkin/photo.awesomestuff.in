@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import * as R from 'ramda';
 
 const host = 'http://photo.awesomestuff.in';
 const basename = '/api/v1';
@@ -39,33 +40,34 @@ export default async () => {
     )
   );
 
-  // const photos = await Promise.all(
-  //   categories.map((category: Category) => fetch(
-  //     `${host}${basename}/category/${category.name}/photo`,
-  //     options,
-  //   )
-  //   .then(res => res.json())
-  //   .then(photos => photos.map((photo: Photo) => ({
-  //     ...photo,
-  //     category: category.name,
-  //   })))
-  //   )
-  // );
+  const photos = await Promise.all(
+    categories.map((category: any) => fetch(
+      `${host}${basename}/category/${category.name}/photo`,
+      options,
+    )
+    .then(res => res.json())
+    .catch(() => [])
+    .then(photos => photos.map((photo: any) => ({
+      ...photo,
+      category: category.name,
+    })))
+    )
+  );
 
-  // const photos$ = R.pipe(
-  //   R.unnest,
-  //   R.groupBy(R.prop('id')),
-  //   // @ts-ignore
-  //   R.map((photoList: Photo[]) => ({
-  //     ...R.head(photoList),
-  //     category: R.map(R.prop('category'), photoList)
-  //   })),
-  //   R.values,
-  // )(photos);
+  const photos$ = R.pipe(
+    R.unnest,
+    R.groupBy(R.prop('id')),
+    // @ts-ignore
+    R.map((photoList: Photo[]) => ({
+      ...R.head(photoList),
+      category: R.map(R.prop('category'), photoList)
+    })),
+    R.values,
+  )(photos);
 
   return {
     pages: pages$.filter(Boolean),
     categories: categories$.filter(Boolean),
-    photos: [],
+    photos: photos$.filter(Boolean),
   } as any;
 };
