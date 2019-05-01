@@ -17,15 +17,14 @@ router
     const pages = await connection
       .getRepository(Page)
       .createQueryBuilder('page')
-      .leftJoinAndSelect("page.translations", "translation")
+      .leftJoinAndSelect("page.translations", "translation",
+        "translation.language = :locale AND translation.field = :field", { locale, field: "title" })
       .select([
         "page.alias",
         "translation.field",
         "translation.value",
       ])
       .where("page.hidden = :hidden", { hidden: false })
-      .andWhere("translation.language = :locale", { locale })
-      .andWhere("translation.field = :field", { field: "title" })
       .getMany();
 
     res.send(pages.map(pageDTO));
@@ -39,18 +38,14 @@ router
     const page = await connection
       .getRepository(Page)
       .createQueryBuilder('page')
-      .leftJoinAndMapMany("page.languages", "page.translations", "lang")
-      .leftJoinAndSelect("page.translations", "translation")
+      .leftJoinAndSelect("page.translations", "translation", "translation.language = :locale", { locale })
       .select([
         "page.alias",
-        "lang.field",
-        "lang.language",
         "translation.field",
         "translation.value",
       ])
       .where('page.alias = :alias', { alias: req.params.alias })
       .andWhere("page.hidden = :hidden", { hidden: false })
-      .andWhere("translation.language = :locale", { locale })
       .getOne();
 
     if (!page) {

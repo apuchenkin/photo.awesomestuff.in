@@ -6,7 +6,7 @@ export interface CategoryDTO {
   title: string;
   description?: string;
   date?: Date;
-  featured?: any;
+  featured?: string;
   children: CategoryDTO[];
 }
 
@@ -30,6 +30,7 @@ export const categoryDTO = (category: Category): CategoryDTO => {
     name: category.name,
     date: category.date,
     title: translations.title,
+    featured: category.featured && category.featured.src,
     description: translations.description,
     children: children.map(categoryDTO),
   }

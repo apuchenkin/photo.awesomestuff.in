@@ -1,4 +1,4 @@
 export {
   PageDTO,
-  pageDTO
+  pageDTO,
 } from './page';

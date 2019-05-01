@@ -4,37 +4,26 @@ import { Connection } from 'typeorm';
 import { Category } from '@app/entity';
 import { Language } from '@app/entity/translation';
 import { unnest, categoryDTO } from '@app/dto/category';
+import photoRouter from './photo';
 
-declare global {
-  namespace Express {
-    interface Request {
-      category?: Category
-    }
-  }
-}
-
-const categoryRouter = express.Router();
+const categoryRouter = express.Router({ mergeParams: true });
 categoryRouter
-  .get('/', (req, res) => {
+  .use('/photo', photoRouter)
+  .get('/', async (req, res) => {
     vary(res, 'Accept-Language');
     res.set('Cache-Control', `public, max-age=${60 * 60 * 24 * 30}`);
 
-    res.send(categoryDTO(req.category))
-  })
-;
-
-const categoriesRouter = express.Router();
-categoriesRouter
-  .param('category', async (req, res, next, name) => {
     const connection: Connection = req.app.locals.connection;
     const locale: Language = req.app.locals.locale;
+    console.log(req.params);
 
     const category = await connection
       .getRepository(Category)
       .createQueryBuilder('category')
-      .leftJoinAndSelect("category.translations", "translation")
+      .leftJoinAndSelect("category.translations", "translation", "translation.language = :locale", { locale })
       .leftJoinAndSelect("category.children", "children")
-      .leftJoinAndSelect("children.translations", "childrenTranslation")
+      .leftJoinAndSelect("category.featured", "featured")
+      .leftJoinAndSelect("children.translations", "childrenTranslation", "childrenTranslation.language = :locale", { locale })
       .select([
         "category.name",
         "category.date",
@@ -44,20 +33,22 @@ categoriesRouter
         "children.date",
         "childrenTranslation.field",
         "childrenTranslation.value",
+        "featured.src",
       ])
-      .where('category.name = :name', { name })
+      .where('category.name = :name', { name: req.params.category })
       .andWhere("category.hidden = :hidden", { hidden: false })
-      .andWhere("translation.language = :locale", { locale })
-      .andWhere("childrenTranslation.language = :locale", { locale })
       .getOne();
 
     if (!category) {
       res.sendStatus(404);
     } else {
-      req.category = category;
-      next();
+      res.send(categoryDTO(category))
     }
   })
+;
+
+const categoriesRouter = express.Router();
+categoriesRouter
   .use('/:category', categoryRouter)
   .get('/', async (req, res) => {
     vary(res, 'Accept-Language');
@@ -69,7 +60,9 @@ categoriesRouter
     const categories = await connection
       .getRepository(Category)
       .createQueryBuilder('category')
-      .leftJoinAndSelect("category.translations", "translation")
+      .leftJoinAndSelect("category.translations", "translation",
+        "translation.language = :locale AND translation.field = :field", { locale, field: "title" })
+      .leftJoinAndSelect("category.featured", "featured")
       .leftJoinAndSelect("category.parent", "parent")
       .select([
         "category.name",
@@ -77,10 +70,9 @@ categoriesRouter
         "translation.field",
         "translation.value",
         "parent.name",
+        "featured.src",
       ])
       .where("category.hidden = :hidden", { hidden: false })
-      .andWhere("translation.language = :locale", { locale })
-      .andWhere("translation.field = :field", { field: "title" })
       .getMany();
 
     res.send(unnest(categories).map(categoryDTO));
