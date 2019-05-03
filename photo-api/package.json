@@ -4,6 +4,7 @@
    "description": "Awesome project developed with TypeORM.",
    "scripts": {
       "start": "ts-node -r tsconfig-paths/register src/index",
+      "start:prod": "node -r ./tsconfig-paths-bootstrap.js build/index.js",
       "schema:drop": "ts-node node_modules/typeorm/cli schema:drop",
       "schema:sync": "ts-node node_modules/typeorm/cli schema:sync",
       "db:start": "docker run --name photo-mysql -e MYSQL_ROOT_PASSWORD=aws-photo -e MYSQL_DATABASE=aws-photo -d -p 3306:3306 mysql:5 --character-set-server=utf8 --collation-server=utf8_unicode_ci",
