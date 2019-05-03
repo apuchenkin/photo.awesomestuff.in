@@ -20,6 +20,8 @@ photoRouter
         "photo.id",
         "photo.src",
         "photo.views",
+        "photo.width",
+        "photo.height",
         "photo.datetime",
         "photo.group",
       ])
