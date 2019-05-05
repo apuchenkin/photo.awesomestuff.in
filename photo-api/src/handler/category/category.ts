@@ -15,7 +15,6 @@ categoryRouter
 
     const connection: Connection = req.app.locals.connection;
     const locale: Language = req.app.locals.locale;
-    console.log(req.params);
 
     const category = await connection
       .getRepository(Category)

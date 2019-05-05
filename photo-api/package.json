@@ -11,7 +11,7 @@
       "db:init": "ts-node -r tsconfig-paths/register src/db/init",
       "db:stop": "docker rm -f photo-mysql",
       "docker:build": "docker build . -t photo-api",
-      "dokcer:run": "docker run -d --network photo -p 3000:3000 --name photo-api photo-api",
+      "docker:run": "docker run -d --network photo -p 3000:3000 --name photo-api photo-api",
       "build": "tsc"
    },
    "devDependencies": {

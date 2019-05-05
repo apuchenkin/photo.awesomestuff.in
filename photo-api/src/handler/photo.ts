@@ -17,7 +17,7 @@ photoRouter
     const photo = await connection
       .getRepository(Photo)
       .createQueryBuilder('photo')
-      .innerJoinAndSelect("photo.translations", "translation", "translation.language = :locale", { locale })
+      .leftJoinAndSelect("photo.translations", "translation", "translation.language = :locale", { locale })
       .select([
         "photo.id",
         "photo.src",
