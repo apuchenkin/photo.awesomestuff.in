@@ -10,6 +10,7 @@ import {
   DropTargetSpec,
 } from 'react-dnd';
 import { NavLink, Link } from 'react-router-dom';
+import { CategoryContext } from '@app/context';
 
 const PHOTO = 'photo';
 const CATEGORY = 'category';
@@ -49,7 +50,7 @@ const categoryDrop: DropTargetSpec<Props> = {
       case PHOTO:
         return true;
       case CATEGORY:
-        return category.parent.id === null && category.id !== monitor.getItem().id;
+        return !category.parent && category.id !== monitor.getItem().id;
     }
   },
 };
@@ -113,6 +114,12 @@ const Category = ({
 };
 
 export default compose(
+  (cmp: React.Component) => (props: Props) => {
+    const categories = React.useContext(CategoryContext);
+    console.log(cmp, categories);
+
+    return React.createElement(cmp, props);
+  },
   DragSource(CATEGORY, categorySource, collectDrag),
   DropTarget([CATEGORY, PHOTO], categoryDrop, collectDrop),
 )(Category);
