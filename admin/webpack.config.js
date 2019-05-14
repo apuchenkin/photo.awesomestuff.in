@@ -1,3 +1,4 @@
+const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -10,7 +11,10 @@ module.exports = {
   devtool: "source-map",
 
   resolve: {
-      extensions: [".ts", ".tsx", ".js", ".json"]
+      extensions: [".ts", ".tsx", ".js", ".json"],
+      alias: {
+        '@app': path.resolve(__dirname, './src'),
+      },
   },
 
   module: {
@@ -39,7 +43,7 @@ module.exports = {
         logLevel: 'debug',
         target: 'http://localhost:3000',
         changeOrigin: true,
-        pathRewrite: { '^/api/v1': '' },
+        pathRewrite: { '^/api/v1': '/admin' },
       },
     },
   },
