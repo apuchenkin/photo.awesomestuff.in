@@ -8,9 +8,13 @@
     "build": "webpack --env.production"
   },
   "dependencies": {
+    "@types/classnames": "^2.2.7",
+    "@types/ramda": "^0.26.8",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/react-router-dom": "^4.3.3",
+    "classnames": "^2.2.6",
+    "ramda": "^0.26.1",
     "react": "^16.8.6",
     "react-dnd": "^7.4.5",
     "react-dnd-html5-backend": "^7.4.4",

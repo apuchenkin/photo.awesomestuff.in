@@ -4,6 +4,7 @@ interface Timestamp {
 }
 
 interface Category extends Timestamp {
+  id: number;
   name: string;
   title: string;
   description?: string;

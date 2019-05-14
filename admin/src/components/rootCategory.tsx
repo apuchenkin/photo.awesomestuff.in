@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import Category from './Category';
 
 export default class RootCategory extends React.Component {

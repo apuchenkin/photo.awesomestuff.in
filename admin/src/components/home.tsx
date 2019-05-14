@@ -7,7 +7,7 @@ import {
 
 // import Photos from './Photos';
 // import CategoryTranslations from './translation/Category';
-// import Categories from './Categories';
+import Categories from './categories';
 import { CategoryContext } from '@app/context';
 
 const App = () => {
@@ -23,8 +23,7 @@ const App = () => {
   return (
     <div className="admin">
       <div className="aside">
-        {JSON.stringify(categories)}
-        {/* <Categories categories={categories} admin={this} /> */}
+        <Categories categories={categories} />
       </div>
       {/* {category && (
         <main>
