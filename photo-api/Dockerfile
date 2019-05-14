@@ -1,8 +1,4 @@
-FROM node
-
-ENV http_proxy http://proxy.merann.ru:8080
-ENV https_proxy http://proxy.merann.ru:8080
-
+FROM node:slim
 RUN apt-get update
 RUN apt-get install mysql-client -y
 
