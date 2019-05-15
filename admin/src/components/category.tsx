@@ -8,15 +8,26 @@ import {
   DragSourceCollector,
   DropTargetCollector,
   DropTargetSpec,
+  ConnectDropTarget,
+  ConnectDragSource,
 } from 'react-dnd';
 import { NavLink, Link } from 'react-router-dom';
 import { CategoryContext } from '@app/context';
+import { UpdateCategory, DeleteCategory } from '@app/context/category';
 
 const PHOTO = 'photo';
 const CATEGORY = 'category';
 
-interface Props {
+interface ExternalProps {
   category: Category;
+}
+
+interface Props extends ExternalProps {
+  updateCategory: UpdateCategory;
+  deleteCategory: DeleteCategory;
+  dragSource: ConnectDragSource;
+  dropTarget: ConnectDropTarget;
+  hovered: boolean;
 }
 
 const categorySource: DragSourceSpec<Props, Category> = {
@@ -35,13 +46,16 @@ const collectDrop: DropTargetCollector<{}, {}> = (connect, monitor) => ({
 });
 
 const categoryDrop: DropTargetSpec<Props> = {
-  drop: ({ category, setParent, linkPhotos }, monitor) => {
+  drop: ({ category, updateCategory }, monitor) => {
     switch (monitor.getItemType()) {
       case PHOTO:
-        linkPhotos(category, [monitor.getItem()]);
+        // linkPhotos(category, [monitor.getItem()]);
         break;
       case CATEGORY:
-        setParent(category, monitor.getItem())
+        updateCategory({
+          ...category,
+          parent: monitor.getItem(),
+        })
         break;
     }
   },
@@ -69,8 +83,10 @@ const translateColor = (category: Category) => {
   return 'yellow';
 };
 
-const Category = ({
+const Category: React.FunctionComponent<Props> = ({
   category,
+  deleteCategory,
+  updateCategory,
   dragSource,
   dropTarget,
   hovered,
@@ -81,7 +97,10 @@ const Category = ({
     }
   };
 
-  const toggleVisibility = () => updateCategory(category, { hidden: !category.hidden });
+  const toggleVisibility = () => updateCategory({
+    ...category,
+    hidden: !category.hidden,
+  });
 
   return dragSource(dropTarget(
     <div className={classNames('category', {
@@ -114,11 +133,13 @@ const Category = ({
 };
 
 export default compose(
-  (cmp: React.Component) => (props: Props) => {
-    const categories = React.useContext(CategoryContext);
-    console.log(cmp, categories);
+  (cmp: React.ComponentType<any>) => (props: ExternalProps) => {
+    const {
+      updateCategory,
+      deleteCategory,
+    } = React.useContext(CategoryContext);
 
-    return React.createElement(cmp, props);
+    return React.createElement(cmp, { ...props, updateCategory, deleteCategory });
   },
   DragSource(CATEGORY, categorySource, collectDrag),
   DropTarget([CATEGORY, PHOTO], categoryDrop, collectDrop),

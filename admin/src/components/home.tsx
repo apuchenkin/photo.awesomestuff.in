@@ -1,46 +1,52 @@
 import * as React from 'react';
+import { __RouterContext } from 'react-router';
 import {
   Route,
   Switch,
-  // withRouter,
 } from 'react-router-dom';
 
-// import Photos from './Photos';
-// import CategoryTranslations from './translation/Category';
+import Photos from './photos';
+// import CategoryTranslations from './translation/category';
 import Categories from './categories';
 import { CategoryContext } from '@app/context';
 
-const App = () => {
-  // const { match, categories } = this.props;
-  // const categoryName = match.params.category;
-  const categories = React.useContext(CategoryContext);
-  // const category = categories.find(c => c.name === categoryName);
-  // const photos = <Photos admin={this} category={category} />;
-  // const transalations = (
-  //   <CategoryTranslations backUrl={match.url} category={category} />
-  // );
+const Category = () => {
+  const { match } = React.useContext(__RouterContext);
+  const { getCategory } = React.useContext(CategoryContext);
+  const category = getCategory(match.params.category);
+
+  console.log(category);
+
+  return (
+    <main>
+      <Switch>
+        <Route
+          // path={`${match.url}/photo`}
+          path="/photo"
+          component={Photos}
+        />
+        {/* <Route
+          path={`${match.url}/translation`}
+          component={CategoryTranslations}
+        /> */}
+      </Switch>
+    </main>
+  )
+};
+
+const Home = () => {
+  const { getCategories } = React.useContext(CategoryContext);
 
   return (
     <div className="admin">
       <div className="aside">
-        <Categories categories={categories} />
+        <Categories categories={getCategories()} />
       </div>
-      {/* {category && (
-        <main>
-          <Switch>
-            <Route
-              path={`${match.url}/photo`}
-              render={() => photos}
-            />
-            <Route
-              path={`${match.url}/translation`}
-              render={() => transalations}
-            />
-          </Switch>
-        </main>
-      )} */}
+      <Switch>
+        <Route path="/category/:category" component={Category} />
+      </Switch>
     </div>
   );
 }
 
-export default App;
+export default Home;

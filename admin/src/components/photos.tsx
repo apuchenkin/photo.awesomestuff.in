@@ -1,25 +1,15 @@
-import React from 'react';
+import * as React from 'react';
 import {
   Route,
   Switch,
   withRouter,
 } from 'react-router-dom';
-import { connect } from 'react-redux';
-import queryString from 'query-string';
+// import queryString from 'query-string';
 
-import Photo from './Photo';
-import Upload from './Upload';
-import PhotoTranslations from './translation/Photo';
-import Pagination from './Pagination';
-
-import {
-  load as loadPhotos,
-  update as updatePhotos,
-} from '../store/photo/actions';
-
-import {
-  update as updateCategory,
-} from '../store/category/actions';
+// import Photo from './Photo';
+// import Upload from './Upload';
+// import PhotoTranslations from './translation/Photo';
+// import Pagination from './Pagination';
 
 class Photos extends React.PureComponent {
 
@@ -199,18 +189,19 @@ class Photos extends React.PureComponent {
   }
 }
 
-export default withRouter(connect(
-  ({ photo: { total, photos, groups }, runtime: { categoryService, photoService } }, { location }) => ({
-    total,
-    photos,
-    groups,
-    categoryService,
-    photoService,
-    page: queryString.parse(location.search).page,
-  }),
-  {
-    loadPhotos,
-    updatePhotos,
-    updateCategory,
-  },
-)(Photos));
+export default Photos;
+//  withRouter(connect(
+//   ({ photo: { total, photos, groups }, runtime: { categoryService, photoService } }, { location }) => ({
+//     total,
+//     photos,
+//     groups,
+//     categoryService,
+//     photoService,
+//     page: queryString.parse(location.search).page,
+//   }),
+//   {
+//     loadPhotos,
+//     updatePhotos,
+//     updateCategory,
+//   },
+// )());

@@ -7,14 +7,15 @@ import {
   ConnectDropTarget,
   DropTargetSpec,
 } from 'react-dnd';
-import RootCategory from './RootCategory';
+import RootCategory from './rootCategory';
 import { CategoryContext } from '@app/context';
+import { UpdateCategory } from '@app/context/category';
 
 const categoryDrop: DropTargetSpec<Props> = {
-  drop: ({ updateCategory, ...props }, monitor) => {
-    debugger;
-    updateCategory(monitor.getItem(), {
-      parentId: null,
+  drop: ({ updateCategory }, monitor) => {
+    updateCategory({
+      ...monitor.getItem(),
+      parent: null,
     });
   },
   canDrop: () => true,
@@ -26,9 +27,13 @@ const collectDrop: DropTargetCollector<{}, {}> = ({ dropTarget }, monitor) => ({
   dropTarget: dropTarget(),
 });
 
-interface Props {
+interface ExternalProps {
   categories: Category[];
+}
+
+interface Props extends ExternalProps {
   dropTarget: ConnectDropTarget;
+  updateCategory: UpdateCategory;
 }
 
 const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) => {
@@ -85,13 +90,10 @@ const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) 
 }
 
 export default compose(
-  // cmp => {
+  (cmp: React.ComponentType<any>) => (props: ExternalProps) => {
+    const { updateCategory } = React.useContext(CategoryContext);
 
-  //   const category = React.useContext(CategoryContext);
-  //   console.log(category);
-  //   debugger;
-
-  //   return cmp;
-  // },
+    return React.createElement(cmp, { ...props, updateCategory });
+  },
   DropTarget('category', categoryDrop, collectDrop),
 )(Categories);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Category from './Category';
+import Category from './category';
 
 interface Props {
   category: Category;
@@ -14,10 +14,9 @@ const RootCategory: React.FunctionComponent<Props> = ({ category }) => {
         className="material-icons"
         onClick={() => setExpanded(!expanded)}
         disabled={!category.children.length}
-      >{
-        expanded
-          ? 'keyboard_arrow_up'
-          : 'keyboard_arrow_down'
+      >{expanded
+        ? 'keyboard_arrow_up'
+        : 'keyboard_arrow_down'
       }</button>
       <Category category={category} />
       {

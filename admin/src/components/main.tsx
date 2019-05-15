@@ -22,8 +22,7 @@ const Main = () => (
   <main id="app">
     <Header />
     <Switch>
-      <Route exact path="/" component={Home} />
-      {/* <Route path="/category/:category" component={App} /> */}
+      <Route path="/" component={Home} />
       <Route component={NoMatch} />
     </Switch>
   </main>
