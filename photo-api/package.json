@@ -43,6 +43,7 @@
       "node-fetch": "^2.4.1",
       "ramda": "^0.26.1",
       "reflect-metadata": "^0.1.10",
+      "sharp": "^0.22.1",
       "tsconfig-paths": "^3.8.0",
       "typeorm": "0.2.16",
       "vary": "^1.1.2"

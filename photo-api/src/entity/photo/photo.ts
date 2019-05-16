@@ -15,7 +15,9 @@ export class Photo {
   })
   src: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   author: string;
 
   @Column({
@@ -34,7 +36,9 @@ export class Photo {
   })
   exif: string;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   views: number;
 
   @Column('datetime', {
