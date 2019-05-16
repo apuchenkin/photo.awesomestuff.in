@@ -63,14 +63,13 @@ const Photo = ({
   photo,
   group,
   featured,
-  history,
   isDragging,
   dragSource,
   dropTarget,
   highlighted,
   hovered,
 }) => {
-  const { match } = React.useContext(__RouterContext);
+  const { match, history } = React.useContext(__RouterContext);
   const { isSelected, select, ungroup } = React.useContext(PhotoContext);
 
   return dragSource(dropTarget(

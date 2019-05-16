@@ -12,5 +12,6 @@ ENV PORT 3000
 ENV TYPEORM_HOST db
 RUN npm prune
 
+VOLUME /static
 EXPOSE 3000
 ENTRYPOINT ["npm", "run", "start:prod"]

@@ -4,12 +4,14 @@ import { values, indexBy, prop, dissoc } from 'ramda';
 
 export type GetCategories = () => Category[];
 export type GetCategory = (name: string) => Category | undefined;
+export type CreateCategory = (category: Partial<Category>) => void;
 export type UpdateCategory = (category: Category) => void;
 export type DeleteCategory = (category: Category) => void;
 
 interface Props {
   getCategories: GetCategories;
   getCategory: GetCategory;
+  createCategory: CreateCategory;
   updateCategory: UpdateCategory;
   deleteCategory: DeleteCategory;
 }
@@ -32,6 +34,16 @@ const CategoryProvider: React.FunctionComponent = ({ children }) => {
       value={{
         getCategories: () => values(categories),
         getCategory: (name: string) => categories[name],
+        createCategory: (category: Partial<Category>) => {
+          const name = category.name;
+          // @ts-ignore
+          const category$: Category = { name };
+
+          setCategories({
+            ...categories,
+            [category$.name]: category$,
+          })
+        },
         updateCategory: (category: Category) => {
           setCategories({
             ...categories,

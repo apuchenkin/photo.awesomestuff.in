@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { Context as ServiceContext } from './service';
-import { values, indexBy, prop, dissoc } from 'ramda';
+import { values, indexBy, prop, slice } from 'ramda';
 
-export type GetPhotos = () => Photo[];
+export type GetTotal = () => number;
+export type GetPhotos = (page?: number, limit?: number) => Photo[];
 export type GetGroups = () => any[];
 export type GetPhoto = (id: number) => Photo | undefined;
 // export type UpdateCategory = (category: Category) => void;
 // export type DeleteCategory = (category: Category) => void;
 
 interface ContextProps {
+  getTotal: GetTotal;
   getPhotos: GetPhotos;
   getPhoto: GetPhoto;
   getGroups: GetGroups;
@@ -25,7 +27,7 @@ interface Props {
 
 const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) => {
   const { categoryService } = React.useContext(ServiceContext);
-  const [ photos, setPhotos ] = React.useState<Record<string, Category>>({});
+  const [ photos, setPhotos ] = React.useState<Record<string, Photo>>({});
   const [ selection, setSelection ] = React.useState([]);
 
   React.useEffect(() => {
@@ -59,10 +61,17 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
 
   const getSelectionCount = () => selection.length;
 
+  const getPhotos: GetPhotos = (page = 1, limit = 50) => slice(
+    (page - 1) * limit,
+    page * limit,
+    values(photos),
+  )
+
   return (
     <Context.Provider
       value={{
-        getPhotos: () => values(photos),
+        getTotal: () => values(photos).length,
+        getPhotos,
         getPhoto: (id: number) => photos[id],
         getGroups: (): any[] => [],
         cleanSelection,

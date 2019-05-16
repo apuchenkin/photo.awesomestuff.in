@@ -7,9 +7,10 @@ import {
   ConnectDropTarget,
   DropTargetSpec,
 } from 'react-dnd';
+
 import RootCategory from './rootCategory';
 import { CategoryContext } from '@app/context';
-import { UpdateCategory } from '@app/context/category';
+import { UpdateCategory, CreateCategory } from '@app/context/category';
 
 const categoryDrop: DropTargetSpec<Props> = {
   drop: ({ updateCategory }, monitor) => {
@@ -34,10 +35,12 @@ interface ExternalProps {
 interface Props extends ExternalProps {
   dropTarget: ConnectDropTarget;
   updateCategory: UpdateCategory;
+  createCategory: CreateCategory;
 }
 
-const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) => {
-  // const inputEl = React.useRef(null);
+const Categories: React.FunctionComponent<Props> = ({ categories, createCategory, dropTarget }) => {
+  const [add, setAdd] = React.useState(false);
+  const inputRef = React.useRef(null);
   const rootCategories = categories
     .filter(c => !(c.parent && c.parent.id))
     .map(category => ({
@@ -47,23 +50,20 @@ const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) 
     }))
     .map(category => (<RootCategory category={category} key={category.id} />));
 
+  const cancel = () => setAdd(false);
 
-  const cancel = () => {}
-  const submit: React.FormEventHandler = (e) => {
-    e.preventDefault();
-    // const data = new FormData(e.currentTarget);
+  const submit: React.FormEventHandler = (event) => {
+    event.preventDefault();
+    if (inputRef.current) {
+      createCategory({ name: inputRef.current.value });
+    }
 
-    // this.props.categoryCreate({
-    //   name: data.get('category'),
-    // });
     cancel();
   }
 
-  const add = false;
-
   const AddForm = () => (
     <form className="create" onSubmit={submit}>
-      <input name="category" />
+      <input name="category" ref={inputRef} />
       <input type="submit" value="Submit" />
       <button onClick={cancel}>Cancel</button>
     </form>
@@ -73,7 +73,7 @@ const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) 
     <i
       role="button"
       tabIndex={0}
-      // onClick={handler}
+      onClick={() => setAdd(true)}
       className={classNames('material-icons', { active: add })}
     >
       add
@@ -82,8 +82,8 @@ const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) 
 
   return (
     <nav className="categories">
-      { dropTarget(<h2>Categories <AddButton /></h2>) }
-      { add && <AddForm /> }
+      {dropTarget(<h2>Categories <AddButton /></h2>)}
+      {add && <AddForm />}
       <ul>{rootCategories}</ul>
     </nav>
   );
@@ -91,9 +91,13 @@ const Categories: React.FunctionComponent<Props> = ({ categories, dropTarget }) 
 
 export default compose(
   (cmp: React.ComponentType<any>) => (props: ExternalProps) => {
-    const { updateCategory } = React.useContext(CategoryContext);
+    const { createCategory, updateCategory } = React.useContext(CategoryContext);
 
-    return React.createElement(cmp, { ...props, updateCategory });
+    return React.createElement(cmp, {
+      ...props,
+      createCategory,
+      updateCategory
+    });
   },
   DropTarget('category', categoryDrop, collectDrop),
 )(Categories);

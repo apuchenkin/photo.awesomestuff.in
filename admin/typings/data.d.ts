@@ -23,11 +23,12 @@ interface Photo {
   width: number;
   height: number;
   group?: number;
-  description?: string;
   author?: string;
+  translations: Translation[];
 }
 
 interface Translation {
+  id: number;
   language: string;
   field: string;
   value: string;

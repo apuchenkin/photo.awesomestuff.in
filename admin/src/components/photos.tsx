@@ -3,24 +3,34 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-// import queryString from 'query-string';
+import * as queryString from 'query-string';
 
 import Photo from './photo';
 import Upload from './upload';
 import { PhotoProvider, PhotoContext } from '@app/context';
-// import PhotoTranslations from './translation/Photo';
-// import Pagination from './Pagination';
+import PhotoTranslations from './translation/photo';
+import Pagination from './pagination';
+import { __RouterContext } from 'react-router';
 
 interface Props {
   category: Category;
 }
 
 const Photos: React.FunctionComponent<Props> = ({ category }) => {
-  const { getPhotos, getGroups, getSelectionCount } = React.useContext(PhotoContext);
-  const photos = getPhotos();
+  const { match } = React.useContext(__RouterContext);
+  const {
+    getPhotos,
+    getPhoto,
+    getTotal,
+    getGroups,
+    getSelectionCount,
+  } = React.useContext(PhotoContext);
+
+  const { page } = queryString.parse(location.search);
+
+  const total = getTotal();
+  const photos = getPhotos(page && Number(page));
   const groups = getGroups();
-
-
 
   // delete(photos) {
   //   const { category, categoryService } = this.props;
@@ -77,10 +87,6 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
   // const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
   // const singleSelect = selection.length === 1;
 
-  // const translations = photo => (
-  //   <PhotoTranslations backUrl={match.url} photo={photo} />
-  // );
-
   const photoItems = photos.map((photo: Photo) => (
     <li key={photo.id} >
       <Photo
@@ -116,21 +122,21 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
       <Upload category={category}>
         <ul>{photoItems}</ul>
       </Upload>
-      {/* <Pagination total={total} /> */}
+      <Pagination total={total} />
     </div>
   );
 
   return (
     <Switch>
-      {/* {photos.length && (
-        <Route
-          path={`${match.url}/:id/translation`}
-          render={({ match: { params } }) => {
-            const photo = photos.find(p => p.id === Number(params.id));
-            return translations(photo);
-          }}
-        />
-      )} */}
+      <Route
+        path={`${match.url}/:id/translation`}
+        render={({ match: { params } }) => {
+          const photo = getPhoto(Number(params.id));
+          if (photo) {
+            return <PhotoTranslations photo={photo} />;
+          }
+        }}
+      />
       <Route render={() => PhotosCmp} />
     </Switch>
   );
