@@ -25,7 +25,7 @@ export default class PhotoService extends Service {
     const body = new FormData();
     body.append('file', file);
 
-    return this.fetch(`/upload/${category.name}`, {
+    return fetch(`${this.endpoint}/upload/${category.name}`, {
       method: 'POST',
       body,
       // headers: {

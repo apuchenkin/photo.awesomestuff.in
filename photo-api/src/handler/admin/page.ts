@@ -32,4 +32,6 @@ router
     res.send(page);
   });
 
+router.use(express.json());
+
 export default router;

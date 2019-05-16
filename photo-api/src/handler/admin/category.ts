@@ -101,4 +101,6 @@ categoriesRouter
   })
 ;
 
+categoriesRouter.use(express.json());
+
 export default categoriesRouter;
