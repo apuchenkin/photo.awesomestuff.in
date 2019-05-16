@@ -7,6 +7,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContextProvider } from 'react-dnd';
 import { ServiceProvider, CategoryProvider } from '@app/context';
 import Main from '@app/components/main';
+import './styles/app.scss';
 
 interface Props {
   config: any;

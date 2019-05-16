@@ -20,4 +20,24 @@ export default class PhotoService extends Service {
       ...photo,
     }));
   }
+
+  upload = (file: File, category: Category) => {
+    const body = new FormData();
+    body.append('file', file);
+
+    return this.fetch(`/upload/${category.name}`, {
+      method: 'POST',
+      body,
+      // headers: {
+      //   'Content-Disposition': `attachment; filename="${file.name}"`,
+      // },
+      // progressSubscriber: Subscriber.create(e =>
+      //   this.updateFile(file, { progress: Number(100 * (e.loaded / e.total)) }),
+      //   error => Observable.of(this.updateFile(file, { status: STATUS_ERROR, error })),
+      //   () => this.updateFile(file, { status: STATUS_COMPLETE }),
+      // ),
+    });
+    // .catch(() => Observable.empty)
+    // .subscribe();
+  }
 }

@@ -15,16 +15,16 @@ const Category = () => {
   const { getCategory } = React.useContext(CategoryContext);
   const category = getCategory(match.params.category);
 
-  console.log(category);
-
   return (
     <main>
       <Switch>
-        <Route
-          // path={`${match.url}/photo`}
-          path="/photo"
-          component={Photos}
-        />
+        {category && (
+          <Route
+            path={`${match.url}/photo`}
+            render={() => <Photos category={category} />}
+          />
+        )}
+
         {/* <Route
           path={`${match.url}/translation`}
           component={CategoryTranslations}

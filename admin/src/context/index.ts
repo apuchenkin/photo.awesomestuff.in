@@ -7,3 +7,8 @@ export {
   default as CategoryProvider,
   Context as CategoryContext
 } from './category';
+
+export {
+  default as PhotoProvider,
+  Context as PhotoContext
+} from './photo';
