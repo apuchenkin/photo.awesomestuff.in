@@ -28,16 +28,13 @@ export default class PhotoService extends Service {
     return fetch(`${this.endpoint}/upload/${category.name}`, {
       method: 'POST',
       body,
-      // headers: {
-      //   'Content-Disposition': `attachment; filename="${file.name}"`,
-      // },
-      // progressSubscriber: Subscriber.create(e =>
-      //   this.updateFile(file, { progress: Number(100 * (e.loaded / e.total)) }),
-      //   error => Observable.of(this.updateFile(file, { status: STATUS_ERROR, error })),
-      //   () => this.updateFile(file, { status: STATUS_COMPLETE }),
-      // ),
+    }).then(async res => {
+      if (!res.ok) {
+        const error = await res.text();
+        throw error;
+      }
+
+      return res;
     });
-    // .catch(() => Observable.empty)
-    // .subscribe();
   }
 }
