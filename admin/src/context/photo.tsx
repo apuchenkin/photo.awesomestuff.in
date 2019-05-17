@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Context as ServiceContext } from './service';
 import { values, indexBy, prop, slice } from 'ramda';
+import { CategoryContext } from '.';
 
 export type GetTotal = () => number;
 export type GetPhotos = (page?: number, limit?: number) => Photo[];
@@ -24,7 +25,8 @@ interface Props {
 }
 
 const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) => {
-  const { categoryService } = React.useContext(ServiceContext);
+  const { updateCategory } = React.useContext(CategoryContext);
+  const { photoService, categoryService } = React.useContext(ServiceContext);
   const [ photos, setPhotos ] = React.useState<Record<string, Photo>>({});
   const [ selection, setSelection ] = React.useState([]);
   const loadPhotos = () => {
@@ -75,21 +77,34 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
       });
   }
 
-  // makeFeatured(photo) {
-  //   this.props.updateCategory(this.props.category, {
-  //     featuredId: photo.id,
-  //   });
-  //   this.cleanSelection();
-  // }
+  const updatePhoto = async (photo: Photo) => {
+    const photo$ = await photoService.update(photo);
 
-  // toggleVisibility() {
-  //   const { selection } = this.state;
-  //   selection.forEach((photo) => {
-  //     this.props.updatePhoto(photo, { hidden: !photo.hidden });
-  //   });
+    setPhotos(photos => ({
+      ...photos,
+      [photo.id]: photo$,
+    }));
+  };
 
-  //   this.cleanSelection();
-  // }
+  const makeFeatured = (photo: Photo) => {
+    updateCategory({
+      ...category,
+      featured: photo,
+    });
+
+    cleanSelection();
+  }
+
+  const toggleVisibility = (photos: Photo[]) => {
+    photos.forEach((photo) => {
+      updatePhoto({
+        ...photo,
+        hidden: !photo.hidden
+      });
+    });
+
+    cleanSelection();
+  }
 
   // ungroup(photo) {
   //   this.props.photoService
@@ -126,6 +141,9 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
         select,
         getSelectionCount,
         deletePhotos,
+        updatePhoto,
+        toggleVisibility,
+        makeFeatured,
       }}
     >
       {children}

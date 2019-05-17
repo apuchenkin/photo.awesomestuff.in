@@ -26,6 +26,8 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
     getSelectionCount,
     isSelected,
     deletePhotos,
+    toggleVisibility,
+    makeFeatured,
   } = React.useContext(PhotoContext);
 
   const { page } = queryString.parse(location.search);
@@ -40,7 +42,7 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
     <li key={photo.id} >
       <Photo
         photo={photo}
-        featured={category.featured === photo.src}
+        featured={(category.featured && category.featured.id) === photo.id}
         group={groups[photo.group]}
       />
     </li>
@@ -56,10 +58,10 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
           {count} selected
         </span>
         <div className="tools">
-          {/* <button disabled={count == 1} onClick={() => this.makeFeatured(selection[0])}>
+          <button disabled={!(count === 1)} onClick={() => makeFeatured(photos.find(isSelected))}>
             Feature
-          </button> */}
-          <button disabled={!count} onClick={() => toggleVisibility()}>
+          </button>
+          <button disabled={!count} onClick={() => toggleVisibility(photos.filter(isSelected))}>
             Show/Hide
           </button>
           {/* <button disabled={!canGroup} onClick={() => this.group(selection)}>

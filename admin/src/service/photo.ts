@@ -21,6 +21,13 @@ export default class PhotoService extends Service {
     }));
   }
 
+  update = (photo: Photo): Promise<Photo> => {
+    return this.fetch(`/photo/${photo.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(photo),
+    });
+  }
+
   upload = (file: File, category: Category) => {
     const body = new FormData();
     body.append('file', file);

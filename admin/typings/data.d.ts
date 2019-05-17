@@ -11,7 +11,7 @@ interface Category extends Timestamp {
   hidden: boolean;
   date?: Date;
   parent?: Category
-  featured?: string;
+  featured?: Photo;
   translations: Translation[];
   children: Category[];
 }
@@ -25,6 +25,7 @@ interface Photo {
   group?: number;
   author?: string;
   translations: Translation[];
+  hidden: boolean;
 }
 
 interface Translation {
