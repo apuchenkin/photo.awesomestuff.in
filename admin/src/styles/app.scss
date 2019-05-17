@@ -1,6 +1,6 @@
 $divisor: 24px;
 $grey: grey;
-$grey-light: darkgrey;
+$grey-light: #333;
 $light-grey: lightgrey;
 $white: white;
 $light: lightblue;
@@ -10,6 +10,7 @@ html, body, body > div, #app {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  margin: 0;
 }
 
 #app {
@@ -205,15 +206,22 @@ form.create {
           line-height: 28px;
 
           & > a {
+            color: $light;
             display: inline-block;
             padding: 0 2px;
             flex: 1 100%;
+
+            &.active {
+              font-weight: bold;
+              color: $accent;
+            }
           }
 
           .tools {
             display: inline-block;
             float: right;
             display: flex;
+
             a {
               height: 28px;
             }
@@ -256,6 +264,7 @@ form.create {
       }
 
       ul {
+        list-style: none;
         align-items: stretch;
         padding: $divisor;
 

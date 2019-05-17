@@ -28,7 +28,7 @@ const Category = () => {
           />
           <Route
             path={`${match.url}/translation`}
-            component={() => <CategoryTranslations category={category} backUrl={match.url} />}
+            component={() => <CategoryTranslations category={category} />}
           />
         </Switch>
       )}

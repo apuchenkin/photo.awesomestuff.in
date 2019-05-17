@@ -24,6 +24,8 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
     getTotal,
     getGroups,
     getSelectionCount,
+    isSelected,
+    deletePhotos,
   } = React.useContext(PhotoContext);
 
   const { page } = queryString.parse(location.search);
@@ -32,59 +34,6 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
   const photos = getPhotos(page && Number(page));
   const groups = getGroups();
 
-  // delete(photos) {
-  //   const { category, categoryService } = this.props;
-
-  //   if (category) {
-  //     categoryService
-  //       .unlinkPhotos(category, photos)
-  //       .then(() => {
-  //         this.cleanSelection();
-  //         this.props.loadPhotos(this.props.category);
-  //       });
-  //   }
-  // }
-
-  // makeFeatured(photo) {
-  //   this.props.updateCategory(this.props.category, {
-  //     featuredId: photo.id,
-  //   });
-  //   this.cleanSelection();
-  // }
-
-  // toggleVisibility() {
-  //   const { selection } = this.state;
-  //   selection.forEach((photo) => {
-  //     this.props.updatePhoto(photo, { hidden: !photo.hidden });
-  //   });
-
-  //   this.cleanSelection();
-  // }
-
-  // ungroup(photo) {
-  //   this.props.photoService
-  //     .removeGroup(photo.group, [photo])
-  //     .then(() => {
-  //       this.cleanSelection();
-  //       this.props.loadPhotos(this.props.category);
-  //     });
-  // }
-
-  // group(photos) {
-  //   const photoService = this.props.photoService;
-  //   const photo = photos.find(p => !!p.group);
-  //   const promise = photo
-  //     ? photoService.appendGroup(photo.group, photos)
-  //     : photoService.group(photos)
-  //   ;
-
-  //   promise.then(() => {
-  //     this.cleanSelection();
-  //     this.props.loadPhotos(this.props.category);
-  //   });
-  // }
-
-  // const canGroup = selection.length > 1 && selection.filter(p => !!p.group).length;
   // const singleSelect = selection.length === 1;
 
   const photoItems = photos.map((photo: Photo) => (
@@ -93,31 +42,33 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
         photo={photo}
         featured={category.featured === photo.src}
         group={groups[photo.group]}
-        parent={this}
       />
     </li>
   ));
+
+  const count = getSelectionCount();
+  // const canGroup = count > 1 && selection.filter(p => !!p.group).length;
 
   const PhotosCmp = (
     <div className="photos">
       <div className="toolbox">
         <span>
-          {getSelectionCount()} selected
+          {count} selected
         </span>
-        {/* <div className="tools">
-          <button disabled={!singleSelect} onClick={() => this.makeFeatured(selection[0])}>
+        <div className="tools">
+          {/* <button disabled={count == 1} onClick={() => this.makeFeatured(selection[0])}>
             Feature
-          </button>
-          <button disabled={!selection.length} onClick={() => this.toggleVisibility()}>
+          </button> */}
+          <button disabled={!count} onClick={() => toggleVisibility()}>
             Show/Hide
           </button>
-          <button disabled={!canGroup} onClick={() => this.group(selection)}>
+          {/* <button disabled={!canGroup} onClick={() => this.group(selection)}>
             Group
-          </button>
-          <button disabled={!selection.length} onClick={() => this.delete(selection)}>
+          </button> */}
+          <button disabled={!count} onClick={() => deletePhotos(photos.filter(isSelected))}>
             Delete
           </button>
-        </div> */}
+        </div>
       </div>
       <Upload category={category}>
         <ul>{photoItems}</ul>

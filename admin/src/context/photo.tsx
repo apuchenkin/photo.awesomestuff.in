@@ -6,16 +6,14 @@ export type GetTotal = () => number;
 export type GetPhotos = (page?: number, limit?: number) => Photo[];
 export type GetGroups = () => any[];
 export type GetPhoto = (id: number) => Photo | undefined;
-// export type UpdateCategory = (category: Category) => void;
-// export type DeleteCategory = (category: Category) => void;
+export type DeletePhotos = (photos: Photo[]) => void;
 
 interface ContextProps {
   getTotal: GetTotal;
   getPhotos: GetPhotos;
   getPhoto: GetPhoto;
   getGroups: GetGroups;
-  // updateCategory: UpdateCategory;
-  // deleteCategory: DeleteCategory;
+  deletePhotos: DeletePhotos;
 }
 
 // @ts-ignore
@@ -29,12 +27,13 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
   const { categoryService } = React.useContext(ServiceContext);
   const [ photos, setPhotos ] = React.useState<Record<string, Photo>>({});
   const [ selection, setSelection ] = React.useState([]);
-
-  React.useEffect(() => {
+  const loadPhotos = () => {
     categoryService.fetchPhotos(category)
       .then(indexBy(prop<string, string>('id')))
       .then(setPhotos);
-  }, [])
+  }
+
+  React.useEffect(loadPhotos, [])
 
   const cleanSelection = () => {
     setSelection([]);
@@ -67,6 +66,54 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
     values(photos),
   )
 
+  const deletePhotos: DeletePhotos = (photos) => {
+    categoryService
+      .unlinkPhotos(category, photos)
+      .then(() => {
+        cleanSelection();
+        loadPhotos();
+      });
+  }
+
+  // makeFeatured(photo) {
+  //   this.props.updateCategory(this.props.category, {
+  //     featuredId: photo.id,
+  //   });
+  //   this.cleanSelection();
+  // }
+
+  // toggleVisibility() {
+  //   const { selection } = this.state;
+  //   selection.forEach((photo) => {
+  //     this.props.updatePhoto(photo, { hidden: !photo.hidden });
+  //   });
+
+  //   this.cleanSelection();
+  // }
+
+  // ungroup(photo) {
+  //   this.props.photoService
+  //     .removeGroup(photo.group, [photo])
+  //     .then(() => {
+  //       this.cleanSelection();
+  //       this.props.loadPhotos(this.props.category);
+  //     });
+  // }
+
+  // group(photos) {
+  //   const photoService = this.props.photoService;
+  //   const photo = photos.find(p => !!p.group);
+  //   const promise = photo
+  //     ? photoService.appendGroup(photo.group, photos)
+  //     : photoService.group(photos)
+  //   ;
+
+  //   promise.then(() => {
+  //     this.cleanSelection();
+  //     this.props.loadPhotos(this.props.category);
+  //   });
+  // }
+
   return (
     <Context.Provider
       value={{
@@ -78,6 +125,7 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
         isSelected,
         select,
         getSelectionCount,
+        deletePhotos,
       }}
     >
       {children}

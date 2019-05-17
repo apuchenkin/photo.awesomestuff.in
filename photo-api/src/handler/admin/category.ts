@@ -18,6 +18,48 @@ photoRouter
 
     res.send(photos);
   })
+  // @ts-ignore
+  .link('/', async (req, res) => {
+    const pids: number[] = req.body;
+    const connection: Connection = req.app.locals.connection;
+    const repository = connection.getRepository(Category);
+    const category = await repository.findOne({
+      name: req.params.category
+    })
+
+    try{
+      await repository
+      .createQueryBuilder()
+      .relation('photos')
+      .of(category.id)
+      .add(pids);
+
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(304).send(error);
+    }
+  })
+  // @ts-ignore
+  .unlink('/', async (req, res) => {
+    const pids: number[] = req.body;
+    const connection: Connection = req.app.locals.connection;
+    const repository = connection.getRepository(Category);
+    const category = await repository.findOne({
+      name: req.params.category
+    })
+
+    try {
+      await repository
+        .createQueryBuilder()
+        .relation('photos')
+        .of(category.id)
+        .remove(pids);
+
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(304).send(error);
+    }
+  });
 ;
 
 const categoryRouter = express.Router({ mergeParams: true });

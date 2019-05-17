@@ -26,8 +26,8 @@ export default class BaseService {
         throw new Error(error);
       }
 
-      if (response.status === 204) {
-        return response
+      if (response.status === 204 || response.status === 304) {
+        return response;
       }
 
       return response.json();

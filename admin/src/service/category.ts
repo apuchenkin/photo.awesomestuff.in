@@ -34,4 +34,18 @@ export default class CategoryService extends ApiService {
       method: 'DELETE',
     });
   }
+
+  linkPhotos = (category: Category, photos: Photo[]) => {
+    return this.fetch(`${base}/${category.name}/photo`, {
+      method: 'LINK',
+      body: JSON.stringify(photos.map(p => p.id)),
+    });
+  }
+
+  unlinkPhotos = (category: Category, photos: Photo[]) => {
+    return this.fetch(`${base}/${category.name}/photo`, {
+      method: 'UNLINK',
+      body: JSON.stringify(photos.map(p => p.id)),
+    });
+  }
 }

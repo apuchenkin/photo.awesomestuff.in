@@ -12,7 +12,7 @@ import {
   ConnectDragSource,
 } from 'react-dnd';
 import { NavLink, Link } from 'react-router-dom';
-import { CategoryContext } from '@app/context';
+import { CategoryContext, ServiceContext } from '@app/context';
 import { UpdateCategory, DeleteCategory } from '@app/context/category';
 
 const PHOTO = 'photo';
@@ -25,6 +25,7 @@ interface ExternalProps {
 interface Props extends ExternalProps {
   updateCategory: UpdateCategory;
   deleteCategory: DeleteCategory;
+  linkPhotos: (category: Category, photos: Photo[]) => void;
   dragSource: ConnectDragSource;
   dropTarget: ConnectDropTarget;
   hovered: boolean;
@@ -46,10 +47,10 @@ const collectDrop: DropTargetCollector<{}, {}> = (connect, monitor) => ({
 });
 
 const categoryDrop: DropTargetSpec<Props> = {
-  drop: ({ category, updateCategory }, monitor) => {
+  drop: ({ category, updateCategory, linkPhotos }, monitor) => {
     switch (monitor.getItemType()) {
       case PHOTO:
-        // linkPhotos(category, [monitor.getItem()]);
+        linkPhotos(category, [monitor.getItem()]);
         break;
       case CATEGORY:
         updateCategory({
@@ -134,12 +135,18 @@ const Category: React.FunctionComponent<Props> = ({
 
 export default compose(
   (cmp: React.ComponentType<any>) => (props: ExternalProps) => {
+    const { categoryService } = React.useContext(ServiceContext);
     const {
       updateCategory,
       deleteCategory,
     } = React.useContext(CategoryContext);
 
-    return React.createElement(cmp, { ...props, updateCategory, deleteCategory });
+    return React.createElement(cmp, {
+      ...props,
+      updateCategory,
+      deleteCategory,
+      linkPhotos: categoryService.linkPhotos,
+    });
   },
   DragSource(CATEGORY, categorySource, collectDrag),
   DropTarget([CATEGORY, PHOTO], categoryDrop, collectDrop),
