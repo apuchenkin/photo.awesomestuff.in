@@ -34,23 +34,26 @@ const CategoryProvider: React.FunctionComponent = ({ children }) => {
       value={{
         getCategories: () => values(categories),
         getCategory: (name: string) => categories[name],
-        createCategory: (category: Partial<Category>) => {
+        createCategory: async (category: Partial<Category>) => {
           const name = category.name;
-          // @ts-ignore
-          const category$: Category = { name };
+          const category$ = await categoryService.create({ name });
 
           setCategories({
             ...categories,
             [category$.name]: category$,
           })
         },
-        updateCategory: (category: Category) => {
+        updateCategory: async (category: Category) => {
+          const category$ = await categoryService.update(category);
+
           setCategories({
             ...categories,
-            [category.name]: category,
+            [category.name]: category$,
           })
         },
-        deleteCategory: (category: Category) => {
+        deleteCategory: async (category: Category) => {
+          await categoryService.delete(category);
+
           setCategories(dissoc(category.name, categories));
         }
       }}

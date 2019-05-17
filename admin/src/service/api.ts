@@ -19,6 +19,18 @@ export default class BaseService {
         'Content-Type': 'application/json',
         ...options.headers,
       },
-    }).then(response => response.json());
+    })
+    .then(async response => {
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error);
+      }
+
+      if (response.status === 204) {
+        return response
+      }
+
+      return response.json();
+    })
   }
 }

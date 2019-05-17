@@ -1,6 +1,4 @@
 import * as React from 'react';
-import classNames from 'classnames';
-
 import Translation from './translation';
 import { __RouterContext } from 'react-router';
 
@@ -12,21 +10,13 @@ interface Props {
   title: string;
 }
 
-const Translations: React.FunctionComponent<Props> = ({ fields, translations, title, children }) => {
+const Translations: React.FunctionComponent<Props> = ({
+  fields,
+  translations,
+  title,
+  children,
+}) => {
   const { history } = React.useContext(__RouterContext);
-
-  const remove = (translation: Translation) => {
-    if (window.confirm(`Delete translation ${translation.value}?`)) {
-      remove(translation);
-    }
-  }
-
-  const update = (translation: Translation) => {
-    // return translation.id
-    //   ? update(translation, data)
-    //   : create(Object.assign(translation, data))
-    // ;
-  }
 
   return (
     <div className="translation">

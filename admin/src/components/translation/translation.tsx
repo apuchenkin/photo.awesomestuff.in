@@ -1,23 +1,37 @@
 import * as React from 'react';
+import { TranslationContext } from '@app/context';
 
 interface Props {
-  translation: Translation;
+  translation: Translation | Partial<Translation>;
 }
 
 const Translations: React.FunctionComponent<Props> = ({ translation }) => {
   const inputRef = React.useRef(null);
   const [edit, setEdit] = React.useState(false);
+  const {
+    createTranslation,
+    updateTranslation,
+    deleteTranslation,
+  } = React.useContext(TranslationContext);
 
-  // TODO: up!
-  const update = (translation: Translation) => {};
-  const remove = (translation: Translation) => {};
+  const remove = (translation: Translation) => {
+    if (window.confirm(`Delete translation ${translation.value}?`)) {
+      deleteTranslation(translation);
+    }
+  }
 
   const toggleEdit = () => setEdit(!edit);
   const cancel = () => setEdit(false);
   const submit = () => {
-    // update(translation, {
-    //   value: inputRef.current.value,
-    // });
+    const translation$ = {
+      ...translation,
+      value: inputRef.current.value,
+    };
+
+    translation$.id
+      ? updateTranslation(translation$)
+      : createTranslation(translation$)
+    ;
 
     cancel();
   }
@@ -52,7 +66,7 @@ const Translations: React.FunctionComponent<Props> = ({ translation }) => {
             mode_edit
           </button>,
           translation.id && (
-            <button key="remove" className="material-icons" onClick={() => remove(translation)}>
+            <button key="remove" className="material-icons" onClick={() => remove(translation as Translation)}>
               clear
             </button>
           ),

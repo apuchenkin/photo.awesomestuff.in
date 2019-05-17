@@ -41,15 +41,19 @@ categoryRouter
       res.send(category)
     }
   })
-  .patch('/', async (req, res) => {
+  .put('/', async (req, res) => {
     const connection: Connection = req.app.locals.connection;
+    const repository = connection.getRepository(Category);
 
     try {
-      const category = await connection
-        .getRepository(Category)
-        .update({ name: req.params.category }, req.body)
-        res.send(category);
+      const category = await repository.findOne({
+        name: req.params.category
+      });
 
+      const category$ = await repository
+        .save(repository.merge(category, req.body))
+
+      res.send(category$);
     } catch (error) {
       res.status(400).send(error);
     }
@@ -71,6 +75,7 @@ categoryRouter
 
 const categoriesRouter = express.Router();
 categoriesRouter
+  .use(express.json())
   .use('/:category', categoryRouter)
   .get('/', async (req, res) => {
     const connection: Connection = req.app.locals.connection;
@@ -100,7 +105,5 @@ categoriesRouter
     }
   })
 ;
-
-categoriesRouter.use(express.json());
 
 export default categoriesRouter;

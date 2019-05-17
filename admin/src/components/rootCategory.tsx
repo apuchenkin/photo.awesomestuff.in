@@ -13,14 +13,14 @@ const RootCategory: React.FunctionComponent<Props> = ({ category }) => {
       <button
         className="material-icons"
         onClick={() => setExpanded(!expanded)}
-        disabled={!category.children.length}
+        disabled={!(category.children && category.children.length)}
       >{expanded
         ? 'keyboard_arrow_up'
         : 'keyboard_arrow_down'
       }</button>
       <Category category={category} />
       {
-        expanded && (
+        expanded && category.children && (
           <ul className="childs">
             {category.children.map(child => (
               <li className="item" key={child.id} >

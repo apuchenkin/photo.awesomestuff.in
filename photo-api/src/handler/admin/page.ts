@@ -5,6 +5,7 @@ import { Page } from '@app/entity';
 const router = express.Router();
 
 router
+  .use(express.json())
   .get('/', async (req, res) => {
     const connection: Connection = req.app.locals.connection;
     const pages = await connection
@@ -31,7 +32,5 @@ router
 
     res.send(page);
   });
-
-router.use(express.json());
 
 export default router;
