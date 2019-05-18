@@ -33,6 +33,48 @@ photoRouter
       res.status(400).send(error);
     }
   })
+  .post('/group', async (req, res) => {
+    const pids = req.body;
+    const connection: Connection = req.app.locals.connection;
+    const repository = connection.getRepository(Photo);
+    const data = await repository.createQueryBuilder('photo')
+      .select("MAX(photo.group)", 'max')
+      .getRawOne();
+
+    await repository.update(
+      pids,
+      { group: Number(data.max) + 1 },
+    )
+
+    res.sendStatus(204);
+  })
+  // @ts-ignore
+  .link('/group/:groupId', async (req, res) => {
+    const group = Number(req.params.groupId);
+    const pids = req.body;
+    const connection: Connection = req.app.locals.connection;
+    const repository = connection.getRepository(Photo);
+
+    await repository.update(
+      pids,
+      { group },
+    )
+
+    res.sendStatus(204);
+  })
+  // @ts-ignore
+  .unlink('/group/:groupId', async (req, res) => {
+    const pids = req.body;
+    const connection: Connection = req.app.locals.connection;
+    const repository = connection.getRepository(Photo);
+
+    await repository.update(
+      pids,
+      { group: null },
+    )
+
+    res.sendStatus(204);
+  })
 ;
 
 export default photoRouter;

@@ -1,51 +1,63 @@
 import * as React from 'react';
 import classNames from 'classnames';
-import { DragSource, DropTarget } from 'react-dnd';
+import {
+  DragSource,
+  DropTarget,
+  DragSourceSpec,
+  ConnectDragSource,
+  ConnectDropTarget,
+  DropTargetSpec,
+  DropTargetCollector,
+  DragSourceCollector,
+} from 'react-dnd';
 import { Link } from 'react-router-dom';
 import { compose } from 'ramda';
 import { getThumb } from '@app/service/photo';
 import { PhotoContext } from '@app/context';
 import { __RouterContext } from 'react-router';
+import { GroupPhotos } from '@app/context/photo';
 
 const PHOTO = 'photo';
 
-const photoSource = {
-  beginDrag({ photo }) {
-    return photo;
-  },
-};
+interface ExternalProps {
+  photo: Photo;
+  featured: boolean;
+}
 
-const photoDrop = {
-  drop({ parent, photo }, monitor) {
-    parent.group([monitor.getItem(), photo]);
+interface Props extends ExternalProps {
+  group: GroupPhotos;
+  isDragging: boolean;
+  dragSource: ConnectDragSource;
+  dropTarget: ConnectDropTarget;
+  highlighted: boolean;
+  hovered: boolean;
+}
+
+const photoSource: DragSourceSpec<Props, Photo> = {
+  beginDrag: ({ photo }) => photo,
+}
+
+const photoDrop: DropTargetSpec<Props> = {
+  drop({ group, photo }, monitor) {
+    group([monitor.getItem(), photo]);
   },
   canDrop({ photo }, monitor) {
     return photo.id !== monitor.getItem().id;
   },
 };
 
-const collectDrop = (connect, monitor) => ({
+const collectDrop: DropTargetCollector<{}, {}> = (connect, monitor) => ({
   highlighted: monitor.canDrop(),
   hovered: monitor.isOver() && monitor.canDrop(),
   dropTarget: connect.dropTarget(),
 });
 
-const collectDrag = (connect, monitor) => ({
+const collectDrag: DragSourceCollector<{}, {}> = (connect, monitor) => ({
   dragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 });
 
-const Group = ({ color, onClick }) => (
-  <div
-    tabIndex="0"
-    role="button"
-    className="group"
-    style={{ background: color }}
-    onClick={onClick}
-  />
-);
-
-const translateColor = (photo) => {
+const translateColor = (photo: Photo) => {
   if (!photo.translations || !photo.translations.length) {
     return 'red';
   }
@@ -59,9 +71,8 @@ const translateColor = (photo) => {
   return 'yellow';
 };
 
-const Photo = ({
+const Photo: React.FunctionComponent<Props> = ({
   photo,
-  group,
   featured,
   isDragging,
   dragSource,
@@ -70,7 +81,16 @@ const Photo = ({
   hovered,
 }) => {
   const { match, history } = React.useContext(__RouterContext);
-  const { isSelected, select, ungroup } = React.useContext(PhotoContext);
+  const { isSelected, select, ungroup, getGroup } = React.useContext(PhotoContext);
+
+  const Group = () => (
+    <div
+      role="button"
+      className="group"
+      style={{ background: getGroup(photo) }}
+      onClick={() => ungroup(photo)}
+    />
+  );
 
   return dragSource(dropTarget(
     <div
@@ -80,7 +100,8 @@ const Photo = ({
         'photo--hovered': hovered,
         dragging: isDragging,
         selected: isSelected(photo),
-        hasParent: photo.hasParent,
+        // TODO: up1
+        // hasParent: photo.hasParent,
         isHidden: photo.hidden,
       })}
       onClick={e => select(photo, e.ctrlKey)}
@@ -94,8 +115,8 @@ const Photo = ({
         </button>
       </Link>
       {featured && <div className="featured material-icons">star</div>}
-      {photo.hasParent && <div className="parent" />}
-      {photo.group && <Group color={group} onClick={() => ungroup(photo)} />}
+      {/* {photo.hasParent && <div className="parent" />} */}
+      {photo.group && <Group />}
       <div
         className="img"
         style={{
@@ -113,6 +134,14 @@ const Photo = ({
 }
 
 export default compose(
+  (cmp: React.ComponentType<any>) => (props: ExternalProps) => {
+    const { group } = React.useContext(PhotoContext);
+
+    return React.createElement(cmp, {
+      ...props,
+      group,
+    });
+  },
   DragSource(PHOTO, photoSource, collectDrag),
   DropTarget(PHOTO, photoDrop, collectDrop),
 )(Photo);

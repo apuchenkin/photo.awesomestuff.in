@@ -44,4 +44,25 @@ export default class PhotoService extends Service {
       return res;
     });
   }
+
+  group = (photos: Photo[]) => {
+    return this.fetch('/photo/group', {
+      method: 'POST',
+      body: JSON.stringify(photos.map(p => p.id)),
+    });
+  }
+
+  appendGroup = (groupId: number, photos: Photo[]) => {
+    return this.fetch(`/photo/group/${groupId}`, {
+      method: 'LINK',
+      body: JSON.stringify(photos.map(p => p.id)),
+    });
+  }
+
+  removeGroup = (groupId: number, photos: Photo[]) => {
+    return this.fetch(`/photo/group/${groupId}`, {
+      method: 'UNLINK',
+      body: JSON.stringify(photos.map(p => p.id)),
+    });
+  }
 }

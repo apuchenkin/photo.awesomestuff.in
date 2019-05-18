@@ -22,34 +22,30 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
     getPhotos,
     getPhoto,
     getTotal,
-    getGroups,
     getSelectionCount,
     isSelected,
     deletePhotos,
     toggleVisibility,
     makeFeatured,
+    group,
   } = React.useContext(PhotoContext);
 
   const { page } = queryString.parse(location.search);
 
   const total = getTotal();
   const photos = getPhotos(page && Number(page));
-  const groups = getGroups();
-
-  // const singleSelect = selection.length === 1;
 
   const photoItems = photos.map((photo: Photo) => (
     <li key={photo.id} >
       <Photo
         photo={photo}
         featured={(category.featured && category.featured.id) === photo.id}
-        group={groups[photo.group]}
       />
     </li>
   ));
 
   const count = getSelectionCount();
-  // const canGroup = count > 1 && selection.filter(p => !!p.group).length;
+  const selection = photos.filter(isSelected);
 
   const PhotosCmp = (
     <div className="photos">
@@ -58,16 +54,16 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
           {count} selected
         </span>
         <div className="tools">
-          <button disabled={!(count === 1)} onClick={() => makeFeatured(photos.find(isSelected))}>
+          <button disabled={!(count === 1)} onClick={() => makeFeatured(selection[0])}>
             Feature
           </button>
-          <button disabled={!count} onClick={() => toggleVisibility(photos.filter(isSelected))}>
+          <button disabled={!count} onClick={() => toggleVisibility(selection)}>
             Show/Hide
           </button>
-          {/* <button disabled={!canGroup} onClick={() => this.group(selection)}>
+          <button disabled={!(count > 1)} onClick={() => group(selection)}>
             Group
-          </button> */}
-          <button disabled={!count} onClick={() => deletePhotos(photos.filter(isSelected))}>
+          </button>
+          <button disabled={!count} onClick={() => deletePhotos(selection)}>
             Delete
           </button>
         </div>
