@@ -29,7 +29,7 @@ module.exports = [
       "type": "mysql",
       "host": process.env.TYPEORM_HOST || "127.0.0.1",
       "port": process.env.TYPORM_PORT || 3306,
-      "username": process.env.TYPORM_USERNAME || "root",
+      "username": process.env.TYPORM_USERNAME || "aws-photo",
       "password": process.env.TYPORM_PASSWORD || "aws-photo",
       "database": process.env.TYPORM_DATABASE || "aws-photo",
       "synchronize": process.env.TYPEORM_SYNCHRONIZE || true,

@@ -1,5 +1,13 @@
 version: '3'
 
+networks:
+  photo:
+
+volumes:
+  db_data:
+  static:
+  nginx_cache:
+
 services:
   nginx:
     image: nginx
@@ -21,36 +29,8 @@ services:
         aliases:
           - nginx
 
-  admin:
-    build:
-      context: .
-      dockerfile: ./admin/Dockerfile
-      args:
-        BASENAME: /admin
-        API_ENDPOINT: /api/v1
-        STATIC_ENDPOINT: /static
-
-  api:
-    depends_on:
-      - db
-    build: ./node-server
-    restart: always
-    volumes:
-      - static:/static
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: aws-photo
-      DB_PASSWORD: aws-photo
-      STATIC_DIR: /static
-    entrypoint: ./scripts/wait.sh node dist/app.js
-    networks:
-      default:
-        aliases:
-          - api
-
   db:
-    image: mysql
+    image: mysql:5
     volumes:
       - db_data:/var/lib/mysql
     restart: always
@@ -61,28 +41,51 @@ services:
       MYSQL_PASSWORD: aws-photo
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;'
     networks:
-      default:
+      photo:
         aliases:
           - db
 
-  static:
-    build:
-      context: .
-      dockerfile: ./static-server/Dockerfile
+  api:
+    depends_on:
+      - db
+    build: ./photo-api
     restart: always
     volumes:
-      - static:/static:ro
+      - static:/static
     environment:
+      TYPEORM_HOST: db
       STATIC_DIR: /static
     networks:
-      default:
+      photo:
         aliases:
-          - static
+          - api
+
+# admin:
+#   build:
+#     context: .
+#     dockerfile: ./admin/Dockerfile
+#     args:
+#       BASENAME: /admin
+#       API_ENDPOINT: /api/v1
+#       STATIC_ENDPOINT: /static
+
+# static:
+#   build:
+#     context: .
+#     dockerfile: ./static-server/Dockerfile
+#   restart: always
+#   volumes:
+#     - static:/static:ro
+#   environment:
+#     STATIC_DIR: /static
+#   networks:
+#     default:
+#       aliases:
+#         - static
 
   client:
     depends_on:
       - api
-      - static
     build:
       context: .
       dockerfile: ./client/Dockerfile
@@ -100,7 +103,3 @@ services:
         aliases:
           - client
 
-volumes:
-  db_data:
-  static:
-  nginx_cache:
