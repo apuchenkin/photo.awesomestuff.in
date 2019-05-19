@@ -1,10 +1,4 @@
-$divisor: 24px;
-$grey: grey;
-$grey-light: #333;
-$light-grey: lightgrey;
-$white: white;
-$light: lightblue;
-$accent: orange;
+@import './var.scss';
 
 html, body, body > div, #app {
   width: 100%;
