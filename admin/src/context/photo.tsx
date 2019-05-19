@@ -145,6 +145,12 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
     loadPhotos();
   }
 
+  const hasParent = (photo: Photo) => {
+    return category.parent && photo.categories
+      .map(category => category.id)
+      .includes(category.parent.id);
+  }
+
   return (
     <Context.Provider
       value={{
@@ -162,6 +168,7 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
         makeFeatured,
         ungroup,
         group,
+        hasParent,
       }}
     >
       {children}

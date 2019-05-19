@@ -1,14 +1,18 @@
-interface Options {
+export interface Options {
   endpoint: string;
+  token: string;
 }
 
 export default class BaseService {
   readonly endpoint: string;
+  readonly token: string;
 
   constructor({
     endpoint,
+    token,
   }: Options) {
     this.endpoint = endpoint;
+    this.token = token;
   }
 
   fetch(url: string, options: RequestInit = {}) {
@@ -17,6 +21,7 @@ export default class BaseService {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Basic ${this.token}`,
         ...options.headers,
       },
     })

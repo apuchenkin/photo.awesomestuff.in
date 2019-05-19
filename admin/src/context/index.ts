@@ -17,3 +17,8 @@ export {
   default as TranslationProvider,
   Context as TranslationContext
 } from './translation';
+
+export {
+  default as AuthProvider,
+  Context as AuthContext
+} from './auth';

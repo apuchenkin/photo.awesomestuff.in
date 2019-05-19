@@ -35,6 +35,9 @@ export default class PhotoService extends Service {
     return fetch(`${this.endpoint}/upload/${category.name}`, {
       method: 'POST',
       body,
+      headers: {
+        'Authorization': `Basic ${this.token}`,
+      }
     }).then(async res => {
       if (!res.ok) {
         const error = await res.text();

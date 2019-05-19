@@ -81,7 +81,7 @@ const Photo: React.FunctionComponent<Props> = ({
   hovered,
 }) => {
   const { match, history } = React.useContext(__RouterContext);
-  const { isSelected, select, ungroup, getGroup } = React.useContext(PhotoContext);
+  const { isSelected, select, ungroup, getGroup, hasParent } = React.useContext(PhotoContext);
 
   const Group = () => (
     <div
@@ -100,8 +100,7 @@ const Photo: React.FunctionComponent<Props> = ({
         'photo--hovered': hovered,
         dragging: isDragging,
         selected: isSelected(photo),
-        // TODO: up1
-        // hasParent: photo.hasParent,
+        hasParent: hasParent(photo),
         isHidden: photo.hidden,
       })}
       onClick={e => select(photo, e.ctrlKey)}
@@ -115,7 +114,7 @@ const Photo: React.FunctionComponent<Props> = ({
         </button>
       </Link>
       {featured && <div className="featured material-icons">star</div>}
-      {/* {photo.hasParent && <div className="parent" />} */}
+      {hasParent(photo) && <div className="parent" />}
       {photo.group && <Group />}
       <div
         className="img"

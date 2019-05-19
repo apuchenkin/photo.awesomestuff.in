@@ -12,7 +12,8 @@ photoRouter
       .getRepository(Photo)
       .createQueryBuilder('photo')
       .leftJoinAndSelect("photo.translations", "translation")
-      .innerJoinAndSelect("photo.categories", "category", "category.name = :name", { name: req.params.category })
+      .innerJoinAndSelect("photo.categories", "category$", "category$.name = :name", { name: req.params.category })
+      .leftJoinAndSelect("photo.categories", "category")
       .orderBy('photo.datetime')
       .getMany();
 

@@ -25,6 +25,7 @@ interface Photo {
   group?: number;
   author?: string;
   translations: Translation[];
+  categories: Category[];
   hidden: boolean;
 }
 

@@ -1,19 +1,27 @@
 import * as React from 'react';
-import factory, { Services, Config } from '@app/service/factory';
+import factory, { Services } from '@app/service/factory';
+import { Context as AuthContext } from './auth';
 
 // @ts-ignore
 export const Context = React.createContext<Services>();
 
 interface Props {
-  config: Config;
+  endpoint: string;
 }
 
-const ServiceProvider: React.FunctionComponent<Props> = ({ config, children }) => (
-  <Context.Provider
-    value={factory(config)}
-  >
-    {children}
-  </Context.Provider>
-);
+const ServiceProvider: React.FunctionComponent<Props> = ({ endpoint, children }) => {
+  const { getToken } = React.useContext(AuthContext);
+
+  return (
+    <Context.Provider
+      value={factory({
+        endpoint,
+        token: getToken(),
+      })}
+    >
+      {children}
+    </Context.Provider>
+  );
+}
 
 export default ServiceProvider;
