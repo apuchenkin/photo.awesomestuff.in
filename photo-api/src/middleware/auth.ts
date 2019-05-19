@@ -7,21 +7,23 @@ const authHandler: RequestHandler = async (req, res, next) => {
   const credentials = basic(req);
   const connection: Connection = req.app.locals.connection;
 
-  if (credentials) {
-    const user = await connection.manager.findOne(User, {
-      where: {
-        email: credentials.name,
-        password: credentials.pass,
-      }
-    });
-
-    req.app.locals.user = user;
+  if (!credentials) {
+    res.sendStatus(401);
+    return;
   }
 
-  if (!(req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS')) {
-    if (!req.app.locals.user) {
-      res.sendStatus(401);
+  const user = await connection.manager.findOne(User, {
+    where: {
+      email: credentials.name,
+      password: credentials.pass,
     }
+  });
+
+  req.app.locals.user = user;
+
+  if (!user) {
+    res.sendStatus(401);
+    return;
   }
 
   next();

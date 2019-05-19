@@ -23,7 +23,7 @@ const AuthProvider: React.FunctionComponent = ({ children }) => {
       value={{
         getToken: () => token,
         login: async (email: string, password: string) => {
-          const token = btoa(`${email}:${password}`)
+          const token = btoa(`${email}:${password}`);
           localStorage.setItem(AUTH, token);
           setToken(token);
         },
