@@ -17,6 +17,7 @@ const sizes = [
   brickWidth,
   brickWidth * 2 + gutter,
   brickWidth * 3 + gutter * 2,
+  brickWidth * 4 + gutter * 3,
 ];
 
 export const generateThumb = async (filePath: string) => {

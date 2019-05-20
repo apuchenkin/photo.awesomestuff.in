@@ -122,7 +122,7 @@ const Photo: React.FunctionComponent<Props> = ({
           width: 150,
           height: 150,
           backgroundColor: 'grey',
-          backgroundImage: `url(${getThumb(200, photo.src)})`,
+          backgroundImage: `url(${getThumb(210, photo.src)})`,
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
@@ -141,6 +141,7 @@ export default compose(
       group,
     });
   },
+  // @ts-ignore
   DragSource(PHOTO, photoSource, collectDrag),
   DropTarget(PHOTO, photoDrop, collectDrop),
 )(Photo);

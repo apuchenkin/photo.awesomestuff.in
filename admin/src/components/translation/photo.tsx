@@ -25,7 +25,7 @@ const PhotoTranslations: React.FunctionComponent<Props> = ({ photo }) => {
         translations={photo.translations}
         title={photo.src}
       >
-        <img alt={photo.src} src={getThumb(800, photo.src)} />
+        <img alt={photo.src} src={getThumb(430, photo.src)} />
       </Translations>
     </TranslationProvider>
   );

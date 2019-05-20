@@ -5,7 +5,7 @@ module.exports = {
   entry: "./src/index.tsx",
   output: {
       filename: "bundle.js",
-      publicPath: '/',
+      publicPath: process.env.BASENAME || '/',
       path: __dirname + "/dist"
   },
 
@@ -40,7 +40,9 @@ module.exports = {
 
   plugins: [
     new HtmlWebpackPlugin({
+      title: 'PHOTO.AWESOMESTUFF.IN',
       template: './src/index.ejs',
+      production: process.env.NODE_ENV === 'production',
     }),
   ],
 

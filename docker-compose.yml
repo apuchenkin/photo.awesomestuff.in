@@ -5,27 +5,25 @@ networks:
 
 volumes:
   db_data:
-  static:
   nginx_cache:
 
 services:
   nginx:
     image: nginx
     depends_on:
-      - admin
-      - client
+      # - client
       - api
-      - static
     volumes:
-      - ./dist/admin:/srv/admin:ro
-      - ./dist/client:/srv/client:ro
       - ./etc/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./admin/dist:/srv/admin:ro
+      - ./client/dist:/srv/client:ro
+      - ./static:/srv/static:ro
       - nginx_cache:/var/cache/nginx
     restart: always
     ports:
       - "${EXTERNAL_PORT:-80}:80"
     networks:
-      default:
+      photo:
         aliases:
           - nginx
 
@@ -51,7 +49,7 @@ services:
     build: ./photo-api
     restart: always
     volumes:
-      - static:/static
+      - ./static:/srv/static
     environment:
       TYPEORM_HOST: db
       STATIC_DIR: /static
@@ -99,7 +97,7 @@ services:
       STATIC_ENDPOINT: /static
       HOSTNAME: ${HOSTNAME:-http://localhost}
     networks:
-      default:
+      photo:
         aliases:
           - client
 

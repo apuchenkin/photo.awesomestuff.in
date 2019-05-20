@@ -148,6 +148,7 @@ export default compose(
       linkPhotos: categoryService.linkPhotos,
     });
   },
+  // @ts-ignore
   DragSource(CATEGORY, categorySource, collectDrag),
   DropTarget([CATEGORY, PHOTO], categoryDrop, collectDrop),
 )(Category);

@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>PHOTO.AWESOMESTUFF.IN - Admin</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" rel="stylesheet">
   </head>
   <body>
     <div id="react-root"></div>
     <!-- Dependencies -->
-    <script src="/node_modules/react/umd/react.development.js"></script>
-    <script src="/node_modules/react-dom/umd/react-dom.development.js"></script>
+    <% if (htmlWebpackPlugin.options.production) { %>
+      <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+      <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <% } else { %>
+      <script src="/node_modules/react/umd/react.development.js"></script>
+      <script src="/node_modules/react-dom/umd/react-dom.development.js"></script>
+    <% } %>
   </body>
 </html>
