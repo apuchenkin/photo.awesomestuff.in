@@ -1,0 +1,14 @@
+$accent: #ff762e;
+
+$grey: lighten(#000000, 10%);
+$grey-light:  lighten($grey, 10%);
+
+$white: #ffffff;
+$light: darken($white, 10%);
+$light-grey: darken($light, 10%);
+
+$divisor: 24px;
+$font-default: 'Roboto Condensed', sans-serif;
+$transition: 200ms;
+
+$footer-size: 2.5 * $divisor;

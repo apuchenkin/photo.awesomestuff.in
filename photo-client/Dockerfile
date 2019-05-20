@@ -1,0 +1,22 @@
+FROM node:8-alpine
+
+ARG HOSTNAME
+ARG ANALYTICS
+ARG API_ENDPOINT
+
+ENV HOSTNAME $HOSTNAME
+ENV ANALYTICS $ANALYTICS
+ENV API_ENDPOINT $API_ENDPOINT
+ENV PORT 3000
+
+COPY . /srv
+WORKDIR /srv
+
+RUN npm install
+ENV NODE_ENV production
+RUN npm run build
+RUN npm prune
+
+VOLUME /srv/static
+EXPOSE 3000
+ENTRYPOINT ["npm", "run", "start:prod"]

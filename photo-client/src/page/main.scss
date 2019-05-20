@@ -1,0 +1,12 @@
+@import '@app/var';
+
+.main {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  color: $light-grey;
+  flex: 1 1 100%;
+  overflow: hidden;
+}

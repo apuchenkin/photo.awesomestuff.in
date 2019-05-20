@@ -1,0 +1,19 @@
+$duration: 175ms;
+
+.enter {
+  opacity: 0.01;
+}
+
+.enter.enterActive {
+  opacity: 1;
+  transition: opacity $duration ease-in;
+}
+
+.exit {
+  opacity: 1;
+}
+
+.exit.exitActive {
+  opacity: 0.01;
+  transition: opacity $duration ease-in;
+}

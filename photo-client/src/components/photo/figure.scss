@@ -1,0 +1,67 @@
+@import '@app/var';
+
+figure,
+img {
+  border: none;
+  outline: 0;
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+.figure {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 0.2s ease-out;
+
+  .image {
+    max-width: 100%;
+    max-height: 90%;
+    flex: 0 1 auto;
+  }
+
+  .tools {
+    align-self: flex-end;
+    flex: 0 0 auto;
+    font-size: 14px;
+    text-align: right;
+    vertical-align: middle;
+    line-height: $divisor * 2;
+    height: $divisor * 2;
+
+    svg {
+      vertical-align: middle;
+      display: inline;
+      font-size: 24px;
+      line-height: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  figcaption {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    padding: $divisor / 2 0;
+    font-size: 0.8em;
+    line-height: 1.2em;
+    color: darken($light-grey, 20%);
+    font-family: $font-default;
+
+    & > .caption {
+      font-size: 1.2em;
+      display: block;
+      float: none;
+      color: $white;
+      margin-bottom: 0.2em;
+    }
+
+    & .author {
+      color: $light-grey;
+    }
+  }
+}
