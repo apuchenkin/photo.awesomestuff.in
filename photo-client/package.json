@@ -29,8 +29,8 @@
     "http-proxy-agent": "^2.1.0",
     "http-proxy-middleware": "^0.19.1",
     "intl": "^1.2.5",
-    "isomorphic-unfetch": "^3.0.0",
     "isomorphic-style-loader": "^5.0.1",
+    "isomorphic-unfetch": "^3.0.0",
     "node-fetch": "^2.5.0",
     "normalize.css": "^8.0.1",
     "perfect-scrollbar": "^1.4.0",
@@ -44,7 +44,6 @@
     "react-transition-group": "^4.0.1",
     "react-visibility-sensor": "^5.0.2",
     "shallowequal": "^1.1.0",
-    "sharp": "^0.22.1",
     "typescript": "^3.4.5"
   },
   "devDependencies": {

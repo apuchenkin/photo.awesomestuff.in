@@ -6,26 +6,28 @@ import Footer from '@app/components/footer';
 // @ts-ignore
 import withStyles from 'isomorphic-style-loader/withStyles';
 import style from './main.scss';
+import { ConfigContext } from '@app/context';
 
 declare global {
   interface Window { gtag: any; }
 }
 
-interface Main {
+interface Props {
   header: React.ReactNode;
-  title: string;
   langs: Locale[];
   className?: string;
 }
 
-const Main: React.FunctionComponent<Main> = ({
+const Main: React.FunctionComponent<Props> = ({
   children,
   header,
-  title,
   langs,
   className,
-}) => (
-  <>
+}) => {
+  const { title } = React.useContext(ConfigContext);
+
+  return (
+    <>
     {header}
     <Scrollbar>
       <main
@@ -53,6 +55,7 @@ const Main: React.FunctionComponent<Main> = ({
       </main>
     </Scrollbar>
   </>
-);
+  )
+}
 
 export default withStyles(style)(Main);

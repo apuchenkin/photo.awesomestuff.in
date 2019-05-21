@@ -30,6 +30,7 @@ services:
   db:
     image: mysql:5
     volumes:
+      - ./sql:/docker-entrypoint-initdb.d
       - db_data:/var/lib/mysql
     restart: always
     environment:
@@ -53,6 +54,8 @@ services:
     environment:
       TYPEORM_HOST: db
       STATIC_DIR: /static
+    ports:
+      - "${API_PORT:-3000}:3000"
     networks:
       photo:
         aliases:
