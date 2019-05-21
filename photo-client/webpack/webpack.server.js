@@ -18,8 +18,8 @@ module.exports = (env = {}) => Object.assign({}, {
   ],
   output: {
     filename: 'server.bundle.js',
-    path: path.resolve(__dirname, '../dist'),
-    publicPath: '/assets/',
+    path: path.resolve(__dirname, '../dist/server'),
     libraryTarget: 'commonjs2',
+    publicPath: '/',
   }
 }, baseConfig(env));

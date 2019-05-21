@@ -1,16 +1,16 @@
 const proxy = require('http-proxy-middleware');
 const express = require('express');
-const app = require('./dist/server.bundle');
+const app = require('./dist/server/server.bundle');
 
 const server = express();
 
 const PORT = process.env.PORT || 3000;
 
-console.log('Start up dev server');
-
-server.use('/assets', express.static('./dist'));
+server.use('/', express.static('./dist/client'));
 
 if (process.env.NODE_ENV !== 'production') {
+  console.log('Start up dev server');
+
   server.use('/api/v1', proxy({
     pathRewrite: {
       '^/api/v1': '/',

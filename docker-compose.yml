@@ -16,7 +16,7 @@ services:
     volumes:
       - ./etc/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./admin/dist:/srv/admin:ro
-      - ./client/dist:/srv/client:ro
+      - ./client/dist/client:/srv/client:ro
       - ./static:/srv/static:ro
       - nginx_cache:/var/cache/nginx
     restart: always

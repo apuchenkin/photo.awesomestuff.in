@@ -6,7 +6,7 @@ const path = require('path');
 module.exports = (env = {}) => Object.assign({}, {
   entry: './src/index.tsx',
   output: {
-    path: path.join(__dirname, '../dist'),
+    path: path.join(__dirname, '../dist/client'),
     filename: env.production ? 'photo.[hash].js' : 'photo.bundle.js',
     chunkFilename: env.production ? '[name].[hash].js' : '[name].bundle.js',
     publicPath: '/',

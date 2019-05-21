@@ -5,6 +5,7 @@ import assets from '@assets/assets.json';
 import favicon from '@assets/favicon.ico';
 import { Helmet } from 'react-helmet';
 import localeData from './localeData';
+import { values, mapObjIndexed } from 'ramda';
 import style from '../style.scss';
 
 interface AnalyticsProps {
@@ -51,6 +52,10 @@ const renderHTML: React.FunctionComponent<Props> = ({ markup, initialState, css 
         {helmet.link.toComponent()}
         {analyticsToken && <script async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsToken}`} />}
         {analyticsToken && <GoogleAnalytics token={analyticsToken} />}
+        <script
+          dangerouslySetInnerHTML={{ __html: localeData(locale) }}
+        />
+        <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
       </head>
       <body {...bodyAttrs}>
         <div
@@ -59,13 +64,16 @@ const renderHTML: React.FunctionComponent<Props> = ({ markup, initialState, css 
           dangerouslySetInnerHTML={{ __html: markup }}
         />
         {config.analytics && <GoogleAnalytics token={config.analytics} />}
-        <script
-          dangerouslySetInnerHTML={{ __html: localeData(locale) }}
-        />
-        <script type="application/javascript" dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};` }} />
-        {/* TODO: place ALL chunks! */}
-        <script type="application/javascript" src={`/assets${assets.main.js}`} />
-        <script type="application/javascript" src={`/assets${assets["vendors~main"].js}`} />
+        {values(mapObjIndexed((asset: any, index) => (
+          <React.Fragment key={index}>
+            {asset.js && (
+              <script src={`${asset.js}`} type="application/javascript" />
+            )}
+            {asset.css && (
+              <link href={`${asset.css}`} rel="stylesheet" type="text/css" />
+            )}
+          </React.Fragment>
+        ), assets))}
         <link href="http://fonts.googleapis.com/css?family=Roboto+Condensed:700,300,400" rel="stylesheet" type="text/css" />
       </body>
     </html>
