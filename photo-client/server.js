@@ -8,9 +8,6 @@ const PORT = process.env.PORT || 3000;
 
 console.log('Start up dev server');
 
-server.use('/static', express.static('./static', {
-  fallthrough: false,
-}));
 server.use('/assets', express.static('./dist'));
 
 if (process.env.NODE_ENV !== 'production') {
@@ -20,6 +17,10 @@ if (process.env.NODE_ENV !== 'production') {
     },
     target: 'http://localhost:3000',
     changeOrigin: true,
+  }));
+
+  server.use('/static', express.static('../static', {
+    fallthrough: false,
   }));
 }
 

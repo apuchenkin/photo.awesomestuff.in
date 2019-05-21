@@ -17,11 +17,10 @@ import { Services } from '@app/service/factory';
 interface Props {
   pages: Page[];
   categories: Category[];
-  config: Config;
   services: Services;
 }
 
-export default ({ pages, categories, config, services }: Props) => {
+export default ({ pages, categories, services }: Props) => {
   const getPhotos = async (
     category: Category,
     photoId: number,
@@ -64,7 +63,7 @@ export default ({ pages, categories, config, services }: Props) => {
   return makeRouteConfig(
     <Route
       path="/"
-      Component={({ ...props }) => <App pages={pages} config={config} {...props} />}
+      Component={App}
     >
       <Route
         Component={() => <Home categories={categories} />}

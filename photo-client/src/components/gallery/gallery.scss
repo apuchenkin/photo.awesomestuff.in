@@ -5,6 +5,7 @@
   box-sizing: border-box;
 
   & > ul {
+    flex: 1 0 auto;
     opacity: 1;
     padding: $divisor $divisor;
     transition: opacity 0.2s ease-out;

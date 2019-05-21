@@ -8,18 +8,23 @@ import Loader from '@app/components/loader';
 import { TransitionGroup } from 'react-transition-group';
 import { RenderErrorArgs, RenderReadyArgs } from 'found';
 import Fade from '@app/components/animation/fade';
-
-const NotFound: React.FunctionComponent = () => <div>Not found</div>;
-const ServiceUnavailable: React.FunctionComponent = () => <div>Service Unavailable</div>;
+import { NotFound, ServiceUnavailable } from '@app/components/error';
+import Main from '@app/page/main';
+import { Header } from '@app/components/home';
+import { FoundProvider } from '@app/context';
 
 const renderError: React.FunctionComponent<RenderErrorArgs> = ({ error, ...props }) => (
   <TransitionGroup component={null}>
     <StaticContainer shouldUpdate>
-    {
-      error.status === 404
-      ? <NotFound {...props} />
-      : <ServiceUnavailable />
-    }
+      <FoundProvider match={props}>
+        <Main header={<Header />}>
+          {
+            error.status === 404
+            ? <NotFound {...props} />
+            : <ServiceUnavailable />
+          }
+        </Main>
+      </FoundProvider>
     </StaticContainer>
   </TransitionGroup>
 );

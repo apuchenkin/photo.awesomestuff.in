@@ -5,6 +5,7 @@ import ruLocaleData from 'react-intl/locale-data/ru';
 
 // @ts-ignore
 import createInitialBrowserRouter from 'found/lib/createInitialBrowserRouter';
+import { ConfigProvider, PageProvider } from '@app/context';
 import routeConfigFactory from './router/config';
 import render from './router/render';
 
@@ -46,7 +47,6 @@ const insertCss = (...styles: any[]) => {
   const routeConfig = routeConfigFactory({
     pages,
     categories,
-    config,
     services,
   })
 
@@ -65,7 +65,11 @@ const insertCss = (...styles: any[]) => {
   ReactDOM.hydrate(
     <IntlProvider locale={locale} messages={messages}>
       <StyleContext.Provider value={{ insertCss }}>
-        <BrowserRouter />
+        <ConfigProvider config={config}>
+          <PageProvider pages={pages}>
+            <BrowserRouter />
+          </PageProvider>
+        </ConfigProvider>
       </StyleContext.Provider>
     </IntlProvider>,
     document.getElementById('react-root'),

@@ -1,20 +1,11 @@
 import * as React from 'react';
-import { ConfigProvider, FoundProvider, PageProvider } from '@app/context';
+import { FoundProvider } from '@app/context';
 import { Match } from 'found';
 
-interface Props extends Match {
-  pages: Page[],
-  config: Config;
-}
-
-const App: React.FunctionComponent<Props> = ({ children, pages, config, ...match }) => (
-  <PageProvider pages={pages}>
-    <FoundProvider match={match}>
-      <ConfigProvider config={config}>
-        {children}
-      </ConfigProvider>
-    </FoundProvider>
-  </PageProvider>
+const App: React.FunctionComponent<Match> = ({ children, ...match }) => (
+  <FoundProvider match={match}>
+    {children}
+  </FoundProvider>
 );
 
 export default App;

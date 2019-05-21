@@ -5,6 +5,7 @@
   box-sizing: border-box;
   margin-bottom: -$footer-size;
   overflow: hidden;
+  padding: $divisor;
 
   &:after {
     content: "";

@@ -71,6 +71,7 @@ const Photo: React.FunctionComponent<Props> = ({
         />
       </Helmet>
       <Figure
+        key={photo.src}
         photo={photo}
         backUrl={backUrl}
         onClick={onClick}

@@ -15,7 +15,7 @@ import render from '../router/render';
 import { RequestHandler } from 'express-serve-static-core';
 // @ts-ignore
 import StyleContext from 'isomorphic-style-loader/StyleContext';
-
+import { ConfigProvider, PageProvider } from '@app/context';
 import serviceFactory from '../service/factory';
 
 // @ts-ignore
@@ -95,7 +95,6 @@ export default () => {
     const routeConfig = routeConfigFactory({
       pages,
       categories,
-      config,
       services,
     })
 
@@ -133,7 +132,11 @@ export default () => {
     const markup = ReactDOM.renderToString(
       <IntlProvider locale={locale} messages={messages}>
         <StyleContext.Provider value={{ insertCss }}>
-          {element}
+          <ConfigProvider config={config}>
+            <PageProvider pages={pages}>
+              {element}
+            </PageProvider>
+          </ConfigProvider>
         </StyleContext.Provider>
       </IntlProvider>
     );

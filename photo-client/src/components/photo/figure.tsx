@@ -66,7 +66,6 @@ const Figure: React.FunctionComponent<Props> = ({ photo, backUrl, onClick }) => 
       onClick={onClick}
       src={`/static/photo/${photo.src}`}
       alt={photo.description}
-      // loader={<Loader />}
       className={style.image}
     />
     <Caption author={photo.author} description={photo.description} />

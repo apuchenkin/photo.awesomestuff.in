@@ -56,26 +56,3 @@ ul {
   justify-content: stretch;
   flex: 0 0 100%;
 }
-
-footer {
-  text-align: center;
-  color: $light-grey;
-  padding: $divisor $divisor $divisor / 2 $divisor;
-  position: sticky;
-  bottom: 0;
-  top: 100%;
-  z-index: 20;
-  flex: 0 0 auto;
-  top: 100%;
-
-  a {
-    color: $white;
-    &:visited {
-      color: $white;
-    }
-
-    &:hover {
-      color: $accent;
-    }
-  }
-}

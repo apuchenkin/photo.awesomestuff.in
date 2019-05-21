@@ -1,0 +1,21 @@
+@import '@app/var';
+
+.footer {
+  text-align: center;
+  color: $light-grey;
+  padding: $divisor $divisor $divisor / 2 $divisor;
+  z-index: 20;
+  flex: 0 0 auto;
+  top: 100%;
+
+  a {
+    color: $white;
+    &:visited {
+      color: $white;
+    }
+
+    &:hover {
+      color: $accent;
+    }
+  }
+}

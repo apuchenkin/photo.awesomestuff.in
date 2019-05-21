@@ -3,6 +3,9 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 import Link from 'found/lib/Link';
 import LanguageSwitcher from '@app/components/languageSwitcher';
 import { ConfigContext, PageContext } from '@app/context';
+// @ts-ignore
+import withStyles from 'isomorphic-style-loader/withStyles';
+import style from './footer.scss';
 
 const messages = defineMessages({
   footer: {
@@ -23,7 +26,7 @@ const Footer: FunctionComponent<Props> = ({ langs }) => {
   const contactsPage = getPage('contacts');
 
   return (
-    <footer>
+    <footer className={style.footer}>
       <Link to="/" >{title}</Link> | &copy; <FormattedMessage {...messages.footer} />
       {aboutPage && aboutPage.title && [' | ', <Link to="/about" key="page.about">{aboutPage.title}</Link>]}
       {contactsPage && contactsPage.title && [' | ', <Link to="/contacts" key="page.contacts">{contactsPage.title}</Link>]}
@@ -32,4 +35,4 @@ const Footer: FunctionComponent<Props> = ({ langs }) => {
   );
 };
 
-export default Footer;
+export default withStyles(style)(Footer);
