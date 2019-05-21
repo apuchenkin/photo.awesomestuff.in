@@ -1,6 +1,0 @@
-dist/
-static/*
-!static/.gitkeep
-node_modules/
-tmp/
-etc/config.json
