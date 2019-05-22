@@ -17,7 +17,7 @@ interface PhotoDTO {
   hidden: boolean;
   group: number;
   order: number;
-  author: number
+  authorId: number
   datetime: string;
   exif: string;
   translations: TranslationDTO[];
@@ -41,7 +41,7 @@ export default (connection: Connection) => async (photos: PhotoDTO[]) => {
     photo.group = photoDTO.group;
     photo.order = photoDTO.order;
     photo.exif = photoDTO.exif;
-    photo.author = String(photoDTO.author);
+    photo.author = String(photoDTO.authorId);
     photo.datetime = photoDTO.datetime && new Date(photoDTO.datetime);
 
     photo.translations = photoDTO.translations.map(translationDTO => {

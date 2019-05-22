@@ -50,11 +50,11 @@ module.exports = {
     port: 9000,
     historyApiFallback: true,
     proxy: {
-      '/api/v1': {
+      '/api/v1/admin': {
         logLevel: 'debug',
         target: 'http://localhost:3000',
         changeOrigin: true,
-        pathRewrite: { '^/api/v1': '/admin' },
+        pathRewrite: { '^/api/v1': '' },
       },
     },
   },
