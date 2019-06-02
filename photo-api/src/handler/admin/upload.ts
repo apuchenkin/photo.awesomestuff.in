@@ -46,6 +46,7 @@ const parseDate = (datetime) => {
 const upload: express.RequestHandler = async (req, res) => {
   const connection: Connection = req.app.locals.connection;
   const photoRepository = connection.getRepository(Photo);
+  const translationRepository = connection.getRepository(PhotoTranslation);
 
   const category = await connection.getRepository(Category).findOne({
     name: req.params.category,
@@ -76,6 +77,11 @@ const upload: express.RequestHandler = async (req, res) => {
           ],
         })
 
+        await ensureDir(path.dirname(fullName));
+        await writeFile(fullName, file);
+        await generateThumb(src);
+        await photoRepository.save(photo);
+
         // @ts-ignore
         if (exif.image.ImageDescription) {
           const translation = new PhotoTranslation();
@@ -84,12 +90,8 @@ const upload: express.RequestHandler = async (req, res) => {
           // @ts-ignore
           translation.value = exif.image.ImageDescription;
           translation.photo = photo;
+          await translationRepository.save(translation);
         }
-
-        await ensureDir(path.dirname(fullName));
-        await writeFile(fullName, file);
-        await generateThumb(src);
-        await photoRepository.save(photo);
 
         res.status(200).send(photo);
       } catch (error) {
