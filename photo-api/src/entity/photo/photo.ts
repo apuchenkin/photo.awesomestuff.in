@@ -60,7 +60,9 @@ export class Photo {
   translations: PhotoTranslation[];
 
   @ManyToMany(() => Category, category => category.photos)
-  @JoinTable()
+  @JoinTable({
+    name: "photo_category"
+  })
   categories: Category[];
 }
 
