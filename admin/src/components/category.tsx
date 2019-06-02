@@ -50,12 +50,17 @@ const categoryDrop: DropTargetSpec<Props> = {
   drop: ({ category, updateCategory, linkPhotos }, monitor) => {
     switch (monitor.getItemType()) {
       case PHOTO:
-        linkPhotos(category, [monitor.getItem()]);
+        const selection = monitor.getItem().selection;
+        const photos = selection && selection.length
+          ? selection
+          : [monitor.getItem().photo]
+
+        linkPhotos(category, photos);
         break;
       case CATEGORY:
         updateCategory({
-          ...category,
-          parent: monitor.getItem(),
+          ...monitor.getItem(),
+          parent: category,
         })
         break;
     }

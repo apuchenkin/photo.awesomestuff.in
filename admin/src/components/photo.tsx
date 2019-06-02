@@ -21,6 +21,7 @@ const PHOTO = 'photo';
 
 interface ExternalProps {
   photo: Photo;
+  selection: Photo[];
   featured: boolean;
 }
 
@@ -33,13 +34,13 @@ interface Props extends ExternalProps {
   hovered: boolean;
 }
 
-const photoSource: DragSourceSpec<Props, Photo> = {
-  beginDrag: ({ photo }) => photo,
+const photoSource: DragSourceSpec<Props, Props> = {
+  beginDrag: props => props,
 }
 
 const photoDrop: DropTargetSpec<Props> = {
   drop({ group, photo }, monitor) {
-    group([monitor.getItem(), photo]);
+    group([monitor.getItem().photo, photo]);
   },
   canDrop({ photo }, monitor) {
     return photo.id !== monitor.getItem().id;

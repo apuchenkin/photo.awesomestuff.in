@@ -18,6 +18,7 @@ interface Props {
 
 const Photos: React.FunctionComponent<Props> = ({ category }) => {
   const { match } = React.useContext(__RouterContext);
+  const { page } = queryString.parse(location.search);
   const {
     getPhotos,
     getPhoto,
@@ -30,22 +31,21 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
     group,
   } = React.useContext(PhotoContext);
 
-  const { page } = queryString.parse(location.search);
-
   const total = getTotal();
   const photos = getPhotos(page && Number(page));
+
+  const count = getSelectionCount();
+  const selection = photos.filter(isSelected);
 
   const photoItems = photos.map((photo: Photo) => (
     <li key={photo.id} >
       <Photo
         photo={photo}
+        selection={selection}
         featured={(category.featured && category.featured.id) === photo.id}
       />
     </li>
   ));
-
-  const count = getSelectionCount();
-  const selection = photos.filter(isSelected);
 
   const PhotosCmp = (
     <div className="photos">
