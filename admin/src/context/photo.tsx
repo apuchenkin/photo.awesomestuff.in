@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Context as ServiceContext } from './service';
-import { values, indexBy, prop, slice, range } from 'ramda';
+import { values, indexBy, prop, slice, range, sort, ascend } from 'ramda';
 import { CategoryContext } from '.';
 
 export type GetTotal = () => number;
@@ -84,7 +84,7 @@ const PhotoProvider: React.FunctionComponent<Props> = ({ category, children }) =
   const getPhotos: GetPhotos = (page = 1, limit = 50) => slice(
     (page - 1) * limit,
     page * limit,
-    values(photos),
+    sort(ascend(prop('datetime')), values(photos)),
   )
 
   const deletePhotos: DeletePhotos = (photos) => {

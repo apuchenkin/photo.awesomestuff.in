@@ -35,7 +35,7 @@ const Photos: React.FunctionComponent<Props> = ({ category }) => {
   const photos = getPhotos(page && Number(page));
 
   const count = getSelectionCount();
-  const selection = photos.filter(isSelected);
+  const selection = getPhotos(1, total).filter(isSelected);
 
   const photoItems = photos.map((photo: Photo) => (
     <li key={photo.id} >

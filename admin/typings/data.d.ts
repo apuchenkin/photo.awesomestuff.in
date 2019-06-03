@@ -26,6 +26,7 @@ interface Photo {
   author?: string;
   translations: Translation[];
   categories: Category[];
+  datetime: Date;
   hidden: boolean;
 }
 
