@@ -6,7 +6,10 @@ export default class CategoryService extends ApiService {
   }
 
   fetchCategory = (name: string): Promise<Category> => {
-    return this.fetch(`/category/${name}`);
+    return this.fetch(`/category/${name}`).then(category => ({
+      ...category,
+      date: category.date && new Date(category),
+    }));
   }
 
   fetchPhotos = (category: Category): Promise<Photo[]> => {
