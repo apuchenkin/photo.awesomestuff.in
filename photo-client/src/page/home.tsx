@@ -14,7 +14,7 @@ interface Props {
 const Home: FunctionComponent<Props> = ({ intl, categories }) => {
   const galleries = categories
     .filter(category => Boolean(category.featured))
-    // .sort((c1, c2) => Number(new Date(c2.date) > c1.date))
+    .sort((c1, c2) => Number(c2.date) - Number(c1.date))
     .map(category => (
       <li key={category.name} >
         <Gallery category={category} />
