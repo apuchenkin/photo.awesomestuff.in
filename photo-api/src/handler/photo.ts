@@ -33,7 +33,7 @@ photoRouter
       .andWhere("photo.hidden = :hidden", { hidden: false })
       .getOne();
 
-    await connection.getRepository(Photo).increment(photo, 'views', 1);
+    await connection.getRepository(Photo).increment({ id: photo.id }, 'views', 1);
 
     res.send(photoDTO(photo));
   })

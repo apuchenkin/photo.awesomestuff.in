@@ -33,7 +33,7 @@ module.exports = [
       "password": process.env.TYPORM_PASSWORD || "aws-photo",
       "database": process.env.TYPORM_DATABASE || "aws-photo",
       "synchronize": process.env.TYPEORM_SYNCHRONIZE || true,
-      "logging": process.env.TYPEORM_LOGGING || false,
+      "logging": process.env.TYPEORM_LOGGING || true,
       "entities": [
          "build/entity/**/*.js"
       ],
