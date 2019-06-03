@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "migrate": "ts-node --files migration/init",
+    "sitemap": "ts-node --files src/sitemap",
     "build:client": "webpack --env.production --config ./webpack/webpack.client.js",
     "build:server": "webpack --env.production --config ./webpack/webpack.server.js",
     "build": "npm run build:client && npm run build:server",
@@ -44,6 +45,7 @@
     "react-transition-group": "^4.0.1",
     "react-visibility-sensor": "^5.0.2",
     "shallowequal": "^1.1.0",
+    "sitemap": "^2.2.0",
     "typescript": "^3.4.5"
   },
   "devDependencies": {

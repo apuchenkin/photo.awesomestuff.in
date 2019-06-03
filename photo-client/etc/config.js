@@ -1,5 +1,5 @@
 module.exports = {
-  "hostname": process.env.HOSTNAME || "http://localhost:3001",
+  "hostname": process.env.HOSTNAME || "http://localhost:3000",
   "apiEndpoint": "/api/v1",
   "staticEndpoint": "/static",
   "analytics": process.env.ANALYTICS || false,
