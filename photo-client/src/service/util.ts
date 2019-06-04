@@ -38,7 +38,9 @@ export const refinePhotos = (excludeId: number) => (photos: Photo[]) => {
       init.push(photo);
     })
 
-  return init.sort((a, b) => a.id - b.id);
+  return init
+    .map(photo => ({ ...photo, datetime: new Date(photo.datetime) }))
+    .sort((a, b) => Number(a.datetime) - Number(b.datetime));
 };
 
 type Mode = 1 | 2 | 3 | 4;

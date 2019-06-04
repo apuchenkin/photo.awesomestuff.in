@@ -21,6 +21,7 @@ interface Photo {
   views: number;
   width: number;
   height: number;
+  datetime: Date;
   group?: number;
   description?: string;
   author?: string;

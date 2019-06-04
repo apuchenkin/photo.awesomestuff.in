@@ -25,7 +25,8 @@ export default ({ pages, categories, services }: Props) => {
     category: Category,
     photoId: number,
   ) => {
-    const photos = await services.categoryService.fetchPhotos(category)
+    const photos = await services.categoryService
+      .fetchPhotos(category)
       .then(refinePhotos(photoId));
     const bricks = remapPhotos(photos);
 
