@@ -1,6 +1,7 @@
 import * as React from 'react';
 import makeRouteConfig from 'found/lib/makeRouteConfig';
 import Redirect from 'found/lib/Redirect';
+import RedirectException from 'found/lib/RedirectException';
 import Route from './route';
 import HttpError from 'found/lib/HttpError';
 
@@ -36,7 +37,7 @@ export default ({ pages, categories, services }: Props) => {
     };
   };
 
-  const photoRoute = (
+  const photoRoute = (category: Category) => (
     <Route
       path="/photo/:photoId"
       Component={({ data: { photo }, ...props }) => (
@@ -46,13 +47,17 @@ export default ({ pages, categories, services }: Props) => {
         />
       )}
       getData={async ({
-        params,
+        params
       }) => {
         const photo = await services.photoService
           .fetchPhoto(Number(params.photoId))
           .catch(() => {
             throw new HttpError(404);
           });
+
+        if (!photo.categories.some((name: string) => category.name === name)) {
+          throw new RedirectException(`/${category.name}`);
+        }
 
         return {
           photo
@@ -110,7 +115,7 @@ export default ({ pages, categories, services }: Props) => {
               )}
               getData={({ params }) => getPhotos(category, Number(params.photoId))}
             >
-              {photoRoute}
+              {photoRoute(category)}
             </Route>
             {
               category.children.map(child => (
@@ -128,7 +133,7 @@ export default ({ pages, categories, services }: Props) => {
                   )}
                   getData={({ params }) => getPhotos(child, Number(params.photoId))}
                 >
-                  {photoRoute}
+                  {photoRoute(child)}
                 </Route>
               ))
             }
