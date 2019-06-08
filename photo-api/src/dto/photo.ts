@@ -9,6 +9,7 @@ export interface PhotoDTO {
   group?: number;
   datetime?: Date;
   description?: string;
+  categories: string[];
 }
 
 export const photoDTO = (photo: Photo): PhotoDTO => {
@@ -25,5 +26,6 @@ export const photoDTO = (photo: Photo): PhotoDTO => {
     group: photo.group,
     datetime: photo.datetime,
     description: translations.description,
+    categories: photo.categories.map(category => category.name),
   }
 }

@@ -18,6 +18,7 @@ photoRouter
       .getRepository(Photo)
       .createQueryBuilder('photo')
       .leftJoinAndSelect("photo.translations", "translation", "translation.language = :locale", { locale })
+      .leftJoinAndSelect("photo.categories", "category")
       .select([
         "photo.id",
         "photo.src",
@@ -28,14 +29,19 @@ photoRouter
         "photo.height",
         "translation.field",
         "translation.value",
+        "category.name",
       ])
       .where("photo.id = :id", { id: req.params.id })
       .andWhere("photo.hidden = :hidden", { hidden: false })
       .getOne();
 
-    await connection.getRepository(Photo).increment({ id: photo.id }, 'views', 1);
+    if (!photo) {
+      res.sendStatus(404);
+    } else {
+      await connection.getRepository(Photo).increment({ id: photo.id }, 'views', 1);
 
-    res.send(photoDTO(photo));
+      res.send(photoDTO(photo));
+    }
   })
 ;
 
