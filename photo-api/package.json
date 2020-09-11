@@ -42,7 +42,7 @@
       "image-size": "^0.7.4",
       "mysql": "^2.14.1",
       "mysql2": "^1.6.5",
-      "node-fetch": "^2.4.1",
+      "node-fetch": "^2.6.1",
       "ramda": "^0.26.1",
       "reflect-metadata": "^0.1.10",
       "sharp": "^0.22.1",
