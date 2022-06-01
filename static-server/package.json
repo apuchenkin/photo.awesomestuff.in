@@ -15,7 +15,7 @@
     "babel-runtime": "^6.11.6",
     "express": "^4.14.0",
     "express-validator": "^3.2.0",
-    "sharp": "^0.22.1",
+    "sharp": "^0.30.5",
     "vary": "^1.1.0"
   },
   "devDependencies": {
